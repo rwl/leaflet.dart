@@ -1,6 +1,6 @@
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' as L;
+import 'package:leaflet/map/map.dart';
 
 
 main() {
@@ -16,7 +16,7 @@ main() {
     group('#remove', () {
       test('fires an unload event if loaded', () {
         var container = document.createElement('div'),
-            map = new L.Map(container).setView([0, 0], 0),
+          map = new L.Map(container).setView([0, 0], 0),
           spy = sinon.spy();
         map.on('unload', spy);
         map.remove();
