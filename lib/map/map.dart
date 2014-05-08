@@ -3,15 +3,13 @@ library map;
 import 'dart:html';
 import 'dart:math' as math;
 
-class Options {
-  CRS crs;
-  bool fadeAnimation;
-  bool trackResize = true;
-  bool markerZoomAnimation;
-}
-
-class Map {
-  Options options;
+class BaseMap {
+  Map<String, Object> options = {
+    'crs': crs.EPSG3857,
+    'fadeAnimation': DomUtil.TRANSITION && !Browser.android23,
+    'trackResize': true,
+    'markerZoomAnimation': DomUtil.TRANSITION && Browser.any3d
+  };
 
   List _handlers;
 
@@ -19,32 +17,32 @@ class Map {
   Map _zoomBoundLayers;
   int _tileLayersNum;
 
-  factory Map.elem(Element id, Options options) {
-    return new Map();
+  factory BaseMap.elem(Element id, Map<String, Object> options) {
+    return new BaseMap(id, options);
   }
 
-  factory Map.id(String id, Options options) {
-    return new Map();
+  factory BaseMap.id(String id, Map<String, Object> options) {
+    return new BaseMap(id, options);
   }
 
-  Map(var id, var options) {
-    this.options = util.setOptions(this, options);
+  BaseMap(var id, Map<String, Object> options) {
+    this.options.addAll(options);
 
 
     this._initContainer(id);
     this._initLayout();
 
     // hack for https://github.com/Leaflet/Leaflet/issues/1980
-    this._onResize = L.bind(this._onResize, this);
+//    this._onResize = L.bind(this._onResize, this);
 
     this._initEvents();
 
-    if (options.maxBounds) {
-      this.setMaxBounds(options.maxBounds);
+    if (options.containsKey('maxBounds')) {
+      this.setMaxBounds(options['maxBounds']);
     }
 
-    if (options.center && options.zoom != null) {
-      this.setView(L.latLng(options.center), options.zoom, {'reset': true});
+    if (options.containsKey('center') && options['zoom'] != null) {
+      this.setView(geo.latLng(options['center']), options['zoom'], {'reset': true});
     }
 
     this._handlers = [];
@@ -55,18 +53,20 @@ class Map {
 
     this.callInitHooks();
 
-    this._addLayers(options.layers);
+    this._addLayers(options['layers']);
   }
 
 
   // public methods that modify map state
 
   // replaced by animation-powered implementation in Map.PanAnimation.js
-  setView(center, zoom) {
+  setView(center, zoom, Map options) {
     zoom = zoom == null ? this.getZoom() : zoom;
-    this._resetView(L.latLng(center), this._limitZoom(zoom));
+    this._resetView(geo.latLng(center), this._limitZoom(zoom));
     return this;
   }
+
+  var _zoom;
 
   setZoom(zoom, options) {
     if (!this._loaded) {
@@ -473,13 +473,15 @@ class Map {
 
   // map initialization methods
 
+  var _container;
+
   _initContainer(id) {
     var container = this._container = L.DomUtil.get(id);
 
     if (!container) {
-      throw new Error('Map container not found.');
+      throw new Exception('Map container not found.');
     } else if (container._leaflet) {
-      throw new Error('Map container is already initialized.');
+      throw new Exception('Map container is already initialized.');
     }
 
     container._leaflet = true;
@@ -489,12 +491,12 @@ class Map {
     var container = this._container;
 
     L.DomUtil.addClass(container, 'leaflet-container' +
-      (L.Browser.touch ? ' leaflet-touch' : '') +
-      (L.Browser.retina ? ' leaflet-retina' : '') +
-      (L.Browser.ielt9 ? ' leaflet-oldie' : '') +
-      (this.options.fadeAnimation ? ' leaflet-fade-anim' : ''));
+      (core.Browser.touch ? ' leaflet-touch' : '') +
+      (core.Browser.retina ? ' leaflet-retina' : '') +
+      (core.Browser.ielt9 ? ' leaflet-oldie' : '') +
+      (this.options['fadeAnimation'] ? ' leaflet-fade-anim' : ''));
 
-    var position = L.DomUtil.getStyle(container, 'position');
+    var position = dom.DomUtil.getStyle(container, 'position');
 
     if (position != 'absolute' && position != 'relative' && position != 'fixed') {
       container.style.position = 'relative';
@@ -507,37 +509,40 @@ class Map {
     }
   }
 
+  Map _panes;
+  var _mapPane, _tilePane;
+
   _initPanes() {
     var panes = this._panes = {};
 
-    this._mapPane = panes.mapPane = this._createPane('leaflet-map-pane', this._container);
+    this._mapPane = panes['mapPane'] = this._createPane('leaflet-map-pane', this._container);
 
-    this._tilePane = panes.tilePane = this._createPane('leaflet-tile-pane', this._mapPane);
-    panes.objectsPane = this._createPane('leaflet-objects-pane', this._mapPane);
-    panes.shadowPane = this._createPane('leaflet-shadow-pane');
-    panes.overlayPane = this._createPane('leaflet-overlay-pane');
-    panes.markerPane = this._createPane('leaflet-marker-pane');
-    panes.popupPane = this._createPane('leaflet-popup-pane');
+    this._tilePane = panes['tilePane'] = this._createPane('leaflet-tile-pane', this._mapPane);
+    panes['objectsPane'] = this._createPane('leaflet-objects-pane', this._mapPane);
+    panes['shadowPane'] = this._createPane('leaflet-shadow-pane');
+    panes['overlayPane'] = this._createPane('leaflet-overlay-pane');
+    panes['markerPane'] = this._createPane('leaflet-marker-pane');
+    panes['popupPane'] = this._createPane('leaflet-popup-pane');
 
     var zoomHide = ' leaflet-zoom-hide';
 
-    if (!this.options.markerZoomAnimation) {
-      L.DomUtil.addClass(panes.markerPane, zoomHide);
-      L.DomUtil.addClass(panes.shadowPane, zoomHide);
-      L.DomUtil.addClass(panes.popupPane, zoomHide);
+    if (!this.options['markerZoomAnimation']) {
+      dom.DomUtil.addClass(panes['markerPane'], zoomHide);
+      dom.DomUtil.addClass(panes['shadowPane'], zoomHide);
+      dom.DomUtil.addClass(panes['popupPane'], zoomHide);
     }
   }
 
-  _createPane(className, container) {
-    return L.DomUtil.create('div', className, container || this._panes.objectsPane);
+  _createPane(String className, [var container=null]) {
+    return dom.DomUtil.create('div', className, container != null ? container : this._panes['objectsPane']);
   }
 
   _clearPanes() {
     this._container.removeChild(this._mapPane);
   }
 
-  _addLayers(layers) {
-    layers = layers ? (L.Util.isArray(layers) ? layers : [layers]) : [];
+  _addLayers([var layers=null]) {
+    layers = layers ? (layers is List ? layers : [layers]) : [];
 
     for (var i = 0, len = layers.length; i < len; i++) {
       this.addLayer(layers[i]);
@@ -547,7 +552,7 @@ class Map {
 
   // private methods that modify map state
 
-  _resetView(center, zoom, preserveMapOffset, afterZoomAnim) {
+  _resetView(center, zoom, [preserveMapOffset=false, afterZoomAnim=false]) {
 
     var zoomChanged = (this._zoom != zoom);
 
@@ -639,12 +644,14 @@ class Map {
 
   // map events
 
-  _initEvents(onOff) {
-    if (!L.DomEvent) { return; }
+  _initEvents([String onOff='on']) {
+    if (dom.DomEvent == null) { return; }
 
-    onOff = onOff || 'on';
-
-    L.DomEvent[onOff](this._container, 'click', this._onMouseClick, this);
+    if (onOff == 'on') {
+      dom.DomEvent.on(this._container, 'click', this._onMouseClick, this);
+    } else {
+      dom.DomEvent.off(this._container, 'click', this._onMouseClick, this);
+    }
 
     var events = ['dblclick', 'mousedown', 'mouseup', 'mouseenter',
                   'mouseleave', 'mousemove', 'contextmenu'],
