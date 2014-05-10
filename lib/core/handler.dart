@@ -1,4 +1,4 @@
-library leaflet.core;
+part of leaflet.core;
 
 abstract class Handler {
   Map _map;

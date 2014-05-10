@@ -1,49 +1,93 @@
-library leaflet.core.mixin;
+part of leaflet.core;
+
+//const eventsKey = '_leaflet_events';
+
+typedef bool Action(Object obj, Event event);
+
+class Event {
+  Action action;
+  Object context;
+  Map<String, Object> data;
+  String type;
+  Events target;
+
+  Event(this.action, this.context);
+}
 
 // Events is used to add custom events functionality to Leaflet classes.
 class Events {
-  addEventListener(types, fn, context) { // (String, Function[, Object]) or (Object[, Object])
+  //Map _leaflet_events;
+  Map<String, List<Event>> _events;
+  Map<String, Map<int, List<Event>>> _contextEvents;
+  Map<String, int> _numContextEvents;
+
+  addEventListener(String types, Action fn, [Map context=null]) { // (String, Function[, Object]) or (Object[, Object])
 
     // types can be a map of types/handlers
-    if (L.Util.invokeEach(types, this.addEventListener, this, fn, context)) { return this; }
+//    if (L.Util.invokeEach(types, this.addEventListener, this, fn, context)) { return this; }
 
-    var events = this[eventsKey] = this[eventsKey] || {},
-        contextId = context && context != this && L.stamp(context),
-        i, len, event, type, indexKey, indexLenKey, typeIndex;
+    //var events = this[eventsKey] = this[eventsKey] || {},
+//    if (_leaflet_events == null) {
+//      _leaflet_events = {};
+//    }
+//    final events = _leaflet_events;
+    if (_events == null) {
+      _events = {};
+    }
+    if (_contextEvents == null) {
+      _contextEvents = {};
+    }
+    if (_numContextEvents == null) {
+      _numContextEvents = {};
+    }
+    //var contextId = context && context != this && L.stamp(context);
+    var contextId = null;
+    if (context != null && context != this) {
+      contextId = Util.stamp(context);
+    }
+//    int i, len;
+//    Map event;
+//    String indexKey, indexLenKey;
+//    Map typeIndex;
 
     // types can be a string of space-separated words
-    types = L.Util.splitWords(types);
+    List<String> typesList = Util.splitWords(types);
 
-    len = types.length;
-    for (i = 0; i < len; i++) {
-      event = {
-        'action': fn,
-        'context': context || this
-      };
-      type = types[i];
+    for (int i = 0; i < typesList.length; i++) {
+      final event = new Event(fn, context != null ? context : this);
+      final type = typesList[i];
 
-      if (contextId) {
+      if (contextId != null) {
         // store listeners of a particular context in a separate hash (if it has an id)
         // gives a major performance boost when removing thousands of map layers
 
-        indexKey = type + '_idx';
-        indexLenKey = indexKey + '_len';
+//        indexKey = type + '_idx';
+//        indexLenKey = indexKey + '_len';
 
-        typeIndex = events[indexKey] = events[indexKey] || {};
+        if (!_contextEvents.containsKey(type)) {
+          _contextEvents[type] = {};
+        }
+        Map<int, List<Event>> typeIndex = _contextEvents[type];
 
-        if (!typeIndex[contextId]) {
+        if (!typeIndex.containsKey(contextId)) {
           typeIndex[contextId] = [];
 
           // keep track of the number of keys in the index to quickly check if it's empty
-          events[indexLenKey] = (events[indexLenKey] || 0) + 1;
+//          events[indexLenKey] = (events.containsKey(indexLenKey) ? events[indexLenKey] : 0) + 1;
+          if (!_numContextEvents.containsKey(type)) {
+            _numContextEvents[type] = 0;
+          }
+          _numContextEvents[type]++;
         }
 
-        typeIndex[contextId].push(event);
+        typeIndex[contextId].add(event);
 
 
       } else {
-        events[type] = events[type] || [];
-        events[type].push(event);
+        if (!_events.containsKey(type)) {
+          _events[type] = [];
+        }
+        _events[type].add(event);
       }
     }
 
@@ -51,59 +95,74 @@ class Events {
   }
 
   bool hasEventListeners(String type) { // (String) -> Boolean
-    var events = this[eventsKey];
-    return !!events && ((events.contains(type) && events[type].length > 0) ||
-                        (events.contains(type + '_idx') && events[type + '_idx_len'] > 0));
+    //var events = this[eventsKey];
+//    final events = _leaflet_events;
+    if (_events != null) {
+      return _events.containsKey(type) && _events[type].length > 0;
+    }
+    if (_contextEvents != null && _numContextEvents != null) {
+      return _contextEvents.containsKey(type) && _numContextEvents[type] > 0;
+    }
+    return false;
+//    return (events.containsKey(type) && events[type].length > 0) || (events.containsKey(type + '_idx') && events[type + '_idx_len'] > 0);
   }
 
-  removeEventListener(String types, Function fn, Map context) { // ([String, Function, Object]) or (Object[, Object])
-
-    if (!this[eventsKey]) {
+  removeEventListener([String types = null, Action fn = null, Map context = null]) { // ([String, Function, Object]) or (Object[, Object])
+    //if (!this[eventsKey]) {
+    if (_events == null && _contextEvents == null) {
       return this;
     }
 
-    if (!types) {
+    if (types == null) {
       return this.clearAllEventListeners();
     }
 
-    if (L.Util.invokeEach(types, this.removeEventListener, this, fn, context)) { return this; }
+//    if (L.Util.invokeEach(types, this.removeEventListener, this, fn, context)) { return this; }
 
-    var events = this[eventsKey],
-        contextId = context && context != this && L.stamp(context),
-        i, len, type, listeners, j, indexKey, indexLenKey, typeIndex, removed;
+//    final events = _leaflet_events;
+    //var contextId = context && context != this && L.stamp(context);
+    int contextId = null;
+    if (context != null && context != this) {
+      contextId = Util.stamp(context);
+    }
+//    Map typeIndex = null;
+//    int i, len, j;
+//    String indexKey, indexLenKey, type;
+//    List listeners, removed;
 
-    types = L.Util.splitWords(types);
+    List<String> typesList = Util.splitWords(types);
 
-    len = types.length;
-    for (i = 0; i < len; i++) {
-      type = types[i];
-      indexKey = type + '_idx';
-      indexLenKey = indexKey + '_len';
+//    len = types.length;
+    for (int i = 0; i < typesList.length; i++) {
+      final type = typesList[i];
+//      indexKey = type + '_idx';
+//      indexLenKey = indexKey + '_len';
 
-      typeIndex = events[indexKey];
+      Map<int, List<Event>> typeIndex = _contextEvents[type];
 
-      if (!fn) {
+      if (fn = null) {
         // clear all listeners for a type if function isn't specified
-        delete(events[type]);
-        delete(events[indexKey]);
-        delete(events[indexLenKey]);
+        _events.remove(type);
+        _contextEvents.remove(type);
+        _numContextEvents.remove(type);
 
       } else {
-        listeners = contextId && typeIndex ? typeIndex[contextId] : events[type];
+        final List<Event> listeners = (contextId != null && typeIndex != null) ? typeIndex[contextId] : _events[type];
 
-        if (listeners) {
-          for (j = listeners.length - 1; j >= 0; j--) {
-            if ((listeners[j].action == fn) && (!context || (listeners[j].context == context))) {
-              removed = listeners.splice(j, 1);
+        if (listeners != null) {
+          for (int j = listeners.length - 1; j >= 0; j--) {
+            if ((listeners[j].action == fn) && (context == null || (listeners[j].context == context))) {
+              final removed = listeners.removeAt(j);
               // set the old action to a no-op, because it is possible
               // that the listener is being iterated over as part of a dispatch
-              removed[0].action = L.Util.falseFn;
+//              removed.action = Util.falseFn;
+              removed.action = (Object context, Event event) { return false; };
             }
           }
 
           if (context && typeIndex && (listeners.length == 0)) {
-            delete(typeIndex[contextId]);
-            events[indexLenKey]--;
+            typeIndex.remove(contextId);
+            _numContextEvents[type]--;
           }
         }
       }
@@ -113,7 +172,11 @@ class Events {
   }
 
   clearAllEventListeners() {
-    delete(this[eventsKey]);
+    //this.remove(eventsKey);
+//    _leaflet_events = null;
+    _events = null;
+    _contextEvents = null;
+    _numContextEvents = null;
     return this;
   }
 
@@ -122,31 +185,36 @@ class Events {
       return this;
     }
 
-    var event = L.Util.extend({}, data, { 'type': type, 'target': this });
+    //var event = Util.extend({}, data, { 'type': type, 'target': this });
+    final event = {};
+    event.addAll(data);
+    event['type'] = type;
+    event['target'] = this;
 
-    var events = this[eventsKey],
-        listeners, i, len, typeIndex, contextId;
+    //var events = this[eventsKey],
+//    final events = _leaflet_events;
+//    var listeners, i, len, typeIndex, contextId;
 
-    if (events[type]) {
+    if (_events.containsKey(type)) {
       // make sure adding/removing listeners inside other listeners won't cause infinite loop
-      listeners = events[type].slice();
+//      final listeners = new List.from(_events[type]);
+      final listeners = _events[type];
 
-      len = listeners.length;
-      for (i = 0; i < len; i++) {
-        listeners[i].action.call(listeners[i].context, event);
+      final len = listeners.length;
+      for (int i = 0; i < len; i++) {
+        listeners[i].action(listeners[i].context, event);
       }
     }
 
     // fire event for the context-indexed listeners as well
-    typeIndex = events[type + '_idx'];
+    Map<int, List<Event>> typeIndex = _contextEvents[type];
 
-    for (contextId in typeIndex) {
-      listeners = typeIndex[contextId].slice();
+    for (int contextId in typeIndex.keys) {
+      final listeners = typeIndex[contextId];//.slice();
 
-      if (listeners) {
-        len = listeners.length;
-        for (i = 0; i < len; i++) {
-          listeners[i].action.call(listeners[i].context, event);
+      if (listeners != null) {
+        for (int i = 0; i < listeners.length; i++) {
+          listeners[i].action(listeners[i].context, event);
         }
       }
     }
@@ -154,9 +222,9 @@ class Events {
     return this;
   }
 
-  addOneTimeEventListener(types, fn, context) {
+  /*addOneTimeEventListener(types, fn, context) {
 
-    if (L.Util.invokeEach(types, this.addOneTimeEventListener, this, fn, context)) { return this; }
+    if (Util.invokeEach(types, this.addOneTimeEventListener, this, fn, context)) { return this; }
 
     var handler = L.bind(() {
       this
@@ -167,5 +235,5 @@ class Events {
     return this
         .addEventListener(types, fn, context)
         .addEventListener(types, handler, context);
-  }
+  }*/
 }
