@@ -1,7 +1,10 @@
-library map;
+library leaflet.map;
 
 import 'dart:html';
 import 'dart:math' as math;
+
+import '../core/core.dart';
+import '../dom/dom.dart';
 
 class BaseMap {
   Map<String, Object> options = {

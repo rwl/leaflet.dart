@@ -1,3 +1,4 @@
+part of leaflet.dom;
 
 // DomUtil contains various utility functions for working with DOM.
 class DomUtil {

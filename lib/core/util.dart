@@ -1,10 +1,10 @@
 part of leaflet.core;
 
-final Util = new Utils();
+final Util = new Util();
 
 final idProp = new Expando<Object>('_leaflet_id');
 
-class Utils {
+class _Util {
   int lastId = 0;
 
   int stamp(Object obj) {

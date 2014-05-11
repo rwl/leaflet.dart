@@ -1,21 +1,21 @@
-library leaflet.geo.projection;
+part of leaflet.geo.projection;
 
-import 'dart:math' as math;
+final Mercator = new _Mercator();
 
 // Mercator projection that takes into account that the Earth is not a perfect sphere.
 // Less popular than spherical mercator; used by projections like EPSG:3395.
-class Mercator {
+class _Mercator implements Projection {
   static double MAX_LATITUDE = 85.0840591556;
 
   static double R_MINOR = 6356752.314245179;
-  static double R_MAJOR = 6378137;
+  static double R_MAJOR = 6378137.0;
 
   project(latlng) { // (LatLng) -> Point
-    var d = L.LatLng.DEG_TO_RAD,
-        max = this.MAX_LATITUDE,
+    var d = LatLng.DEG_TO_RAD,
+        max = MAX_LATITUDE,
         lat = math.max(math.min(max, latlng.lat), -max),
-        r = this.R_MAJOR,
-        r2 = this.R_MINOR,
+        r = R_MAJOR,
+        r2 = R_MINOR,
         x = latlng.lng * d * r,
         y = lat * d,
         tmp = r2 / r,
@@ -31,9 +31,9 @@ class Mercator {
   }
 
   unproject(point) { // (Point, Boolean) -> LatLng
-    var d = L.LatLng.RAD_TO_DEG,
-        r = this.R_MAJOR,
-        r2 = this.R_MINOR,
+    var d = LatLng.RAD_TO_DEG,
+        r = R_MAJOR,
+        r2 = R_MINOR,
         lng = point.x * d / r,
         tmp = r2 / r,
         eccent = math.sqrt(1 - (tmp * tmp)),

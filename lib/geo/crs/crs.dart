@@ -2,32 +2,47 @@ library leaflet.geo.crs;
 
 import 'dart:math' as math;
 
-// CRS is a base object for all defined CRS (Coordinate Reference Systems) in Leaflet.
-class CRS {
-  latLngToPoint(latlng, zoom) { // (LatLng, Number) -> Point
-    var projectedPoint = this.projection.project(latlng),
-        scale = this.scale(zoom);
+import '../geo.dart';
+import '../projection/projection.dart' as proj;
+import '../../geometry/geometry.dart';
 
-    return this.transformation._transform(projectedPoint, scale);
+part 'epsg3395.dart';
+part 'epsg3857.dart';
+part 'epsg4326.dart';
+part 'simple.dart';
+
+// CRS is a base object for all defined CRS (Coordinate Reference Systems) in Leaflet.
+abstract class CRS {
+  final proj.Projection projection;
+  final Transformation transformation;
+  final String code;
+
+  CRS(this.projection, this.transformation, this.code);
+
+  Point latLngToPoint(LatLng latlng, num zoom) { // (LatLng, Number) -> Point
+    final projectedPoint = this.projection.project(latlng);
+    final scale = this.scale(zoom);
+
+    return this.transformation.destructive_transform(projectedPoint, scale);
   }
 
-  pointToLatLng(point, zoom) { // (Point, Number[, Boolean]) -> LatLng
-    var scale = this.scale(zoom),
-        untransformedPoint = this.transformation.untransform(point, scale);
+  LatLng pointToLatLng(Point point, num zoom) { // (Point, Number[, Boolean]) -> LatLng
+    final scale = this.scale(zoom);
+    final untransformedPoint = this.transformation.untransform(point, scale);
 
     return this.projection.unproject(untransformedPoint);
   }
 
-  project(latlng) {
+  Point project(LatLng latlng) {
     return this.projection.project(latlng);
   }
 
-  scale(zoom) {
+  num scale(num zoom) {
     return 256 * math.pow(2, zoom);
   }
 
-  getSize(zoom) {
+  Point getSize(num zoom) {
     var s = this.scale(zoom);
-    return L.point(s, s);
+    return new Point(s, s);
   }
 }

@@ -1,24 +1,30 @@
-library leaflet.geometry;
-
-import 'dart:math' as math;
+part of leaflet.geometry;
 
 // Bounds represents a rectangular area on the screen in pixel coordinates.
 class Bounds {
-  call(a, b) { //(Point, Point) or Point[]
-    if (!a) { return; }
+  Point min, max;
 
-    var points = b ? [a, b] : a;
+  Bounds(List<Point> points) { //(Point, Point) or Point[]
+    if (points == null) { return; }
 
     for (var i = 0, len = points.length; i < len; i++) {
       this.extend(points[i]);
     }
   }
 
-  // Extend the bounds to contain the given point.
-  extend(point) { // (Point)
-    point = L.point(point);
+  factory Bounds.points(Point a, Point b) {
+    return new Bounds([a, b]);
+  }
 
-    if (!this.min && !this.max) {
+  factory Bounds.bounds(Bounds b) {
+    return b;
+  }
+
+  // Extend the bounds to contain the given point.
+  extend(Point point) {
+    point = new Point.point(point);
+
+    if (this.min == null && this.max == null) {
       this.min = point.clone();
       this.max = point.clone();
     } else {
@@ -30,39 +36,29 @@ class Bounds {
     return this;
   }
 
-  getCenter(round) { // (Boolean) -> Point
-    return new L.Point(
+  Point getCenter([bool round = false]) {
+    return new Point(
             (this.min.x + this.max.x) / 2,
             (this.min.y + this.max.y) / 2, round);
   }
 
-  getBottomLeft() { // -> Point
-    return new L.Point(this.min.x, this.max.y);
+  Point getBottomLeft() {
+    return new Point(this.min.x, this.max.y);
   }
 
-  getTopRight() { // -> Point
-    return new L.Point(this.max.x, this.min.y);
+  Point getTopRight() {
+    return new Point(this.max.x, this.min.y);
   }
 
-  getSize() {
+  num getSize() {
     return this.max.subtract(this.min);
   }
 
-  contains(obj) { // (Bounds) or (Point) -> Boolean
-    var min, max;
+  bool contains(Point obj) {
+    obj = new Point.point(obj);
 
-    if (obj[0] is num || obj is Point) {
-      obj = L.point(obj);
-    } else {
-      obj = L.bounds(obj);
-    }
-
-    if (obj is Bounds) {
-      min = obj.min;
-      max = obj.max;
-    } else {
-      min = max = obj;
-    }
+    final min = obj;
+    final max = obj;
 
     return (min.x >= this.min.x) &&
            (max.x <= this.max.x) &&
@@ -70,8 +66,20 @@ class Bounds {
            (max.y <= this.max.y);
   }
 
-  intersects(bounds) { // (Bounds) -> Boolean
-    bounds = L.bounds(bounds);
+  bool containsBounds(Bounds obj) {
+    obj = new Bounds.bounds(obj);
+
+    final min = obj.min;
+    final max = obj.max;
+
+    return (min.x >= this.min.x) &&
+           (max.x <= this.max.x) &&
+           (min.y >= this.min.y) &&
+           (max.y <= this.max.y);
+  }
+
+  bool intersects(Bounds bounds) { // (Bounds) -> Boolean
+    bounds = new Bounds.bounds(bounds);
 
     var min = this.min,
         max = this.max,
@@ -83,7 +91,7 @@ class Bounds {
     return xIntersects && yIntersects;
   }
 
-  isValid() {
-    return !(this.min && this.max);
+  bool isValid() {
+    return this.min != null && this.max != null;
   }
 }

@@ -1,10 +1,10 @@
-library leaflet.geometry;
+part of leaflet.geometry;
 
-import 'dart:math' as math;
+final LineUtil = new _LineUtil();
 
 // LineUtil contains different utility functions for line segments
 // and polylines (clipping, simplification, distances, etc.)
-class LineUtil {
+class _LineUtil {
 
   // Simplify polyline with vertex reduction and Douglas-Peucker simplification.
   // Improves rendering performance dramatically by lessening the number of points to draw.

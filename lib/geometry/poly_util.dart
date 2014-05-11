@@ -1,7 +1,9 @@
-library leaflet.geometry;
+part of leaflet.geometry;
+
+final PolyUtil = new _PolyUtil();
 
 // PolyUtil contains utility functions for polygons (clipping, etc.).
-class PolyUtil {
+class _PolyUtil {
 
   // Sutherland-Hodgeman polygon clipping algorithm.
   // Used to avoid rendering parts of a polygon that are not currently visible.
@@ -11,7 +13,7 @@ class PolyUtil {
     i, j, k,
     a, b,
     len, edge, p,
-    lu = L.LineUtil;
+    lu = LineUtil;
 
     len = points.length;
     for (i = 0; i < len; i++) {
@@ -35,15 +37,15 @@ class PolyUtil {
           if (b._code & edge) {
             p = lu._getEdgeIntersection(b, a, edge, bounds);
             p._code = lu._getBitCode(p, bounds);
-            clippedPoints.push(p);
+            clippedPoints.add(p);
           }
-          clippedPoints.push(a);
+          clippedPoints.add(a);
 
           // else if b is inside the clip window (a->b enters the screen)
         } else if (!(b._code & edge)) {
           p = lu._getEdgeIntersection(b, a, edge, bounds);
           p._code = lu._getBitCode(p, bounds);
-          clippedPoints.push(p);
+          clippedPoints.add(p);
         }
       }
       points = clippedPoints;

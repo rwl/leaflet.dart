@@ -1,14 +1,14 @@
-library leaflet.geo.projection;
+part of leaflet.geo.projection;
 
-import 'dart:math' as math;
+final SphericalMercator = new _SphericalMercator();
 
 // Spherical Mercator is the most popular map projection, used by EPSG:3857 CRS used by default.
-class SphericalMercator {
+class _SphericalMercator implements Projection {
   static final double MAX_LATITUDE = 85.0511287798;
 
   project(latlng) { // (LatLng) -> Point
     var d = LatLng.DEG_TO_RAD,
-        max = this.MAX_LATITUDE,
+        max = MAX_LATITUDE,
         lat = math.max(math.min(max, latlng.lat), -max),
         x = latlng.lng * d,
         y = lat * d;
@@ -19,7 +19,7 @@ class SphericalMercator {
   }
 
   unproject(point) { // (Point, Boolean) -> LatLng
-    var d = L.LatLng.RAD_TO_DEG,
+    var d = LatLng.RAD_TO_DEG,
         lng = point.x * d,
         lat = (2 * math.atan(math.exp(point.y)) - (math.PI / 2)) * d;
 

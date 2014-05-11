@@ -1,32 +1,40 @@
-library leaflet.geometry;
-
-import 'dart:math' as math;
+part of leaflet.geometry;
 
 // Point represents a point with x and y coordinates.
 class Point {
-  call(/*Number*/ x, /*Number*/ y, /*Boolean*/ round) {
-    this.x = (round ? math.round(x) : x);
-    this.y = (round ? math.round(y) : y);
+  num x, y;
+
+  Point(num x, num y, [bool round=false]) {
+    this.x = (round ? x.round() : x);
+    this.y = (round ? y.round() : y);
+  }
+
+  factory Point.point(Point p) {
+    return p;
+  }
+
+  factory Point.array(List<num> a) {
+    return new Point(a[0], a[1]);
   }
 
   clone() {
-    return new L.Point(this.x, this.y);
+    return new Point(x, y);
   }
 
   // non-destructive, returns a new point
   add(point) {
-    return this.clone()._add(L.point(point));
+    return this.clone()._add(new Point.point(point));
   }
 
   // destructive, used directly for performance in situations where it's safe to modify existing point
-  _add(point) {
+  Point _add(point) {
     this.x += point.x;
     this.y += point.y;
     return this;
   }
 
   subtract(point) {
-    return this.clone()._subtract(L.point(point));
+    return this.clone()._subtract(new Point.point(point));
   }
 
   _subtract(point) {
@@ -60,8 +68,8 @@ class Point {
   }
 
   _round() {
-    this.x = Math.round(this.x);
-    this.y = Math.round(this.y);
+    this.x = this.x.round();
+    this.y = this.y.round();
     return this;
   }
 
@@ -70,37 +78,37 @@ class Point {
   }
 
   _floor() {
-    this.x = Math.floor(this.x);
-    this.y = Math.floor(this.y);
+    this.x = this.x.floor();
+    this.y = this.y.floor();
     return this;
   }
 
   distanceTo(point) {
-    point = L.point(point);
+    point = new Point.point(point);
 
     var x = point.x - this.x,
         y = point.y - this.y;
 
-    return Math.sqrt(x * x + y * y);
+    return math.sqrt(x * x + y * y);
   }
 
-  equals(point) {
-    point = L.point(point);
+  bool equals(Point point) {
+    point = new Point.point(point);
 
     return point.x == this.x &&
            point.y == this.y;
   }
 
-  contains(point) {
-    point = L.point(point);
+  bool contains(Point point) {
+    point = new Point.point(point);
 
-    return Math.abs(point.x) <= Math.abs(this.x) &&
-           Math.abs(point.y) <= Math.abs(this.y);
+    return point.x.abs() <= this.x.abs() &&
+           point.y.abs() <= this.y.abs();
   }
 
   toString() {
     return 'Point(' +
-            L.Util.formatNum(this.x) + ', ' +
-            L.Util.formatNum(this.y) + ')';
+            Util.formatNum(this.x) + ', ' +
+            Util.formatNum(this.y) + ')';
   }
 }

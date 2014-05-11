@@ -1,22 +1,23 @@
-library leaflet.geo.crs;
+part of leaflet.geo.crs;
 
-import 'dart:math' as math;
+final EPSG3857 = new _EPSG3857();
 
 // EPSG3857 (Spherical Mercator) is the most common CRS for web mapping
 // and is used by Leaflet by default.
-class EPSG3857 extends CRS {
-  var code = 'EPSG:3857';
+class _EPSG3857 extends CRS {
 
-  var projection = projection.SphericalMercator;
-  var transformation = new L.Transformation(0.5 / Math.PI, 0.5, -0.5 / Math.PI, 0.5);
+  static final num earthRadius = 6378137;
 
-  project(latlng) { // (LatLng) -> Point
-    var projectedPoint = this.projection.project(latlng),
-        earthRadius = 6378137;
+  _EPSG3857([String code = 'EPSG:3857']) : super(proj.SphericalMercator, new Transformation(0.5 / math.PI, 0.5, -0.5 / math.PI, 0.5), code);
+
+  Point project(LatLng latlng) { // (LatLng) -> Point
+    final projectedPoint = this.projection.project(latlng);
     return projectedPoint.multiplyBy(earthRadius);
   }
 }
 
-class EPSG900913 extends EPSG3857 {
-  var code = 'EPSG:900913';
+final EPSG900913 = new _EPSG900913();
+
+class _EPSG900913 extends _EPSG3857 {
+  _EPSG900913() : super('EPSG:900913');
 }

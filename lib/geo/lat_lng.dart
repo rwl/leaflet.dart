@@ -1,77 +1,79 @@
-library leaflet.geo;
+part of leaflet.geo;
 
 // LatLng represents a geographical point with latitude and longitude coordinates.
 class LatLng {
 
-  LatLng(lat, lng, alt) {
-    lat = parseFloat(lat);
-    lng = parseFloat(lng);
+  num lat, lng, alt;
 
-    if (isNaN(lat) || isNaN(lng)) {
-      throw new Error('Invalid LatLng object: (' + lat + ', ' + lng + ')');
+  factory LatLng.parse(String lat, String lng, [String alt='']) {
+    final lt = double.parse(lat, (String s) { return double.NAN; });
+    final lg = double.parse(lng, (String s) { return double.NAN; });
+    final at = double.parse(alt, (String s) { return null; });
+    return new LatLng(lt, lg, at);
+  }
+
+  factory LatLng.latLng(LatLng ll) {
+    return ll;
+  }
+
+  LatLng(num lat, num lng, [num alt=null]) {
+    if (lat.isNaN || lng.isNaN) {
+      throw new Exception('Invalid LatLng object: ($lat, $lng)');
     }
 
     this.lat = lat;
     this.lng = lng;
-
-    if (alt != null) {
-      this.alt = parseFloat(alt);
-    }
+    this.alt = alt;
   }
 
-  static var DEG_TO_RAD = Math.PI / 180;
-  static var RAD_TO_DEG = 180 / Math.PI;
-  static var MAX_MARGIN = 1.0E-9; // max margin of error for the "equals" check
+  static final DEG_TO_RAD = math.PI / 180;
+  static final RAD_TO_DEG = 180 / math.PI;
+  static final MAX_MARGIN = 1.0E-9; // max margin of error for the "equals" check
 
-  equals(obj) { // (LatLng) -> Boolean
-    if (!obj) { return false; }
+  bool equals(LatLng obj) { // (LatLng) -> Boolean
+    if (obj == null) { return false; }
 
-    obj = L.latLng(obj);
+    obj = new LatLng.latLng(obj);
 
-    var margin = Math.max(
-            Math.abs(this.lat - obj.lat),
-            Math.abs(this.lng - obj.lng));
+    var margin = math.max(
+            (this.lat - obj.lat).abs(),
+            (this.lng - obj.lng).abs());
 
-    return margin <= L.LatLng.MAX_MARGIN;
+    return margin <= LatLng.MAX_MARGIN;
   }
 
-  toString(precision) { // (Number) -> String
-    return 'LatLng(' +
-            L.Util.formatNum(this.lat, precision) + ', ' +
-            L.Util.formatNum(this.lng, precision) + ')';
+  String toString([num precision=5]) { // (Number) -> String
+    return 'LatLng(${Util.formatNum(this.lat, precision)}, ${Util.formatNum(this.lng, precision)})';
   }
 
   // Haversine distance formula, see http://en.wikipedia.org/wiki/Haversine_formula
   // TODO move to projection code, LatLng shouldn't know about Earth
-  distanceTo(other) { // (LatLng) -> Number
-    other = L.latLng(other);
+  num distanceTo(LatLng other) { // (LatLng) -> Number
+    other = new LatLng.latLng(other);
 
     var R = 6378137, // earth radius in meters
-        d2r = L.LatLng.DEG_TO_RAD,
+        d2r = LatLng.DEG_TO_RAD,
         dLat = (other.lat - this.lat) * d2r,
         dLon = (other.lng - this.lng) * d2r,
         lat1 = this.lat * d2r,
         lat2 = other.lat * d2r,
-        sin1 = Math.sin(dLat / 2),
-        sin2 = Math.sin(dLon / 2);
+        sin1 = math.sin(dLat / 2),
+        sin2 = math.sin(dLon / 2);
 
-    var a = sin1 * sin1 + sin2 * sin2 * Math.cos(lat1) * Math.cos(lat2);
+    var a = sin1 * sin1 + sin2 * sin2 * math.cos(lat1) * math.cos(lat2);
 
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
   }
 
-  wrap(a, b) { // (Number, Number) -> LatLng
+  LatLng wrap([num a=-180, num b=180]) { // (Number, Number) -> LatLng
     var lng = this.lng;
-
-    a = a || -180;
-    b = b ||  180;
 
     lng = (lng + b) % (b - a) + (lng < a || lng == b ? b : a);
 
     return new LatLng(this.lat, lng);
   }
 }
-
+/*
 latLng(a, b) { // (LatLng) or ([Number, Number]) or (Number, Number)
   if (a is LatLng) {
     return a;
@@ -94,3 +96,4 @@ latLng(a, b) { // (LatLng) or ([Number, Number]) or (Number, Number)
   }
   return new LatLng(a, b);
 }
+*/

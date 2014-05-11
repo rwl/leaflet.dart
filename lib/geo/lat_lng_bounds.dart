@@ -1,7 +1,14 @@
-library leaflet.geo;
+part of leaflet.geo;
 
 // LatLngBounds represents a rectangular area on the map in geographical coordinates.
 class LatLngBounds {
+
+  LatLng _southWest, _northEast;
+
+  factory LatLngBounds.latLngBounds(LatLngBounds llb) {
+    return llb;
+  }
+
   LatLngBounds(southWest, northEast) { // (LatLng, LatLng) or (LatLng[])
     if (!southWest) { return; }
 
@@ -12,111 +19,118 @@ class LatLngBounds {
     }
   }
 
-  // Extend the bounds to contain the given point or bounds.
-  extend(obj) { // (LatLng) or (LatLngBounds)
-    if (!obj) { return this; }
+  // Extend the bounds to contain the given point.
+  LatLngBounds extend(LatLng obj) { // (LatLng) or (LatLngBounds)
+    if (obj == null) { return this; }
 
-    var latLng = L.latLng(obj);
-    if (latLng != null) {
-      obj = latLng;
+    var latLng = new LatLng.latLng(obj);
+
+    if (this._southWest ==null && this._northEast == null) {
+      this._southWest = new LatLng(obj.lat, obj.lng);
+      this._northEast = new LatLng(obj.lat, obj.lng);
     } else {
-      obj = L.latLngBounds(obj);
+      this._southWest.lat = math.min(obj.lat, this._southWest.lat);
+      this._southWest.lng = math.min(obj.lng, this._southWest.lng);
+
+      this._northEast.lat = math.max(obj.lat, this._northEast.lat);
+      this._northEast.lng = math.max(obj.lng, this._northEast.lng);
     }
 
-    if (obj is LatLng) {
-      if (!this._southWest && !this._northEast) {
-        this._southWest = new L.LatLng(obj.lat, obj.lng);
-        this._northEast = new L.LatLng(obj.lat, obj.lng);
-      } else {
-        this._southWest.lat = Math.min(obj.lat, this._southWest.lat);
-        this._southWest.lng = Math.min(obj.lng, this._southWest.lng);
+    return this;
+  }
 
-        this._northEast.lat = Math.max(obj.lat, this._northEast.lat);
-        this._northEast.lng = Math.max(obj.lng, this._northEast.lng);
-      }
-    } else if (obj is LatLngBounds) {
-      this.extend(obj._southWest);
-      this.extend(obj._northEast);
-    }
+  // Extend the bounds to contain the given bounds.
+  LatLngBounds extendBounds(LatLngBounds obj) {
+    if (obj == null) { return this; }
+
+    obj = new LatLngBounds.latLngBounds(obj);
+
+    this.extend(obj._southWest);
+    this.extend(obj._northEast);
+
     return this;
   }
 
   // Extend the bounds by a percentage.
-  pad(bufferRatio) { // (Number) -> LatLngBounds
-    var sw = this._southWest,
-        ne = this._northEast,
-        heightBuffer = Math.abs(sw.lat - ne.lat) * bufferRatio,
-        widthBuffer = Math.abs(sw.lng - ne.lng) * bufferRatio;
+  LatLngBounds pad(num bufferRatio) { // (Number) -> LatLngBounds
+    final sw = this._southWest;
+    final ne = this._northEast;
+    final heightBuffer = (sw.lat - ne.lat).abs() * bufferRatio;
+    final widthBuffer = (sw.lng - ne.lng).abs() * bufferRatio;
 
-    return new L.LatLngBounds(
-            new L.LatLng(sw.lat - heightBuffer, sw.lng - widthBuffer),
-            new L.LatLng(ne.lat + heightBuffer, ne.lng + widthBuffer));
+    return new LatLngBounds(
+            new LatLng(sw.lat - heightBuffer, sw.lng - widthBuffer),
+            new LatLng(ne.lat + heightBuffer, ne.lng + widthBuffer));
   }
 
-  getCenter() { // -> LatLng
-    return new L.LatLng(
+  LatLng getCenter() { // -> LatLng
+    return new LatLng(
             (this._southWest.lat + this._northEast.lat) / 2,
             (this._southWest.lng + this._northEast.lng) / 2);
   }
 
-  getSouthWest() {
+  LatLng getSouthWest() {
     return this._southWest;
   }
 
-  getNorthEast() {
+  LatLng getNorthEast() {
     return this._northEast;
   }
 
-  getNorthWest() {
-    return new L.LatLng(this.getNorth(), this.getWest());
+  LatLng getNorthWest() {
+    return new LatLng(this.getNorth(), this.getWest());
   }
 
-  getSouthEast() {
-    return new L.LatLng(this.getSouth(), this.getEast());
+  LatLng getSouthEast() {
+    return new LatLng(this.getSouth(), this.getEast());
   }
 
-  getWest() {
+  num getWest() {
     return this._southWest.lng;
   }
 
-  getSouth() {
+  num getSouth() {
     return this._southWest.lat;
   }
 
-  getEast() {
+  num getEast() {
     return this._northEast.lng;
   }
 
-  getNorth() {
+  num getNorth() {
     return this._northEast.lat;
   }
 
-  contains(obj) { // (LatLngBounds) or (LatLng) -> Boolean
-    if (obj[0] is num || obj is LatLng) {
-      obj = L.latLng(obj);
-    } else {
-      obj = L.latLngBounds(obj);
-    }
+  bool contains(LatLng obj) {
+    obj = new LatLng.latLng(obj);
 
-    var sw = this._southWest,
-        ne = this._northEast,
-        sw2, ne2;
+    final sw = this._southWest,
+        ne = this._northEast;
 
-    if (obj is LatLngBounds) {
-      sw2 = obj.getSouthWest();
-      ne2 = obj.getNorthEast();
-    } else {
-      sw2 = ne2 = obj;
-    }
+    final sw2 = obj;
+    final ne2 = obj;
 
     return (sw2.lat >= sw.lat) && (ne2.lat <= ne.lat) &&
            (sw2.lng >= sw.lng) && (ne2.lng <= ne.lng);
   }
 
-  intersects(bounds) { // (LatLngBounds)
-    bounds = L.latLngBounds(bounds);
+  bool containsBounds(LatLngBounds obj) {
+    obj = new LatLngBounds.latLngBounds(obj);
 
-    var sw = this._southWest,
+    final sw = this._southWest,
+        ne = this._northEast;
+
+    final sw2 = obj.getSouthWest();
+    final ne2 = obj.getNorthEast();
+
+    return (sw2.lat >= sw.lat) && (ne2.lat <= ne.lat) &&
+           (sw2.lng >= sw.lng) && (ne2.lng <= ne.lng);
+  }
+
+  bool intersects(LatLngBounds bounds) {
+    bounds = new LatLngBounds.latLngBounds(bounds);
+
+    final sw = this._southWest,
         ne = this._northEast,
         sw2 = bounds.getSouthWest(),
         ne2 = bounds.getNorthEast(),
@@ -127,20 +141,20 @@ class LatLngBounds {
     return latIntersects && lngIntersects;
   }
 
-  toBBoxString() {
+  String toBBoxString() {
     return [this.getWest(), this.getSouth(), this.getEast(), this.getNorth()].join(',');
   }
 
-  equals(bounds) { // (LatLngBounds)
-    if (!bounds) { return false; }
+  bool equals(LatLngBounds bounds) {
+    if (bounds == null) { return false; }
 
-    bounds = L.latLngBounds(bounds);
+    bounds = new LatLngBounds.latLngBounds(bounds);
 
     return this._southWest.equals(bounds.getSouthWest()) &&
            this._northEast.equals(bounds.getNorthEast());
   }
 
-  isValid() {
-    return !!(this._southWest && this._northEast);
+  bool isValid() {
+    return this._southWest != null && this._northEast != null;
   }
 }
