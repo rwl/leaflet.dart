@@ -1,4 +1,4 @@
-
+part of leaflet.layer.vector;
 
 // Polygon is used to display polygons on a map.
 class Polygon extends Polyline {

@@ -1,6 +1,10 @@
 library leaflet.layer;
 
+import 'dart:html';
+import 'dart:math' as math show min, max;
+
 import '../core/core.dart';
+import '../dom/dom.dart';
 import '../map/map.dart';
 import '../geo/geo.dart';
 import './marker/marker.dart';

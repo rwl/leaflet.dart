@@ -1,4 +1,4 @@
-
+part of leaflet.dom;
 
 // PosAnimation is used by Leaflet internally for pan animations.
 class PosAnimation extends Object with Events {

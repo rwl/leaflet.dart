@@ -1,7 +1,10 @@
 part of leaflet.dom;
 
+final DomUtil = new _DomUtil();
+
 // DomUtil contains various utility functions for working with DOM.
-class DomUtil {
+class _DomUtil {
+
   get(id) {
     return (id is String ? document.getElementById(id) : id);
   }
@@ -107,7 +110,7 @@ class DomUtil {
       return el.classList.contains(name);
     }
     var className = L.DomUtil._getClass(el);
-    return className.length > 0 && new RegExp('(^|\\s)' + name + '(\\s|$)').test(className);
+    return className.length > 0 && new RegExp(r'(^|\\s)' + name + '(\\s|\$)').test(className);
   }
 
   addClass(el, name) {

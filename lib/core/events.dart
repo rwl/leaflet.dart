@@ -39,6 +39,10 @@ class Events {
   Map<String, Map<int, List<Event>>> _contextEvents;
   Map<String, int> _numContextEvents;
 
+  on(String types, Action fn, [Map context=null]) {
+    return addEventListener(types, fn);
+  }
+
   addEventListener(String types, Action fn, [Map context=null]) { // (String, Function[, Object]) or (Object[, Object])
 
     // types can be a map of types/handlers
@@ -125,6 +129,10 @@ class Events {
 //    return (events.containsKey(type) && events[type].length > 0) || (events.containsKey(type + '_idx') && events[type + '_idx_len'] > 0);
   }
 
+  off([String types = null, Action fn = null, Map context = null]) {
+    return removeEventListener(types, fn, context);
+  }
+
   removeEventListener([String types = null, Action fn = null, Map context = null]) { // ([String, Function, Object]) or (Object[, Object])
     //if (!this[eventsKey]) {
     if (_events == null && _contextEvents == null) {
@@ -198,18 +206,20 @@ class Events {
     return this;
   }
 
-  fire(String type, Map data) {
+  fire(String type, [Map data = null]) {
     return fireEvent(type, data);
   }
 
-  fireEvent(String type, Map data) { // (String[, Object])
+  fireEvent(String type, [Map data = null]) { // (String[, Object])
     if (!this.hasEventListeners(type)) {
       return this;
     }
 
     //var event = Util.extend({}, data, { 'type': type, 'target': this });
     final event = {};
-    event.addAll(data);
+    if (data != null) {
+      event.addAll(data);
+    }
     event['type'] = type;
     event['target'] = this;
 
@@ -244,7 +254,11 @@ class Events {
     return this;
   }
 
-  /*addOneTimeEventListener(types, fn, context) {
+  /*once(types, fn, context) {
+    return addOneTimeEventListener(types, fn, context);
+  }
+
+  addOneTimeEventListener(types, fn, context) {
 
     if (Util.invokeEach(types, this.addOneTimeEventListener, this, fn, context)) { return this; }
 

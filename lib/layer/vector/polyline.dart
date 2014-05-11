@@ -1,3 +1,4 @@
+part of leaflet.layer.vector;
 
 // Polyline is used to display polylines on a map.
 class Polyline extends Path {

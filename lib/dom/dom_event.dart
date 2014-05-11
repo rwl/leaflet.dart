@@ -1,6 +1,9 @@
+part of leaflet.dom;
+
+final DomEvent = new _DomEvent();
 
 // DomEvent contains functions for working with DOM events.
-class DomEvent {
+class _DomEvent {
   /* inspired by John Resig, Dean Edwards and YUI addEvent implementations */
   addListener(obj, type, fn, context) { // (HTMLElement, String, Function[, Object])
 

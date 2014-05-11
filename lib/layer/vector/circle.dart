@@ -1,20 +1,26 @@
-
+part of leaflet.layer.vector;
 
 // Circle is a circle overlay (with a certain radius in meters).
 class Circle extends Path {
-  Circle(latlng, radius, options) {
-    L.Path.prototype.initialize.call(this, options);
 
-    this._latlng = L.latLng(latlng);
-    this._mRadius = radius;
-  }
-
-  var options = {
+  Map<String, Object> options = {
     'fill': true
   };
 
+  LatLng _latlng;
+  var _mRadius;
+  Point _point;
+  num _radius;
+
+  Circle(latlng, radius, options) : super(options) {
+//    L.Path.prototype.initialize.call(this, options);
+
+    this._latlng = new LatLng.latLng(latlng);
+    this._mRadius = radius;
+  }
+
   setLatLng(latlng) {
-    this._latlng = L.latLng(latlng);
+    this._latlng = new LatLng.latLng(latlng);
     return this.redraw();
   }
 
@@ -29,7 +35,7 @@ class Circle extends Path {
         pointLeft = this._map.latLngToLayerPoint([latlng.lat, latlng.lng - lngRadius]);
 
     this._point = this._map.latLngToLayerPoint(latlng);
-    this._radius = Math.max(this._point.x - pointLeft.x, 1);
+    this._radius = math.max(this._point.x - pointLeft.x, 1);
   }
 
   getBounds() {
@@ -37,7 +43,7 @@ class Circle extends Path {
         latRadius = (this._mRadius / 40075017) * 360,
         latlng = this._latlng;
 
-    return new L.LatLngBounds(
+    return new LatLngBounds(
             [latlng.lat - latRadius, latlng.lng - lngRadius],
             [latlng.lat + latRadius, latlng.lng + lngRadius]);
   }
@@ -54,14 +60,14 @@ class Circle extends Path {
       return '';
     }
 
-    if (L.Browser.svg) {
+    if (Browser.svg) {
       return 'M' + p.x + ',' + (p.y - r) +
              'A' + r + ',' + r + ',0,1,1,' +
              (p.x - 0.1) + ',' + (p.y - r) + ' z';
     } else {
       p._round();
-      r = Math.round(r);
-      return 'AL ' + p.x + ',' + p.y + ' ' + r + ',' + r + ' 0,' + (65535 * 360);
+      r = r.round();
+      return 'AL ' + p.x + ',' + p.y + ' ' + r + ',' + r + ' 0,${65535 * 360}';
     }
   }
 
@@ -76,11 +82,11 @@ class Circle extends Path {
   }
 
   _getLngRadius() {
-    return this._getLatRadius() / Math.cos(L.LatLng.DEG_TO_RAD * this._latlng.lat);
+    return this._getLatRadius() / math.cos(LatLng.DEG_TO_RAD * this._latlng.lat);
   }
 
   _checkIfEmpty() {
-    if (!this._map) {
+    if (this._map == null) {
       return false;
     }
     var vp = this._map._pathViewport,

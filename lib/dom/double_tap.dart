@@ -1,3 +1,4 @@
+part of leaflet.dom;
 
 // Extends the event handling code with double tap support for mobile browsers.
 class DoubleTap extends DomEvent {

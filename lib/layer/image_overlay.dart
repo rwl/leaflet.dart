@@ -2,29 +2,35 @@ part of leaflet.layer;
 
 // ImageOverlay is used to overlay images over the map (to specific geographical bounds).
 class ImageOverlay extends Object with Events {
-  var options = {
+
+  Map<String, Object> options = {
     'opacity': 1
   };
 
-  ImageOverlay(url, bounds, options) { // (String, LatLngBounds, Object)
-    this._url = url;
-    this._bounds = L.latLngBounds(bounds);
+  String _url;
+  LatLngBounds _bounds;
+  BaseMap _map;
+  var _image;
 
-    L.setOptions(this, options);
+  ImageOverlay(String url, LatLngBounds bounds, Map<String, Object> options) {
+    this._url = url;
+    this._bounds = new LatLngBounds.latLngBounds(bounds);
+
+    this.options.addAll(options);
   }
 
-  onAdd(map) {
+  onAdd(BaseMap map) {
     this._map = map;
 
-    if (!this._image) {
+    if (this._image == null) {
       this._initImage();
     }
 
-    map._panes.overlayPane.appendChild(this._image);
+    map.panes['overlayPane'].append(this._image);
 
     map.on('viewreset', this._reset, this);
 
-    if (map.options.zoomAnimation && L.Browser.any3d) {
+    if (map.options['zoomAnimation'] && Browser.any3d) {
       map.on('zoomanim', this._animateZoom, this);
     }
 
@@ -47,7 +53,7 @@ class ImageOverlay extends Object with Events {
   }
 
   setOpacity(opacity) {
-    this.options.opacity = opacity;
+    this.options['opacity'] = opacity;
     this._updateOpacity();
     return this;
   }
@@ -55,13 +61,13 @@ class ImageOverlay extends Object with Events {
   // TODO remove bringToFront/bringToBack duplication from TileLayer/Path
   bringToFront() {
     if (this._image) {
-      this._map._panes.overlayPane.appendChild(this._image);
+      this._map.panes['overlayPane'].append(this._image);
     }
     return this;
   }
 
   bringToBack() {
-    var pane = this._map._panes.overlayPane;
+    final pane = this._map.panes['overlayPane'];
     if (this._image) {
       pane.insertBefore(this._image, pane.firstChild);
     }
@@ -74,28 +80,28 @@ class ImageOverlay extends Object with Events {
   }
 
   getAttribution() {
-    return this.options.attribution;
+    return this.options['attribution'];
   }
 
   _initImage() {
-    this._image = L.DomUtil.create('img', 'leaflet-image-layer');
+    this._image = DomUtil.create('img', 'leaflet-image-layer');
 
-    if (this._map.options.zoomAnimation && L.Browser.any3d) {
-      L.DomUtil.addClass(this._image, 'leaflet-zoom-animated');
+    if (this._map.options['zoomAnimation'] && Browser.any3d) {
+      DomUtil.addClass(this._image, 'leaflet-zoom-animated');
     } else {
-      L.DomUtil.addClass(this._image, 'leaflet-zoom-hide');
+      DomUtil.addClass(this._image, 'leaflet-zoom-hide');
     }
 
     this._updateOpacity();
 
-    //TODO createImage util method to remove duplication
-    L.extend(this._image, {
-      'galleryimg': 'no',
-      'onselectstart': L.Util.falseFn,
-      'onmousemove': L.Util.falseFn,
-      'onload': L.bind(this._onImageLoad, this),
-      'src': this._url
-    });
+    // TODO: createImage util method to remove duplication
+//    L.extend(this._image, {
+//      'galleryimg': 'no',
+//      'onselectstart': Util.falseFn,
+//      'onmousemove': Util.falseFn,
+//      'onload': bind(this._onImageLoad, this),
+//      'src': this._url
+//    });
   }
 
   _animateZoom(e) {
@@ -105,12 +111,12 @@ class ImageOverlay extends Object with Events {
         nw = this._bounds.getNorthWest(),
         se = this._bounds.getSouthEast(),
 
-        topLeft = map._latLngToNewLayerPoint(nw, e.zoom, e.center),
-        size = map._latLngToNewLayerPoint(se, e.zoom, e.center)._subtract(topLeft),
+        topLeft = map.latLngToNewLayerPoint(nw, e.zoom, e.center),
+        size = map.latLngToNewLayerPoint(se, e.zoom, e.center)._subtract(topLeft),
         origin = topLeft._add(size._multiplyBy((1 / 2) * (1 - 1 / scale)));
 
-    image.style[L.DomUtil.TRANSFORM] =
-            L.DomUtil.getTranslateString(origin) + ' scale(' + scale + ') ';
+    image.style[DomUtil.TRANSFORM] =
+            DomUtil.getTranslateString(origin) + ' scale($scale) ';
   }
 
   _reset() {
@@ -118,7 +124,7 @@ class ImageOverlay extends Object with Events {
         topLeft = this._map.latLngToLayerPoint(this._bounds.getNorthWest()),
         size = this._map.latLngToLayerPoint(this._bounds.getSouthEast())._subtract(topLeft);
 
-    L.DomUtil.setPosition(image, topLeft);
+    DomUtil.setPosition(image, topLeft);
 
     image.style.width  = size.x + 'px';
     image.style.height = size.y + 'px';
@@ -129,6 +135,6 @@ class ImageOverlay extends Object with Events {
   }
 
   _updateOpacity() {
-    L.DomUtil.setOpacity(this._image, this.options.opacity);
+    DomUtil.setOpacity(this._image, this.options['opacity']);
   }
 }

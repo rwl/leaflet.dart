@@ -1,16 +1,18 @@
+part of leaflet.layer.vector;
 
 // Path is a base class for rendering vector paths on a map. Inherited by Polyline, Circle, etc.
 class Path extends Object with Events {
+
   // how much to extend the clip area around the map view
   // (relative to its size, e.g. 0.5 is half the screen in each direction)
   // set it so that SVG element doesn't exceed 1280px (vectors flicker on dragend if it is)
   static var CLIP_PADDING = (() {
-    var max = L.Browser.mobile ? 1280 : 2000,
-        target = (max / Math.max(window.outerWidth, window.outerHeight) - 1) / 2;
-    return Math.max(0, Math.min(0.5, target));
+    var max = Browser.mobile ? 1280 : 2000,
+        target = (max / math.max(window.outerWidth, window.outerHeight) - 1) / 2;
+    return math.max(0, math.min(0.5, target));
   })();
 
-  var options = {
+  Map<String, Object> options = {
     'stroke': true,
     'color': '#0033ff',
     'dashArray': null,
@@ -26,14 +28,17 @@ class Path extends Object with Events {
     'clickable': true
   };
 
-  Path(options) {
-    L.setOptions(this, options);
+  BaseMap _map;
+  var _container, _stroke, _fill;
+
+  Path(Map<String, Object> options) {
+    this.options.addAll(options);
   }
 
-  onAdd(map) {
+  onAdd(BaseMap map) {
     this._map = map;
 
-    if (!this._container) {
+    if (this._container == null) {
       this._initElements();
       this._initEvents();
     }
@@ -41,8 +46,8 @@ class Path extends Object with Events {
     this.projectLatlngs();
     this._updatePath();
 
-    if (this._container) {
-      this._map._pathRoot.appendChild(this._container);
+    if (this._container != null) {
+      this._map._pathRoot.append(this._container);
     }
 
     this.fire('add');
@@ -65,7 +70,7 @@ class Path extends Object with Events {
     this.fire('remove');
     this._map = null;
 
-    if (L.Browser.vml) {
+    if (Browser.vml) {
       this._container = null;
       this._stroke = null;
       this._fill = null;
@@ -82,7 +87,7 @@ class Path extends Object with Events {
   }
 
   setStyle(style) {
-    L.setOptions(this, style);
+    options.addAll(style);
 
     if (this._container) {
       this._updateStyle();
@@ -92,7 +97,7 @@ class Path extends Object with Events {
   }
 
   redraw() {
-    if (this._map) {
+    if (this._map != null) {
       this.projectLatlngs();
       this._updatePath();
     }

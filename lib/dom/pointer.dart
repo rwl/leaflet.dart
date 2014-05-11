@@ -1,3 +1,4 @@
+part of leaflet.dom;
 
 // Extends DomEvent to provide touch support for Internet Explorer and Windows-based devices.
 class Pointer extends DomEvent {

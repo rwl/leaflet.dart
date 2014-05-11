@@ -1,3 +1,4 @@
+part of leaflet.layer.vector;
 
 // CircleMarker is a circle overlay with a permanent pixel radius.
 class CircleMarker extends Circle {

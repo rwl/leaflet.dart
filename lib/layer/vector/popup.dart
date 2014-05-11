@@ -1,4 +1,4 @@
-library leaflet.layer.vector.path;
+part of leaflet.layer.vector;
 
 // Popup extension to Path (polylines, polygons, circles), adding popup-related methods.
 class Popup {

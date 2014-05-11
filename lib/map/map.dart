@@ -401,9 +401,7 @@ class BaseMap {
     return this._initialTopLeftPoint;
   }
 
-  getPanes() {
-    return this._panes;
-  }
+  Map<String, Element> get panes => _panes;
 
   getContainer() {
     return this._container;
@@ -512,7 +510,7 @@ class BaseMap {
     }
   }
 
-  Map _panes;
+  Map<String, Element> _panes;
   var _mapPane, _tilePane;
 
   _initPanes() {
@@ -760,7 +758,7 @@ class BaseMap {
     return this.project(center, zoom)._subtract(viewHalf)._round();
   }
 
-  _latLngToNewLayerPoint(latlng, newZoom, newCenter) {
+  latLngToNewLayerPoint(latlng, newZoom, newCenter) {
     var topLeft = this._getNewTopLeftPoint(newCenter, newZoom).add(this._getMapPanePos());
     return this.project(latlng, newZoom)._subtract(topLeft);
   }

@@ -2,7 +2,8 @@ part of leaflet.layer;
 
 // Popup is used for displaying popups on the map.
 class Popup extends Object with Events {
-  var options = {
+
+  Map<String, Object> options = {
     'minWidth': 50,
     'maxWidth': 300,
     // 'maxHeight': null,
@@ -17,51 +18,63 @@ class Popup extends Object with Events {
     'zoomAnimation': true
   };
 
-  Popup(options, source) {
-    L.setOptions(this, options);
+  var _source;
+  bool _animated, _isOpen;
+  BaseMap _map;
+  var _container;
+  LatLng _latlng;
+  var _content;
+  var _closeButton;
+  Element _contentNode;
+  var _wrapper;
+  var _tip, _tipContainer;
+  var _containerWidth, _containerBottom, _containerLeft;
+
+  Popup(Map<String, Object> options, var source) {
+    this.options.addAll(options);
 
     this._source = source;
-    this._animated = L.Browser.any3d && this.options.zoomAnimation;
+    this._animated = Browser.any3d && this.options['zoomAnimation'];
     this._isOpen = false;
   }
 
-  onAdd(map) {
+  onAdd(BaseMap map) {
     this._map = map;
 
-    if (!this._container) {
+    if (this._container == null) {
       this._initLayout();
     }
 
-    var animFade = map.options.fadeAnimation;
+    final bool animFade = map.options['fadeAnimation'];
 
     if (animFade) {
-      L.DomUtil.setOpacity(this._container, 0);
+      DomUtil.setOpacity(this._container, 0);
     }
-    map._panes.popupPane.appendChild(this._container);
+    map.panes['popupPane'].append(this._container);
 
     map.on(this._getEvents(), this);
 
     this.update();
 
     if (animFade) {
-      L.DomUtil.setOpacity(this._container, 1);
+      DomUtil.setOpacity(this._container, 1);
     }
 
     this.fire('open');
 
-    map.fire('popupopen', {popup: this});
+    map.fire('popupopen', {'popup': this});
 
     if (this._source) {
-      this._source.fire('popupopen', {popup: this});
+      this._source.fire('popupopen', {'popup': this});
     }
   }
 
-  addTo(map) {
+  addTo(BaseMap map) {
     map.addLayer(this);
     return this;
   }
 
-  openOn(map) {
+  openOn(BaseMap map) {
     map.openPopup(this);
     return this;
   }
@@ -69,22 +82,22 @@ class Popup extends Object with Events {
   onRemove(map) {
     map._panes.popupPane.removeChild(this._container);
 
-    L.Util.falseFn(this._container.offsetWidth); // force reflow
+    Util.falseFn(this._container.offsetWidth); // force reflow
 
     map.off(this._getEvents(), this);
 
-    if (map.options.fadeAnimation) {
-      L.DomUtil.setOpacity(this._container, 0);
+    if (map.options['fadeAnimation']) {
+      DomUtil.setOpacity(this._container, 0);
     }
 
     this._map = null;
 
     this.fire('close');
 
-    map.fire('popupclose', {popup: this});
+    map.fire('popupclose', {'popup': this});
 
     if (this._source) {
-      this._source.fire('popupclose', {popup: this});
+      this._source.fire('popupclose', {'popup': this});
     }
   }
 
@@ -92,9 +105,9 @@ class Popup extends Object with Events {
     return this._latlng;
   }
 
-  setLatLng(latlng) {
-    this._latlng = L.latLng(latlng);
-    if (this._map) {
+  setLatLng(LatLng latlng) {
+    this._latlng = new LatLng.latLng(latlng);
+    if (this._map != null) {
       this._updatePosition();
       this._adjustPan();
     }
@@ -112,7 +125,7 @@ class Popup extends Object with Events {
   }
 
   update() {
-    if (!this._map) { return; }
+    if (this._map == null) { return; }
 
     this._container.style.visibility = 'hidden';
 
@@ -126,69 +139,69 @@ class Popup extends Object with Events {
   }
 
   _getEvents() {
-    var events = {
-      viewreset: this._updatePosition
+    final events = {
+      'viewreset': this._updatePosition
     };
 
     if (this._animated) {
-      events.zoomanim = this._zoomAnimation;
+      events['zoomanim'] = this._zoomAnimation;
     }
-    if (this.options.contains('closeOnClick') ? this.options.closeOnClick : this._map.options.closePopupOnClick) {
-      events.preclick = this._close;
+    if (this.options.containsKey('closeOnClick') ? this.options['closeOnClick'] : this._map.options['closePopupOnClick']) {
+      events['preclick'] = this._close;
     }
-    if (this.options.keepInView) {
-      events.moveend = this._adjustPan;
+    if (this.options.containsKey('keepInView')) {
+      events['moveend'] = this._adjustPan;
     }
 
     return events;
   }
 
   _close() {
-    if (this._map) {
+    if (this._map != null) {
       this._map.closePopup(this);
     }
   }
 
   _initLayout() {
     var prefix = 'leaflet-popup',
-      containerClass = prefix + ' ' + this.options.className + ' leaflet-zoom-' +
+      containerClass = prefix + ' ' + this.options['className'] + ' leaflet-zoom-' +
               (this._animated ? 'animated' : 'hide'),
-      container = this._container = L.DomUtil.create('div', containerClass),
+      container = this._container = DomUtil.create('div', containerClass),
       closeButton;
 
-    if (this.options.closeButton) {
+    if (this.options.containsKey('closeButton')) {
       closeButton = this._closeButton =
-              L.DomUtil.create('a', prefix + '-close-button', container);
+              DomUtil.create('a', prefix + '-close-button', container);
       closeButton.href = '#close';
       closeButton.innerHTML = '&#215;';
-      L.DomEvent.disableClickPropagation(closeButton);
+      DomEvent.disableClickPropagation(closeButton);
 
-      L.DomEvent.on(closeButton, 'click', this._onCloseButtonClick, this);
+      DomEvent.on(closeButton, 'click', this._onCloseButtonClick, this);
     }
 
     var wrapper = this._wrapper =
-            L.DomUtil.create('div', prefix + '-content-wrapper', container);
-    L.DomEvent.disableClickPropagation(wrapper);
+            DomUtil.create('div', prefix + '-content-wrapper', container);
+    DomEvent.disableClickPropagation(wrapper);
 
-    this._contentNode = L.DomUtil.create('div', prefix + '-content', wrapper);
+    this._contentNode = DomUtil.create('div', prefix + '-content', wrapper);
 
-    L.DomEvent.disableScrollPropagation(this._contentNode);
-    L.DomEvent.on(wrapper, 'contextmenu', L.DomEvent.stopPropagation);
+    DomEvent.disableScrollPropagation(this._contentNode);
+    DomEvent.on(wrapper, 'contextmenu', L.DomEvent.stopPropagation);
 
-    this._tipContainer = L.DomUtil.create('div', prefix + '-tip-container', container);
-    this._tip = L.DomUtil.create('div', prefix + '-tip', this._tipContainer);
+    this._tipContainer = DomUtil.create('div', prefix + '-tip-container', container);
+    this._tip = DomUtil.create('div', prefix + '-tip', this._tipContainer);
   }
 
   _updateContent() {
     if (!this._content) { return; }
 
     if (this._content is String) {
-      this._contentNode.innerHTML = this._content;
+      this._contentNode.setInnerHtml(this._content);
     } else {
       while (this._contentNode.hasChildNodes()) {
         this._contentNode.removeChild(this._contentNode.firstChild);
       }
-      this._contentNode.appendChild(this._content);
+      this._contentNode.append(this._content);
     }
     this.fire('contentupdate');
   }
@@ -201,8 +214,8 @@ class Popup extends Object with Events {
     style.whiteSpace = 'nowrap';
 
     var width = container.offsetWidth;
-    width = Math.min(width, this.options.maxWidth);
-    width = Math.max(width, this.options.minWidth);
+    width = math.min(width, this.options['maxWidth']);
+    width = math.max(width, this.options['minWidth']);
 
     style.width = (width + 1) + 'px';
     style.whiteSpace = '';
@@ -210,32 +223,32 @@ class Popup extends Object with Events {
     style.height = '';
 
     var height = container.offsetHeight,
-        maxHeight = this.options.maxHeight,
+        maxHeight = this.options['maxHeight'],
         scrolledClass = 'leaflet-popup-scrolled';
 
     if (maxHeight && height > maxHeight) {
       style.height = maxHeight + 'px';
-      L.DomUtil.addClass(container, scrolledClass);
+      DomUtil.addClass(container, scrolledClass);
     } else {
-      L.DomUtil.removeClass(container, scrolledClass);
+      DomUtil.removeClass(container, scrolledClass);
     }
 
     this._containerWidth = this._container.offsetWidth;
   }
 
   _updatePosition() {
-    if (!this._map) { return; }
+    if (this._map == null) { return; }
 
     var pos = this._map.latLngToLayerPoint(this._latlng),
         animated = this._animated,
-        offset = L.point(this.options.offset);
+        offset = new Point(this.options['offset']);
 
     if (animated) {
-      L.DomUtil.setPosition(this._container, pos);
+      DomUtil.setPosition(this._container, pos);
     }
 
     this._containerBottom = -offset.y - (animated ? 0 : pos.y);
-    this._containerLeft = -Math.round(this._containerWidth / 2) + offset.x + (animated ? 0 : pos.x);
+    this._containerLeft = -(this._containerWidth / 2).round() + offset.x + (animated ? 0 : pos.x);
 
     // bottom position the popup in case the height of the popup changes (images loading etc)
     this._container.style.bottom = this._containerBottom + 'px';
@@ -243,30 +256,30 @@ class Popup extends Object with Events {
   }
 
   _zoomAnimation(opt) {
-    var pos = this._map._latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center);
+    var pos = this._map.latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center);
 
-    L.DomUtil.setPosition(this._container, pos);
+    DomUtil.setPosition(this._container, pos);
   }
 
   _adjustPan() {
-    if (!this.options.autoPan) { return; }
+    if (!this.options.containsKey('autoPan')) { return; }
 
-    var map = this._map,
-        containerHeight = this._container.offsetHeight,
-        containerWidth = this._containerWidth,
+    final map = this._map;
+    var containerHeight = this._container.offsetHeight,
+        containerWidth = this._containerWidth;
 
-        layerPos = new L.Point(this._containerLeft, -containerHeight - this._containerBottom);
+    final layerPos = new Point(this._containerLeft, -containerHeight - this._containerBottom);
 
     if (this._animated) {
-      layerPos._add(L.DomUtil.getPosition(this._container));
+      layerPos._add(DomUtil.getPosition(this._container));
     }
 
-    var containerPos = map.layerPointToContainerPoint(layerPos),
-        padding = L.point(this.options.autoPanPadding),
-        paddingTL = L.point(this.options.autoPanPaddingTopLeft || padding),
-        paddingBR = L.point(this.options.autoPanPaddingBottomRight || padding),
-        size = map.getSize(),
-        dx = 0,
+    final containerPos = map.layerPointToContainerPoint(layerPos),
+        padding = new Point(options['autoPanPadding']),
+        paddingTL = new Point(options.containsKey('autoPanPaddingTopLeft') ? options['autoPanPaddingTopLeft'] : padding),
+        paddingBR = new Point(options.containsKey('autoPanPaddingBottomRight') ? options['autoPanPaddingBottomRight'] : padding);
+    final size = map.getSize();
+    num dx = 0,
         dy = 0;
 
     if (containerPos.x + containerWidth + paddingBR.x > size.x) { // right
@@ -291,6 +304,6 @@ class Popup extends Object with Events {
 
   _onCloseButtonClick(e) {
     this._close();
-    L.DomEvent.stop(e);
+    DomEvent.stop(e);
   }
 }

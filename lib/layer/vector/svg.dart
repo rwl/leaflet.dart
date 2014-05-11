@@ -1,3 +1,4 @@
+part of leaflet.layer.vector;
 
 var SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -152,7 +153,7 @@ class Path {
   }
 }
 
-class Map {
+class SvgMap {
   _initPathRoot() {
     if (!this._pathRoot) {
       this._pathRoot = L.Path.prototype._createElement('svg');

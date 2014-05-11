@@ -1,4 +1,4 @@
-
+part of leaflet.layer.vector;
 
 // Rectangle extends Polygon and creates a rectangle when passed a LatLngBounds object.
 class Rectangle extends Polygon {

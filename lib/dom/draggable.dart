@@ -1,3 +1,4 @@
+part of leaflet.dom;
 
 // Draggable allows you to add dragging capabilities to any element. Supports mobile devices too.
 class Draggable extends Object with Events {
