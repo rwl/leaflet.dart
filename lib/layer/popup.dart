@@ -1,6 +1,4 @@
-library leaflet.layer;
-
-import '../core/events.dart';
+part of leaflet.layer;
 
 // Popup is used for displaying popups on the map.
 class Popup extends Object with Events {

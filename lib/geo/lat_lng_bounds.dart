@@ -9,10 +9,10 @@ class LatLngBounds {
     return llb;
   }
 
-  LatLngBounds(southWest, northEast) { // (LatLng, LatLng) or (LatLng[])
-    if (!southWest) { return; }
+  LatLngBounds([southWest = null, northEast = null]) { // (LatLng, LatLng) or (LatLng[])
+    if (southWest == null) { return; }
 
-    var latlngs = northEast ? [southWest, northEast] : southWest;
+    List latlngs = northEast != null ? [southWest, northEast] : [southWest];
 
     for (var i = 0, len = latlngs.length; i < len; i++) {
       this.extend(latlngs[i]);

@@ -11,7 +11,25 @@ class Event {
   String type;
   Events target;
 
-  Event(this.action, this.context);
+  var layer;
+
+  Event();
+
+  factory Event.event(action, context) {
+    final e = new Event();
+    e.action = action;
+    e.context = context;
+    return e;
+  }
+
+  Event copy() {
+    final e = new Event();
+    e.action = action;
+    e.context = context;
+    e.data = data;
+    e.type = type;
+    e.target = target;
+  }
 }
 
 // Events is used to add custom events functionality to Leaflet classes.
@@ -54,7 +72,7 @@ class Events {
     List<String> typesList = Util.splitWords(types);
 
     for (int i = 0; i < typesList.length; i++) {
-      final event = new Event(fn, context != null ? context : this);
+      final event = new Event.event(fn, context != null ? context : this);
       final type = typesList[i];
 
       if (contextId != null) {
@@ -178,6 +196,10 @@ class Events {
     _contextEvents = null;
     _numContextEvents = null;
     return this;
+  }
+
+  fire(String type, Map data) {
+    return fireEvent(type, data);
   }
 
   fireEvent(String type, Map data) { // (String[, Object])

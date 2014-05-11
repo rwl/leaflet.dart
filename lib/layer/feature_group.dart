@@ -1,11 +1,14 @@
-library leaflet.layer;
-
-import '../core/events.dart';
+part of leaflet.layer;
 
 // FeatureGroup extends LayerGroup by introducing mouse events and additional methods
 // shared between a group of interactive layers (like vectors or markers).
-class FeatureGroup extends Object with Events {
-  static var EVENTS = 'click dblclick mouseover mouseout mousemove contextmenu popupopen popupclose';
+class FeatureGroup extends LayerGroup with Events {
+
+  static final EVENTS = 'click dblclick mouseover mouseout mousemove contextmenu popupopen popupclose';
+
+  var _popupContent, _popupOptions;
+
+  FeatureGroup(List layers) : super(layers);
 
   addLayer(layer) {
     if (this.hasLayer(layer)) {
@@ -13,12 +16,12 @@ class FeatureGroup extends Object with Events {
     }
 
     if (layer.contains('on')) {
-      layer.on(L.FeatureGroup.EVENTS, this._propagateEvent, this);
+      layer.on(FeatureGroup.EVENTS, this._propagateEvent, this);
     }
 
-    L.LayerGroup.prototype.addLayer.call(this, layer);
+    super.addLayer(layer);
 
-    if (this._popupContent && layer.bindPopup) {
+    if (this._popupContent != null && layer.bindPopup != null) {
       layer.bindPopup(this._popupContent, this._popupOptions);
     }
 
@@ -29,16 +32,19 @@ class FeatureGroup extends Object with Events {
     if (!this.hasLayer(layer)) {
       return this;
     }
-    if (this._layers.contains(layer)) {
+    if (this._layers.containsKey(layer)) {
       layer = this._layers[layer];
     }
 
-    layer.off(L.FeatureGroup.EVENTS, this._propagateEvent, this);
+    layer.off(FeatureGroup.EVENTS, this._propagateEvent, this);
 
-    L.LayerGroup.prototype.removeLayer.call(this, layer);
+    super.removeLayer(layer);
 
     if (this._popupContent) {
-      this.invoke('unbindPopup');
+//      this.invoke('unbindPopup');
+      this.eachLayer((layer) {
+        layer.unbindPopup();
+      });
     }
 
     return this.fire('layerremove', {layer: layer});
@@ -47,7 +53,11 @@ class FeatureGroup extends Object with Events {
   bindPopup(content, options) {
     this._popupContent = content;
     this._popupOptions = options;
-    return this.invoke('bindPopup', content, options);
+    //return this.invoke('bindPopup', content, options);
+    this.eachLayer((layer) {
+      layer.bindPopup(content, options);
+      //content.bindPopup(layer, options);
+    });
   }
 
   openPopup(latlng) {
@@ -60,19 +70,28 @@ class FeatureGroup extends Object with Events {
   }
 
   setStyle(style) {
-    return this.invoke('setStyle', style);
+    //return this.invoke('setStyle', style);
+    this.eachLayer((layer) {
+      layer.setStyle(style);
+    });
   }
 
   bringToFront() {
-    return this.invoke('bringToFront');
+    //return this.invoke('bringToFront');
+    this.eachLayer((layer) {
+      layer.bringToFront();
+    });
   }
 
   bringToBack() {
-    return this.invoke('bringToBack');
+    //return this.invoke('bringToBack');
+    this.eachLayer((layer) {
+      layer.bringToBack();
+    });
   }
 
   getBounds() {
-    var bounds = new L.LatLngBounds();
+    var bounds = new LatLngBounds();
 
     this.eachLayer((layer) {
       bounds.extend(layer is Marker ? layer.getLatLng() : layer.getBounds());
@@ -81,11 +100,10 @@ class FeatureGroup extends Object with Events {
     return bounds;
   }
 
-  _propagateEvent(e) {
-    e = L.extend({
-      'layer': e.target,
-      'target': this
-    }, e);
-    this.fire(e.type, e);
+  _propagateEvent(Event e) {
+    final ee = e.copy();
+    ee.layer = e.target;
+    ee.target = this;
+    this.fire(ee.type, ee);
   }
 }

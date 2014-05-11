@@ -1,6 +1,4 @@
-library leaflet.layer;
-
-import '../core/events.dart';
+part of leaflet.layer;
 
 // ImageOverlay is used to overlay images over the map (to specific geographical bounds).
 class ImageOverlay extends Object with Events {
