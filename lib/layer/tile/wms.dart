@@ -1,3 +1,4 @@
+part of leaflet.layer.tile;
 
 // WMS is used for putting WMS tile layers on the map.
 class WMS extends TileLayer {

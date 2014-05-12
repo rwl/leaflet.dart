@@ -1,8 +1,9 @@
-library leaflet.layer.marker;
+part of leaflet.layer.marker;
 
 // Icon is an image-based icon class that you can use with L.Marker for custom markers.
 class Icon {
-  var options = {
+
+  final Map<String, Object> options = {
     /*
     iconUrl: (String) (required)
     iconRetinaUrl: (String) (optional, used for retina devices if detected)
@@ -17,8 +18,8 @@ class Icon {
     'className': ''
   };
 
-  Icon(options) {
-    L.setOptions(this, options);
+  Icon(Map<String, Object> options) {
+    this.options.addAll(options);
   }
 
   createIcon(oldIcon) {
@@ -32,15 +33,15 @@ class Icon {
   _createIcon(name, oldIcon) {
     var src = this._getIconUrl(name);
 
-    if (!src) {
+    if (src == null) {
       if (name == 'icon') {
-        throw new Error('iconUrl not set in Icon options (see the docs).');
+        throw new Exception('iconUrl not set in Icon options (see the docs).');
       }
       return null;
     }
 
     var img;
-    if (!oldIcon || oldIcon.tagName != 'IMG') {
+    if (oldIcon == null || oldIcon.tagName != 'IMG') {
       img = this._createImg(src);
     } else {
       img = this._createImg(src, oldIcon);
@@ -50,29 +51,29 @@ class Icon {
     return img;
   }
 
-  _setIconStyles(img, name) {
-    var options = this.options,
-        size = L.point(options[name + 'Size']),
-        anchor;
+  _setIconStyles(img, String name) {
+    final options = this.options,
+        size = new Point(options[name + 'Size']);
+    var anchor = null;
 
     if (name == 'shadow') {
-      anchor = L.point(options.shadowAnchor || options.iconAnchor);
+      anchor = new Point(options.containsKey('shadowAnchor') ? options['shadowAnchor'] : options['iconAnchor']);
     } else {
-      anchor = L.point(options.iconAnchor);
+      anchor = new Point(options['iconAnchor']);
     }
 
-    if (!anchor && size) {
+    if (anchor == null && size != null) {
       anchor = size.divideBy(2, true);
     }
 
-    img.className = 'leaflet-marker-' + name + ' ' + options.className;
+    img.className = 'leaflet-marker-' + name + ' ' + options['className'];
 
-    if (anchor) {
+    if (anchor != null) {
       img.style.marginLeft = (-anchor.x) + 'px';
       img.style.marginTop  = (-anchor.y) + 'px';
     }
 
-    if (size) {
+    if (size != null) {
       img.style.width  = size.x + 'px';
       img.style.height = size.y + 'px';
     }
@@ -84,8 +85,8 @@ class Icon {
     return el;
   }
 
-  _getIconUrl(name) {
-    if (L.Browser.retina && this.options[name + 'RetinaUrl']) {
+  _getIconUrl(String name) {
+    if (Browser.retina && this.options[name + 'RetinaUrl']) {
       return this.options[name + 'RetinaUrl'];
     }
     return this.options[name + 'Url'];

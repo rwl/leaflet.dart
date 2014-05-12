@@ -1,8 +1,8 @@
-library leaflet.layer.marker.icon;
+part of leaflet.layer.marker;
 
 // Default is the blue marker icon used by default in Leaflet.
 class Default extends Icon {
-  var options = {
+  final Map<String, Object> options = {
     'iconSize': [25, 41],
     'iconAnchor': [12, 41],
     'popupAnchor': [1, -34],
@@ -10,21 +10,23 @@ class Default extends Icon {
     'shadowSize': [41, 41]
   };
 
-  _getIconUrl(name) {
+  Default() : super({});
+
+  _getIconUrl(String name) {
     var key = name + 'Url';
 
-    if (this.options[key]) {
+    if (this.options.containsKey(key)) {
       return this.options[key];
     }
 
-    if (L.Browser.retina && name == 'icon') {
+    if (Browser.retina && name == 'icon') {
       name += '-2x';
     }
 
-    var path = L.Icon.Default.imagePath;
+    final path = Icon.Default.imagePath;
 
-    if (!path) {
-      throw new Error('Couldn\'t autodetect L.Icon.Default.imagePath, set it manually.');
+    if (path == null) {
+      throw new Exception('Couldn\'t autodetect Icon.Default.imagePath, set it manually.');
     }
 
     return path + '/marker-' + name + '.png';

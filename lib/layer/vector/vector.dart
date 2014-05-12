@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import '../../core/core.dart';
 import '../../map/map.dart';
 import '../../geo/geo.dart';
+import '../../geometry/geometry.dart';
 
 part 'circle.dart';
 part 'circle_marker.dart';

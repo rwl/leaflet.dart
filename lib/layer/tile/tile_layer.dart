@@ -1,8 +1,13 @@
-library leaflet.layer.tile;
+part of leaflet.layer.tile;
 
 // TileLayer is used for standard xyz-numbered tile layers.
-class TileLayer extends Object with Events {
-  var options = {
+class TileLayer extends Object with core.Events {
+
+  String _url;
+  BaseMap _map;
+  bool _animated;
+
+  final Map<String, Object> options = {
     'minZoom': 0,
     'maxZoom': 18,
     'tileSize': 256,
@@ -22,39 +27,39 @@ class TileLayer extends Object with Events {
     reuseTiles: false,
     bounds: false,
     */
-    'unloadInvisibleTiles': L.Browser.mobile,
-    'updateWhenIdle': L.Browser.mobile
+    'unloadInvisibleTiles': core.Browser.mobile,
+    'updateWhenIdle': core.Browser.mobile
   };
 
-  TileLayer(url, options) {
-    options = L.setOptions(this, options);
+  TileLayer(String url, Map<String, Object> options) {
+    this.options.addAll(options);
 
     // detecting retina displays, adjusting tileSize and zoom levels
-    if (options.detectRetina && L.Browser.retina && options.maxZoom > 0) {
+    if (options['detectRetina'] && core.Browser.retina && options['maxZoom'] > 0) {
 
-      options.tileSize = Math.floor(options.tileSize / 2);
-      options.zoomOffset++;
+      options['tileSize'] = (options['tileSize'] / 2).floor();
+      options['zoomOffset']++;
 
-      if (options.minZoom > 0) {
-        options.minZoom--;
+      if (options['minZoom'] > 0) {
+        options['minZoom']--;
       }
-      this.options.maxZoom--;
+      this.options['maxZoom']--;
     }
 
-    if (options.bounds) {
-      options.bounds = L.latLngBounds(options.bounds);
+    if (options.containsKey('bounds')) {
+      options['bounds'] = new LatLngBounds.latLngBounds(options['bounds']);
     }
 
     this._url = url;
 
-    var subdomains = this.options.subdomains;
+    var subdomains = this.options['subdomains'];
 
     if (subdomains is String) {
-      this.options.subdomains = subdomains.split('');
+      this.options['subdomains'] = subdomains.split('');
     }
   }
 
-  onAdd(map) {
+  onAdd(BaseMap map) {
     this._map = map;
     this._animated = map._zoomAnimated;
 

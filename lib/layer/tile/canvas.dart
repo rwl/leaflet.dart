@@ -1,3 +1,4 @@
+part of leaflet.layer.tile;
 
 // Canvas is a class that you can use as a base for creating
 // dynamically drawn Canvas-based tile layers.

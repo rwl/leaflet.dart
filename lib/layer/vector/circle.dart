@@ -12,7 +12,7 @@ class Circle extends Path {
   Point _point;
   num _radius;
 
-  Circle(latlng, radius, options) : super(options) {
+  Circle(LatLng latlng, num radius, Map<String, Object> options) : super(options) {
 //    L.Path.prototype.initialize.call(this, options);
 
     this._latlng = new LatLng.latLng(latlng);

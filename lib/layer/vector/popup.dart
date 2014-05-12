@@ -2,13 +2,18 @@ part of leaflet.layer.vector;
 
 // Popup extension to Path (polylines, polygons, circles), adding popup-related methods.
 class Popup {
-  bindPopup(content, options) {
 
-    if (content is L.Popup) {
+  Popup _popup;
+  bool _popupHandlersAdded;
+  LatLng _latlng;
+
+  bindPopup(var content, [Map<String, Object> options=null]) {
+
+    if (content is Popup) {
       this._popup = content;
     } else {
-      if (!this._popup || options) {
-        this._popup = new L.Popup(options, this);
+      if (this._popup == null || options != null) {
+        this._popup = new Popup(options, this);
       }
       this._popup.setContent(content);
     }
@@ -25,7 +30,7 @@ class Popup {
   }
 
   unbindPopup() {
-    if (this._popup) {
+    if (this._popup != null) {
       this._popup = null;
       this
           .off('click', this._openPopup)
@@ -36,21 +41,26 @@ class Popup {
     return this;
   }
 
-  openPopup(latlng) {
+  openPopup([LatLng latlng=null]) {
 
-    if (this._popup) {
+    if (this._popup != null) {
       // open the popup from one of the path's points if not specified
-      latlng = latlng || this._latlng ||
-               this._latlngs[Math.floor(this._latlngs.length / 2)];
+      if (latlng == null) {
+        if (this._latlng != null) {
+          latlng = this._latlng;
+        } else {
+          latlng = this._latlngs[(this._latlngs.length / 2).floor()];
+        }
+      }
 
-      this._openPopup({latlng: latlng});
+      this._openPopup({'latlng': latlng});
     }
 
     return this;
   }
 
   closePopup() {
-    if (this._popup) {
+    if (this._popup != null) {
       this._popup._close();
     }
     return this;

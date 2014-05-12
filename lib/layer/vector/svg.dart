@@ -3,12 +3,13 @@ part of leaflet.layer.vector;
 var SVG_NS = 'http://www.w3.org/2000/svg';
 
 // Extends Path with SVG-specific rendering code.
-class Path {
-  static var SVG = L.Browser.svg;
+class SVGPath {
+
+  static final SVG = Browser.svg;
 
   bringToFront() {
-    var root = this._map._pathRoot,
-        path = this._container;
+    final root = this._map._pathRoot;
+    final path = this._container;
 
     if (path && root.lastChild != path) {
       root.appendChild(path);
@@ -17,9 +18,9 @@ class Path {
   }
 
   bringToBack() {
-    var root = this._map._pathRoot,
-        path = this._container,
-        first = root.firstChild;
+    final root = this._map._pathRoot;
+    final path = this._container;
+    final first = root.firstChild;
 
     if (path && first != path) {
       root.insertBefore(path, first);
@@ -32,7 +33,7 @@ class Path {
   }
 
   _createElement(name) {
-    return document.createElementNS(L.Path.SVG_NS, name);
+    return document.createElementNS(Path.SVG_NS, name);
   }
 
   _initElements() {
@@ -46,60 +47,60 @@ class Path {
 
     this._path = this._createElement('path');
 
-    if (this.options.className) {
-      L.DomUtil.addClass(this._path, this.options.className);
+    if (this.options.containsKey('className')) {
+      DomUtil.addClass(this._path, this.options['className']);
     }
 
-    this._container.appendChild(this._path);
+    this._container.append(this._path);
   }
 
   _initStyle() {
-    if (this.options.stroke) {
+    if (this.options.containsKey('stroke')) {
       this._path.setAttribute('stroke-linejoin', 'round');
       this._path.setAttribute('stroke-linecap', 'round');
     }
-    if (this.options.fill) {
+    if (this.options.containsKey('fill')) {
       this._path.setAttribute('fill-rule', 'evenodd');
     }
-    if (this.options.pointerEvents) {
-      this._path.setAttribute('pointer-events', this.options.pointerEvents);
+    if (this.options.containsKey('pointerEvents')) {
+      this._path.setAttribute('pointer-events', this.options['pointerEvents']);
     }
-    if (!this.options.clickable && !this.options.pointerEvents) {
+    if (!this.options.containsKey('clickable') && !this.options.containsKey('pointerEvents')) {
       this._path.setAttribute('pointer-events', 'none');
     }
     this._updateStyle();
   }
 
   _updateStyle() {
-    if (this.options.stroke) {
-      this._path.setAttribute('stroke', this.options.color);
-      this._path.setAttribute('stroke-opacity', this.options.opacity);
-      this._path.setAttribute('stroke-width', this.options.weight);
-      if (this.options.dashArray) {
-        this._path.setAttribute('stroke-dasharray', this.options.dashArray);
+    if (this.options.containsKey('stroke')) {
+      this._path.setAttribute('stroke', this.options['color']);
+      this._path.setAttribute('stroke-opacity', this.options['opacity']);
+      this._path.setAttribute('stroke-width', this.options['weight']);
+      if (this.options.containsKey('dashArray')) {
+        this._path.setAttribute('stroke-dasharray', this.options['dashArray']);
       } else {
         this._path.removeAttribute('stroke-dasharray');
       }
-      if (this.options.lineCap) {
-        this._path.setAttribute('stroke-linecap', this.options.lineCap);
+      if (this.options.containsKey('lineCap')) {
+        this._path.setAttribute('stroke-linecap', this.options['lineCap']);
       }
-      if (this.options.lineJoin) {
-        this._path.setAttribute('stroke-linejoin', this.options.lineJoin);
+      if (this.options.containsKey('lineJoin')) {
+        this._path.setAttribute('stroke-linejoin', this.options['lineJoin']);
       }
     } else {
       this._path.setAttribute('stroke', 'none');
     }
-    if (this.options.fill) {
-      this._path.setAttribute('fill', this.options.fillColor || this.options.color);
-      this._path.setAttribute('fill-opacity', this.options.fillOpacity);
+    if (this.options.containsKey('fill')) {
+      this._path.setAttribute('fill', this.options.containsKey('fillColor') ? options['fillColor'] : this.options['color']);
+      this._path.setAttribute('fill-opacity', this.options['fillOpacity']);
     } else {
       this._path.setAttribute('fill', 'none');
     }
   }
 
   _updatePath() {
-    var str = this.getPathString();
-    if (!str) {
+    String str = this.getPathString();
+    if (str == null) {
       // fix webkit empty string parsing bug
       str = 'M0 0';
     }
@@ -108,23 +109,23 @@ class Path {
 
   // TODO remove duplication with L.Map
   _initEvents() {
-    if (this.options.clickable) {
-      if (L.Browser.svg || !L.Browser.vml) {
-        L.DomUtil.addClass(this._path, 'leaflet-clickable');
+    if (this.options.containsKey('clickable')) {
+      if (Browser.svg || !Browser.vml) {
+        DomUtil.addClass(this._path, 'leaflet-clickable');
       }
 
-      L.DomEvent.on(this._container, 'click', this._onMouseClick, this);
+      DomEvent.on(this._container, 'click', this._onMouseClick, this);
 
       var events = ['dblclick', 'mousedown', 'mouseover',
                     'mouseout', 'mousemove', 'contextmenu'];
-      for (var i = 0; i < events.length; i++) {
-        L.DomEvent.on(this._container, events[i], this._fireMouseEvent, this);
+      for (int i = 0; i < events.length; i++) {
+        DomEvent.on(this._container, events[i], this._fireMouseEvent, this);
       }
     }
   }
 
   _onMouseClick(e) {
-    if (this._map.dragging && this._map.dragging.moved()) { return; }
+    if (this._map.dragging != null && this._map.dragging.moved()) { return; }
 
     this._fireMouseEvent(e);
   }
@@ -132,42 +133,42 @@ class Path {
   _fireMouseEvent(e) {
     if (!this.hasEventListeners(e.type)) { return; }
 
-    var map = this._map,
-        containerPoint = map.mouseEventToContainerPoint(e),
-        layerPoint = map.containerPointToLayerPoint(containerPoint),
-        latlng = map.layerPointToLatLng(layerPoint);
+    final map = this._map;
+    final containerPoint = map.mouseEventToContainerPoint(e);
+    final layerPoint = map.containerPointToLayerPoint(containerPoint);
+    final latlng = map.layerPointToLatLng(layerPoint);
 
     this.fire(e.type, {
-      latlng: latlng,
-      layerPoint: layerPoint,
-      containerPoint: containerPoint,
-      originalEvent: e
+      'latlng': latlng,
+      'layerPoint': layerPoint,
+      'containerPoint': containerPoint,
+      'originalEvent': e
     });
 
     if (e.type == 'contextmenu') {
-      L.DomEvent.preventDefault(e);
+      DomEvent.preventDefault(e);
     }
     if (e.type != 'mousemove') {
-      L.DomEvent.stopPropagation(e);
+      DomEvent.stopPropagation(e);
     }
   }
 }
 
 class SvgMap {
   _initPathRoot() {
-    if (!this._pathRoot) {
-      this._pathRoot = L.Path.prototype._createElement('svg');
-      this._panes.overlayPane.appendChild(this._pathRoot);
+    if (this._pathRoot == null) {
+      this._pathRoot = Path._createElement('svg');
+      this._panes['overlayPane'].append(this._pathRoot);
 
-      if (this.options.zoomAnimation && L.Browser.any3d) {
-        L.DomUtil.addClass(this._pathRoot, 'leaflet-zoom-animated');
+      if (this.options['zoomAnimation'] && Browser.any3d) {
+        DomUtil.addClass(this._pathRoot, 'leaflet-zoom-animated');
 
         this.on({
           'zoomanim': this._animatePathZoom,
           'zoomend': this._endPathZoom
         });
       } else {
-        L.DomUtil.addClass(this._pathRoot, 'leaflet-zoom-hide');
+        DomUtil.addClass(this._pathRoot, 'leaflet-zoom-hide');
       }
 
       this.on('moveend', this._updateSvgViewport);
@@ -176,11 +177,11 @@ class SvgMap {
   }
 
   _animatePathZoom(e) {
-    var scale = this.getZoomScale(e.zoom),
-        offset = this._getCenterOffset(e.center)._multiplyBy(-scale)._add(this._pathViewport.min);
+    final scale = this.getZoomScale(e.zoom);
+    final offset = this._getCenterOffset(e.center)._multiplyBy(-scale)._add(this._pathViewport.min);
 
-    this._pathRoot.style[L.DomUtil.TRANSFORM] =
-            L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ') ';
+    this._pathRoot.style[DomUtil.TRANSFORM] =
+            DomUtil.getTranslateString(offset) + ' scale(' + scale + ') ';
 
     this._pathZooming = true;
   }
@@ -209,16 +210,16 @@ class SvgMap {
         pane = this._panes.overlayPane;
 
     // Hack to make flicker on drag end on mobile webkit less irritating
-    if (L.Browser.mobileWebkit) {
+    if (Browser.mobileWebkit) {
       pane.removeChild(root);
     }
 
-    L.DomUtil.setPosition(root, min);
+    DomUtil.setPosition(root, min);
     root.setAttribute('width', width);
     root.setAttribute('height', height);
     root.setAttribute('viewBox', [min.x, min.y, width, height].join(' '));
 
-    if (L.Browser.mobileWebkit) {
+    if (Browser.mobileWebkit) {
       pane.appendChild(root);
     }
   }

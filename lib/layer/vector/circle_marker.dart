@@ -2,14 +2,13 @@ part of leaflet.layer.vector;
 
 // CircleMarker is a circle overlay with a permanent pixel radius.
 class CircleMarker extends Circle {
-  var options = {
+  Map<String, Object> options = {
     'radius': 10,
     'weight': 2
   };
 
-  CircleMarker(latlng, options) {
-    L.Circle.prototype.initialize.call(this, latlng, null, options);
-    this._radius = this.options.radius;
+  CircleMarker(LatLng latlng, Map<String, Object> options) : super(latlng, null, options) {
+    this._radius = this.options['radius'];
   }
 
   projectLatlngs() {
@@ -17,20 +16,20 @@ class CircleMarker extends Circle {
   }
 
   _updateStyle() {
-    L.Circle.prototype._updateStyle.call(this);
-    this.setRadius(this.options.radius);
+    super._updateStyle();
+    this.setRadius(this.options['radius']);
   }
 
   setLatLng(latlng) {
-    L.Circle.prototype.setLatLng.call(this, latlng);
-    if (this._popup && this._popup._isOpen) {
+    super.setLatLng(latlng);
+    if (this._popup != null && this._popup._isOpen) {
       this._popup.setLatLng(latlng);
     }
     return this;
   }
 
-  setRadius(radius) {
-    this.options.radius = this._radius = radius;
+  setRadius(num radius) {
+    this.options['radius'] = this._radius = radius;
     return this.redraw();
   }
 

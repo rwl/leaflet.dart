@@ -2,16 +2,15 @@ part of leaflet.layer.vector;
 
 // Rectangle extends Polygon and creates a rectangle when passed a LatLngBounds object.
 class Rectangle extends Polygon {
-  Rectangle(latLngBounds, options) {
-    L.Polygon.prototype.initialize.call(this, this._boundsToLatLngs(latLngBounds), options);
+
+  Rectangle(LatLngBounds latLngBounds, Map<String, Object> options) : super(_boundsToLatLngs(latLngBounds), options);
+
+  setBounds(LatLngBounds latLngBounds) {
+    this.setLatLngs(_boundsToLatLngs(latLngBounds));
   }
 
-  setBounds(latLngBounds) {
-    this.setLatLngs(this._boundsToLatLngs(latLngBounds));
-  }
-
-  _boundsToLatLngs(latLngBounds) {
-    latLngBounds = L.latLngBounds(latLngBounds);
+  static List<LatLng> _boundsToLatLngs(latLngBounds) {
+    latLngBounds = new LatLngBounds.latLngBounds(latLngBounds);
     return [
       latLngBounds.getSouthWest(),
       latLngBounds.getNorthWest(),
@@ -19,4 +18,5 @@ class Rectangle extends Polygon {
       latLngBounds.getSouthEast()
     ];
   }
+
 }

@@ -1,4 +1,4 @@
-library leaflet.layer.tile;
+part of leaflet.layer.tile;
 
 // Zoom animation logic for TileLayer.
 class Anim {

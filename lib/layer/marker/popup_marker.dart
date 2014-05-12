@@ -1,9 +1,14 @@
-library leaflet.layer.tile;
+part of leaflet.layer.marker;
 
 // Popup extension to Marker, adding popup-related methods.
-class Popup /*extends Marker*/ {
+class Popup extends Marker {
+
+  var _popup;
+
+  Popup(LatLng latlng, Map<String, Object> options) : super(latlng, options);
+
   openPopup() {
-    if (this._popup && this._map && !this._map.hasLayer(this._popup)) {
+    if (this._popup != null && this._map != null && !this._map.hasLayer(this._popup)) {
       this._popup.setLatLng(this._latlng);
       this._map.openPopup(this._popup);
     }
@@ -29,16 +34,17 @@ class Popup /*extends Marker*/ {
     return this;
   }
 
-  bindPopup(content, options) {
-    var anchor = L.point(this.options.icon.options.popupAnchor || [0, 0]);
+  bindPopup(var content, Map<String, Object> options) {
+    var anchor = new Point(this.options['icon'].options['popupAnchor'] || [0, 0]);
 
-    anchor = anchor.add(L.Popup.prototype.options.offset);
+    anchor = anchor.add(Popup.options['offset']);
 
-    if (options && options.offset) {
-      anchor = anchor.add(options.offset);
+    if (options != null && options.containsKey('offset')) {
+      anchor = anchor.add(options['offset']);
     }
 
-    options = L.extend({offset: anchor}, options);
+    options = new Map(options);
+    options['offset'] = anchor;
 
     if (!this._popupHandlersAdded) {
       this
@@ -49,10 +55,10 @@ class Popup /*extends Marker*/ {
     }
 
     if (content is Popup) {
-      L.setOptions(content, options);
+      content.options.addAll(options);
       this._popup = content;
     } else {
-      this._popup = new L.Popup(options, this)
+      this._popup = new Popup(options, this)
         .setContent(content);
     }
 
