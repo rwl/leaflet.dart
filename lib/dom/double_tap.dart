@@ -1,16 +1,18 @@
 part of leaflet.dom;
 
 // Extends the event handling code with double tap support for mobile browsers.
-class DoubleTap extends DomEvent {
-  var _touchstart = L.Browser.msPointer ? 'MSPointerDown' : L.Browser.pointer ? 'pointerdown' : 'touchstart';
-  var _touchend = L.Browser.msPointer ? 'MSPointerUp' : L.Browser.pointer ? 'pointerup' : 'touchend';
+class DoubleTap extends _DomEvent {
+
+  var _touchstart = Browser.msPointer ? 'MSPointerDown' : Browser.pointer ? 'pointerdown' : 'touchstart';
+  var _touchend = Browser.msPointer ? 'MSPointerUp' : Browser.pointer ? 'pointerup' : 'touchend';
 
   // inspired by Zepto touch code by Thomas Fuchs
   addDoubleTapListener(obj, handler, id) {
     var last,
-        doubleTap = false,
-        delay = 250,
         touch,
+        doubleTap = false;
+
+    final delay = 250,
         pre = '_leaflet_',
         touchstart = this._touchstart,
         touchend = this._touchend,
@@ -19,8 +21,8 @@ class DoubleTap extends DomEvent {
     onTouchStart(e) {
       var count;
 
-      if (L.Browser.pointer) {
-        trackedTouches.push(e.pointerId);
+      if (Browser.pointer) {
+        trackedTouches.add(e.pointerId);
         count = trackedTouches.length;
       } else {
         count = e.touches.length;
@@ -29,7 +31,7 @@ class DoubleTap extends DomEvent {
         return;
       }
 
-      var now = Date.now(),
+      final now = Date.now(),
         delta = now - (last || now);
 
       touch = e.touches ? e.touches[0] : e;
@@ -38,16 +40,16 @@ class DoubleTap extends DomEvent {
     }
 
     onTouchEnd(e) {
-      if (L.Browser.pointer) {
+      if (Browser.pointer) {
         var idx = trackedTouches.indexOf(e.pointerId);
         if (idx == -1) {
           return;
         }
-        trackedTouches.splice(idx, 1);
+        trackedTouches.removeAt(idx);
       }
 
       if (doubleTap) {
-        if (L.Browser.pointer) {
+        if (Browser.pointer) {
           // work around .type being readonly with MSPointer* events
           var newTouch = { },
             prop;
@@ -73,13 +75,13 @@ class DoubleTap extends DomEvent {
 
     // on pointer we need to listen on the document, otherwise a drag starting on the map and moving off screen
     // will not come through to us, so we will lose track of how many touches are ongoing
-    var endElement = L.Browser.pointer ? document.documentElement : obj;
+    var endElement = Browser.pointer ? document.documentElement : obj;
 
     obj.addEventListener(touchstart, onTouchStart, false);
     endElement.addEventListener(touchend, onTouchEnd, false);
 
-    if (L.Browser.pointer) {
-      endElement.addEventListener(L.DomEvent.POINTER_CANCEL, onTouchEnd, false);
+    if (Browser.pointer) {
+      endElement.addEventListener(DomEvent.POINTER_CANCEL, onTouchEnd, false);
     }
 
     return this;
@@ -89,11 +91,11 @@ class DoubleTap extends DomEvent {
     var pre = '_leaflet_';
 
     obj.removeEventListener(this._touchstart, obj[pre + this._touchstart + id], false);
-    (L.Browser.pointer ? document.documentElement : obj).removeEventListener(
+    (Browser.pointer ? document.documentElement : obj).removeEventListener(
             this._touchend, obj[pre + this._touchend + id], false);
 
-    if (L.Browser.pointer) {
-      document.documentElement.removeEventListener(L.DomEvent.POINTER_CANCEL, obj[pre + this._touchend + id],
+    if (Browser.pointer) {
+      document.documentElement.removeEventListener(DomEvent.POINTER_CANCEL, obj[pre + this._touchend + id],
         false);
     }
 

@@ -1,7 +1,11 @@
+part of leaflet.control;
 
 // Zoom is used for the default zoom buttons on the map.
 class Zoom extends Control {
-  var options = {
+
+  Zoom() : super({});
+
+  final Map<String, Object> options = {
     'position': 'topleft',
     'zoomInText': '+',
     'zoomInTitle': 'Zoom in',
@@ -9,17 +13,19 @@ class Zoom extends Control {
     'zoomOutTitle': 'Zoom out'
   };
 
-  onAdd(map) {
-    var zoomName = 'leaflet-control-zoom',
-        container = L.DomUtil.create('div', zoomName + ' leaflet-bar');
+  var _zoomInButton, _zoomOutButton;
+
+  onAdd(BaseMap map) {
+    final zoomName = 'leaflet-control-zoom',
+        container = DomUtil.create('div', zoomName + ' leaflet-bar');
 
     this._map = map;
 
-    this._zoomInButton  = this._createButton(
-            this.options.zoomInText, this.options.zoomInTitle,
-            zoomName + '-in',  container, this._zoomIn,  this);
+    this._zoomInButton = this._createButton(
+            this.options['zoomInText'], this.options['zoomInTitle'],
+            zoomName + '-in', container, this._zoomIn, this);
     this._zoomOutButton = this._createButton(
-            this.options.zoomOutText, this.options.zoomOutTitle,
+            this.options['zoomOutText'], this.options['zoomOutTitle'],
             zoomName + '-out', container, this._zoomOut, this);
 
     this._updateDisabled();
@@ -41,18 +47,18 @@ class Zoom extends Control {
   }
 
   _createButton(html, title, className, container, fn, context) {
-    var link = L.DomUtil.create('a', className, container);
-    link.innerHTML = html;
+    final link = DomUtil.create('a', className, container);
+    link.setInnerHTML(html);
     link.href = '#';
     link.title = title;
 
-    var stop = L.DomEvent.stopPropagation;
+    final stop = DomEvent.stopPropagation;
 
-    L.DomEvent
+    DomEvent
         .on(link, 'click', stop)
         .on(link, 'mousedown', stop)
         .on(link, 'dblclick', stop)
-        .on(link, 'click', L.DomEvent.preventDefault)
+        .on(link, 'click', DomEvent.preventDefault)
         .on(link, 'click', fn, context)
         .on(link, 'click', this._refocusOnMap, context);
 
@@ -60,17 +66,17 @@ class Zoom extends Control {
   }
 
   _updateDisabled() {
-    var map = this._map,
+    final map = this._map,
       className = 'leaflet-disabled';
 
-    L.DomUtil.removeClass(this._zoomInButton, className);
-    L.DomUtil.removeClass(this._zoomOutButton, className);
+    DomUtil.removeClass(this._zoomInButton, className);
+    DomUtil.removeClass(this._zoomOutButton, className);
 
     if (map._zoom == map.getMinZoom()) {
-      L.DomUtil.addClass(this._zoomOutButton, className);
+      DomUtil.addClass(this._zoomOutButton, className);
     }
     if (map._zoom == map.getMaxZoom()) {
-      L.DomUtil.addClass(this._zoomInButton, className);
+      DomUtil.addClass(this._zoomInButton, className);
     }
   }
 }

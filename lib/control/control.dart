@@ -1,17 +1,34 @@
+library leaflet.control;
+
+import 'dart:html';
+import 'dart:math' as math;
+
+import '../core/core.dart';
+import '../map/map.dart';
+import '../geo/geo.dart';
+import '../dom/dom.dart';
+
+part 'attribution.dart';
+part 'layers.dart';
+part 'scale.dart';
+part 'zoom.dart';
 
 // Control is a base class for implementing map controls. Handles positioning.
 // All other controls extend from this class.
 class Control {
-  var options = {
+  final Map<String, Object> options = {
     'position': 'topright'
   };
 
-  Control(options) {
-    L.setOptions(this, options);
+  BaseMap _map;
+  var _container;
+
+  Control(Map<String, Object> options) {
+    this.options.addAll(options);
   }
 
-  getPosition() {
-    return this.options.position;
+  String getPosition() {
+    return this.options['position'];
   }
 
   setPosition(position) {
@@ -21,7 +38,7 @@ class Control {
       map.removeControl(this);
     }
 
-    this.options.position = position;
+    this.options['position'] = position;
 
     if (map) {
       map.addControl(this);
@@ -34,32 +51,32 @@ class Control {
     return this._container;
   }
 
-  addTo(map) {
+  addTo(BaseMap map) {
     this._map = map;
 
-    var container = this._container = this.onAdd(map),
-        pos = this.getPosition(),
+    final container = this._container = this.onAdd(map);
+    final pos = this.getPosition(),
         corner = map._controlCorners[pos];
 
-    L.DomUtil.addClass(container, 'leaflet-control');
+    DomUtil.addClass(container, 'leaflet-control');
 
     if (pos.indexOf('bottom') != -1) {
       corner.insertBefore(container, corner.firstChild);
     } else {
-      corner.appendChild(container);
+      corner.append(container);
     }
 
     return this;
   }
 
-  removeFrom(map) {
+  removeFrom(BaseMap map) {
     var pos = this.getPosition(),
         corner = map._controlCorners[pos];
 
     corner.removeChild(this._container);
     this._map = null;
 
-    if (this.onRemove) {
+    if (this.onRemove != null) {
       this.onRemove(map);
     }
 
@@ -67,13 +84,13 @@ class Control {
   }
 
   _refocusOnMap() {
-    if (this._map) {
+    if (this._map != null) {
       this._map.getContainer().focus();
     }
   }
 }
 
-class Map {
+class ControlMap {
   addControl(control) {
     control.addTo(this);
     return this;
@@ -85,15 +102,15 @@ class Map {
   }
 
   _initControlPos() {
-    var corners = this._controlCorners = {},
-        l = 'leaflet-',
-        container = this._controlContainer =
-                L.DomUtil.create('div', l + 'control-container', this._container);
+    final corners = this._controlCorners = {};
+    String l = 'leaflet-';
+    final container = this._controlContainer =
+                DomUtil.create('div', l + 'control-container', this._container);
 
-    createCorner(vSide, hSide) {
+    createCorner(String vSide, String hSide) {
       var className = l + vSide + ' ' + l + hSide;
 
-      corners[vSide + hSide] = L.DomUtil.create('div', className, container);
+      corners[vSide + hSide] = DomUtil.create('div', className, container);
     }
 
     createCorner('top', 'left');

@@ -172,7 +172,7 @@ class _DomEvent {
 
   _fakeStop(e) {
     // fakes stopPropagation by setting a special event flag, checked/reset with L.DomEvent._skipped(e)
-    L.DomEvent._skipEvents[e.type] = true;
+    DomEvent._skipEvents[e.type] = true;
   }
 
   _skipped(e) {
@@ -206,7 +206,7 @@ class _DomEvent {
       var caller = arguments.callee.caller;
       while (caller) {
         e = caller['arguments'][0];
-        if (e && window.Event === e.constructor) {
+        if (e && window.Event == e.constructor) {
           break;
         }
         caller = caller.caller;
@@ -226,10 +226,10 @@ class _DomEvent {
     // or check if click is simulated on the element, and if it is, reject any non-simulated events
 
     if ((elapsed && elapsed > 100 && elapsed < 1000) || (e.target._simulatedClick && !e._simulated)) {
-      L.DomEvent.stop(e);
-      return;
+      DomEvent.stop(e);
+      return null;
     }
-    L.DomEvent._lastClick = timeStamp;
+    DomEvent._lastClick = timeStamp;
 
     return handler(e);
   }

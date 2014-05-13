@@ -1,12 +1,12 @@
 part of leaflet.dom;
 
 // Extends DomEvent to provide touch support for Internet Explorer and Windows-based devices.
-class Pointer extends DomEvent {
+class Pointer extends _DomEvent {
 
-  static var POINTER_DOWN = L.Browser.msPointer ? 'MSPointerDown' : 'pointerdown';
-  static var POINTER_MOVE = L.Browser.msPointer ? 'MSPointerMove' : 'pointermove';
-  static var POINTER_UP = L.Browser.msPointer ? 'MSPointerUp' : 'pointerup';
-  static var POINTER_CANCEL = L.Browser.msPointer ? 'MSPointerCancel' : 'pointercancel';
+  static final POINTER_DOWN = Browser.msPointer ? 'MSPointerDown' : 'pointerdown';
+  static final POINTER_MOVE = Browser.msPointer ? 'MSPointerMove' : 'pointermove';
+  static final POINTER_UP = Browser.msPointer ? 'MSPointerUp' : 'pointerup';
+  static final POINTER_CANCEL = Browser.msPointer ? 'MSPointerCancel' : 'pointercancel';
 
   var _pointers = [];
   var _pointerDocumentListener = false;
@@ -35,7 +35,7 @@ class Pointer extends DomEvent {
 
     var cb = (e) {
 
-      L.DomEvent.preventDefault(e);
+      DomEvent.preventDefault(e);
 
       var alreadyInArray = false;
       for (var i = 0; i < pointers.length; i++) {
@@ -55,22 +55,22 @@ class Pointer extends DomEvent {
     };
 
     obj[pre + 'touchstart' + id] = cb;
-    obj.addEventListener(this.POINTER_DOWN, cb, false);
+    obj.addEventListener(POINTER_DOWN, cb, false);
 
     // need to also listen for end events to keep the _pointers list accurate
     // this needs to be on the body and never go away
     if (!this._pointerDocumentListener) {
-      var internalCb = function (e) {
+      var internalCb = (e) {
         for (var i = 0; i < pointers.length; i++) {
-          if (pointers[i].pointerId === e.pointerId) {
+          if (pointers[i].pointerId == e.pointerId) {
             pointers.splice(i, 1);
             break;
           }
         }
       };
       //We listen on the documentElement as any drags that end by moving the touch off the screen get fired there
-      document.documentElement.addEventListener(this.POINTER_UP, internalCb, false);
-      document.documentElement.addEventListener(this.POINTER_CANCEL, internalCb, false);
+      document.documentElement.addEventListener(POINTER_UP, internalCb, false);
+      document.documentElement.addEventListener(POINTER_CANCEL, internalCb, false);
 
       this._pointerDocumentListener = true;
     }
@@ -101,7 +101,7 @@ class Pointer extends DomEvent {
     }
 
     obj[pre + 'touchmove' + id] = cb;
-    obj.addEventListener(this.POINTER_MOVE, cb, false);
+    obj.addEventListener(POINTER_MOVE, cb, false);
 
     return this;
   }
@@ -125,8 +125,8 @@ class Pointer extends DomEvent {
     };
 
     obj[pre + 'touchend' + id] = cb;
-    obj.addEventListener(this.POINTER_UP, cb, false);
-    obj.addEventListener(this.POINTER_CANCEL, cb, false);
+    obj.addEventListener(POINTER_UP, cb, false);
+    obj.addEventListener(POINTER_CANCEL, cb, false);
 
     return this;
   }
@@ -137,14 +137,14 @@ class Pointer extends DomEvent {
 
     switch (type) {
     case 'touchstart':
-      obj.removeEventListener(this.POINTER_DOWN, cb, false);
+      obj.removeEventListener(POINTER_DOWN, cb, false);
       break;
     case 'touchmove':
-      obj.removeEventListener(this.POINTER_MOVE, cb, false);
+      obj.removeEventListener(POINTER_MOVE, cb, false);
       break;
     case 'touchend':
-      obj.removeEventListener(this.POINTER_UP, cb, false);
-      obj.removeEventListener(this.POINTER_CANCEL, cb, false);
+      obj.removeEventListener(POINTER_UP, cb, false);
+      obj.removeEventListener(POINTER_CANCEL, cb, false);
       break;
     }
 

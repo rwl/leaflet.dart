@@ -1,8 +1,11 @@
-
+part of leaflet.control;
 
 // Scale is used for displaying metric/imperial scale on the map.
 class Scale extends Control {
-  var options = {
+
+  Scale() : super({});
+
+  final Map<String, Object> options = {
     'position': 'bottomleft',
     'maxWidth': 100,
     'metric': true,
@@ -10,46 +13,48 @@ class Scale extends Control {
     'updateWhenIdle': false
   };
 
+  var _mScale, _iScale;
+
   onAdd(map) {
     this._map = map;
 
-    var className = 'leaflet-control-scale',
-        container = L.DomUtil.create('div', className),
+    final className = 'leaflet-control-scale',
+        container = DomUtil.create('div', className),
         options = this.options;
 
     this._addScales(options, className, container);
 
-    map.on(options.updateWhenIdle ? 'moveend' : 'move', this._update, this);
+    map.on(options['updateWhenIdle'] ? 'moveend' : 'move', this._update, this);
     map.whenReady(this._update, this);
 
     return container;
   }
 
   onRemove(map) {
-    map.off(this.options.updateWhenIdle ? 'moveend' : 'move', this._update, this);
+    map.off(this.options['updateWhenIdle'] ? 'moveend' : 'move', this._update, this);
   }
 
   _addScales(options, className, container) {
-    if (options.metric) {
-      this._mScale = L.DomUtil.create('div', className + '-line', container);
+    if (options['metric']) {
+      this._mScale = DomUtil.create('div', className + '-line', container);
     }
-    if (options.imperial) {
-      this._iScale = L.DomUtil.create('div', className + '-line', container);
+    if (options['imperial']) {
+      this._iScale = DomUtil.create('div', className + '-line', container);
     }
   }
 
   _update() {
-    var bounds = this._map.getBounds(),
+    final bounds = this._map.getBounds(),
         centerLat = bounds.getCenter().lat,
-        halfWorldMeters = 6378137 * Math.PI * Math.cos(centerLat * Math.PI / 180),
+        halfWorldMeters = 6378137 * math.PI * math.cos(centerLat * math.PI / 180),
         dist = halfWorldMeters * (bounds.getNorthEast().lng - bounds.getSouthWest().lng) / 180,
 
         size = this._map.getSize(),
-        options = this.options,
-        maxMeters = 0;
+        options = this.options;
+    int maxMeters = 0;
 
     if (size.x > 0) {
-      maxMeters = dist * (options.maxWidth / size.x);
+      maxMeters = dist * (options['maxWidth'] / size.x);
     }
 
     this._updateScales(options, maxMeters);
@@ -93,12 +98,12 @@ class Scale extends Control {
   }
 
   _getScaleWidth(ratio) {
-    return Math.round(this.options.maxWidth * ratio) - 10;
+    return (this.options['maxWidth'] * ratio).round() - 10;
   }
 
-  _getRoundNum(num) {
-    var pow10 = Math.pow(10, (Math.floor(num) + '').length - 1),
-        d = num / pow10;
+  _getRoundNum(n) {
+    var pow10 = math.pow(10, (n.floor() + '').length - 1),
+        d = n / pow10;
 
     d = d >= 10 ? 10 : d >= 5 ? 5 : d >= 3 ? 3 : d >= 2 ? 2 : 1;
 

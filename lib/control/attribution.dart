@@ -1,20 +1,24 @@
+part of leaflet.control;
 
 // Attribution is used for displaying attribution on the map (added by default).
 class Attribution extends Control {
-  var options = {
+
+  final Map<String, Object> options = {
     'position': 'bottomright',
     'prefix': '<a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
   };
 
-  Attribution(options) {
-    L.setOptions(this, options);
+  Map _attributions;
+
+  Attribution(Map<String, Object> options) : super(options) {
+    this.options.addAll(options);
 
     this._attributions = {};
   }
 
   onAdd(map) {
-    this._container = L.DomUtil.create('div', 'leaflet-control-attribution');
-    L.DomEvent.disableClickPropagation(this._container);
+    this._container = DomUtil.create('div', 'leaflet-control-attribution');
+    DomEvent.disableClickPropagation(this._container);
 
     for (var i in map._layers) {
       if (map._layers[i].getAttribution) {
@@ -39,13 +43,13 @@ class Attribution extends Control {
   }
 
   setPrefix(prefix) {
-    this.options.prefix = prefix;
+    this.options['prefix'] = prefix;
     this._update();
     return this;
   }
 
-  addAttribution(text) {
-    if (!text) { return; }
+  addAttribution(String text) {
+    if (text == null) { return null; }
 
     if (!this._attributions[text]) {
       this._attributions[text] = 0;
@@ -58,7 +62,7 @@ class Attribution extends Control {
   }
 
   removeAttribution(text) {
-    if (!text) { return; }
+    if (text == null) { return null; }
 
     if (this._attributions[text]) {
       this._attributions[text]--;
@@ -69,36 +73,36 @@ class Attribution extends Control {
   }
 
   _update() {
-    if (!this._map) { return; }
+    if (this._map == null) { return; }
 
     var attribs = [];
 
     for (var i in this._attributions) {
       if (this._attributions[i]) {
-        attribs.push(i);
+        attribs.add(i);
       }
     }
 
     var prefixAndAttribs = [];
 
-    if (this.options.prefix) {
-      prefixAndAttribs.push(this.options.prefix);
+    if (this.options.containsKey('prefix')) {
+      prefixAndAttribs.add(this.options['prefix']);
     }
     if (attribs.length) {
-      prefixAndAttribs.push(attribs.join(', '));
+      prefixAndAttribs.add(attribs.join(', '));
     }
 
     this._container.innerHTML = prefixAndAttribs.join(' | ');
   }
 
   _onLayerAdd(e) {
-    if (e.layer.getAttribution) {
+    if (e.layer.getAttribution != null) {
       this.addAttribution(e.layer.getAttribution());
     }
   }
 
   _onLayerRemove(e) {
-    if (e.layer.getAttribution) {
+    if (e.layer.getAttribution != null) {
       this.removeAttribution(e.layer.getAttribution());
     }
   }

@@ -2,7 +2,13 @@ part of leaflet.dom;
 
 // PosAnimation is used by Leaflet internally for pan animations.
 class PosAnimation extends Object with Events {
-  run(el, newPos, duration, easeLinearity) { // (HTMLElement, Point[, Number, Number])
+
+  Element _el;
+  bool _inProgress;
+  Point _newPos;
+  var _stepTimer;
+
+  run(Element el, Point newPos, [num duration, num easeLinearity]) { // (HTMLElement, Point[, Number, Number])
     this.stop();
 
     this._el = el;
@@ -11,17 +17,17 @@ class PosAnimation extends Object with Events {
 
     this.fire('start');
 
-    el.style[L.DomUtil.TRANSITION] = 'all ' + (duration || 0.25) +
+    el.style[DomUtil.TRANSITION] = 'all ' + (duration || 0.25) +
             's cubic-bezier(0,0,' + (easeLinearity || 0.5) + ',1)';
 
-    L.DomEvent.on(el, L.DomUtil.TRANSITION_END, this._onTransitionEnd, this);
-    L.DomUtil.setPosition(el, newPos);
+    DomEvent.on(el, L.DomUtil.TRANSITION_END, this._onTransitionEnd, this);
+    DomUtil.setPosition(el, newPos);
 
     // toggle reflow, Chrome flickers for some reason if you don't do this
-    L.Util.falseFn(el.offsetWidth);
+    Util.falseFn(el.offsetWidth);
 
     // there's no native way to track value updates of transitioned properties, so we imitate this
-    this._stepTimer = setInterval(L.bind(this._onStep, this), 50);
+    this._stepTimer = setInterval(bind(this._onStep, this), 50);
   }
 
   stop() {
@@ -30,9 +36,9 @@ class PosAnimation extends Object with Events {
     // if we just removed the transition property, the element would jump to its final position,
     // so we need to make it stay at the current position
 
-    L.DomUtil.setPosition(this._el, this._getPos());
+    DomUtil.setPosition(this._el, this._getPos());
     this._onTransitionEnd();
-    L.Util.falseFn(this._el.offsetWidth); // force reflow in case we are about to start a new animation
+    Util.falseFn(this._el.offsetWidth); // force reflow in case we are about to start a new animation
   }
 
   _onStep() {
@@ -51,33 +57,33 @@ class PosAnimation extends Object with Events {
   // you can't easily get intermediate values of properties animated with CSS3 Transitions,
   // we need to parse computed style (in case of transform it returns matrix string)
 
-  var _transformRe = '([-+]?(?:\d*\.)?\d+)\D*, ([-+]?(?:\d*\.)?\d+)\D*\)';
+  var _transformRe = r'([-+]?(?:\d*\.)?\d+)\D*, ([-+]?(?:\d*\.)?\d+)\D*\)';
 
   _getPos() {
-    var left, top, matches,
-        el = this._el,
+    var left, top, matches;
+    final el = this._el,
         style = window.getComputedStyle(el);
 
-    if (L.Browser.any3d) {
+    if (Browser.any3d) {
       matches = style[L.DomUtil.TRANSFORM].match(this._transformRe);
-      if (!matches) { return; }
-      left = parseFloat(matches[1]);
-      top  = parseFloat(matches[2]);
+      if (!matches) { return null; }
+      left = double.parse(matches[1]);
+      top  = double.parse(matches[2]);
     } else {
-      left = parseFloat(style.left);
-      top  = parseFloat(style.top);
+      left = double.parse(style.left);
+      top  = double.parse(style.top);
     }
 
-    return new L.Point(left, top, true);
+    return new Point(left, top, true);
   }
 
   _onTransitionEnd() {
-    L.DomEvent.off(this._el, L.DomUtil.TRANSITION_END, this._onTransitionEnd, this);
+    DomEvent.off(this._el, DomUtil.TRANSITION_END, this._onTransitionEnd, this);
 
     if (!this._inProgress) { return; }
     this._inProgress = false;
 
-    this._el.style[L.DomUtil.TRANSITION] = '';
+    this._el.style[DomUtil.TRANSITION] = '';
 
     // jshint camelcase: false
     // make sure L.DomUtil.getPosition returns the final position value after animation
