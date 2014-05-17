@@ -1,5 +1,12 @@
 part of leaflet.layer.vector;
 
+class PolylineOptions {
+  // How much to simplify the polyline on each zoom level. More means better performance and smoother look, and less means more accurate representation.
+  num smoothFactor  = 1.0;
+  // Disabled polyline clipping.
+  bool noClip  = false;
+}
+
 // Polyline is used to display polylines on a map.
 class Polyline extends Path {
 

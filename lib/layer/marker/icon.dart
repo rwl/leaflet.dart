@@ -1,5 +1,28 @@
 part of leaflet.layer.marker;
 
+class IconOptions {
+  // (required) The URL to the icon image (absolute or relative to your script path).
+  String  iconUrl;
+  // The URL to a retina sized version of the icon image (absolute or relative to your script path). Used for Retina screen devices.
+  String  iconRetinaUrl;
+  // Size of the icon image in pixels.
+  Point iconSize;
+  // The coordinates of the "tip" of the icon (relative to its top left corner). The icon will be aligned so that this point is at the marker's geographical location. Centered by default if size is specified, also can be set in CSS with negative margins.
+  Point iconAnchor;
+  // The URL to the icon shadow image. If not specified, no shadow image will be created.
+  String  shadowUrl;
+  // The URL to the retina sized version of the icon shadow image. If not specified, no shadow image will be created. Used for Retina screen devices.
+  String  shadowRetinaUrl;
+  // Size of the shadow image in pixels.
+  Point shadowSize;
+  // The coordinates of the "tip" of the shadow (relative to its top left corner) (the same as iconAnchor if not specified).
+  Point shadowAnchor;
+  // The coordinates of the point from which popups will "open", relative to the icon anchor.
+  Point popupAnchor;
+  // A custom class name to assign to both icon and shadow images. Empty by default.
+  String  className;
+}
+
 // Icon is an image-based icon class that you can use with L.Marker for custom markers.
 class Icon {
 

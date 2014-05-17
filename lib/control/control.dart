@@ -13,6 +13,26 @@ part 'layers.dart';
 part 'scale.dart';
 part 'zoom.dart';
 
+class ControlPosition {
+  final _value;
+  const ControlPosition._internal(this._value);
+  toString() => '$_value';
+
+  // Top left of the map.
+  static const TOPLEFT = const ControlPosition._internal('topleft');
+  // Top right of the map.
+  static const TOPRIGHT = const ControlPosition._internal('topright');
+  // Bottom left of the map.
+  static const BOTTOMLEFT = const ControlPosition._internal('bottomleft');
+  // Bottom right of the map.
+  static const BOTTOMRIGHT = const ControlPosition._internal('bottomright');
+}
+
+class ControlOptions {
+  // The initial position of the control (one of the map corners).
+  ControlPosition position = ControlPosition.TOPRIGHT;
+}
+
 // Control is a base class for implementing map controls. Handles positioning.
 // All other controls extend from this class.
 class Control {

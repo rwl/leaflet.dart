@@ -1,5 +1,14 @@
 part of leaflet.control;
 
+class LayersOptions {
+  // The position of the control (one of the map corners). See control positions.
+  ControlPosition position  = ControlPosition.TOPRIGHT;
+  // If true, the control will be collapsed into an icon and expanded on mouse hover or touch.
+  bool collapsed = true;
+  // If true, the control will assign zIndexes in increasing order to all of its layers so that the order is preserved when switching them on/off.
+  bool autoZIndex  = true;
+}
+
 // Layers is a control to allow users to switch between different layers on the map.
 class Layers extends Control {
 

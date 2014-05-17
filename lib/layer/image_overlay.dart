@@ -1,5 +1,12 @@
 part of leaflet.layer;
 
+class ImageOverlayOptions {
+  // The opacity of the image overlay.
+  num opacity = 1.0;
+  // The attribution text of the image overlay.
+  String attribution = '';
+}
+
 // ImageOverlay is used to overlay images over the map (to specific geographical bounds).
 class ImageOverlay extends Object with Events {
 

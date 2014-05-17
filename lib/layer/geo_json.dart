@@ -1,5 +1,27 @@
 part of leaflet.layer;
 
+class GeoJSONOptions {
+  // Function that will be used for creating layers for GeoJSON points (if not specified, simple markers will be created).
+  // ( <GeoJSON> featureData, <LatLng> latlng )
+  Function pointToLayer;
+
+  // Function that will be used to get style options for vector layers created for GeoJSON features.
+  // ( <GeoJSON> featureData )
+  Function style;
+
+  // Function that will be called on each created feature layer. Useful for attaching events and popups to features.
+  // ( <GeoJSON> featureData, <ILayer> layer )
+  Function onEachFeature;
+
+  // Function that will be used to decide whether to show a feature or not.
+  // ( <GeoJSON> featureData, <ILayer> layer )
+  Function filter;
+
+  // Function that will be used for converting GeoJSON coordinates to LatLng points (if not specified, coords will be assumed to be WGS84 — standard [longitude, latitude] values in degrees).
+  // ( <Array> coords )
+  Function coordsToLatLng;
+}
+
 // GeoJSON turns any GeoJSON data into a Leaflet layer.
 class GeoJSON extends FeatureGroup {
 

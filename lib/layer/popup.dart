@@ -1,5 +1,34 @@
 part of leaflet.layer;
 
+class PopupOptions {
+  // Max width of the popup.
+  num maxWidth  = 300;
+  // Min width of the popup.
+  num minWidth  = 50;
+  // If set, creates a scrollable container of the given height inside a popup if its content exceeds it.
+  num maxHeight;
+  // Set it to false if you don't want the map to do panning animation to fit the opened popup.
+  bool autoPan = true;
+  // Set it to true if you want to prevent users from panning the popup off of the screen while it is open.
+  bool keepInView  = false;
+  // Controls the presense of a close button in the popup.
+  bool closeButton = true;
+  // The offset of the popup position. Useful to control the anchor of the popup when opening it on some overlays.
+  Point offset  = new Point(0, 6);
+  // The margin between the popup and the top left corner of the map view after autopanning was performed.
+  Point autoPanPaddingTopLeft;
+  // The margin between the popup and the bottom right corner of the map view after autopanning was performed.
+  Point autoPanPaddingBottomRight;
+  // Equivalent of setting both top left and bottom right autopan padding to the same value.
+  Point autoPanPadding = new Point(5, 5);
+  // Whether to animate the popup on zoom. Disable it if you have problems with Flash content inside popups.
+  bool zoomAnimation = true;
+  // Set it to false if you want to override the default behavior of the popup closing when user clicks the map (set globally by the Map closePopupOnClick option).
+  bool closeOnClick;
+  // A custom class name to assign to the popup.
+  String className = '';
+}
+
 // Popup is used for displaying popups on the map.
 class Popup extends Object with Events {
 

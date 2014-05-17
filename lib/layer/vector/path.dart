@@ -1,5 +1,34 @@
 part of leaflet.layer.vector;
 
+class PathOptions {
+  // Whether to draw stroke along the path. Set it to false to disable borders on polygons or circles.
+  bool stroke = true;
+  // Stroke color.
+  String  color = '#03f';
+  // Stroke width in pixels.
+  num weight  = 5;
+  // Stroke opacity.
+  num opacity = 0.5;
+  // Whether to fill the path with color. Set it to false to disable filling on polygons or circles.
+  bool fill;
+  // Same as color Fill color.
+  String fillColor;
+  // Fill opacity.
+  num fillOpacity = 0.2;
+  // A string that defines the stroke dash pattern. Doesn't work on canvas-powered layers (e.g. Android 2).
+  String  dashArray;
+  // A string that defines shape to be used at the end of the stroke.
+  String lineCap;
+  // A string that defines shape to be used at the corners of the stroke.
+  String lineJoin;
+  // If false, the vector will not emit mouse events and will act as a part of the underlying map.
+  bool clickable = true;
+  // Sets the pointer-events attribute on the path if SVG backend is used.
+  String pointerEvents;
+  // Custom class name set on an element.
+  String className = '';
+}
+
 // Path is a base class for rendering vector paths on a map. Inherited by Polyline, Circle, etc.
 class Path extends Object with Events {
 

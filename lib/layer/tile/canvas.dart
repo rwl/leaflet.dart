@@ -1,5 +1,10 @@
 part of leaflet.layer.tile;
 
+class CanvasOptions {
+  // Indicates that tiles will be drawn asynchronously. tileDrawn method should be called for each tile after drawing completion.
+  bool async = false;
+}
+
 // Canvas is a class that you can use as a base for creating
 // dynamically drawn Canvas-based tile layers.
 class Canvas extends TileLayer {

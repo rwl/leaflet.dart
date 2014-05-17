@@ -1,5 +1,12 @@
 part of leaflet.control;
 
+class AttributionOptions {
+  // The position of the control (one of the map corners). See control positions.
+  ControlPosition position = ControlPosition.BOTTOMRIGHT;
+  // The HTML text shown before the attributions. Pass false to disable.
+  String  prefix = 'Leaflet';
+}
+
 // Attribution is used for displaying attribution on the map (added by default).
 class Attribution extends Control {
 
