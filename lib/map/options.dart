@@ -159,10 +159,11 @@ class ZoomPanOptions {
   // Sets the options for the zoom change if it occurs.
   ZoomOptions zoom;
   // An equivalent of passing animate to both zoom and pan options (see below).
-  void set animate(bool anim) {
+  /*void set animate(bool anim) {
     pan.animate = anim;
     zoom.animate = anim;
-  }
+  }*/
+  bool animate;
 
   // Sets the amount of padding in the top left corner of a map container that
   // shouldn't be accounted for when setting the view to fit bounds. Useful if

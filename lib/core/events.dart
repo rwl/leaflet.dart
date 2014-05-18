@@ -383,11 +383,11 @@ class Events {
     return this;
   }
 
-  fire(String type, [Map data = null]) {
+  fire(EventType type, [Map data = null]) {
     return fireEvent(type, data);
   }
 
-  fireEvent(String type, [Map data = null]) { // (String[, Object])
+  fireEvent(EventType type, [Map data = null]) { // (String[, Object])
     if (!this.hasEventListeners(type)) {
       return this;
     }

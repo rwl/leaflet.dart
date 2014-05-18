@@ -13,6 +13,8 @@ import '../layer/tile/tile.dart';
 
 part 'options.dart';
 
+final containerProp = new Expando<Element>('_leaflet');
+
 class BaseMap extends Object with core.Events {
   /*Map<String, Object> options = {
     'crs': crs.EPSG3857,
@@ -231,7 +233,7 @@ class BaseMap extends Object with core.Events {
       this._panInsideMaxBounds();
     }
 
-    return this.on('moveend', this._panInsideMaxBounds, this);
+    return this.on(EventType.MOVEEND, this._panInsideMaxBounds, this);
   }
 
   // Pans the map to the closest view that would lie inside the given bounds
@@ -325,18 +327,21 @@ class BaseMap extends Object with core.Events {
     return this;
   }*/
 
+  bool _sizeChanged;
+  LatLng _initialCenter;
+
   // Checks if the map container size changed and updates the map if so — call
   // it after you've changed the map size dynamically, also animating pan by
   // default. If options.pan is false, panning will not occur. If
   // options.debounceMoveend is true, it will delay moveend event so that it
   // doesn't happen often even if the method is called many times in a row.
-  void invalidateSize(ZoomPanOptions options) {
+  void invalidateSize(bool animate, [bool pan=true, bool debounceMoveend=false]) {
     if (!this._loaded) { return; }
 
-    options = L.extend({
+    /*options = L.extend({
       animate: false,
       pan: true
-    }, options == true ? {animate: true} : options);
+    }, options == true ? {animate: true} : options);*/
 
     var oldSize = this.getSize();
     this._sizeChanged = true;
@@ -349,32 +354,32 @@ class BaseMap extends Object with core.Events {
 
     if (!offset.x && !offset.y) { return; }
 
-    if (options.animate && options.pan) {
+    if (animate && pan) {
       this.panBy(offset);
 
     } else {
-      if (options.pan) {
+      if (pan) {
         this._rawPanBy(offset);
       }
 
       this.fire('move');
 
-      if (options.debounceMoveend) {
+      if (debounceMoveend) {
         clearTimeout(this._sizeTimer);
-        this._sizeTimer = setTimeout(L.bind(this.fire, this, 'moveend'), 200);
+        this._sizeTimer = setTimeout(bind(this.fire, this, EventType.MOVEEND), 200);
       } else {
-        this.fire('moveend');
+        this.fire(EventType.MOVEEND);
       }
     }
 
     this.fire(EventType.RESIZE, {
-      oldSize: oldSize,
-      newSize: newSize
+      'oldSize': oldSize,
+      'newSize': newSize
     });
   }
 
   // TODO handler.addTo
-  addHandler(name, HandlerClass) {
+  /*addHandler(name, HandlerClass) {
     if (!HandlerClass) { return this; }
 
     var handler = this[name] = new HandlerClass(this);
@@ -386,21 +391,23 @@ class BaseMap extends Object with core.Events {
     }
 
     return this;
-  }
+  }*/
 
+  // Destroys the map and clears all related event listeners.
   remove() {
     if (this._loaded) {
-      this.fire('unload');
+      this.fire(EventType.UNLOAD);
     }
 
-    this._initEvents('off');
+    this._initEvents(false);
 
-    try {
+    /*try {
       // throws error in IE6-8
       delete(this._container._leaflet);
     } catch (e) {
       this._container._leaflet = undefined;
-    }
+    }*/
+    containerProp[_container] = null;
 
     this._clearPanes();
     if (this._clearControlPos) {
@@ -415,7 +422,8 @@ class BaseMap extends Object with core.Events {
 
   // public methods for getting map state
 
-  getCenter() { // (Boolean) -> LatLng
+  // Returns the geographical center of the map view.
+  LatLng getCenter() {
     this._checkIfLoaded();
 
     if (this._initialCenter && !this._moved()) {
@@ -424,44 +432,55 @@ class BaseMap extends Object with core.Events {
     return this.layerPointToLatLng(this._getCenterLayerPoint());
   }
 
-  getZoom() {
+  // Returns the current zoom of the map view.
+  num getZoom() {
     return this._zoom;
   }
 
-  getBounds() {
-    var bounds = this.getPixelBounds(),
+  // Returns the LatLngBounds of the current map view.
+  LatLngBounds getBounds() {
+    final bounds = this.getPixelBounds(),
         sw = this.unproject(bounds.getBottomLeft()),
         ne = this.unproject(bounds.getTopRight());
 
-    return new L.LatLngBounds(sw, ne);
+    return new LatLngBounds(sw, ne);
   }
 
-  getMinZoom() {
-    return this.options.minZoom == null ?
+  // Returns the minimum zoom level of the map.
+  num getMinZoom() {
+    return this.stateOptions.minZoom == null ?
       (this._layersMinZoom == null ? 0 : this._layersMinZoom) :
-      this.options.minZoom;
+      this.stateOptions.minZoom;
   }
 
-  getMaxZoom() {
-    return this.options.maxZoom == null ?
-      (this._layersMaxZoom == null ? Infinity : this._layersMaxZoom) :
-      this.options.maxZoom;
+  // Returns the maximum zoom level of the map.
+  num getMaxZoom() {
+    return this.stateOptions.maxZoom == null ?
+      (this._layersMaxZoom == null ? double.INFINITY : this._layersMaxZoom) :
+      this.stateOptions.maxZoom;
   }
 
-  getBoundsZoom(bounds, inside, padding) { // (LatLngBounds[, Boolean, geom.Point]) -> Number
-    bounds = L.latLngBounds(bounds);
+  // Returns the maximum zoom level on which the given bounds fit to the map
+  // view in its entirety. If inside (optional) is set to true, the method
+  // instead returns the minimum zoom level on which the map view fits into
+  // the given bounds in its entirety.
+  num getBoundsZoom(LatLngBounds bounds, [bool inside = false, geom.Point padding = null]) {
+    if (padding == null) {
+      padding = new geom.Point(0, 0);
+    }
+    bounds = new LatLngBounds.latLngBounds(bounds);
 
-    var zoom = this.getMinZoom() - (inside ? 1 : 0),
-        maxZoom = this.getMaxZoom(),
+    num zoom = this.getMinZoom() - (inside ? 1 : 0);
+    final maxZoom = this.getMaxZoom(),
         size = this.getSize(),
 
         nw = bounds.getNorthWest(),
-        se = bounds.getSouthEast(),
+        se = bounds.getSouthEast();
 
-        zoomNotFound = true,
-        boundsSize;
+    bool zoomNotFound = true;
+    var boundsSize;
 
-    padding = L.point(padding || [0, 0]);
+    padding = new Point.point(padding);
 
     do {
       zoom++;
@@ -477,9 +496,12 @@ class BaseMap extends Object with core.Events {
     return inside ? zoom : zoom - 1;
   }
 
-  getSize() {
-    if (!this._size || this._sizeChanged) {
-      this._size = new L.geom.Point(
+  geom.Point _size;
+
+  // Returns the current size of the map container.
+  geom.Point getSize() {
+    if (this._size == null || this._sizeChanged) {
+      this._size = new geom.Point(
         this._container.clientWidth,
         this._container.clientHeight);
 
@@ -488,19 +510,27 @@ class BaseMap extends Object with core.Events {
     return this._size.clone();
   }
 
-  getPixelBounds() {
+  // Returns the bounds of the current map view in projected pixel coordinates
+  // (sometimes useful in layer and overlay implementations).
+  Bounds getPixelBounds() {
     var topLeftPoint = this._getTopLeftPoint();
-    return new L.Bounds(topLeftPoint, topLeftPoint.add(this.getSize()));
+    return new Bounds(topLeftPoint, topLeftPoint.add(this.getSize()));
   }
 
-  getPixelOrigin() {
+  geom.Point _initialTopLeftPoint;
+
+  // Returns the projected pixel coordinates of the top left point of the map
+  // layer (useful in custom layer and overlay implementations).
+  geom.Point getPixelOrigin() {
     this._checkIfLoaded();
     return this._initialTopLeftPoint;
   }
 
-  Map<String, Element> get panes => _panes;
+  // Returns an object with different map panes (to render overlays in).
+  Map<String, Element> get panes => new Map.from(_panes);
 
-  getContainer() {
+  // Returns the container element of the map.
+  Element getContainer() {
     return this._container;
   }
 
@@ -519,12 +549,12 @@ class BaseMap extends Object with core.Events {
 
   // conversion methods
 
-  project(latlng, zoom) { // (LatLng[, Number]) -> Point
+  project(latlng, [zoom=null]) { // (LatLng[, Number]) -> Point
     zoom = zoom == null ? this._zoom : zoom;
     return this.options.crs.latLngToPoint(L.latLng(latlng), zoom);
   }
 
-  unproject(point, zoom) { // (Point[, Number]) -> LatLng
+  unproject(point, [zoom=null]) { // (Point[, Number]) -> LatLng
     zoom = zoom == null ? this._zoom : zoom;
     return this.options.crs.pointToLatLng(L.point(point), zoom);
   }
@@ -571,30 +601,36 @@ class BaseMap extends Object with core.Events {
 
   // map initialization methods
 
-  var _container;
+  Element _container;
 
-  _initContainer(id) {
-    var container = this._container = L.DomUtil.get(id);
-
-    if (!container) {
+  _initContainerID(String id) {
+    final container = DomUtil.get(id);
+    if (container == null) {
       throw new Exception('Map container not found.');
-    } else if (container._leaflet) {
+    }
+    _initContainer(container);
+  }
+
+  _initContainer(Element container) {
+    this._container = container;
+
+    if (containerProp[container] != null) {
       throw new Exception('Map container is already initialized.');
     }
 
-    container._leaflet = true;
+    containerProp[container] = true;
   }
 
   _initLayout() {
     var container = this._container;
 
-    L.DomUtil.addClass(container, 'leaflet-container' +
+    DomUtil.addClass(container, 'leaflet-container' +
       (core.Browser.touch ? ' leaflet-touch' : '') +
       (core.Browser.retina ? ' leaflet-retina' : '') +
       (core.Browser.ielt9 ? ' leaflet-oldie' : '') +
-      (this.options['fadeAnimation'] ? ' leaflet-fade-anim' : ''));
+      (this.animationOptions.fadeAnimation ? ' leaflet-fade-anim' : ''));
 
-    var position = dom.DomUtil.getStyle(container, 'position');
+    var position = DomUtil.getStyle(container, 'position');
 
     if (position != 'absolute' && position != 'relative' && position != 'fixed') {
       container.style.position = 'relative';
@@ -742,10 +778,10 @@ class BaseMap extends Object with core.Events {
 
   // map events
 
-  _initEvents([String onOff='on']) {
+  _initEvents([bool on = true]) {
     if (dom.DomEvent == null) { return; }
 
-    if (onOff == 'on') {
+    if (on) {
       dom.DomEvent.on(this._container, 'click', this._onMouseClick, this);
     } else {
       dom.DomEvent.off(this._container, 'click', this._onMouseClick, this);
@@ -757,11 +793,19 @@ class BaseMap extends Object with core.Events {
 
     len = events.length;
     for (i = 0; i < len; i++) {
-      L.DomEvent[onOff](this._container, events[i], this._fireMouseEvent, this);
+      if (on) {
+        DomEvent.on(this._container, events[i], this._fireMouseEvent, this);
+      } else {
+        DomEvent.off(this._container, events[i], this._fireMouseEvent, this);
+      }
     }
 
-    if (this.options.trackResize) {
-      L.DomEvent[onOff](window, 'resize', this._onResize, this);
+    if (this.interactionOptions.trackResize) {
+      if (on) {
+        DomEvent.on(window, 'resize', this._onResize, this);
+      } else {
+        DomEvent.off(window, 'resize', this._onResize, this);
+      }
     }
   }
 
