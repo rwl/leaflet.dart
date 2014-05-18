@@ -3,12 +3,17 @@ library leaflet.map;
 import 'dart:html';
 import 'dart:math' as math;
 
-import '../core/core.dart';
+import '../core/core.dart' as core;
+import '../core/core.dart' show EventType;
 import '../geo/geo.dart';
+import '../geo/crs/crs.dart';
+import '../geometry/geometry.dart' as geom;
+import '../layer/layer.dart';
+import '../layer/tile/tile.dart';
 
 part 'options.dart';
 
-class BaseMap {
+class BaseMap extends Object with core.Events {
   /*Map<String, Object> options = {
     'crs': crs.EPSG3857,
     'fadeAnimation': DomUtil.TRANSITION && !Browser.android23,
@@ -28,7 +33,7 @@ class BaseMap {
 
   Map _layers;
   Map _zoomBoundLayers;
-  int _tileLayersNum;
+  int _tileLayersNum, _tileLayersToLoad;
 
   factory BaseMap.elem(Element id, Map<String, Object> options) {
     return new BaseMap(id, options);
@@ -84,7 +89,7 @@ class BaseMap {
 
     this._initEvents();
 
-    if (stateOptions.maxBounds) {
+    if (stateOptions.maxBounds != null) {
       this.setMaxBounds(stateOptions.maxBounds);
     }
 
@@ -110,7 +115,7 @@ class BaseMap {
   // animation options.
   //
   // Replaced by animation-powered implementation in Map.PanAnimation
-  setView(LatLng center, num zoom, ZoomPanOptions options) {
+  setView(LatLng center, num zoom, [ZoomPanOptions options = null]) {
     zoom = zoom == null ? this.getZoom() : zoom;
     this._resetView(new LatLng.latLng(center), this._limitZoom(zoom));
   }
@@ -119,7 +124,7 @@ class BaseMap {
   bool _loaded;
 
   // Sets the zoom of the map.
-  setZoom(num zoom, ZoomOptions options) {
+  setZoom(num zoom, [ZoomOptions options=null]) {
     if (!this._loaded) {
       this._zoom = this._limitZoom(zoom);
       return;
@@ -138,12 +143,12 @@ class BaseMap {
   }
 
   // Zooms the map while keeping a specified point on the map stationary (e.g. used internally for scroll zoom and double-click zoom).
-  setZoomAroundLatLng(LatLng latlng, num zoom, ZoomOptions options) {
+  setZoomAroundLatLng(LatLng latlng, num zoom, [ZoomOptions options = null]) {
     setZoomAround(latLngToContainerPoint(latlng), zoom, options);
   }
 
   // Zooms the map while keeping a specified point on the map stationary (e.g. used internally for scroll zoom and double-click zoom).
-  setZoomAround(Point containerPoint, num zoom, ZoomOptions options) {
+  setZoomAround(geom.Point containerPoint, num zoom, [ZoomOptions options = null]) {
     final scale = this.getZoomScale(zoom),
         viewHalf = this.getSize().divideBy(2),
 
@@ -158,23 +163,23 @@ class BaseMap {
     if (options == null) {
       options = new ZoomPanOptions();
     }
-    bounds = bounds.getBounds ? bounds.getBounds() : new LatLngBounds.latLngBounds(bounds);
+//    bounds = bounds.getBounds ? bounds.getBounds() : new LatLngBounds.latLngBounds(bounds);
 
-    Point paddingTL;
+    geom.Point paddingTL;
     if (options.paddingTopLeft != null) {
-      paddingTL = new Point(options.paddingTopLeft);
+      paddingTL = new geom.Point.point(options.paddingTopLeft);
     } else if (options.padding != null) {
-      paddingTL = new Point(options.padding);
+      paddingTL = new geom.Point.point(options.padding);
     } else {
-      paddingTL = new Point(0, 0);
+      paddingTL = new geom.Point(0, 0);
     }
-    Point paddingBR;
+    geom.Point paddingBR;
     if (options.paddingTopLeft != null) {
-      paddingBR = new Point.point(options.paddingBottomRight);
+      paddingBR = new geom.Point.point(options.paddingBottomRight);
     } else if (options.padding != null) {
-      paddingBR = new Point.point(options.padding);
+      paddingBR = new geom.Point.point(options.padding);
     } else {
-      paddingBR = new Point([0, 0]);
+      paddingBR = new geom.Point(0, 0);
     }
 
     var zoom = this.getBoundsZoom(bounds, false, paddingTL.add(paddingBR));
@@ -192,32 +197,34 @@ class BaseMap {
   }
 
   // Sets a map view that mostly contains the whole world with the maximum zoom level possible.
-  void fitWorld(ZoomPanOptions options) {
-    this.fitBounds([[-90, -180], [90, 180]], options);
+  void fitWorld([ZoomPanOptions options = null]) {
+    this.fitBounds(new LatLngBounds.array([[-90, -180], [90, 180]]), options);
   }
 
   // Pans the map to a given center. Makes an animated pan if new center is not more than one screen away from the current one.
-  void panTo(LatLng center, PanOptions options) { // (LatLng)
+  void panTo(LatLng center, [PanOptions options = null]) { // (LatLng)
     this.setView(center, this._zoom, new ZoomPanOptions(pan: options));
   }
 
-  panBy(offset) { // (Point)
+  // Pans the map by a given number of pixels (animated).
+  void panBy(geom.Point offset) {
     // replaced with animated panBy in Map.PanAnimation.js
-    this.fire('movestart');
+    this.fire(EventType.MOVESTART);
 
-    this._rawPanBy(L.point(offset));
+    this._rawPanBy(new geom.Point.point(offset));
 
-    this.fire('move');
-    return this.fire('moveend');
+    this.fire(EventType.MOVE);
+    this.fire(EventType.MOVEEND);
   }
 
-  setMaxBounds(bounds) {
-    bounds = L.latLngBounds(bounds);
+  // Restricts the map view to the given bounds (see map maxBounds option).
+  setMaxBounds(LatLngBounds bounds) {
+    bounds = new LatLngBounds.latLngBounds(bounds);
 
-    this.options.maxBounds = bounds;
+    this.stateOptions.maxBounds = bounds;
 
-    if (!bounds) {
-      return this.off('moveend', this._panInsideMaxBounds, this);
+    if (bounds == null) {
+      return this.off(EventType.MOVEEND, this._panInsideMaxBounds, this);
     }
 
     if (this._loaded) {
@@ -227,89 +234,104 @@ class BaseMap {
     return this.on('moveend', this._panInsideMaxBounds, this);
   }
 
-  panInsideBounds(bounds, options) {
+  // Pans the map to the closest view that would lie inside the given bounds
+  // (if it's not already), controlling the animation using the options
+  // specific, if any.
+  void panInsideBounds(LatLngBounds bounds, [PanOptions options = null]) {
     var center = this.getCenter(),
       newCenter = this._limitCenter(center, this._zoom, bounds);
 
-    if (center.equals(newCenter)) { return this; }
+    if (center.equals(newCenter)) { return; }
 
-    return this.panTo(newCenter, options);
+    this.panTo(newCenter, options);
   }
 
-  addLayer(layer) {
+  // Adds the given layer to the map. If optional insertAtTheBottom is set to
+  // true, the layer is inserted under all others (useful when switching base
+  // tile layers).
+  void addLayer(Layer layer) {
     // TODO method is too big, refactor
 
-    var id = L.stamp(layer);
+    var id = core.Util.stamp(layer);
 
-    if (this._layers[id]) { return this; }
+    if (this._layers[id]) { return; }
 
     this._layers[id] = layer;
 
     // TODO getMaxZoom, getMinZoom in ILayer (instead of options)
-    if (layer.options && (!isNaN(layer.options.maxZoom) || !isNaN(layer.options.minZoom))) {
-      this._zoomBoundLayers[id] = layer;
-      this._updateZoomLevels();
+    if (layer is TileLayer) {
+      if (!layer.options.maxZoom.isNaN || !layer.options.minZoom.isNaN) {
+        this._zoomBoundLayers[id] = layer;
+        this._updateZoomLevels();
+      }
     }
 
     // TODO looks ugly, refactor!!!
-    if (this.options.zoomAnimation && L.TileLayer && (layer is L.TileLayer)) {
+    if (this.animationOptions.zoomAnimation && layer is TileLayer) {
       this._tileLayersNum++;
       this._tileLayersToLoad++;
-      layer.on('load', this._onTileLayerLoad, this);
+      layer.on(EventType.LOAD, this._onTileLayerLoad, this);
     }
 
     if (this._loaded) {
       this._layerAdd(layer);
     }
 
-    return this;
+    return;
   }
 
-  removeLayer(layer) {
-    var id = L.stamp(layer);
+  // Removes the given layer from the map.
+  void removeLayer(Layer layer) {
+    var id = core.Util.stamp(layer);
 
-    if (!this._layers[id]) { return this; }
+    if (!this._layers[id]) { return; }
 
     if (this._loaded) {
       layer.onRemove(this);
     }
 
-    delete(this._layers[id]);
+    this._layers.remove(id);
 
     if (this._loaded) {
       this.fire('layerremove', {layer: layer});
     }
 
-    if (this._zoomBoundLayers[id]) {
-      delete(this._zoomBoundLayers[id]);
+    if (this._zoomBoundLayers.containsKey(id)) {
+      this._zoomBoundLayers.remove(id);
       this._updateZoomLevels();
     }
 
     // TODO looks ugly, refactor
-    if (this.options.zoomAnimation && L.TileLayer && (layer is L.TileLayer)) {
+    if (this.animationOptions.zoomAnimation && layer is TileLayer) {
       this._tileLayersNum--;
       this._tileLayersToLoad--;
       layer.off('load', this._onTileLayerLoad, this);
     }
 
-    return this;
+    return;
   }
 
-  hasLayer(layer) {
-    if (!layer) { return false; }
+  // Returns true if the given layer is currently added to the map.
+  bool hasLayer(Layer layer) {
+    if (layer == null) { return false; }
 
-    return this._layers.contains(L.stamp(layer));
+    return this._layers.containsKey(core.Util.stamp(layer));
   }
 
-  eachLayer(method, context) {
+  /*eachLayer(method, context) {
     for (var i in this._layers) {
       method.call(context, this._layers[i]);
     }
     return this;
-  }
+  }*/
 
-  invalidateSize(options) {
-    if (!this._loaded) { return this; }
+  // Checks if the map container size changed and updates the map if so — call
+  // it after you've changed the map size dynamically, also animating pan by
+  // default. If options.pan is false, panning will not occur. If
+  // options.debounceMoveend is true, it will delay moveend event so that it
+  // doesn't happen often even if the method is called many times in a row.
+  void invalidateSize(ZoomPanOptions options) {
+    if (!this._loaded) { return; }
 
     options = L.extend({
       animate: false,
@@ -325,7 +347,7 @@ class BaseMap {
         newCenter = newSize.divideBy(2).round(),
         offset = oldCenter.subtract(newCenter);
 
-    if (!offset.x && !offset.y) { return this; }
+    if (!offset.x && !offset.y) { return; }
 
     if (options.animate && options.pan) {
       this.panBy(offset);
@@ -345,7 +367,7 @@ class BaseMap {
       }
     }
 
-    return this.fire('resize', {
+    this.fire(EventType.RESIZE, {
       oldSize: oldSize,
       newSize: newSize
     });
@@ -426,7 +448,7 @@ class BaseMap {
       this.options.maxZoom;
   }
 
-  getBoundsZoom(bounds, inside, padding) { // (LatLngBounds[, Boolean, Point]) -> Number
+  getBoundsZoom(bounds, inside, padding) { // (LatLngBounds[, Boolean, geom.Point]) -> Number
     bounds = L.latLngBounds(bounds);
 
     var zoom = this.getMinZoom() - (inside ? 1 : 0),
@@ -457,7 +479,7 @@ class BaseMap {
 
   getSize() {
     if (!this._size || this._sizeChanged) {
-      this._size = new L.Point(
+      this._size = new L.geom.Point(
         this._container.clientWidth,
         this._container.clientHeight);
 
@@ -646,7 +668,7 @@ class BaseMap {
     this._initialTopLeftPoint = this._getNewTopLeftPoint(center);
 
     if (!preserveMapOffset) {
-      L.DomUtil.setPosition(this._mapPane, new L.Point(0, 0));
+      L.DomUtil.setPosition(this._mapPane, new L.geom.Point(0, 0));
     } else {
       this._initialTopLeftPoint._add(this._getMapPanePos());
     }
@@ -708,8 +730,8 @@ class BaseMap {
     }
   }
 
-  _panInsideMaxBounds() {
-    this.panInsideBounds(this.options.maxBounds);
+  bool _panInsideMaxBounds([Object obj=null, core.Event event=null]) {
+    this.panInsideBounds(this.stateOptions.maxBounds);
   }
 
   _checkIfLoaded() {
@@ -784,7 +806,7 @@ class BaseMap {
     });
   }
 
-  _onTileLayerLoad() {
+  _onTileLayerLoad([Object obj=null, core.Event event=null]) {
     this._tileLayersToLoad--;
     if (this._tileLayersNum && !this._tileLayersToLoad) {
       this.fire('tilelayersload');
@@ -879,7 +901,7 @@ class BaseMap {
         dx = this._rebound(nwOffset.x, -seOffset.x),
         dy = this._rebound(nwOffset.y, -seOffset.y);
 
-    return new L.Point(dx, dy);
+    return new L.geom.Point(dx, dy);
   }
 
   _rebound(left, right) {

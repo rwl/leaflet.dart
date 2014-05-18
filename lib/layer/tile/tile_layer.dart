@@ -42,35 +42,36 @@ class TileLayerOptions {
 }
 
 // TileLayer is used for standard xyz-numbered tile layers.
-class TileLayer extends Object with core.Events {
+class TileLayer extends Object with core.Events implements Layer {
 
   String _url;
   BaseMap _map;
   bool _animated;
 
-  final Map<String, Object> options = {
-    'minZoom': 0,
-    'maxZoom': 18,
-    'tileSize': 256,
-    'subdomains': 'abc',
-    'errorTileUrl': '',
-    'attribution': '',
-    'zoomOffset': 0,
-    'opacity': 1,
-    /*
-    maxNativeZoom: null,
-    zIndex: null,
-    tms: false,
-    continuousWorld: false,
-    noWrap: false,
-    zoomReverse: false,
-    detectRetina: false,
-    reuseTiles: false,
-    bounds: false,
-    */
-    'unloadInvisibleTiles': core.Browser.mobile,
-    'updateWhenIdle': core.Browser.mobile
-  };
+//  final Map<String, Object> options = {
+//    'minZoom': 0,
+//    'maxZoom': 18,
+//    'tileSize': 256,
+//    'subdomains': 'abc',
+//    'errorTileUrl': '',
+//    'attribution': '',
+//    'zoomOffset': 0,
+//    'opacity': 1,
+//    /*
+//    maxNativeZoom: null,
+//    zIndex: null,
+//    tms: false,
+//    continuousWorld: false,
+//    noWrap: false,
+//    zoomReverse: false,
+//    detectRetina: false,
+//    reuseTiles: false,
+//    bounds: false,
+//    */
+//    'unloadInvisibleTiles': core.Browser.mobile,
+//    'updateWhenIdle': core.Browser.mobile
+//  };
+  TileLayerOptions options;
 
   TileLayer(String url, Map<String, Object> options) {
     this.options.addAll(options);

@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import '../../core/core.dart' as core;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
+import '../layer.dart';
 import '../../geometry/geometry.dart';
 
 part 'anim.dart';

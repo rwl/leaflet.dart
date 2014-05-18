@@ -216,11 +216,11 @@ class Events {
   Map<String, Map<int, List<Event>>> _contextEvents;
   Map<String, int> _numContextEvents;
 
-  on(String types, Action fn, [Map context=null]) {
+  on(EventType types, Action fn, [BaseMap context=null]) {
     return addEventListener(types, fn);
   }
 
-  addEventListener(String types, Action fn, [Map context=null]) { // (String, Function[, Object]) or (Object[, Object])
+  addEventListener(EventType types, Action fn, [Map context=null]) { // (String, Function[, Object]) or (Object[, Object])
 
     // types can be a map of types/handlers
 //    if (L.Util.invokeEach(types, this.addEventListener, this, fn, context)) { return this; }
@@ -306,7 +306,7 @@ class Events {
 //    return (events.containsKey(type) && events[type].length > 0) || (events.containsKey(type + '_idx') && events[type + '_idx_len'] > 0);
   }
 
-  off([String types = null, Action fn = null, Map context = null]) {
+  off([String types = null, Action fn = null, BaseMap context = null]) {
     return removeEventListener(types, fn, context);
   }
 

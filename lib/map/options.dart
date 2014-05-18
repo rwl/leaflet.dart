@@ -24,7 +24,7 @@ class MapStateOptions {
 
   // Coordinate Reference System to use. Don't change this if you're not sure
   // what it means.
-  CRS crs = crs.EPSG3857;
+  CRS crs = EPSG3857;
 }
 
 class InteractionOptions {
@@ -168,15 +168,15 @@ class ZoomPanOptions {
   // shouldn't be accounted for when setting the view to fit bounds. Useful if
   // you have some control overlays on the map like a sidebar and you don't want
   // them to obscure objects you're zooming to.
-  Point   paddingTopLeft;
+  geom.Point   paddingTopLeft;
   // The same for bottom right corner of the map.
-  Point   paddingBottomRight  = new Point([0, 0]);
+  geom.Point   paddingBottomRight  = new geom.Point(0, 0);
   // Equivalent of setting both top left and bottom right padding to the same
   // value.
-  Point padding = new Point([0, 0]);
-  /*void set padding(Point point) {
+  geom.Point padding = new geom.Point(0, 0);
+  /*void set padding(geom.Point point) {
     if (point == null) {
-      point = new Point([0, 0]);
+      point = new geom.Point([0, 0]);
     }
     paddingTopLeft = point;
     paddingBottomRight = point;
@@ -187,11 +187,11 @@ class ZoomPanOptions {
   ZoomPanOptions({this.reset: false, this.pan, this.zoom, this.paddingTopLeft: null,
     this.paddingBottomRight: null, this.maxZoom}) {
     if (paddingTopLeft == null) {
-      paddingTopLeft = new Point([0, 0]);
+      paddingTopLeft = new geom.Point(0, 0);
     }
     this.paddingTopLeft = paddingTopLeft;
     if (paddingBottomRight == null) {
-      paddingBottomRight = new Point([0, 0]);
+      paddingBottomRight = new geom.Point(0, 0);
     }
     this.paddingBottomRight = paddingBottomRight;
   }
