@@ -2,7 +2,8 @@ library leaflet.layer.marker;
 
 import 'dart:html';
 
-import '../../core/core.dart';
+import '../../core/core.dart' as core;
+import '../../core/core.dart' show EventType;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../dom/dom.dart';
@@ -47,7 +48,7 @@ class MarkerOptions {
 
 
 // Marker is used to display clickable/draggable icons on the map.
-class Marker extends Object with Events {
+class Marker extends Object with core.Events {
 
   LatLng _latlng;
   BaseMap _map;
@@ -55,7 +56,7 @@ class Marker extends Object with Events {
   var _icon, _shadow;
   var _zIndex;
 
-  final Map<String, Object> options = {
+  /*final Map<String, Object> options = {
     'icon': new Icon.Default(),
     'title': '',
     'alt': '',
@@ -66,213 +67,212 @@ class Marker extends Object with Events {
     'opacity': 1,
     'riseOnHover': false,
     'riseOffset': 250
-  };
+  };*/
+  final MarkerOptions options;
 
-  Marker(LatLng latlng, Map<String, Object> options) {
-    this.options.addAll(options);
-    this._latlng = new LatLng.latLng(latlng);
+  Marker(LatLng latlng, this.options) {
+    _latlng = new LatLng.latLng(latlng);
   }
 
-  onAdd(BaseMap map) {
-    this._map = map;
+  void onAdd(BaseMap map) {
+    _map = map;
 
-    map.on('viewreset', this.update, this);
+    map.on(EventType.VIEWRESET, this.update, this);
 
-    this._initIcon();
-    this.update();
-    this.fire('add');
+    _initIcon();
+    update();
+    fire(EventType.ADD);
 
-    if (map.options['zoomAnimation'] && map.options['markerZoomAnimation']) {
-      map.on('zoomanim', this._animateZoom, this);
+    if (map.animationOptions.zoomAnimation && map.animationOptions.markerZoomAnimation) {
+      map.on(EventType.ZOOMANIM, this._animateZoom, this);
     }
   }
 
-  addTo(BaseMap map) {
+  // Adds the marker to the map.
+  void addTo(BaseMap map) {
     map.addLayer(this);
-    return this;
   }
 
-  onRemove(BaseMap map) {
-    if (this.dragging) {
-      this.dragging.disable();
+  void onRemove(BaseMap map) {
+    if (dragging) {
+      dragging.disable();
     }
 
-    this._removeIcon();
-    this._removeShadow();
+    _removeIcon();
+    _removeShadow();
 
-    this.fire('remove');
+    fire(EventType.REMOVE);
 
     map.off({
       'viewreset': this.update,
       'zoomanim': this._animateZoom
     }, this);
 
-    this._map = null;
+    _map = null;
   }
 
-  getLatLng() {
-    return this._latlng;
+  // Returns the current geographical position of the marker.
+  LatLng getLatLng() {
+    return _latlng;
   }
 
-  setLatLng(latlng) {
-    this._latlng = new LatLng.latLng(latlng);
+  // Changes the marker position to the given point.
+  void setLatLng(LatLng latlng) {
+    _latlng = new LatLng.latLng(latlng);
 
-    this.update();
+    update();
 
-    return this.fire('move', { 'latlng': this._latlng });
+    fire(EventType.MOVE, { 'latlng': _latlng });
   }
 
-  setZIndexOffset(offset) {
-    this.options['zIndexOffset'] = offset;
-    this.update();
-
-    return this;
+  // Changes the zIndex offset of the marker.
+  void setZIndexOffset(num offset) {
+    options.zIndexOffset = offset;
+    update();
   }
 
-  setIcon(icon) {
+  // Changes the marker icon.
+  void setIcon(Icon icon) {
+    options.icon = icon;
 
-    this.options['icon'] = icon;
-
-    if (this._map != null) {
-      this._initIcon();
-      this.update();
+    if (_map != null) {
+      _initIcon();
+      update();
     }
 
-    if (this._popup != null) {
-      this.bindPopup(this._popup);
+    if (_popup != null) {
+      bindPopup(_popup);
     }
-
-    return this;
   }
 
-  update() {
-    if (this._icon != null) {
-      var pos = this._map.latLngToLayerPoint(this._latlng).round();
-      this._setPos(pos);
+  // Updates the marker position, useful if coordinates of its latLng object
+  // were changed directly.
+  void update() {
+    if (_icon != null) {
+      var pos = _map.latLngToLayerPoint(_latlng).round();
+      _setPos(pos);
     }
-
-    return this;
   }
 
   _initIcon() {
-    final options = this.options;
-    final map = this._map;
-    final animation = (map.options['zoomAnimation'] && map.options['markerZoomAnimation']);
+    final map = _map;
+    final animation = (map.animationOptions.zoomAnimation && map.animationOptions.markerZoomAnimation);
     final classToAdd = animation ? 'leaflet-zoom-animated' : 'leaflet-zoom-hide';
 
-    final icon = options['icon'].createIcon(this._icon);
+    final icon = options.icon.createIcon(_icon);
     bool addIcon = false;
 
     // if we're not reusing the icon, remove the old one and init new one
-    if (icon != this._icon) {
-      if (this._icon) {
-        this._removeIcon();
+    if (icon != _icon) {
+      if (_icon) {
+        _removeIcon();
       }
       addIcon = true;
 
-      if (options.containsKey('title')) {
-        icon.title = options['title'];
+      if (options.title != null) {
+        icon.title = options.title;
       }
 
-      if (options.containsKey('alt')) {
-        icon.alt = options['alt'];
+      if (options.alt != null) {
+        icon.alt = options.alt;
       }
     }
 
-    L.DomUtil.addClass(icon, classToAdd);
+    DomUtil.addClass(icon, classToAdd);
 
-    if (options.containsKey('keyboard')) {
+    if (options.keyboard) {
       icon.tabIndex = '0';
     }
 
-    this._icon = icon;
+    _icon = icon;
 
-    this._initInteraction();
+    _initInteraction();
 
-    if (options.containsKey('riseOnHover')) {
+    if (options.riseOnHover) {
       DomEvent
-        .on(icon, 'mouseover', this._bringToFront, this)
-        .on(icon, 'mouseout', this._resetZIndex, this);
+        .on(icon, 'mouseover', _bringToFront, this)
+        .on(icon, 'mouseout', _resetZIndex, this);
     }
 
-    final newShadow = options['icon'].createShadow(this._shadow);
+    final newShadow = options.icon.createShadow(_shadow);
     bool addShadow = false;
 
-    if (newShadow != this._shadow) {
-      this._removeShadow();
+    if (newShadow != _shadow) {
+      _removeShadow();
       addShadow = true;
     }
 
     if (newShadow != null) {
       DomUtil.addClass(newShadow, classToAdd);
     }
-    this._shadow = newShadow;
+    _shadow = newShadow;
 
 
-    if (options['opacity'] < 1) {
-      this._updateOpacity();
+    if (options.opacity < 1) {
+      _updateOpacity();
     }
 
 
-    final panes = this._map.panes;
+    final panes = _map.panes;
 
     if (addIcon) {
-      panes['markerPane'].append(this._icon);
+      panes['markerPane'].append(_icon);
     }
 
     if (newShadow != null && addShadow) {
-      panes['shadowPane'].append(this._shadow);
+      panes['shadowPane'].append(_shadow);
     }
   }
 
   _removeIcon() {
-    if (this.options.containsKey('riseOnHover')) {
+    if (options.riseOnHover) {
       DomEvent
-          .off(this._icon, 'mouseover', this._bringToFront)
-          .off(this._icon, 'mouseout', this._resetZIndex);
+          .off(_icon, 'mouseover', _bringToFront)
+          .off(_icon, 'mouseout', _resetZIndex);
     }
 
-    this._map.panes['markerPane'].removeChild(this._icon);
+    //this._map.panes['markerPane'].removeChild(this._icon);
+    _icon.remove();
 
-    this._icon = null;
+    _icon = null;
   }
 
   _removeShadow() {
-    if (this._shadow != null) {
-      this._map.panes['shadowPane'].removeChild(this._shadow);
+    if (_shadow != null) {
+      //this._map.panes['shadowPane'].removeChild(this._shadow);
+      _shadow.remove();
     }
-    this._shadow = null;
+    _shadow = null;
   }
 
   _setPos(pos) {
-    DomUtil.setPosition(this._icon, pos);
+    DomUtil.setPosition(_icon, pos);
 
-    if (this._shadow != null) {
-      DomUtil.setPosition(this._shadow, pos);
+    if (_shadow != null) {
+      DomUtil.setPosition(_shadow, pos);
     }
 
-    this._zIndex = pos.y + this.options['zIndexOffset'];
+    _zIndex = pos.y + options.zIndexOffset;
 
-    this._resetZIndex();
+    _resetZIndex();
   }
 
   _updateZIndex(offset) {
-    this._icon.style.zIndex = this._zIndex + offset;
+    _icon.style.zIndex = _zIndex + offset;
   }
 
   _animateZoom(opt) {
-    var pos = this._map.latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center).round();
+    var pos = _map.latLngToNewLayerPoint(_latlng, opt.zoom, opt.center).round();
 
-    this._setPos(pos);
+    _setPos(pos);
   }
 
   _initInteraction() {
-
-    if (!this.options.containsKey('clickable')) { return; }
+    if (!options.clickable) { return; }
 
     // TODO refactor into something shared with Map/Path/etc. to DRY it up
 
-    final icon = this._icon;
+    final icon = _icon;
     final events = ['dblclick', 'mousedown', 'mouseover', 'mouseout', 'contextmenu'];
 
     DomUtil.addClass(icon, 'leaflet-clickable');
@@ -284,52 +284,52 @@ class Marker extends Object with Events {
     }
 
     if (Handler.MarkerDrag) {
-      this.dragging = new Handler.MarkerDrag(this);
+      dragging = new Handler.MarkerDrag(this);
 
-      if (this.options.containsKey('draggable')) {
-        this.dragging.enable();
+      if (options.draggable) {
+        dragging.enable();
       }
     }
   }
 
   _onMouseClick(e) {
-    final wasDragged = this.dragging != null && this.dragging.moved();
+    final wasDragged = dragging != null && dragging.moved();
 
-    if (this.hasEventListeners(e.type) || wasDragged) {
+    if (hasEventListeners(e.type) || wasDragged) {
       DomEvent.stopPropagation(e);
     }
 
     if (wasDragged) { return; }
 
-    if ((!this.dragging || !this.dragging._enabled) && this._map.dragging != null && this._map.dragging.moved()) {
+    if ((!dragging || !dragging._enabled) && _map.dragging != null && _map.dragging.moved()) {
       return;
     }
 
-    this.fire(e.type, {
+    fire(e.type, {
       'originalEvent': e,
-      'latlng': this._latlng
+      'latlng': _latlng
     });
   }
 
   _onKeyPress(e) {
     if (e.keyCode == 13) {
-      this.fire('click', {
+      fire(EventType.CLICK, {
         'originalEvent': e,
-        'latlng': this._latlng
+        'latlng': _latlng
       });
     }
   }
 
   _fireMouseEvent(e) {
 
-    this.fire(e.type, {
+    fire(e.type, {
       'originalEvent': e,
-      'latlng': this._latlng
+      'latlng': _latlng
     });
 
     // TODO proper custom event propagation
     // this line will always be called if marker is in a FeatureGroup
-    if (e.type == 'contextmenu' && this.hasEventListeners(e.type)) {
+    if (e.type == 'contextmenu' && hasEventListeners(e.type)) {
       DomEvent.preventDefault(e);
     }
     if (e.type != 'mousedown') {
@@ -339,27 +339,26 @@ class Marker extends Object with Events {
     }
   }
 
-  setOpacity(opacity) {
-    this.options['opacity'] = opacity;
-    if (this._map != null) {
-      this._updateOpacity();
+  // Changes the opacity of the marker.
+  void setOpacity(num opacity) {
+    options.opacity = opacity;
+    if (_map != null) {
+      _updateOpacity();
     }
-
-    return this;
   }
 
   _updateOpacity() {
-    DomUtil.setOpacity(this._icon, this.options['opacity']);
-    if (this._shadow != null) {
-      DomUtil.setOpacity(this._shadow, this.options['opacity']);
+    DomUtil.setOpacity(_icon, options.opacity);
+    if (_shadow != null) {
+      DomUtil.setOpacity(_shadow, options.opacity);
     }
   }
 
   _bringToFront() {
-    this._updateZIndex(this.options['riseOffset']);
+    _updateZIndex(options.riseOffset);
   }
 
   _resetZIndex() {
-    this._updateZIndex(0);
+    _updateZIndex(0);
   }
 }

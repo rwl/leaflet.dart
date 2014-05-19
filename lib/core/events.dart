@@ -86,6 +86,17 @@ class EventType {
   static const POPUPOPEN  = const EventType._internal('popupopen');
   // Fired when a popup is closed (using closePopup method).
   static const POPUPCLOSE  = const EventType._internal('popupclose');
+
+  // Marker events.
+
+  // Fired when the marker is added to the map.
+  static const ADD = const EventType._internal('add');
+  // Fired when the marker is removed from the map.
+  static const REMOVE = const EventType._internal('remove');
+
+
+  static const MOUSEENTER  = const EventType._internal('mouseenter');
+  static const MOUSELEAVE  = const EventType._internal('mouseleave');
 }
 
 class Event {
@@ -212,9 +223,9 @@ class Event {
 // Events is used to add custom events functionality to Leaflet classes.
 class Events {
   //Map _leaflet_events;
-  Map<String, List<Event>> _events;
-  Map<String, Map<int, List<Event>>> _contextEvents;
-  Map<String, int> _numContextEvents;
+  Map<EventType, List<Event>> _events;
+  Map<EventType, Map<int, List<Event>>> _contextEvents;
+  Map<EventType, int> _numContextEvents;
 
   on(EventType types, Action fn, [BaseMap context=null]) {
     return addEventListener(types, fn);
@@ -293,7 +304,7 @@ class Events {
     return this;
   }
 
-  bool hasEventListeners(String type) { // (String) -> Boolean
+  bool hasEventListeners(EventType type) {
     //var events = this[eventsKey];
 //    final events = _leaflet_events;
     if (_events != null) {

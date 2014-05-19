@@ -37,15 +37,15 @@ class BaseMap extends Object with core.Events {
   Map _zoomBoundLayers;
   int _tileLayersNum, _tileLayersToLoad;
 
-  factory BaseMap.elem(Element id, Map<String, Object> options) {
+  /*factory BaseMap.elem(Element id, Map<String, Object> options) {
     return new BaseMap(id, options);
   }
 
   factory BaseMap.id(String id, Map<String, Object> options) {
     return new BaseMap(id, options);
-  }
+  }*/
 
-  BaseMap(var id, {MapStateOptions stateOptions: null, InteractionOptions interactionOptions: null,
+  BaseMap(Element container, {MapStateOptions stateOptions: null, InteractionOptions interactionOptions: null,
       KeyboardNavigationOptions keyboardNavigationOptions: null, PanningInertiaOptions panningInertiaOptions: null,
       ControlOptions controlOptions: null, AnimationOptions animationOptions: null, LocateOptions locateOptions: null,
       ZoomPanOptions zoomPanOptions: null}) {
@@ -83,31 +83,31 @@ class BaseMap extends Object with core.Events {
     this.zoomPanOptions = zoomPanOptions;
 
 
-    this._initContainer(id);
-    this._initLayout();
+    _initContainer(container);
+    _initLayout();
 
     // hack for https://github.com/Leaflet/Leaflet/issues/1980
 //    this._onResize = L.bind(this._onResize, this);
 
-    this._initEvents();
+    _initEvents();
 
     if (stateOptions.maxBounds != null) {
-      this.setMaxBounds(stateOptions.maxBounds);
+      setMaxBounds(stateOptions.maxBounds);
     }
 
     if (stateOptions.center != null && zoomPanOptions.zoom != null) {
-      this.setView(new LatLng.latLng(stateOptions.center), zoomPanOptions.zoom, new ZoomPanOptions(reset: true));
+      setView(new LatLng.latLng(stateOptions.center), zoomPanOptions.zoom, new ZoomPanOptions(reset: true));
     }
 
-    this._handlers = [];
+    _handlers = [];
 
-    this._layers = {};
-    this._zoomBoundLayers = {};
-    this._tileLayersNum = 0;
+    _layers = {};
+    _zoomBoundLayers = {};
+    _tileLayersNum = 0;
 
-    this.callInitHooks();
+    callInitHooks();
 
-    this._addLayers(stateOptions.layers);
+    _addLayers(stateOptions.layers);
   }
 
 
@@ -118,8 +118,8 @@ class BaseMap extends Object with core.Events {
   //
   // Replaced by animation-powered implementation in Map.PanAnimation
   setView(LatLng center, num zoom, [ZoomPanOptions options = null]) {
-    zoom = zoom == null ? this.getZoom() : zoom;
-    this._resetView(new LatLng.latLng(center), this._limitZoom(zoom));
+    zoom = zoom == null ? getZoom() : zoom;
+    _resetView(new LatLng.latLng(center), _limitZoom(zoom));
   }
 
   num _zoom;
@@ -127,21 +127,21 @@ class BaseMap extends Object with core.Events {
 
   // Sets the zoom of the map.
   setZoom(num zoom, [ZoomOptions options=null]) {
-    if (!this._loaded) {
-      this._zoom = this._limitZoom(zoom);
+    if (!_loaded) {
+      _zoom = _limitZoom(zoom);
       return;
     }
-    this.setView(this.getCenter(), zoom, new ZoomPanOptions(zoom: options));
+    setView(getCenter(), zoom, new ZoomPanOptions(zoom: options));
   }
 
   // Increases the zoom of the map by delta (1 by default).
   zoomIn([num delta = 1, ZoomOptions options = null]) {
-    return this.setZoom(this._zoom + delta, options);
+    return setZoom(_zoom + delta, options);
   }
 
   // Decreases the zoom of the map by delta (1 by default).
   zoomOut([num delta = 1, ZoomOptions options = null]) {
-    return this.setZoom(this._zoom - delta, options);
+    return setZoom(_zoom - delta, options);
   }
 
   // Zooms the map while keeping a specified point on the map stationary (e.g. used internally for scroll zoom and double-click zoom).
@@ -151,13 +151,13 @@ class BaseMap extends Object with core.Events {
 
   // Zooms the map while keeping a specified point on the map stationary (e.g. used internally for scroll zoom and double-click zoom).
   setZoomAround(geom.Point containerPoint, num zoom, [ZoomOptions options = null]) {
-    final scale = this.getZoomScale(zoom),
-        viewHalf = this.getSize().divideBy(2),
+    final scale = getZoomScale(zoom),
+        viewHalf = getSize().divideBy(2),
 
         centerOffset = containerPoint.subtract(viewHalf).multiplyBy(1 - 1 / scale),
-        newCenter = this.containerPointToLatLng(viewHalf.add(centerOffset));
+        newCenter = containerPointToLatLng(viewHalf.add(centerOffset));
 
-    this.setView(newCenter, zoom, new ZoomPanOptions(zoom: options));
+    setView(newCenter, zoom, new ZoomPanOptions(zoom: options));
   }
 
   // Sets a map view that contains the given geographical bounds with the maximum zoom level possible.
@@ -184,68 +184,68 @@ class BaseMap extends Object with core.Events {
       paddingBR = new geom.Point(0, 0);
     }
 
-    var zoom = this.getBoundsZoom(bounds, false, paddingTL.add(paddingBR));
+    var zoom = getBoundsZoom(bounds, false, paddingTL.add(paddingBR));
     final paddingOffset = paddingBR.subtract(paddingTL).divideBy(2),
 
-        swPoint = this.project(bounds.getSouthWest(), zoom),
-        nePoint = this.project(bounds.getNorthEast(), zoom),
-        center = this.unproject(swPoint.add(nePoint).divideBy(2).add(paddingOffset), zoom);
+        swPoint = project(bounds.getSouthWest(), zoom),
+        nePoint = project(bounds.getNorthEast(), zoom),
+        center = unproject(swPoint.add(nePoint).divideBy(2).add(paddingOffset), zoom);
 
     if (options != null && options.maxZoom != null) {
       zoom = math.min(options.maxZoom, zoom);
     }
 
-    return this.setView(center, zoom, options);
+    return setView(center, zoom, options);
   }
 
   // Sets a map view that mostly contains the whole world with the maximum zoom level possible.
   void fitWorld([ZoomPanOptions options = null]) {
-    this.fitBounds(new LatLngBounds.array([[-90, -180], [90, 180]]), options);
+    fitBounds(new LatLngBounds.array([[-90, -180], [90, 180]]), options);
   }
 
   // Pans the map to a given center. Makes an animated pan if new center is not more than one screen away from the current one.
   void panTo(LatLng center, [PanOptions options = null]) { // (LatLng)
-    this.setView(center, this._zoom, new ZoomPanOptions(pan: options));
+    setView(center, _zoom, new ZoomPanOptions(pan: options));
   }
 
   // Pans the map by a given number of pixels (animated).
   void panBy(geom.Point offset) {
     // replaced with animated panBy in Map.PanAnimation.js
-    this.fire(EventType.MOVESTART);
+    fire(EventType.MOVESTART);
 
-    this._rawPanBy(new geom.Point.point(offset));
+    _rawPanBy(new geom.Point.point(offset));
 
-    this.fire(EventType.MOVE);
-    this.fire(EventType.MOVEEND);
+    fire(EventType.MOVE);
+    fire(EventType.MOVEEND);
   }
 
   // Restricts the map view to the given bounds (see map maxBounds option).
-  setMaxBounds(LatLngBounds bounds) {
+  void setMaxBounds(LatLngBounds bounds) {
     bounds = new LatLngBounds.latLngBounds(bounds);
 
-    this.stateOptions.maxBounds = bounds;
+    stateOptions.maxBounds = bounds;
 
     if (bounds == null) {
-      return this.off(EventType.MOVEEND, this._panInsideMaxBounds, this);
+      return off(EventType.MOVEEND, _panInsideMaxBounds, this);
     }
 
-    if (this._loaded) {
-      this._panInsideMaxBounds();
+    if (_loaded) {
+      _panInsideMaxBounds();
     }
 
-    return this.on(EventType.MOVEEND, this._panInsideMaxBounds, this);
+    on(EventType.MOVEEND, _panInsideMaxBounds, this);
   }
 
   // Pans the map to the closest view that would lie inside the given bounds
   // (if it's not already), controlling the animation using the options
   // specific, if any.
   void panInsideBounds(LatLngBounds bounds, [PanOptions options = null]) {
-    var center = this.getCenter(),
-      newCenter = this._limitCenter(center, this._zoom, bounds);
+    var center = getCenter(),
+      newCenter = _limitCenter(center, _zoom, bounds);
 
     if (center.equals(newCenter)) { return; }
 
-    this.panTo(newCenter, options);
+    panTo(newCenter, options);
   }
 
   // Adds the given layer to the map. If optional insertAtTheBottom is set to
@@ -256,27 +256,27 @@ class BaseMap extends Object with core.Events {
 
     var id = core.Util.stamp(layer);
 
-    if (this._layers[id]) { return; }
+    if (_layers[id]) { return; }
 
-    this._layers[id] = layer;
+    _layers[id] = layer;
 
     // TODO getMaxZoom, getMinZoom in ILayer (instead of options)
     if (layer is TileLayer) {
       if (!layer.options.maxZoom.isNaN || !layer.options.minZoom.isNaN) {
-        this._zoomBoundLayers[id] = layer;
-        this._updateZoomLevels();
+        _zoomBoundLayers[id] = layer;
+        _updateZoomLevels();
       }
     }
 
     // TODO looks ugly, refactor!!!
-    if (this.animationOptions.zoomAnimation && layer is TileLayer) {
-      this._tileLayersNum++;
-      this._tileLayersToLoad++;
-      layer.on(EventType.LOAD, this._onTileLayerLoad, this);
+    if (animationOptions.zoomAnimation && layer is TileLayer) {
+      _tileLayersNum++;
+      _tileLayersToLoad++;
+      layer.on(EventType.LOAD, _onTileLayerLoad, this);
     }
 
-    if (this._loaded) {
-      this._layerAdd(layer);
+    if (_loaded) {
+      _layerAdd(layer);
     }
 
     return;
@@ -286,28 +286,28 @@ class BaseMap extends Object with core.Events {
   void removeLayer(Layer layer) {
     var id = core.Util.stamp(layer);
 
-    if (!this._layers[id]) { return; }
+    if (!_layers.containsKey(id)) { return; }
 
-    if (this._loaded) {
+    if (_loaded) {
       layer.onRemove(this);
     }
 
-    this._layers.remove(id);
+    _layers.remove(id);
 
-    if (this._loaded) {
-      this.fire('layerremove', {layer: layer});
+    if (_loaded) {
+      fire(EventType.LAYERREMOVE, {'layer': layer});
     }
 
-    if (this._zoomBoundLayers.containsKey(id)) {
-      this._zoomBoundLayers.remove(id);
-      this._updateZoomLevels();
+    if (_zoomBoundLayers.containsKey(id)) {
+      _zoomBoundLayers.remove(id);
+      _updateZoomLevels();
     }
 
     // TODO looks ugly, refactor
-    if (this.animationOptions.zoomAnimation && layer is TileLayer) {
-      this._tileLayersNum--;
-      this._tileLayersToLoad--;
-      layer.off('load', this._onTileLayerLoad, this);
+    if (animationOptions.zoomAnimation && layer is TileLayer) {
+      _tileLayersNum--;
+      _tileLayersToLoad--;
+      layer.off('load', _onTileLayerLoad, this);
     }
 
     return;
@@ -317,12 +317,12 @@ class BaseMap extends Object with core.Events {
   bool hasLayer(Layer layer) {
     if (layer == null) { return false; }
 
-    return this._layers.containsKey(core.Util.stamp(layer));
+    return _layers.containsKey(core.Util.stamp(layer));
   }
 
   /*eachLayer(method, context) {
-    for (var i in this._layers) {
-      method.call(context, this._layers[i]);
+    for (var i in _layers) {
+      method.call(context, _layers[i]);
     }
     return this;
   }*/
@@ -335,19 +335,19 @@ class BaseMap extends Object with core.Events {
   // default. If options.pan is false, panning will not occur. If
   // options.debounceMoveend is true, it will delay moveend event so that it
   // doesn't happen often even if the method is called many times in a row.
-  void invalidateSize(bool animate, [bool pan=true, bool debounceMoveend=false]) {
-    if (!this._loaded) { return; }
+  void invalidateSize({bool animate: true, bool pan: true, bool debounceMoveend: false}) {
+    if (!_loaded) { return; }
 
     /*options = L.extend({
       animate: false,
       pan: true
     }, options == true ? {animate: true} : options);*/
 
-    var oldSize = this.getSize();
-    this._sizeChanged = true;
-    this._initialCenter = null;
+    var oldSize = getSize();
+    _sizeChanged = true;
+    _initialCenter = null;
 
-    var newSize = this.getSize(),
+    var newSize = getSize(),
         oldCenter = oldSize.divideBy(2).round(),
         newCenter = newSize.divideBy(2).round(),
         offset = oldCenter.subtract(newCenter);
@@ -355,24 +355,24 @@ class BaseMap extends Object with core.Events {
     if (!offset.x && !offset.y) { return; }
 
     if (animate && pan) {
-      this.panBy(offset);
+      panBy(offset);
 
     } else {
       if (pan) {
-        this._rawPanBy(offset);
+        _rawPanBy(offset);
       }
 
-      this.fire('move');
+      fire(EventType.MOVE);
 
       if (debounceMoveend) {
-        clearTimeout(this._sizeTimer);
-        this._sizeTimer = setTimeout(bind(this.fire, this, EventType.MOVEEND), 200);
+        clearTimeout(_sizeTimer);
+        _sizeTimer = setTimeout(bind(this.fire, this, EventType.MOVEEND), 200);
       } else {
-        this.fire(EventType.MOVEEND);
+        fire(EventType.MOVEEND);
       }
     }
 
-    this.fire(EventType.RESIZE, {
+    fire(EventType.RESIZE, {
       'oldSize': oldSize,
       'newSize': newSize
     });
@@ -384,9 +384,9 @@ class BaseMap extends Object with core.Events {
 
     var handler = this[name] = new HandlerClass(this);
 
-    this._handlers.push(handler);
+    _handlers.push(handler);
 
-    if (this.options[name]) {
+    if (options[name]) {
       handler.enable();
     }
 
@@ -395,26 +395,26 @@ class BaseMap extends Object with core.Events {
 
   // Destroys the map and clears all related event listeners.
   remove() {
-    if (this._loaded) {
-      this.fire(EventType.UNLOAD);
+    if (_loaded) {
+      fire(EventType.UNLOAD);
     }
 
-    this._initEvents(false);
+    _initEvents(false);
 
     /*try {
       // throws error in IE6-8
-      delete(this._container._leaflet);
+      delete(_container._leaflet);
     } catch (e) {
-      this._container._leaflet = undefined;
+      _container._leaflet = undefined;
     }*/
     containerProp[_container] = null;
 
-    this._clearPanes();
-    if (this._clearControlPos) {
-      this._clearControlPos();
+    _clearPanes();
+    if (_clearControlPos) {
+      _clearControlPos();
     }
 
-    this._clearHandlers();
+    _clearHandlers();
 
     return this;
   }
@@ -424,40 +424,40 @@ class BaseMap extends Object with core.Events {
 
   // Returns the geographical center of the map view.
   LatLng getCenter() {
-    this._checkIfLoaded();
+    _checkIfLoaded();
 
-    if (this._initialCenter && !this._moved()) {
-      return this._initialCenter;
+    if (_initialCenter && !_moved()) {
+      return _initialCenter;
     }
-    return this.layerPointToLatLng(this._getCenterLayerPoint());
+    return layerPointToLatLng(_getCenterLayerPoint());
   }
 
   // Returns the current zoom of the map view.
   num getZoom() {
-    return this._zoom;
+    return _zoom;
   }
 
   // Returns the LatLngBounds of the current map view.
   LatLngBounds getBounds() {
-    final bounds = this.getPixelBounds(),
-        sw = this.unproject(bounds.getBottomLeft()),
-        ne = this.unproject(bounds.getTopRight());
+    final bounds = getPixelBounds(),
+        sw = unproject(bounds.getBottomLeft()),
+        ne = unproject(bounds.getTopRight());
 
     return new LatLngBounds(sw, ne);
   }
 
   // Returns the minimum zoom level of the map.
   num getMinZoom() {
-    return this.stateOptions.minZoom == null ?
-      (this._layersMinZoom == null ? 0 : this._layersMinZoom) :
-      this.stateOptions.minZoom;
+    return stateOptions.minZoom == null ?
+      (_layersMinZoom == null ? 0 : _layersMinZoom) :
+      stateOptions.minZoom;
   }
 
   // Returns the maximum zoom level of the map.
   num getMaxZoom() {
-    return this.stateOptions.maxZoom == null ?
-      (this._layersMaxZoom == null ? double.INFINITY : this._layersMaxZoom) :
-      this.stateOptions.maxZoom;
+    return stateOptions.maxZoom == null ?
+      (_layersMaxZoom == null ? double.INFINITY : _layersMaxZoom) :
+      stateOptions.maxZoom;
   }
 
   // Returns the maximum zoom level on which the given bounds fit to the map
@@ -470,9 +470,9 @@ class BaseMap extends Object with core.Events {
     }
     bounds = new LatLngBounds.latLngBounds(bounds);
 
-    num zoom = this.getMinZoom() - (inside ? 1 : 0);
-    final maxZoom = this.getMaxZoom(),
-        size = this.getSize(),
+    num zoom = getMinZoom() - (inside ? 1 : 0);
+    final maxZoom = getMaxZoom(),
+        size = getSize(),
 
         nw = bounds.getNorthWest(),
         se = bounds.getSouthEast();
@@ -484,7 +484,7 @@ class BaseMap extends Object with core.Events {
 
     do {
       zoom++;
-      boundsSize = this.project(se, zoom).subtract(this.project(nw, zoom)).add(padding);
+      boundsSize = project(se, zoom).subtract(project(nw, zoom)).add(padding);
       zoomNotFound = !inside ? size.contains(boundsSize) : boundsSize.x < size.x || boundsSize.y < size.y;
 
     } while (zoomNotFound && zoom <= maxZoom);
@@ -500,21 +500,21 @@ class BaseMap extends Object with core.Events {
 
   // Returns the current size of the map container.
   geom.Point getSize() {
-    if (this._size == null || this._sizeChanged) {
-      this._size = new geom.Point(
-        this._container.clientWidth,
-        this._container.clientHeight);
+    if (_size == null || _sizeChanged) {
+      _size = new geom.Point(
+        _container.clientWidth,
+        _container.clientHeight);
 
-      this._sizeChanged = false;
+      _sizeChanged = false;
     }
-    return this._size.clone();
+    return _size.clone();
   }
 
   // Returns the bounds of the current map view in projected pixel coordinates
   // (sometimes useful in layer and overlay implementations).
   Bounds getPixelBounds() {
-    var topLeftPoint = this._getTopLeftPoint();
-    return new Bounds(topLeftPoint, topLeftPoint.add(this.getSize()));
+    var topLeftPoint = _getTopLeftPoint();
+    return new Bounds(topLeftPoint, topLeftPoint.add(getSize()));
   }
 
   geom.Point _initialTopLeftPoint;
@@ -522,8 +522,8 @@ class BaseMap extends Object with core.Events {
   // Returns the projected pixel coordinates of the top left point of the map
   // layer (useful in custom layer and overlay implementations).
   geom.Point getPixelOrigin() {
-    this._checkIfLoaded();
-    return this._initialTopLeftPoint;
+    _checkIfLoaded();
+    return _initialTopLeftPoint;
   }
 
   // Returns an object with different map panes (to render overlays in).
@@ -531,71 +531,82 @@ class BaseMap extends Object with core.Events {
 
   // Returns the container element of the map.
   Element getContainer() {
-    return this._container;
+    return _container;
   }
 
 
   // TODO replace with universal implementation after refactoring projections
 
   getZoomScale(toZoom) {
-    var crs = this.options.crs;
-    return crs.scale(toZoom) / crs.scale(this._zoom);
+    final crs = stateOptions.crs;
+    return crs.scale(toZoom) / crs.scale(_zoom);
   }
 
   getScaleZoom(scale) {
-    return this._zoom + (Math.log(scale) / Math.LN2);
+    return _zoom + (math.log(scale) / math.LN2);
   }
 
 
   // conversion methods
 
-  project(latlng, [zoom=null]) { // (LatLng[, Number]) -> Point
-    zoom = zoom == null ? this._zoom : zoom;
-    return this.options.crs.latLngToPoint(L.latLng(latlng), zoom);
+  // Projects the given geographical coordinates to absolute pixel coordinates for the given zoom level (current zoom level by default).
+  geom.Point project(LatLng latlng, [num zoom = null]) {
+    zoom = zoom == null ? _zoom : zoom;
+    return stateOptions.crs.latLngToPoint(new LatLng.latLng(latlng), zoom);
   }
 
-  unproject(point, [zoom=null]) { // (Point[, Number]) -> LatLng
-    zoom = zoom == null ? this._zoom : zoom;
-    return this.options.crs.pointToLatLng(L.point(point), zoom);
+  // Projects the given absolute pixel coordinates to geographical coordinates for the given zoom level (current zoom level by default).
+  LatLng unproject(geom.Point point, [num zoom = null]) {
+    zoom = zoom == null ? _zoom : zoom;
+    return stateOptions.crs.pointToLatLng(new geom.Point.point(point), zoom);
   }
 
-  layerPointToLatLng(point) { // (Point)
-    var projectedPoint = L.point(point).add(this.getPixelOrigin());
-    return this.unproject(projectedPoint);
+  // Returns the geographical coordinates of a given map layer point.
+  LatLng layerPointToLatLng(geom.Point point) {
+    final projectedPoint = new geom.Point.point(point).add(getPixelOrigin());
+    return unproject(projectedPoint);
   }
 
-  latLngToLayerPoint(latlng) { // (LatLng)
-    var projectedPoint = this.project(L.latLng(latlng))._round();
-    return projectedPoint._subtract(this.getPixelOrigin());
+  // Returns the map layer point that corresponds to the given geographical coordinates (useful for placing overlays on the map).
+  geom.Point latLngToLayerPoint(LatLng latlng) {
+    var projectedPoint = project(new LatLng.latLng(latlng))._round();
+    return projectedPoint._subtract(getPixelOrigin());
   }
 
-  containerPointToLayerPoint(point) { // (Point)
-    return L.point(point).subtract(this._getMapPanePos());
+  // Converts the point relative to the map container to a point relative to the map layer.
+  geom.Point containerPointToLayerPoint(geom.Point point) {
+    return new geom.Point.point(point).subtract(_getMapPanePos());
   }
 
-  layerPointToContainerPoint(point) { // (Point)
-    return L.point(point).add(this._getMapPanePos());
+  // Converts the point relative to the map layer to a point relative to the map container.
+  geom.Point layerPointToContainerPoint(geom.Point point) {
+    return new geom.Point.point(point).add(_getMapPanePos());
   }
 
-  containerPointToLatLng(point) {
-    var layerPoint = this.containerPointToLayerPoint(L.point(point));
-    return this.layerPointToLatLng(layerPoint);
+  // Returns the geographical coordinates of a given map container point.
+  LatLng containerPointToLatLng(geom.Point point) {
+    final layerPoint = containerPointToLayerPoint(new geom.Point.point(point));
+    return layerPointToLatLng(layerPoint);
   }
 
-  latLngToContainerPoint(latlng) {
-    return this.layerPointToContainerPoint(this.latLngToLayerPoint(L.latLng(latlng)));
+  // Returns the map container point that corresponds to the given geographical coordinates.
+  geom.Point latLngToContainerPoint(LatLng latlng) {
+    return layerPointToContainerPoint(latLngToLayerPoint(new LatLng.latLng(latlng)));
   }
 
-  mouseEventToContainerPoint(e) { // (MouseEvent)
-    return L.DomEvent.getMousePosition(e, this._container);
+  // Returns the pixel coordinates of a mouse click (relative to the top left corner of the map) given its event object.
+  geom.Point mouseEventToContainerPoint(core.Event e) {
+    return DomEvent.getMousePosition(e, _container);
   }
 
-  mouseEventToLayerPoint(e) { // (MouseEvent)
-    return this.containerPointToLayerPoint(this.mouseEventToContainerPoint(e));
+  // Returns the pixel coordinates of a mouse click relative to the map layer given its event object.
+  geom.Point mouseEventToLayerPoint(MouseEvent e) {
+    return containerPointToLayerPoint(mouseEventToContainerPoint(e));
   }
 
-  mouseEventToLatLng(e) { // (MouseEvent)
-    return this.layerPointToLatLng(this.mouseEventToLayerPoint(e));
+  // Returns the geographical coordinates of the point the mouse clicked on given the click's event object.
+  LatLng mouseEventToLatLng(MouseEvent e) {
+    return layerPointToLatLng(mouseEventToLayerPoint(e));
   }
 
 
@@ -603,7 +614,7 @@ class BaseMap extends Object with core.Events {
 
   Element _container;
 
-  _initContainerID(String id) {
+  void _initContainerID(String id) {
     final container = DomUtil.get(id);
     if (container == null) {
       throw new Exception('Map container not found.');
@@ -611,8 +622,8 @@ class BaseMap extends Object with core.Events {
     _initContainer(container);
   }
 
-  _initContainer(Element container) {
-    this._container = container;
+  void _initContainer(Element container) {
+    _container = container;
 
     if (containerProp[container] != null) {
       throw new Exception('Map container is already initialized.');
@@ -622,13 +633,13 @@ class BaseMap extends Object with core.Events {
   }
 
   _initLayout() {
-    var container = this._container;
+    var container = _container;
 
     DomUtil.addClass(container, 'leaflet-container' +
       (core.Browser.touch ? ' leaflet-touch' : '') +
       (core.Browser.retina ? ' leaflet-retina' : '') +
       (core.Browser.ielt9 ? ' leaflet-oldie' : '') +
-      (this.animationOptions.fadeAnimation ? ' leaflet-fade-anim' : ''));
+      (animationOptions.fadeAnimation ? ' leaflet-fade-anim' : ''));
 
     var position = DomUtil.getStyle(container, 'position');
 
@@ -636,327 +647,336 @@ class BaseMap extends Object with core.Events {
       container.style.position = 'relative';
     }
 
-    this._initPanes();
+    _initPanes();
 
-    if (this._initControlPos) {
-      this._initControlPos();
+    if (_initControlPos) {
+      _initControlPos();
     }
   }
 
   Map<String, Element> _panes;
-  var _mapPane, _tilePane;
+  Element _mapPane, _tilePane;
 
-  _initPanes() {
-    var panes = this._panes = {};
+  void _initPanes() {
+    final panes = _panes = new Map<String, Element>();
 
-    this._mapPane = panes['mapPane'] = this._createPane('leaflet-map-pane', this._container);
+    _mapPane = panes['mapPane'] = _createPane('leaflet-map-pane', _container);
 
-    this._tilePane = panes['tilePane'] = this._createPane('leaflet-tile-pane', this._mapPane);
-    panes['objectsPane'] = this._createPane('leaflet-objects-pane', this._mapPane);
-    panes['shadowPane'] = this._createPane('leaflet-shadow-pane');
-    panes['overlayPane'] = this._createPane('leaflet-overlay-pane');
-    panes['markerPane'] = this._createPane('leaflet-marker-pane');
-    panes['popupPane'] = this._createPane('leaflet-popup-pane');
+    _tilePane = panes['tilePane'] = _createPane('leaflet-tile-pane', _mapPane);
+    panes['objectsPane'] = _createPane('leaflet-objects-pane', _mapPane);
+    panes['shadowPane'] = _createPane('leaflet-shadow-pane');
+    panes['overlayPane'] = _createPane('leaflet-overlay-pane');
+    panes['markerPane'] = _createPane('leaflet-marker-pane');
+    panes['popupPane'] = _createPane('leaflet-popup-pane');
 
     var zoomHide = ' leaflet-zoom-hide';
 
-    if (!this.options['markerZoomAnimation']) {
-      dom.DomUtil.addClass(panes['markerPane'], zoomHide);
-      dom.DomUtil.addClass(panes['shadowPane'], zoomHide);
-      dom.DomUtil.addClass(panes['popupPane'], zoomHide);
+    if (!animationOptions.markerZoomAnimation) {
+      DomUtil.addClass(panes['markerPane'], zoomHide);
+      DomUtil.addClass(panes['shadowPane'], zoomHide);
+      DomUtil.addClass(panes['popupPane'], zoomHide);
     }
   }
 
-  _createPane(String className, [var container=null]) {
-    return dom.DomUtil.create('div', className, container != null ? container : this._panes['objectsPane']);
+  void _createPane(String className, [Element container=null]) {
+    return DomUtil.create('div', className, container != null ? container : _panes['objectsPane']);
   }
 
-  _clearPanes() {
-    this._container.removeChild(this._mapPane);
+  void _clearPanes() {
+//    _container.removeChild(_mapPane);
+    _mapPane.remove();
   }
 
-  _addLayers([var layers=null]) {
-    layers = layers ? (layers is List ? layers : [layers]) : [];
-
+//  _addLayers([var layers=null]) {
+//    layers = layers ? (layers is List ? layers : [layers]) : [];
+  void _addLayers(List<Layer> layers) {
     for (var i = 0, len = layers.length; i < len; i++) {
-      this.addLayer(layers[i]);
+      addLayer(layers[i]);
     }
   }
 
 
   // private methods that modify map state
 
-  _resetView(center, zoom, [preserveMapOffset=false, afterZoomAnim=false]) {
+  void _resetView(LatLng center, num zoom, [bool preserveMapOffset=false, bool afterZoomAnim=false]) {
 
-    var zoomChanged = (this._zoom != zoom);
+    var zoomChanged = (_zoom != zoom);
 
     if (!afterZoomAnim) {
-      this.fire('movestart');
+      fire(EventType.MOVESTART);
 
       if (zoomChanged) {
-        this.fire('zoomstart');
+        fire(EventType.ZOOMSTART);
       }
     }
 
-    this._zoom = zoom;
-    this._initialCenter = center;
+    _zoom = zoom;
+    _initialCenter = center;
 
-    this._initialTopLeftPoint = this._getNewTopLeftPoint(center);
+    _initialTopLeftPoint = _getNewTopLeftPoint(center);
 
     if (!preserveMapOffset) {
-      L.DomUtil.setPosition(this._mapPane, new L.geom.Point(0, 0));
+      DomUtil.setPosition(_mapPane, new geom.Point(0, 0));
     } else {
-      this._initialTopLeftPoint._add(this._getMapPanePos());
+      _initialTopLeftPoint._add(_getMapPanePos());
     }
 
-    this._tileLayersToLoad = this._tileLayersNum;
+    _tileLayersToLoad = _tileLayersNum;
 
-    var loading = !this._loaded;
-    this._loaded = true;
+    var loading = !_loaded;
+    _loaded = true;
 
     if (loading) {
-      this.fire('load');
-      this.eachLayer(this._layerAdd, this);
+      fire(EventType.LOAD);
+      eachLayer(_layerAdd, this);
     }
 
-    this.fire('viewreset', {hard: !preserveMapOffset});
+    fire(EventType.VIEWRESET, {'hard': !preserveMapOffset});
 
-    this.fire('move');
+    fire(EventType.MOVE);
 
     if (zoomChanged || afterZoomAnim) {
-      this.fire('zoomend');
+      fire(EventType.ZOOMEND);
     }
 
-    this.fire('moveend', {hard: !preserveMapOffset});
+    fire(EventType.MOVEEND, {'hard': !preserveMapOffset});
   }
 
-  _rawPanBy(offset) {
-    L.DomUtil.setPosition(this._mapPane, this._getMapPanePos().subtract(offset));
+  void _rawPanBy(geom.Point offset) {
+    DomUtil.setPosition(_mapPane, _getMapPanePos().subtract(offset));
   }
 
   _getZoomSpan() {
-    return this.getMaxZoom() - this.getMinZoom();
+    return getMaxZoom() - getMinZoom();
   }
 
-  _updateZoomLevels() {
-    var i,
-      minZoom = Infinity,
-      maxZoom = -Infinity,
-      oldZoomSpan = this._getZoomSpan();
+  num _layersMaxZoom, _layersMinZoom;
 
-    for (i in this._zoomBoundLayers) {
-      var layer = this._zoomBoundLayers[i];
-      if (!isNaN(layer.options.minZoom)) {
-        minZoom = Math.min(minZoom, layer.options.minZoom);
+  _updateZoomLevels() {
+    int i = null;
+    num minZoom = double.INFINITY;
+    num maxZoom = double.NEGATIVE_INFINITY;
+    final oldZoomSpan = _getZoomSpan();
+
+    for (i in _zoomBoundLayers) {
+      var layer = _zoomBoundLayers[i];
+      if (!layer.options.minZoom.isNaN) {
+        minZoom = math.min(minZoom, layer.options.minZoom);
       }
-      if (!isNaN(layer.options.maxZoom)) {
-        maxZoom = Math.max(maxZoom, layer.options.maxZoom);
+      if (!layer.options.maxZoom.isNaN) {
+        maxZoom = math.max(maxZoom, layer.options.maxZoom);
       }
     }
 
     if (i == null) { // we have no tilelayers
-      this._layersMaxZoom = this._layersMinZoom = undefined;
+      _layersMaxZoom = _layersMinZoom = null;
     } else {
-      this._layersMaxZoom = maxZoom;
-      this._layersMinZoom = minZoom;
+      _layersMaxZoom = maxZoom;
+      _layersMinZoom = minZoom;
     }
 
-    if (oldZoomSpan != this._getZoomSpan()) {
-      this.fire('zoomlevelschange');
+    if (oldZoomSpan != _getZoomSpan()) {
+      fire(EventType.ZOOMLEVELSCHANGE);
     }
   }
 
   bool _panInsideMaxBounds([Object obj=null, core.Event event=null]) {
-    this.panInsideBounds(this.stateOptions.maxBounds);
+    panInsideBounds(stateOptions.maxBounds);
   }
 
-  _checkIfLoaded() {
-    if (!this._loaded) {
-      throw new Error('Set map center and zoom first.');
+  void _checkIfLoaded() {
+    if (!_loaded) {
+      throw new Exception('Set map center and zoom first.');
     }
   }
 
   // map events
 
-  _initEvents([bool on = true]) {
-    if (dom.DomEvent == null) { return; }
+  void _initEvents([bool on = true]) {
+    if (DomEvent == null) { return; }
 
     if (on) {
-      dom.DomEvent.on(this._container, 'click', this._onMouseClick, this);
+      DomEvent.on(_container, 'click', _onMouseClick, this);
     } else {
-      dom.DomEvent.off(this._container, 'click', this._onMouseClick, this);
+      DomEvent.off(_container, 'click', _onMouseClick, this);
     }
 
-    var events = ['dblclick', 'mousedown', 'mouseup', 'mouseenter',
-                  'mouseleave', 'mousemove', 'contextmenu'],
-        i, len;
+    final events = [EventType.DBLCLICK, EventType.MOUSEDOWN, EventType.MOUSEUP,
+                    EventType.MOUSEENTER, EventType.MOUSELEAVE, EventType.MOUSEMOVE,
+                    EventType.CONTEXTMENU];
 
-    len = events.length;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < events.length; i++) {
       if (on) {
-        DomEvent.on(this._container, events[i], this._fireMouseEvent, this);
+        DomEvent.on(_container, events[i], _fireMouseEvent, this);
       } else {
-        DomEvent.off(this._container, events[i], this._fireMouseEvent, this);
+        DomEvent.off(_container, events[i], _fireMouseEvent, this);
       }
     }
 
-    if (this.interactionOptions.trackResize) {
+    if (interactionOptions.trackResize) {
       if (on) {
-        DomEvent.on(window, 'resize', this._onResize, this);
+        DomEvent.on(window, 'resize', _onResize, this);
       } else {
-        DomEvent.off(window, 'resize', this._onResize, this);
+        DomEvent.off(window, 'resize', _onResize, this);
       }
     }
   }
 
-  _onResize() {
-    L.Util.cancelAnimFrame(this._resizeRequest);
-    this._resizeRequest = L.Util.requestAnimFrame(
-            () { this.invalidateSize({'debounceMoveend': true}); }, this, false, this._container);
+  void _onResize() {
+    core.Util.cancelAnimFrame(_resizeRequest);
+    _resizeRequest = core.Util.requestAnimFrame(
+            () { invalidateSize(debounceMoveend: true); }, this, false, _container);
   }
 
-  _onMouseClick(e) {
-    if (!this._loaded || (!e._simulated &&
-            ((this.dragging && this.dragging.moved()) ||
-             (this.boxZoom  && this.boxZoom.moved()))) ||
-                L.DomEvent._skipped(e)) { return; }
-
-    this.fire('preclick');
-    this._fireMouseEvent(e);
-  }
-
-  _fireMouseEvent(e) {
-    if (!this._loaded || L.DomEvent._skipped(e)) { return; }
-
-    var type = e.type;
-
-    type = (type == 'mouseenter' ? 'mouseover' : (type == 'mouseleave' ? 'mouseout' : type));
-
-    if (!this.hasEventListeners(type)) { return; }
-
-    if (type == 'contextmenu') {
-      L.DomEvent.preventDefault(e);
+  void _onMouseClick(core.Event e) {
+    if (!_loaded ||
+        (!e._simulated && ((this.dragging && this.dragging.moved()) || (this.boxZoom && this.boxZoom.moved()))) ||
+        DomEvent._skipped(e)) {
+      return;
     }
 
-    var containerPoint = this.mouseEventToContainerPoint(e),
-        layerPoint = this.containerPointToLayerPoint(containerPoint),
-        latlng = this.layerPointToLatLng(layerPoint);
+    fire(EventType.PRECLICK);
+    _fireMouseEvent(e);
+  }
 
-    this.fire(type, {
-      latlng: latlng,
-      layerPoint: layerPoint,
-      containerPoint: containerPoint,
-      originalEvent: e
+  void _fireMouseEvent(core.Event e) {
+    if (!_loaded || DomEvent._skipped(e)) {
+      return;
+    }
+
+    EventType type = e.type;
+
+    type = (type == EventType.MOUSEENTER ? EventType.MOUSEOVER : (type == EventType.MOUSELEAVE ? EventType.MOUSEOUT : type));
+
+    if (!hasEventListeners(type)) { return; }
+
+    if (type == EventType.CONTEXTMENU) {
+      DomEvent.preventDefault(e);
+    }
+
+    final containerPoint = mouseEventToContainerPoint(e),
+        layerPoint = containerPointToLayerPoint(containerPoint),
+        latlng = layerPointToLatLng(layerPoint);
+
+    fire(type, {
+      'latlng': latlng,
+      'layerPoint': layerPoint,
+      'containerPoint': containerPoint,
+      'originalEvent': e
     });
   }
 
-  _onTileLayerLoad([Object obj=null, core.Event event=null]) {
-    this._tileLayersToLoad--;
-    if (this._tileLayersNum && !this._tileLayersToLoad) {
-      this.fire('tilelayersload');
+  bool _onTileLayerLoad(Object obj, core.Event event) {
+    _tileLayersToLoad--;
+    if (_tileLayersNum && _tileLayersToLoad == 0) {
+      fire(EventType.TILELAYERSLOAD);
     }
   }
 
-  _clearHandlers() {
-    for (var i = 0, len = this._handlers.length; i < len; i++) {
-      this._handlers[i].disable();
+  void _clearHandlers() {
+    for (int i = 0; i < _handlers.length; i++) {
+      _handlers[i].disable();
     }
   }
 
-  whenReady(callback, context) {
-    if (this._loaded) {
+  // Runs the given callback when the map gets initialized with a place and
+  // zoom, or immediately if it happened already, optionally passing a
+  // function context.
+  void whenReady(Function callback, [Object context=null]) {
+    if (_loaded) {
       callback.call(context || this, this);
     } else {
-      this.on('load', callback, context);
+      on(EventType.LOAD, callback, context);
     }
-    return this;
+    return;
   }
 
-  _layerAdd(layer) {
+  void _layerAdd(Layer layer) {
     layer.onAdd(this);
-    this.fire('layeradd', {layer: layer});
+    fire(EventType.LAYERADD, {'layer': layer});
   }
 
 
   // private methods for getting map state
 
-  _getMapPanePos() {
-    return L.DomUtil.getPosition(this._mapPane);
+  geom.Point _getMapPanePos() {
+    return DomUtil.getPosition(_mapPane);
   }
 
-  _moved() {
-    var pos = this._getMapPanePos();
-    return pos && !pos.equals([0, 0]);
+  bool _moved() {
+    final pos = _getMapPanePos();
+    return pos != null && !pos.equals([0, 0]);
   }
 
-  _getTopLeftPoint() {
-    return this.getPixelOrigin().subtract(this._getMapPanePos());
+  geom.Point _getTopLeftPoint() {
+    return getPixelOrigin().subtract(_getMapPanePos());
   }
 
-  _getNewTopLeftPoint(center, zoom) {
-    var viewHalf = this.getSize()._divideBy(2);
+  geom.Point _getNewTopLeftPoint(LatLng center, [num zoom = null]) {
+    var viewHalf = getSize()._divideBy(2);
     // TODO round on display, not calculation to increase precision?
-    return this.project(center, zoom)._subtract(viewHalf)._round();
+    return project(center, zoom)._subtract(viewHalf)._round();
   }
 
-  latLngToNewLayerPoint(latlng, newZoom, newCenter) {
-    var topLeft = this._getNewTopLeftPoint(newCenter, newZoom).add(this._getMapPanePos());
-    return this.project(latlng, newZoom)._subtract(topLeft);
+  //internal use only
+  geom.Point latLngToNewLayerPoint(LatLng latlng, num newZoom, LatLng newCenter) {
+    var topLeft = _getNewTopLeftPoint(newCenter, newZoom).add(_getMapPanePos());
+    return project(latlng, newZoom)._subtract(topLeft);
   }
 
   // layer point of the current center
-  _getCenterLayerPoint() {
-    return this.containerPointToLayerPoint(this.getSize()._divideBy(2));
+  geom.Point _getCenterLayerPoint() {
+    return containerPointToLayerPoint(getSize()._divideBy(2));
   }
 
   // offset of the specified place to the current center in pixels
-  _getCenterOffset(latlng) {
-    return this.latLngToLayerPoint(latlng).subtract(this._getCenterLayerPoint());
+  geom.Point _getCenterOffset(LatLng latlng) {
+    return latLngToLayerPoint(latlng).subtract(_getCenterLayerPoint());
   }
 
   // adjust center for view to get inside bounds
-  _limitCenter(center, zoom, bounds) {
+  LatLng _limitCenter(LatLng center, num zoom, [LatLngBounds bounds=null]) {
 
-    if (!bounds) { return center; }
+    if (bounds == null) { return center; }
 
-    var centerPoint = this.project(center, zoom),
-        viewHalf = this.getSize().divideBy(2),
-        viewBounds = new L.Bounds(centerPoint.subtract(viewHalf), centerPoint.add(viewHalf)),
-        offset = this._getBoundsOffset(viewBounds, bounds, zoom);
+    final centerPoint = project(center, zoom),
+        viewHalf = getSize().divideBy(2),
+        viewBounds = new Bounds(centerPoint.subtract(viewHalf), centerPoint.add(viewHalf)),
+        offset = _getBoundsOffset(viewBounds, bounds, zoom);
 
-    return this.unproject(centerPoint.add(offset), zoom);
+    return unproject(centerPoint.add(offset), zoom);
   }
 
   // adjust offset for view to get inside bounds
-  _limitOffset(offset, bounds) {
-    if (!bounds) { return offset; }
+  geom.Point _limitOffset(geom.Point offset, LatLngBounds bounds) {
+    if (bounds == null) { return offset; }
 
-    var viewBounds = this.getPixelBounds(),
-        newBounds = new L.Bounds(viewBounds.min.add(offset), viewBounds.max.add(offset));
+    var viewBounds = getPixelBounds(),
+        newBounds = new Bounds(viewBounds.min.add(offset), viewBounds.max.add(offset));
 
-    return offset.add(this._getBoundsOffset(newBounds, bounds));
+    return offset.add(_getBoundsOffset(newBounds, bounds));
   }
 
   // returns offset needed for pxBounds to get inside maxBounds at a specified zoom
-  _getBoundsOffset(pxBounds, maxBounds, zoom) {
-    var nwOffset = this.project(maxBounds.getNorthWest(), zoom).subtract(pxBounds.min),
-        seOffset = this.project(maxBounds.getSouthEast(), zoom).subtract(pxBounds.max),
+  geom.Point _getBoundsOffset(Bounds pxBounds, LatLngBounds maxBounds, [num zoom=null]) {
+    final nwOffset = project(maxBounds.getNorthWest(), zoom).subtract(pxBounds.min),
+        seOffset = project(maxBounds.getSouthEast(), zoom).subtract(pxBounds.max),
 
-        dx = this._rebound(nwOffset.x, -seOffset.x),
-        dy = this._rebound(nwOffset.y, -seOffset.y);
+        dx = _rebound(nwOffset.x, -seOffset.x),
+        dy = _rebound(nwOffset.y, -seOffset.y);
 
-    return new L.geom.Point(dx, dy);
+    return new geom.Point(dx, dy);
   }
 
-  _rebound(left, right) {
+  num _rebound(num left, num right) {
     return left + right > 0 ?
-      (left - right).round / 2 :
+      (left - right).round() / 2 :
       math.max(0, left.ceil()) - math.max(0, right.floor());
   }
 
-  _limitZoom(zoom) {
-    var min = this.getMinZoom(),
-        max = this.getMaxZoom();
+  num _limitZoom(num zoom) {
+    var min = getMinZoom(),
+        max = getMaxZoom();
 
     return math.max(min, math.min(max, zoom));
   }
