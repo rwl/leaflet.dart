@@ -3,10 +3,12 @@ library leaflet.layer;
 import 'dart:html';
 import 'dart:math' as math show min, max;
 
-import '../core/core.dart';
+import '../core/core.dart' as core;
+import '../core/core.dart' show EventType, Browser;
 import '../dom/dom.dart';
 import '../map/map.dart';
 import '../geo/geo.dart';
+import '../geometry/geometry.dart' as geom;
 import './marker/marker.dart';
 
 part 'feature_group.dart';

@@ -1,5 +1,4 @@
-
-import '../../core/handler.dart';
+part of leaflet.map.handler;
 
 // DoubleClickZoom is used to handle double-click zoom on the map, enabled by default.
 class DoubleClickZoom extends Handler {

@@ -1,9 +1,4 @@
-library map;
-
-import 'dart:html';
-import 'dart:math' as math;
-
-import '../../core/handler.dart';
+part of leaflet.map.handler;
 
 // BoxZoom is used to add shift-drag zoom interaction to the map
 // (zoom to a selected bounding box), enabled by default.

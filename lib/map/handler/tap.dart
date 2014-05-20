@@ -1,6 +1,4 @@
-library map;
-
-import '../../core/handler.dart';
+part of leaflet.map.handler;
 
 // Tap is used to enable mobile hacks like quick taps and long hold.
 class Tap extends Handler {

@@ -1,6 +1,4 @@
-library leaflet.map.handler;
-
-import '../../core/handler.dart';
+part of leaflet.map.handler;
 
 // ScrollWheelZoom is used by L.Map to enable mouse scroll wheel zoom on the map.
 class ScrollWheelZoom extends Handler {

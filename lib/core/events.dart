@@ -97,6 +97,9 @@ class EventType {
 
   static const MOUSEENTER  = const EventType._internal('mouseenter');
   static const MOUSELEAVE  = const EventType._internal('mouseleave');
+
+  static const OPEN  = const EventType._internal('open');
+  static const CLOSE  = const EventType._internal('close');
 }
 
 class Event {

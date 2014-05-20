@@ -14,13 +14,13 @@ class PopupOptions {
   // Controls the presense of a close button in the popup.
   bool closeButton = true;
   // The offset of the popup position. Useful to control the anchor of the popup when opening it on some overlays.
-  Point offset  = new Point(0, 6);
+  geom.Point offset  = new geom.Point(0, 6);
   // The margin between the popup and the top left corner of the map view after autopanning was performed.
-  Point autoPanPaddingTopLeft;
+  geom.Point autoPanPaddingTopLeft;
   // The margin between the popup and the bottom right corner of the map view after autopanning was performed.
-  Point autoPanPaddingBottomRight;
+  geom.Point autoPanPaddingBottomRight;
   // Equivalent of setting both top left and bottom right autopan padding to the same value.
-  Point autoPanPadding = new Point(5, 5);
+  geom.Point autoPanPadding = new geom.Point(5, 5);
   // Whether to animate the popup on zoom. Disable it if you have problems with Flash content inside popups.
   bool zoomAnimation = true;
   // Set it to false if you want to override the default behavior of the popup closing when user clicks the map (set globally by the Map closePopupOnClick option).
@@ -30,9 +30,9 @@ class PopupOptions {
 }
 
 // Popup is used for displaying popups on the map.
-class Popup extends Object with Events {
+class Popup extends Object with core.Events {
 
-  Map<String, Object> options = {
+  /*Map<String, Object> options = {
     'minWidth': 50,
     'maxWidth': 300,
     // 'maxHeight': null,
@@ -45,7 +45,8 @@ class Popup extends Object with Events {
     'keepInView': false,
     'className': '',
     'zoomAnimation': true
-  };
+  };*/
+  final PopupOptions options;
 
   var _source;
   bool _animated, _isOpen;
@@ -59,200 +60,204 @@ class Popup extends Object with Events {
   var _tip, _tipContainer;
   var _containerWidth, _containerBottom, _containerLeft;
 
-  Popup(Map<String, Object> options, var source) {
-    this.options.addAll(options);
-
-    this._source = source;
-    this._animated = Browser.any3d && this.options['zoomAnimation'];
-    this._isOpen = false;
+  Popup(this.options, this._source) {
+    _animated = Browser.any3d && options.zoomAnimation;
+    _isOpen = false;
   }
 
   onAdd(BaseMap map) {
-    this._map = map;
+    _map = map;
 
-    if (this._container == null) {
-      this._initLayout();
+    if (_container == null) {
+      _initLayout();
     }
 
-    final bool animFade = map.options['fadeAnimation'];
+    final bool animFade = map.animationOptions.fadeAnimation;
 
     if (animFade) {
-      DomUtil.setOpacity(this._container, 0);
+      DomUtil.setOpacity(_container, 0);
     }
-    map.panes['popupPane'].append(this._container);
+    map.panes['popupPane'].append(_container);
 
-    map.on(this._getEvents(), this);
+    map.on(_getEvents(), this);
 
-    this.update();
+    update();
 
     if (animFade) {
-      DomUtil.setOpacity(this._container, 1);
+      DomUtil.setOpacity(_container, 1);
     }
 
-    this.fire('open');
+    fire(EventType.OPEN);
 
-    map.fire('popupopen', {'popup': this});
+    map.fire(EventType.POPUPOPEN, {'popup': this});
 
-    if (this._source) {
-      this._source.fire('popupopen', {'popup': this});
+    if (_source) {
+      _source.fire('popupopen', {'popup': this});
     }
   }
 
+  // Adds the popup to the map.
   addTo(BaseMap map) {
     map.addLayer(this);
     return this;
   }
 
+  // Adds the popup to the map and closes the previous one.
   openOn(BaseMap map) {
     map.openPopup(this);
     return this;
   }
 
-  onRemove(map) {
-    map._panes.popupPane.removeChild(this._container);
+  void onRemove(BaseMap map) {
+    //map.panes['popupPane'].removeChild(_container);
+    _container.remove();
 
-    Util.falseFn(this._container.offsetWidth); // force reflow
+    Util.falseFn(_container.offsetWidth); // force reflow
 
-    map.off(this._getEvents(), this);
+    map.off(_getEvents(), this);
 
-    if (map.options['fadeAnimation']) {
-      DomUtil.setOpacity(this._container, 0);
+    if (map.animationOptions.fadeAnimation) {
+      DomUtil.setOpacity(_container, 0);
     }
 
-    this._map = null;
+    _map = null;
 
-    this.fire('close');
+    fire(EventType.CLOSE);
 
-    map.fire('popupclose', {'popup': this});
+    map.fire(EventType.POPUPCLOSE, {'popup': this});
 
-    if (this._source) {
-      this._source.fire('popupclose', {'popup': this});
+    if (_source) {
+      _source.fire('popupclose', {'popup': this});
     }
   }
 
-  getLatLng() {
-    return this._latlng;
+  // Returns the geographical point of popup.
+  LatLng getLatLng() {
+    return _latlng;
   }
 
-  setLatLng(LatLng latlng) {
-    this._latlng = new LatLng.latLng(latlng);
-    if (this._map != null) {
-      this._updatePosition();
-      this._adjustPan();
+  // Sets the geographical point where the popup will open.
+  void setLatLng(LatLng latlng) {
+    _latlng = new LatLng.latLng(latlng);
+    if (_map != null) {
+      _updatePosition();
+      _adjustPan();
     }
-    return this;
   }
 
-  getContent() {
-    return this._content;
+  // Returns the content of the popup.
+  Object getContent() {
+    return _content;
   }
 
-  setContent(content) {
-    this._content = content;
-    this.update();
-    return this;
+  // Sets the HTML content of the popup.
+  void setContent(var content) {
+    _content = content;
+    update();
   }
 
+  // Updates the popup content, layout and position. Useful for updating the
+  // popup after something inside changed, e.g. image loaded.
   update() {
-    if (this._map == null) { return; }
+    if (_map == null) { return; }
 
-    this._container.style.visibility = 'hidden';
+    _container.style.visibility = 'hidden';
 
-    this._updateContent();
-    this._updateLayout();
-    this._updatePosition();
+    _updateContent();
+    _updateLayout();
+    _updatePosition();
 
-    this._container.style.visibility = '';
+    _container.style.visibility = '';
 
-    this._adjustPan();
+    _adjustPan();
   }
 
-  _getEvents() {
+  Map<EventType, Function>_getEvents() {
     final events = {
-      'viewreset': this._updatePosition
+      EventType.VIEWRESET: _updatePosition
     };
 
-    if (this._animated) {
-      events['zoomanim'] = this._zoomAnimation;
+    if (_animated) {
+      events[EventType.ZOOMANIM] = _zoomAnimation;
     }
-    if (this.options.containsKey('closeOnClick') ? this.options['closeOnClick'] : this._map.options['closePopupOnClick']) {
-      events['preclick'] = this._close;
+    if (options.closeOnClick != null ? options.closeOnClick : _map.interactionOptions.closePopupOnClick) {
+      events[EventType.PRECLICK] = _close;
     }
-    if (this.options.containsKey('keepInView')) {
-      events['moveend'] = this._adjustPan;
+    if (options.keepInView) {
+      events[EventType.MOVEEND] = _adjustPan;
     }
 
     return events;
   }
 
-  _close() {
-    if (this._map != null) {
-      this._map.closePopup(this);
+  void _close() {
+    if (_map != null) {
+      _map.closePopup(this);
     }
   }
 
-  _initLayout() {
-    var prefix = 'leaflet-popup',
-      containerClass = prefix + ' ' + this.options['className'] + ' leaflet-zoom-' +
-              (this._animated ? 'animated' : 'hide'),
-      container = this._container = DomUtil.create('div', containerClass),
-      closeButton;
+  void _initLayout() {
+    final prefix = 'leaflet-popup',
+      containerClass = prefix + ' ' + options.className + ' leaflet-zoom-' +
+              (_animated ? 'animated' : 'hide'),
+      container = _container = DomUtil.create('div', containerClass);
 
-    if (this.options.containsKey('closeButton')) {
-      closeButton = this._closeButton =
+    if (options.closeButton) {
+      final closeButton = _closeButton =
               DomUtil.create('a', prefix + '-close-button', container);
       closeButton.href = '#close';
       closeButton.innerHTML = '&#215;';
       DomEvent.disableClickPropagation(closeButton);
 
-      DomEvent.on(closeButton, 'click', this._onCloseButtonClick, this);
+      DomEvent.on(closeButton, 'click', _onCloseButtonClick, this);
     }
 
-    var wrapper = this._wrapper =
+    final wrapper = _wrapper =
             DomUtil.create('div', prefix + '-content-wrapper', container);
     DomEvent.disableClickPropagation(wrapper);
 
-    this._contentNode = DomUtil.create('div', prefix + '-content', wrapper);
+    _contentNode = DomUtil.create('div', prefix + '-content', wrapper);
 
-    DomEvent.disableScrollPropagation(this._contentNode);
-    DomEvent.on(wrapper, 'contextmenu', L.DomEvent.stopPropagation);
+    DomEvent.disableScrollPropagation(_contentNode);
+    DomEvent.on(wrapper, 'contextmenu', DomEvent.stopPropagation);
 
-    this._tipContainer = DomUtil.create('div', prefix + '-tip-container', container);
-    this._tip = DomUtil.create('div', prefix + '-tip', this._tipContainer);
+    _tipContainer = DomUtil.create('div', prefix + '-tip-container', container);
+    _tip = DomUtil.create('div', prefix + '-tip', _tipContainer);
   }
 
-  _updateContent() {
-    if (!this._content) { return; }
+  void _updateContent() {
+    if (!_content) { return; }
 
-    if (this._content is String) {
-      this._contentNode.setInnerHtml(this._content);
+    if (_content is String) {
+      _contentNode.setInnerHtml(_content);
     } else {
-      while (this._contentNode.hasChildNodes()) {
-        this._contentNode.removeChild(this._contentNode.firstChild);
+      while (_contentNode.hasChildNodes()) {
+        //_contentNode.removeChild(_contentNode.firstChild);
+        _contentNode.firstChild.remove();
       }
-      this._contentNode.append(this._content);
+      _contentNode.append(_content);
     }
-    this.fire('contentupdate');
+    fire(EventType.CONTENTUPDATE);
   }
 
-  _updateLayout() {
-    var container = this._contentNode,
+  void _updateLayout() {
+    final container = _contentNode,
         style = container.style;
 
     style.width = '';
     style.whiteSpace = 'nowrap';
 
     var width = container.offsetWidth;
-    width = math.min(width, this.options['maxWidth']);
-    width = math.max(width, this.options['minWidth']);
+    width = math.min(width, options.maxWidth);
+    width = math.max(width, options.minWidth);
 
     style.width = (width + 1) + 'px';
     style.whiteSpace = '';
 
     style.height = '';
 
-    var height = container.offsetHeight,
-        maxHeight = this.options['maxHeight'],
+    final height = container.offsetHeight,
+        maxHeight = options.maxHeight,
         scrolledClass = 'leaflet-popup-scrolled';
 
     if (maxHeight && height > maxHeight) {
@@ -262,51 +267,51 @@ class Popup extends Object with Events {
       DomUtil.removeClass(container, scrolledClass);
     }
 
-    this._containerWidth = this._container.offsetWidth;
+    _containerWidth = _container.offsetWidth;
   }
 
-  _updatePosition() {
-    if (this._map == null) { return; }
+  void _updatePosition() {
+    if (_map == null) { return; }
 
-    var pos = this._map.latLngToLayerPoint(this._latlng),
-        animated = this._animated,
-        offset = new Point(this.options['offset']);
+    final pos = _map.latLngToLayerPoint(_latlng),
+        animated = _animated,
+        offset = new geom.Point.point(options.offset);
 
     if (animated) {
-      DomUtil.setPosition(this._container, pos);
+      DomUtil.setPosition(_container, pos);
     }
 
-    this._containerBottom = -offset.y - (animated ? 0 : pos.y);
-    this._containerLeft = -(this._containerWidth / 2).round() + offset.x + (animated ? 0 : pos.x);
+    _containerBottom = -offset.y - (animated ? 0 : pos.y);
+    _containerLeft = -(_containerWidth / 2).round() + offset.x + (animated ? 0 : pos.x);
 
     // bottom position the popup in case the height of the popup changes (images loading etc)
-    this._container.style.bottom = this._containerBottom + 'px';
-    this._container.style.left = this._containerLeft + 'px';
+    _container.style.bottom = _containerBottom + 'px';
+    _container.style.left = _containerLeft + 'px';
   }
 
-  _zoomAnimation(opt) {
-    var pos = this._map.latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center);
+  void _zoomAnimation(num zoom, LatLng center) {
+    var pos = _map.latLngToNewLayerPoint(_latlng, zoom, center);
 
-    DomUtil.setPosition(this._container, pos);
+    DomUtil.setPosition(_container, pos);
   }
 
-  _adjustPan() {
-    if (!this.options.containsKey('autoPan')) { return; }
+  void _adjustPan() {
+    if (!options.autoPan) { return; }
 
-    final map = this._map;
-    var containerHeight = this._container.offsetHeight,
-        containerWidth = this._containerWidth;
+    final map = _map;
+    var containerHeight = _container.offsetHeight,
+        containerWidth = _containerWidth;
 
-    final layerPos = new Point(this._containerLeft, -containerHeight - this._containerBottom);
+    final layerPos = new geom.Point(_containerLeft, -containerHeight - _containerBottom);
 
-    if (this._animated) {
-      layerPos._add(DomUtil.getPosition(this._container));
+    if (_animated) {
+      layerPos._add(DomUtil.getPosition(_container));
     }
 
     final containerPos = map.layerPointToContainerPoint(layerPos),
-        padding = new Point(options['autoPanPadding']),
-        paddingTL = new Point(options.containsKey('autoPanPaddingTopLeft') ? options['autoPanPaddingTopLeft'] : padding),
-        paddingBR = new Point(options.containsKey('autoPanPaddingBottomRight') ? options['autoPanPaddingBottomRight'] : padding);
+        padding = new geom.Point.point(options.autoPanPadding),
+        paddingTL = new geom.Point.point(options.autoPanPaddingTopLeft != null ? options.autoPanPaddingTopLeft : padding),
+        paddingBR = new geom.Point.point(options.autoPanPaddingBottomRight != null ? options.autoPanPaddingBottomRight : padding);
     final size = map.getSize();
     num dx = 0,
         dy = 0;
@@ -326,13 +331,13 @@ class Popup extends Object with Events {
 
     if (dx || dy) {
       map
-          .fire('autopanstart')
+          .fire(EventType.AUTOPANSTART)
           .panBy([dx, dy]);
     }
   }
 
-  _onCloseButtonClick(e) {
-    this._close();
+  void _onCloseButtonClick(core.Event e) {
+    _close();
     DomEvent.stop(e);
   }
 }

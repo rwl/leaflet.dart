@@ -1,7 +1,7 @@
 part of leaflet.layer.marker;
 
 // MarkerDrag is used internally by Marker to make the markers draggable.
-class MarkerDrag extends Handler {
+class MarkerDrag extends core.Handler {
   MarkerDrag(marker) {
     this._marker = marker;
   }

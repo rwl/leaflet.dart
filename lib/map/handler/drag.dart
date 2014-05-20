@@ -1,6 +1,4 @@
-library leaflet.map.handler;
-
-import '../../core/handler.dart';
+part of leaflet.map.handler;
 
 // Drag is used to make the map draggable (with panning inertia), enabled by default.
 class Drag extends Handler {

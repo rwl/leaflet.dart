@@ -52,7 +52,7 @@ class Marker extends Object with core.Events {
 
   LatLng _latlng;
   BaseMap _map;
-  var dragging;
+  core.Handler dragging;
   var _icon, _shadow;
   var _zIndex;
 
@@ -154,7 +154,7 @@ class Marker extends Object with core.Events {
     }
   }
 
-  _initIcon() {
+  void _initIcon() {
     final map = _map;
     final animation = (map.animationOptions.zoomAnimation && map.animationOptions.markerZoomAnimation);
     final classToAdd = animation ? 'leaflet-zoom-animated' : 'leaflet-zoom-hide';
@@ -224,7 +224,7 @@ class Marker extends Object with core.Events {
     }
   }
 
-  _removeIcon() {
+  void _removeIcon() {
     if (options.riseOnHover) {
       DomEvent
           .off(_icon, 'mouseover', _bringToFront)
@@ -237,7 +237,7 @@ class Marker extends Object with core.Events {
     _icon = null;
   }
 
-  _removeShadow() {
+  void _removeShadow() {
     if (_shadow != null) {
       //this._map.panes['shadowPane'].removeChild(this._shadow);
       _shadow.remove();
@@ -245,7 +245,7 @@ class Marker extends Object with core.Events {
     _shadow = null;
   }
 
-  _setPos(pos) {
+  void _setPos(pos) {
     DomUtil.setPosition(_icon, pos);
 
     if (_shadow != null) {
@@ -257,23 +257,24 @@ class Marker extends Object with core.Events {
     _resetZIndex();
   }
 
-  _updateZIndex(offset) {
+  void _updateZIndex(num offset) {
     _icon.style.zIndex = _zIndex + offset;
   }
 
-  _animateZoom(opt) {
-    var pos = _map.latLngToNewLayerPoint(_latlng, opt.zoom, opt.center).round();
+  _animateZoom(num zoom, LatLng center) {
+    final pos = _map.latLngToNewLayerPoint(_latlng, zoom, center).round();
 
     _setPos(pos);
   }
 
-  _initInteraction() {
+  void _initInteraction() {
     if (!options.clickable) { return; }
 
     // TODO refactor into something shared with Map/Path/etc. to DRY it up
 
     final icon = _icon;
-    final events = ['dblclick', 'mousedown', 'mouseover', 'mouseout', 'contextmenu'];
+    final events = [EventType.DBLCLICK, EventType.MOUSEDOWN, EventType.MOUSEOVER,
+                    EventType.MOUSEOUT, EventType.CONTEXTMENU];
 
     DomUtil.addClass(icon, 'leaflet-clickable');
     DomEvent.on(icon, 'click', this._onMouseClick, this);
@@ -292,7 +293,7 @@ class Marker extends Object with core.Events {
     }
   }
 
-  _onMouseClick(e) {
+  void _onMouseClick(core.Event e) {
     final wasDragged = dragging != null && dragging.moved();
 
     if (hasEventListeners(e.type) || wasDragged) {
@@ -311,7 +312,7 @@ class Marker extends Object with core.Events {
     });
   }
 
-  _onKeyPress(e) {
+  void _onKeyPress(core.Event e) {
     if (e.keyCode == 13) {
       fire(EventType.CLICK, {
         'originalEvent': e,
@@ -320,7 +321,7 @@ class Marker extends Object with core.Events {
     }
   }
 
-  _fireMouseEvent(e) {
+  void _fireMouseEvent(core.Event e) {
 
     fire(e.type, {
       'originalEvent': e,
@@ -347,18 +348,18 @@ class Marker extends Object with core.Events {
     }
   }
 
-  _updateOpacity() {
+  void _updateOpacity() {
     DomUtil.setOpacity(_icon, options.opacity);
     if (_shadow != null) {
       DomUtil.setOpacity(_shadow, options.opacity);
     }
   }
 
-  _bringToFront() {
+  void _bringToFront() {
     _updateZIndex(options.riseOffset);
   }
 
-  _resetZIndex() {
+  void _resetZIndex() {
     _updateZIndex(0);
   }
 }

@@ -1,6 +1,4 @@
-library leaflet.map.handler;
-
-import '../../core/handler.dart';
+part of leaflet.map.handler;
 
 // Keyboard is handling keyboard interaction with the map, enabled by default.
 class Keyboard extends Handler {

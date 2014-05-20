@@ -1,6 +1,4 @@
-library map;
-
-import '../../core/handler.dart';
+part of leaflet.map.handler;
 
 // TouchZoom is used by Map to add pinch zoom on supported mobile browsers.
 class TouchZoom extends Handler {
