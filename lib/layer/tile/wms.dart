@@ -1,17 +1,35 @@
 part of leaflet.layer.tile;
 
 class WMSOptions {
-  // (required) Comma-separated list of WMS layers to show.
+  /**
+   * Comma-separated list of WMS layers to show (required).
+   */
   String layers = '';
-  // Comma-separated list of WMS styles.
+
+  /**
+   * Comma-separated list of WMS styles.
+   */
   String styles  = '';
-  // WMS image format (use 'image/png' for layers with transparency).
+
+  /**
+   * WMS image format (use 'image/png' for layers with transparency).
+   */
   String format = 'image/jpeg';
-  // If true, the WMS service will return images with transparency.
+
+  /**
+   * If true, the WMS service will return images with transparency.
+   */
   bool transparent = false;
-  // Version of the WMS service to use.
+
+  /**
+   * Version of the WMS service to use.
+   */
   String version = '1.1.1';
-  // Coordinate Reference System to use for the WMS requests, defaults to map CRS. Don't change this if you're not sure what it means.
+
+  /**
+   * Coordinate Reference System to use for the WMS requests, defaults to
+   * map CRS. Don't change this if you're not sure what it means.
+   */
   CRS crs;
 }
 

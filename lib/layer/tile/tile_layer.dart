@@ -1,47 +1,126 @@
 part of leaflet.layer.tile;
 
 class TileLayerOptions {
-  // Minimum zoom number.
+  /**
+   * Minimum zoom number.
+   */
   num minZoom = 0;
-  // Maximum zoom number.
+
+  /**
+   * Maximum zoom number.
+   */
   num maxZoom = 18;
-  // Maximum zoom number the tiles source has available. If it is specified, the tiles on all zoom levels higher than maxNativeZoom will be loaded from maxZoom level and auto-scaled.
+
+  /**
+   * Maximum zoom number the tiles source has available. If it is specified,
+   * the tiles on all zoom levels higher than maxNativeZoom will be loaded
+   * from maxZoom level and auto-scaled.
+   */
   num maxNativeZoom;
-  // Tile size (width and height in pixels, assuming tiles are square).
+
+  /**
+   * Tile size (width and height in pixels, assuming tiles are square).
+   */
   num tileSize  = 256;
-  // Subdomains of the tile service. Can be passed in the form of one string (where each letter is a subdomain name) or an array of strings.
+
+  /**
+   * Subdomains of the tile service. Can be passed in the form of one string
+   * (where each letter is a subdomain name) or an array of strings.
+   */
   List<String> subdomains = ['abc'];
-  // URL to the tile image to show in place of the tile that failed to load.
+
+  /**
+   * URL to the tile image to show in place of the tile that failed to load.
+   */
   String errorTileUrl  = '';
-  // e.g. "© Mapbox" — the string used by the attribution control, describes the layer data.
+
+  /**
+   * e.g. "© Mapbox" — the string used by the attribution control, describes
+   * the layer data.
+   */
   String attribution = '';
-  // If true, inverses Y axis numbering for tiles (turn this on for TMS services).
+
+  /**
+   * If true, inverses Y axis numbering for tiles (turn this on for TMS
+   * services).
+   */
   bool tms = false;
-  // If set to true, the tile coordinates won't be wrapped by world width (-180 to 180 longitude) or clamped to lie within world height (-90 to 90). Use this if you use Leaflet for maps that don't reflect the real world (e.g. game, indoor or photo maps).
+
+  /**
+   * If set to true, the tile coordinates won't be wrapped by world width
+   * (-180 to 180 longitude) or clamped to lie within world height (-90 to 90).
+   * Use this if you use Leaflet for maps that don't reflect the real world
+   * (e.g. game, indoor or photo maps).
+   */
   bool continuousWorld = false;
-  // If set to true, the tiles just won't load outside the world width (-180 to 180 longitude) instead of repeating.
+
+  /**
+   * If set to true, the tiles just won't load outside the world width
+   * (-180 to 180 longitude) instead of repeating.
+   */
   bool noWrap = false;
-  // The zoom number used in tile URLs will be offset with this value.
+
+  /**
+   * The zoom number used in tile URLs will be offset with this value.
+   */
   num zoomOffset  = 0;
-  // If set to true, the zoom number used in tile URLs will be reversed (maxZoom - zoom instead of zoom)
+
+  /**
+   * If set to true, the zoom number used in tile URLs will be reversed
+   * (maxZoom - zoom instead of zoom)
+   */
   bool zoomReverse = false;
-  // The opacity of the tile layer.
+
+  /**
+   * The opacity of the tile layer.
+   */
   num opacity = 1.0;
-  // The explicit zIndex of the tile layer. Not set by default.
+
+  /**
+   * The explicit zIndex of the tile layer. Not set by default.
+   */
   num zIndex;
-  // If true, all the tiles that are not visible after panning are removed (for better performance). true by default on mobile WebKit, otherwise false.
+
+  /**
+   * If true, all the tiles that are not visible after panning are removed
+   * (for better performance). true by default on mobile WebKit, otherwise
+   * false.
+   */
   bool unloadInvisibleTiles;
-  // If false, new tiles are loaded during panning, otherwise only after it (for better performance). true by default on mobile WebKit, otherwise false.
+
+  /**
+   * If false, new tiles are loaded during panning, otherwise only after it
+   * (for better performance). true by default on mobile WebKit, otherwise
+   * false.
+   */
   bool updateWhenIdle;
-  // If true and user is on a retina display, it will request four tiles of half the specified size and a bigger zoom level in place of one to utilize the high resolution.
+
+  /**
+   * If true and user is on a retina display, it will request four tiles of
+   * half the specified size and a bigger zoom level in place of one to
+   * utilize the high resolution.
+   */
   bool detectRetina;
-  // If true, all the tiles that are not visible after panning are placed in a reuse queue from which they will be fetched when new tiles become visible (as opposed to dynamically creating new ones). This will in theory keep memory usage low and eliminate the need for reserving new memory whenever a new tile is needed.
+
+  /**
+   * If true, all the tiles that are not visible after panning are placed in
+   * a reuse queue from which they will be fetched when new tiles become
+   * visible (as opposed to dynamically creating new ones). This will in
+   * theory keep memory usage low and eliminate the need for reserving new
+   * memory whenever a new tile is needed.
+   */
   bool reuseTiles = false;
-  // When this option is set, the TileLayer only loads tiles that are in the given geographical bounds.
+
+  /**
+   * When this option is set, the TileLayer only loads tiles that are in the
+   * given geographical bounds.
+   */
   LatLngBounds bounds;
 }
 
-// TileLayer is used for standard xyz-numbered tile layers.
+/**
+ * TileLayer is used for standard xyz-numbered tile layers.
+ */
 class TileLayer extends Object with core.Events implements Layer {
 
   String _url;
@@ -71,37 +150,35 @@ class TileLayer extends Object with core.Events implements Layer {
 //    'unloadInvisibleTiles': core.Browser.mobile,
 //    'updateWhenIdle': core.Browser.mobile
 //  };
-  TileLayerOptions options;
+  final TileLayerOptions options;
 
-  TileLayer(String url, Map<String, Object> options) {
-    this.options.addAll(options);
+  Element _container;
 
+  TileLayer(this._url, this.options) {
     // detecting retina displays, adjusting tileSize and zoom levels
-    if (options['detectRetina'] && core.Browser.retina && options['maxZoom'] > 0) {
+    if (options.detectRetina && Browser.retina && options.maxZoom > 0) {
 
-      options['tileSize'] = (options['tileSize'] / 2).floor();
-      options['zoomOffset']++;
+      options.tileSize = (options.tileSize / 2).floor();
+      options.zoomOffset++;
 
-      if (options['minZoom'] > 0) {
-        options['minZoom']--;
+      if (options.minZoom > 0) {
+        options.minZoom--;
       }
-      this.options['maxZoom']--;
+      this.options.maxZoom--;
     }
 
-    if (options.containsKey('bounds')) {
-      options['bounds'] = new LatLngBounds.latLngBounds(options['bounds']);
+    if (options.bounds != null) {
+      options.bounds = new LatLngBounds.latLngBounds(options.bounds);
     }
 
-    this._url = url;
-
-    var subdomains = this.options['subdomains'];
+    /*var subdomains = this.options.subdomains;
 
     if (subdomains is String) {
       this.options['subdomains'] = subdomains.split('');
-    }
+    }*/
   }
 
-  onAdd(BaseMap map) {
+  void onAdd(BaseMap map) {
     this._map = map;
     this._animated = map._zoomAnimated;
 
@@ -109,180 +186,201 @@ class TileLayer extends Object with core.Events implements Layer {
     this._initContainer();
 
     // set up events
-    map.on({
-      'viewreset': this._reset,
-      'moveend': this._update
-    }, this);
+    map.on(EventType.VIEWRESET, this._animateZoom, this);
+    map.on(EventType.MOVEEND, this._update, this);
+//    map.on({
+//      'viewreset': this._reset,
+//      'moveend': this._update
+//    }, this);
 
     if (this._animated) {
-      map.on({
-        'zoomanim': this._animateZoom,
-        'zoomend': this._endZoomAnim
-      }, this);
+      map.on(EventType.ZOOMANIM, this._animateZoom, this);
+      map.on(EventType.ZOOMEND, this._endZoomAnim, this);
+//      map.on({
+//        'zoomanim': this._animateZoom,
+//        'zoomend': this._endZoomAnim
+//      }, this);
     }
 
     if (!this.options.updateWhenIdle) {
-      this._limitedUpdate = L.Util.limitExecByInterval(this._update, 150, this);
-      map.on('move', this._limitedUpdate, this);
+      this._limitedUpdate = Util.limitExecByInterval(this._update, 150, this);
+      map.on(EventType.MOVE, this._limitedUpdate, this);
     }
 
     this._reset();
     this._update();
   }
 
-  addTo(map) {
+  Function _limitedUpdate;
+
+  /**
+   * Adds the layer to the map.
+   */
+  void addTo(BaseMap map) {
     map.addLayer(this);
-    return this;
   }
 
-  onRemove(map) {
-    this._container.parentNode.removeChild(this._container);
+  void onRemove(BaseMap map) {
+    //this._container.parentNode.removeChild(this._container);
+    this._container.remove();
 
-    map.off({
-      'viewreset': this._reset,
-      'moveend': this._update
-    }, this);
+    map.off(EventType.VIEWRESET, this._reset, this);
+    map.off(EventType.MOVEEND, this._update, this);
+//    map.off({
+//      'viewreset': this._reset,
+//      'moveend': this._update
+//    }, this);
 
     if (this._animated) {
-      map.off({
-        'zoomanim': this._animateZoom,
-        'zoomend': this._endZoomAnim
-      }, this);
+      map.off(EventType.ZOOMANIM, this._animateZoom, this);
+      map.off(EventType.ZOOMEND, this._endZoomAnim, this);
+//      map.off({
+//        'zoomanim': this._animateZoom,
+//        'zoomend': this._endZoomAnim
+//      }, this);
     }
 
     if (!this.options.updateWhenIdle) {
-      map.off('move', this._limitedUpdate, this);
+      map.off(EventType.MOVE, this._limitedUpdate, this);
     }
 
     this._container = null;
     this._map = null;
   }
 
-  bringToFront() {
-    var pane = this._map._panes.tilePane;
+  /**
+   * Brings the tile layer to the top of all tile layers.
+   */
+  void bringToFront() {
+    final pane = this._map.panes['tilePane'];
 
-    if (this._container) {
-      pane.appendChild(this._container);
-      this._setAutoZIndex(pane, Math.max);
+    if (this._container != null) {
+      pane.append(this._container);
+      this._setAutoZIndex(pane, math.max);
     }
-
-    return this;
   }
 
-  bringToBack() {
-    var pane = this._map._panes.tilePane;
+  /**
+   * Brings the tile layer to the bottom of all tile layers.
+   */
+  void bringToBack() {
+    final pane = this._map.panes['tilePane'];
 
-    if (this._container) {
+    if (this._container != null) {
       pane.insertBefore(this._container, pane.firstChild);
-      this._setAutoZIndex(pane, Math.min);
+      this._setAutoZIndex(pane, math.min);
     }
-
-    return this;
   }
 
-  getAttribution() {
+  String getAttribution() {
     return this.options.attribution;
   }
 
-  getContainer() {
+  /**
+   * Returns the HTML element that contains the tiles for this layer.
+   */
+  Element getContainer() {
     return this._container;
   }
 
-  setOpacity(opacity) {
+  /**
+   * Changes the opacity of the tile layer.
+   */
+  void setOpacity(num opacity) {
     this.options.opacity = opacity;
 
-    if (this._map) {
+    if (this._map != null) {
       this._updateOpacity();
     }
-
-    return this;
   }
 
-  setZIndex(zIndex) {
+  /**
+   * Sets the zIndex of the tile layer.
+   */
+  void setZIndex(num zIndex) {
     this.options.zIndex = zIndex;
     this._updateZIndex();
-
-    return this;
   }
 
-  setUrl(url, noRedraw) {
+  /**
+   * Updates the layer's URL template and redraws it.
+   */
+  void setUrl(String url, [bool noRedraw=false]) {
     this._url = url;
 
     if (!noRedraw) {
       this.redraw();
     }
-
-    return this;
   }
 
-  redraw() {
-    if (this._map) {
-      this._reset({hard: true});
+  /**
+   * Causes the layer to clear all the tiles and request them again.
+   */
+  void redraw() {
+    if (this._map != null) {
+      this._reset(true);
       this._update();
     }
-    return this;
   }
 
-  _updateZIndex() {
+  void _updateZIndex() {
     if (this._container && this.options.zIndex != null) {
-      this._container.style.zIndex = this.options.zIndex;
+      this._container.style.zIndex = this.options.zIndex.toString();
     }
   }
 
-  _setAutoZIndex(pane, compare) {
+  void _setAutoZIndex(Element pane, Function compare) {
 
-    var layers = pane.children,
-        edgeZIndex = -compare(Infinity, -Infinity), // -Infinity for max, Infinity for min
-        zIndex, i, len;
+    final layers = pane.children;
+    num edgeZIndex = -compare(double.INFINITY, double.NEGATIVE_INFINITY); // -Infinity for max, Infinity for min
+    num zIndex;
 
-    len = layers.length;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < layers.length; i++) {
 
       if (layers[i] != this._container) {
-        zIndex = parseInt(layers[i].style.zIndex, 10);
+        zIndex = int.parse(layers[i].style.zIndex, radix: 10);
 
-        if (!isNaN(zIndex)) {
+        if (!zIndex.isNaN) {
           edgeZIndex = compare(edgeZIndex, zIndex);
         }
       }
     }
 
-    this.options.zIndex = this._container.style.zIndex =
-            (isFinite(edgeZIndex) ? edgeZIndex : 0) + compare(1, -1);
+    this.options.zIndex = (edgeZIndex.isFinite ? edgeZIndex : 0) + compare(1, -1);
+    this._container.style.zIndex = this.options.zIndex.toString();
   }
 
-  _updateOpacity() {
-    var i,
-        tiles = this._tiles;
+  void _updateOpacity() {
+    final tiles = this._tiles;
 
-    if (L.Browser.ielt9) {
-      for (i in tiles) {
-        L.DomUtil.setOpacity(tiles[i], this.options.opacity);
+    if (Browser.ielt9) {
+      for (var i in tiles) {
+        DomUtil.setOpacity(tiles[i], this.options.opacity);
       }
     } else {
-      L.DomUtil.setOpacity(this._container, this.options.opacity);
+      DomUtil.setOpacity(this._container, this.options.opacity);
     }
   }
 
-  _initContainer() {
-    var tilePane = this._map._panes.tilePane;
+  void _initContainer() {
+    final tilePane = this._map.panes['tilePane'];
 
-    if (!this._container) {
-      this._container = L.DomUtil.create('div', 'leaflet-layer');
+    if (this._container == null) {
+      this._container = DomUtil.create('div', 'leaflet-layer');
 
       this._updateZIndex();
 
       if (this._animated) {
         var className = 'leaflet-tile-container';
 
-        this._bgBuffer = L.DomUtil.create('div', className, this._container);
-        this._tileContainer = L.DomUtil.create('div', className, this._container);
+        this._bgBuffer = DomUtil.create('div', className, this._container);
+        this._tileContainer = DomUtil.create('div', className, this._container);
 
       } else {
         this._tileContainer = this._container;
       }
 
-      tilePane.appendChild(this._container);
+      tilePane.append(this._container);
 
       if (this.options.opacity < 1) {
         this._updateOpacity();
@@ -290,7 +388,7 @@ class TileLayer extends Object with core.Events implements Layer {
     }
   }
 
-  _reset(e) {
+  void _reset([bool hard = false]/*[core.Event e = null]*/) {
     for (var key in this._tiles) {
       this.fire('tileunload', {'tile': this._tiles[key]});
     }
@@ -304,7 +402,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
     this._tileContainer.innerHTML = '';
 
-    if (this._animated && e && e.hard) {
+    if (this._animated && hard) {
       this._clearBgBuffer();
     }
 

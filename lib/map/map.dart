@@ -113,10 +113,12 @@ class BaseMap extends Object with core.Events {
 
   // public methods that modify map state
 
-  // Sets the view of the map (geographical center and zoom) with the given
-  // animation options.
-  //
-  // Replaced by animation-powered implementation in Map.PanAnimation
+  /**
+   * Sets the view of the map (geographical center and zoom) with the given
+   * animation options.
+   *
+   * Replaced by animation-powered implementation in Map.PanAnimation
+   */
   setView(LatLng center, num zoom, [ZoomPanOptions options = null]) {
     zoom = zoom == null ? getZoom() : zoom;
     _resetView(new LatLng.latLng(center), _limitZoom(zoom));
@@ -125,7 +127,9 @@ class BaseMap extends Object with core.Events {
   num _zoom;
   bool _loaded;
 
-  // Sets the zoom of the map.
+  /**
+   * Sets the zoom of the map.
+   */
   setZoom(num zoom, [ZoomOptions options=null]) {
     if (!_loaded) {
       _zoom = _limitZoom(zoom);
@@ -134,22 +138,32 @@ class BaseMap extends Object with core.Events {
     setView(getCenter(), zoom, new ZoomPanOptions(zoom: options));
   }
 
-  // Increases the zoom of the map by delta (1 by default).
+  /**
+   * Increases the zoom of the map by delta (1 by default).
+   */
   zoomIn([num delta = 1, ZoomOptions options = null]) {
     return setZoom(_zoom + delta, options);
   }
 
-  // Decreases the zoom of the map by delta (1 by default).
+  /**
+   * Decreases the zoom of the map by delta (1 by default).
+   */
   zoomOut([num delta = 1, ZoomOptions options = null]) {
     return setZoom(_zoom - delta, options);
   }
 
-  // Zooms the map while keeping a specified point on the map stationary (e.g. used internally for scroll zoom and double-click zoom).
+  /**
+   * Zooms the map while keeping a specified point on the map stationary
+   * (e.g. used internally for scroll zoom and double-click zoom).
+   */
   setZoomAroundLatLng(LatLng latlng, num zoom, [ZoomOptions options = null]) {
     setZoomAround(latLngToContainerPoint(latlng), zoom, options);
   }
 
-  // Zooms the map while keeping a specified point on the map stationary (e.g. used internally for scroll zoom and double-click zoom).
+  /**
+   * Zooms the map while keeping a specified point on the map stationary
+   * (e.g. used internally for scroll zoom and double-click zoom).
+   */
   setZoomAround(geom.Point containerPoint, num zoom, [ZoomOptions options = null]) {
     final scale = getZoomScale(zoom),
         viewHalf = getSize().divideBy(2),
@@ -160,7 +174,10 @@ class BaseMap extends Object with core.Events {
     setView(newCenter, zoom, new ZoomPanOptions(zoom: options));
   }
 
-  // Sets a map view that contains the given geographical bounds with the maximum zoom level possible.
+  /**
+   * Sets a map view that contains the given geographical bounds with the
+   * maximum zoom level possible.
+   */
   fitBounds(LatLngBounds bounds, [ZoomPanOptions options = null]) {
     if (options == null) {
       options = new ZoomPanOptions();
@@ -198,17 +215,25 @@ class BaseMap extends Object with core.Events {
     return setView(center, zoom, options);
   }
 
-  // Sets a map view that mostly contains the whole world with the maximum zoom level possible.
+  /**
+   * Sets a map view that mostly contains the whole world with the maximum
+   * zoom level possible.
+   */
   void fitWorld([ZoomPanOptions options = null]) {
     fitBounds(new LatLngBounds.array([[-90, -180], [90, 180]]), options);
   }
 
-  // Pans the map to a given center. Makes an animated pan if new center is not more than one screen away from the current one.
+  /**
+   * Pans the map to a given center. Makes an animated pan if new center is
+   * not more than one screen away from the current one.
+   */
   void panTo(LatLng center, [PanOptions options = null]) { // (LatLng)
     setView(center, _zoom, new ZoomPanOptions(pan: options));
   }
 
-  // Pans the map by a given number of pixels (animated).
+  /**
+   * Pans the map by a given number of pixels (animated).
+   */
   void panBy(geom.Point offset) {
     // replaced with animated panBy in Map.PanAnimation.js
     fire(EventType.MOVESTART);
@@ -219,7 +244,9 @@ class BaseMap extends Object with core.Events {
     fire(EventType.MOVEEND);
   }
 
-  // Restricts the map view to the given bounds (see map maxBounds option).
+  /**
+   * Restricts the map view to the given bounds (see map maxBounds option).
+   */
   void setMaxBounds(LatLngBounds bounds) {
     bounds = new LatLngBounds.latLngBounds(bounds);
 
@@ -236,9 +263,11 @@ class BaseMap extends Object with core.Events {
     on(EventType.MOVEEND, _panInsideMaxBounds, this);
   }
 
-  // Pans the map to the closest view that would lie inside the given bounds
-  // (if it's not already), controlling the animation using the options
-  // specific, if any.
+  /**
+   * Pans the map to the closest view that would lie inside the given bounds
+   * (if it's not already), controlling the animation using the options
+   * specific, if any.
+   */
   void panInsideBounds(LatLngBounds bounds, [PanOptions options = null]) {
     var center = getCenter(),
       newCenter = _limitCenter(center, _zoom, bounds);
@@ -248,9 +277,11 @@ class BaseMap extends Object with core.Events {
     panTo(newCenter, options);
   }
 
-  // Adds the given layer to the map. If optional insertAtTheBottom is set to
-  // true, the layer is inserted under all others (useful when switching base
-  // tile layers).
+  /**
+   * Adds the given layer to the map. If optional insertAtTheBottom is set to
+   * true, the layer is inserted under all others (useful when switching base
+   * tile layers).
+   */
   void addLayer(Layer layer) {
     // TODO method is too big, refactor
 
@@ -282,7 +313,9 @@ class BaseMap extends Object with core.Events {
     return;
   }
 
-  // Removes the given layer from the map.
+  /**
+   * Removes the given layer from the map.
+   */
   void removeLayer(Layer layer) {
     var id = core.Util.stamp(layer);
 
@@ -313,7 +346,9 @@ class BaseMap extends Object with core.Events {
     return;
   }
 
-  // Returns true if the given layer is currently added to the map.
+  /**
+   * Returns true if the given layer is currently added to the map.
+   */
   bool hasLayer(Layer layer) {
     if (layer == null) { return false; }
 
@@ -330,11 +365,13 @@ class BaseMap extends Object with core.Events {
   bool _sizeChanged;
   LatLng _initialCenter;
 
-  // Checks if the map container size changed and updates the map if so — call
-  // it after you've changed the map size dynamically, also animating pan by
-  // default. If options.pan is false, panning will not occur. If
-  // options.debounceMoveend is true, it will delay moveend event so that it
-  // doesn't happen often even if the method is called many times in a row.
+  /**
+   * Checks if the map container size changed and updates the map if so — call
+   * it after you've changed the map size dynamically, also animating pan by
+   * default. If options.pan is false, panning will not occur. If
+   * options.debounceMoveend is true, it will delay moveend event so that it
+   * doesn't happen often even if the method is called many times in a row.
+   */
   void invalidateSize({bool animate: true, bool pan: true, bool debounceMoveend: false}) {
     if (!_loaded) { return; }
 
@@ -393,7 +430,9 @@ class BaseMap extends Object with core.Events {
     return this;
   }*/
 
-  // Destroys the map and clears all related event listeners.
+  /**
+   * Destroys the map and clears all related event listeners.
+   */
   remove() {
     if (_loaded) {
       fire(EventType.UNLOAD);
@@ -420,9 +459,11 @@ class BaseMap extends Object with core.Events {
   }
 
 
-  // public methods for getting map state
+  /* public methods for getting map state */
 
-  // Returns the geographical center of the map view.
+  /**
+   * Returns the geographical center of the map view.
+   */
   LatLng getCenter() {
     _checkIfLoaded();
 
@@ -432,12 +473,16 @@ class BaseMap extends Object with core.Events {
     return layerPointToLatLng(_getCenterLayerPoint());
   }
 
-  // Returns the current zoom of the map view.
+  /**
+   * Returns the current zoom of the map view.
+   */
   num getZoom() {
     return _zoom;
   }
 
-  // Returns the LatLngBounds of the current map view.
+  /**
+   * Returns the LatLngBounds of the current map view.
+   */
   LatLngBounds getBounds() {
     final bounds = getPixelBounds(),
         sw = unproject(bounds.getBottomLeft()),
@@ -446,24 +491,30 @@ class BaseMap extends Object with core.Events {
     return new LatLngBounds(sw, ne);
   }
 
-  // Returns the minimum zoom level of the map.
+  /**
+   * Returns the minimum zoom level of the map.
+   */
   num getMinZoom() {
     return stateOptions.minZoom == null ?
       (_layersMinZoom == null ? 0 : _layersMinZoom) :
       stateOptions.minZoom;
   }
 
-  // Returns the maximum zoom level of the map.
+  /**
+   * Returns the maximum zoom level of the map.
+   */
   num getMaxZoom() {
     return stateOptions.maxZoom == null ?
       (_layersMaxZoom == null ? double.INFINITY : _layersMaxZoom) :
       stateOptions.maxZoom;
   }
 
-  // Returns the maximum zoom level on which the given bounds fit to the map
-  // view in its entirety. If inside (optional) is set to true, the method
-  // instead returns the minimum zoom level on which the map view fits into
-  // the given bounds in its entirety.
+  /**
+   * Returns the maximum zoom level on which the given bounds fit to the map
+   * view in its entirety. If inside (optional) is set to true, the method
+   * instead returns the minimum zoom level on which the map view fits into
+   * the given bounds in its entirety.
+   */
   num getBoundsZoom(LatLngBounds bounds, [bool inside = false, geom.Point padding = null]) {
     if (padding == null) {
       padding = new geom.Point(0, 0);
@@ -498,7 +549,9 @@ class BaseMap extends Object with core.Events {
 
   geom.Point _size;
 
-  // Returns the current size of the map container.
+  /**
+   * Returns the current size of the map container.
+   */
   geom.Point getSize() {
     if (_size == null || _sizeChanged) {
       _size = new geom.Point(
@@ -510,8 +563,10 @@ class BaseMap extends Object with core.Events {
     return _size.clone();
   }
 
-  // Returns the bounds of the current map view in projected pixel coordinates
-  // (sometimes useful in layer and overlay implementations).
+  /**
+   * Returns the bounds of the current map view in projected pixel coordinates
+   * (sometimes useful in layer and overlay implementations).
+   */
   Bounds getPixelBounds() {
     var topLeftPoint = _getTopLeftPoint();
     return new Bounds(topLeftPoint, topLeftPoint.add(getSize()));
@@ -519,17 +574,23 @@ class BaseMap extends Object with core.Events {
 
   geom.Point _initialTopLeftPoint;
 
-  // Returns the projected pixel coordinates of the top left point of the map
-  // layer (useful in custom layer and overlay implementations).
+  /**
+   * Returns the projected pixel coordinates of the top left point of the map
+   * layer (useful in custom layer and overlay implementations).
+   */
   geom.Point getPixelOrigin() {
     _checkIfLoaded();
     return _initialTopLeftPoint;
   }
 
-  // Returns an object with different map panes (to render overlays in).
+  /**
+   * Returns an object with different map panes (to render overlays in).
+   */
   Map<String, Element> get panes => new Map.from(_panes);
 
-  // Returns the container element of the map.
+  /**
+   * Returns the container element of the map.
+   */
   Element getContainer() {
     return _container;
   }
@@ -547,70 +608,101 @@ class BaseMap extends Object with core.Events {
   }
 
 
-  // conversion methods
+  /* Conversion methods */
 
-  // Projects the given geographical coordinates to absolute pixel coordinates for the given zoom level (current zoom level by default).
+  /**
+   * Projects the given geographical coordinates to absolute pixel coordinates
+   * for the given zoom level (current zoom level by default).
+   */
   geom.Point project(LatLng latlng, [num zoom = null]) {
     zoom = zoom == null ? _zoom : zoom;
     return stateOptions.crs.latLngToPoint(new LatLng.latLng(latlng), zoom);
   }
 
-  // Projects the given absolute pixel coordinates to geographical coordinates for the given zoom level (current zoom level by default).
+  /**
+   * Projects the given absolute pixel coordinates to geographical coordinates
+   * for the given zoom level (current zoom level by default).
+   */
   LatLng unproject(geom.Point point, [num zoom = null]) {
     zoom = zoom == null ? _zoom : zoom;
     return stateOptions.crs.pointToLatLng(new geom.Point.point(point), zoom);
   }
 
-  // Returns the geographical coordinates of a given map layer point.
+  /**
+   * Returns the geographical coordinates of a given map layer point.
+   */
   LatLng layerPointToLatLng(geom.Point point) {
     final projectedPoint = new geom.Point.point(point).add(getPixelOrigin());
     return unproject(projectedPoint);
   }
 
-  // Returns the map layer point that corresponds to the given geographical coordinates (useful for placing overlays on the map).
+  /**
+   * Returns the map layer point that corresponds to the given geographical
+   * coordinates (useful for placing overlays on the map).
+   */
   geom.Point latLngToLayerPoint(LatLng latlng) {
     var projectedPoint = project(new LatLng.latLng(latlng))._round();
     return projectedPoint._subtract(getPixelOrigin());
   }
 
-  // Converts the point relative to the map container to a point relative to the map layer.
+  /**
+   * Converts the point relative to the map container to a point relative
+   * to the map layer.
+   */
   geom.Point containerPointToLayerPoint(geom.Point point) {
     return new geom.Point.point(point).subtract(_getMapPanePos());
   }
 
-  // Converts the point relative to the map layer to a point relative to the map container.
+  /**
+   * Converts the point relative to the map layer to a point relative to the
+   * map container.
+   */
   geom.Point layerPointToContainerPoint(geom.Point point) {
     return new geom.Point.point(point).add(_getMapPanePos());
   }
 
-  // Returns the geographical coordinates of a given map container point.
+  /**
+   * Returns the geographical coordinates of a given map container point.
+   */
   LatLng containerPointToLatLng(geom.Point point) {
     final layerPoint = containerPointToLayerPoint(new geom.Point.point(point));
     return layerPointToLatLng(layerPoint);
   }
 
-  // Returns the map container point that corresponds to the given geographical coordinates.
+  /**
+   * Returns the map container point that corresponds to the given
+   * geographical coordinates.
+   */
   geom.Point latLngToContainerPoint(LatLng latlng) {
     return layerPointToContainerPoint(latLngToLayerPoint(new LatLng.latLng(latlng)));
   }
 
-  // Returns the pixel coordinates of a mouse click (relative to the top left corner of the map) given its event object.
+  /**
+   * Returns the pixel coordinates of a mouse click (relative to the top left
+   * corner of the map) given its event object.
+   */
   geom.Point mouseEventToContainerPoint(core.Event e) {
     return DomEvent.getMousePosition(e, _container);
   }
 
-  // Returns the pixel coordinates of a mouse click relative to the map layer given its event object.
+  /**
+   * Returns the pixel coordinates of a mouse click relative to the map layer
+   * given its event object.
+   */
   geom.Point mouseEventToLayerPoint(MouseEvent e) {
     return containerPointToLayerPoint(mouseEventToContainerPoint(e));
   }
 
-  // Returns the geographical coordinates of the point the mouse clicked on given the click's event object.
+  /**
+   * Returns the geographical coordinates of the point the mouse clicked on
+   * given the click's event object.
+   */
   LatLng mouseEventToLatLng(MouseEvent e) {
     return layerPointToLatLng(mouseEventToLayerPoint(e));
   }
 
 
-  // map initialization methods
+  /* Map initialization methods */
 
   Element _container;
 
@@ -879,9 +971,11 @@ class BaseMap extends Object with core.Events {
     }
   }
 
-  // Runs the given callback when the map gets initialized with a place and
-  // zoom, or immediately if it happened already, optionally passing a
-  // function context.
+  /**
+   * Runs the given callback when the map gets initialized with a place and
+   * zoom, or immediately if it happened already, optionally passing a
+   * function context.
+   */
   void whenReady(Function callback, [Object context=null]) {
     if (_loaded) {
       callback.call(context || this, this);
@@ -897,7 +991,7 @@ class BaseMap extends Object with core.Events {
   }
 
 
-  // private methods for getting map state
+  /* Private methods for getting map state */
 
   geom.Point _getMapPanePos() {
     return DomUtil.getPosition(_mapPane);
@@ -924,17 +1018,23 @@ class BaseMap extends Object with core.Events {
     return project(latlng, newZoom)._subtract(topLeft);
   }
 
-  // layer point of the current center
+  /**
+   * Layer point of the current center.
+   */
   geom.Point _getCenterLayerPoint() {
     return containerPointToLayerPoint(getSize()._divideBy(2));
   }
 
-  // offset of the specified place to the current center in pixels
+  /**
+   * Offset of the specified place to the current center in pixels.
+   */
   geom.Point _getCenterOffset(LatLng latlng) {
     return latLngToLayerPoint(latlng).subtract(_getCenterLayerPoint());
   }
 
-  // adjust center for view to get inside bounds
+  /**
+   * Adjust center for view to get inside bounds.
+   */
   LatLng _limitCenter(LatLng center, num zoom, [LatLngBounds bounds=null]) {
 
     if (bounds == null) { return center; }
@@ -947,7 +1047,9 @@ class BaseMap extends Object with core.Events {
     return unproject(centerPoint.add(offset), zoom);
   }
 
-  // adjust offset for view to get inside bounds
+  /**
+   * Adjust offset for view to get inside bounds.
+   */
   geom.Point _limitOffset(geom.Point offset, LatLngBounds bounds) {
     if (bounds == null) { return offset; }
 
@@ -957,7 +1059,10 @@ class BaseMap extends Object with core.Events {
     return offset.add(_getBoundsOffset(newBounds, bounds));
   }
 
-  // returns offset needed for pxBounds to get inside maxBounds at a specified zoom
+  /**
+   * Returns offset needed for pxBounds to get inside maxBounds at a specified
+   * zoom.
+   */
   geom.Point _getBoundsOffset(Bounds pxBounds, LatLngBounds maxBounds, [num zoom=null]) {
     final nwOffset = project(maxBounds.getNorthWest(), zoom).subtract(pxBounds.min),
         seOffset = project(maxBounds.getSouthEast(), zoom).subtract(pxBounds.max),
