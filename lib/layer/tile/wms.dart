@@ -31,11 +31,13 @@ class WMSOptions {
    * map CRS. Don't change this if you're not sure what it means.
    */
   CRS crs;
+
+  num width, height;
 }
 
 // WMS is used for putting WMS tile layers on the map.
 class WMS extends TileLayer {
-  var defaultWmsParams = {
+  /*var defaultWmsParams = {
     'service': 'WMS',
     'request': 'GetMap',
     'version': '1.1.1',
@@ -43,31 +45,30 @@ class WMS extends TileLayer {
     'styles': '',
     'format': 'image/jpeg',
     'transparent': false
-  };
+  };*/
+  WMSOptions wmsParams;
 
-  WMS(url, options) { // (String, Object)
+  WMS(String url, this.wmsParams, TileLayerOptions options) : super(url, options) {
 
-    this._url = url;
+//    var wmsParams = L.extend({}, this.defaultWmsParams),
+    final tileSize = options.tileSize;// || this.options.tileSize;
 
-    var wmsParams = L.extend({}, this.defaultWmsParams),
-        tileSize = options.tileSize || this.options.tileSize;
-
-    if (options.detectRetina && L.Browser.retina) {
+    if (options.detectRetina && Browser.retina) {
       wmsParams.width = wmsParams.height = tileSize * 2;
     } else {
       wmsParams.width = wmsParams.height = tileSize;
     }
 
-    for (var i in options) {
+    /*for (var i in options) {
       // all keys that are not TileLayer options go to WMS params
       if (!this.options.hasOwnProperty(i) && i != 'crs') {
         wmsParams[i] = options[i];
       }
-    }
+    }*/
 
-    this.wmsParams = wmsParams;
+//    this.wmsParams = wmsParams;
 
-    L.setOptions(this, options);
+//    L.setOptions(this, options);
   }
 
   onAdd(map) {
@@ -101,6 +102,10 @@ class WMS extends TileLayer {
     return url + L.Util.getParamString(this.wmsParams, url, true) + '&BBOX=' + bbox;
   }
 
+  /**
+   * Merges an object with the new parameters and re-requests tiles on the
+   * current screen (unless noRedraw was set to true).
+   */
   setParams(params, noRedraw) {
 
     L.extend(this.wmsParams, params);

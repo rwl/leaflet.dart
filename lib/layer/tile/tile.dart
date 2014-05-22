@@ -8,7 +8,7 @@ import '../../core/core.dart' show EventType, Browser, Util;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../layer.dart';
-import '../../geometry/geometry.dart';
+import '../../geometry/geometry.dart' as geom;
 
 part 'anim.dart';
 part 'canvas.dart';

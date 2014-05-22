@@ -153,6 +153,7 @@ class TileLayer extends Object with core.Events implements Layer {
   final TileLayerOptions options;
 
   Element _container;
+  Map _tiles;
 
   TileLayer(this._url, this.options) {
     // detecting retina displays, adjusting tileSize and zoom levels
@@ -164,26 +165,26 @@ class TileLayer extends Object with core.Events implements Layer {
       if (options.minZoom > 0) {
         options.minZoom--;
       }
-      this.options.maxZoom--;
+      options.maxZoom--;
     }
 
     if (options.bounds != null) {
       options.bounds = new LatLngBounds.latLngBounds(options.bounds);
     }
 
-    /*var subdomains = this.options.subdomains;
+    /*var subdomains = options.subdomains;
 
     if (subdomains is String) {
-      this.options['subdomains'] = subdomains.split('');
+      options['subdomains'] = subdomains.split('');
     }*/
   }
 
   void onAdd(BaseMap map) {
-    this._map = map;
-    this._animated = map._zoomAnimated;
+    _map = map;
+    _animated = map._zoomAnimated;
 
     // create a container div for tiles
-    this._initContainer();
+    _initContainer();
 
     // set up events
     map.on(EventType.VIEWRESET, this._animateZoom, this);
@@ -193,7 +194,7 @@ class TileLayer extends Object with core.Events implements Layer {
 //      'moveend': this._update
 //    }, this);
 
-    if (this._animated) {
+    if (_animated) {
       map.on(EventType.ZOOMANIM, this._animateZoom, this);
       map.on(EventType.ZOOMEND, this._endZoomAnim, this);
 //      map.on({
@@ -202,13 +203,13 @@ class TileLayer extends Object with core.Events implements Layer {
 //      }, this);
     }
 
-    if (!this.options.updateWhenIdle) {
-      this._limitedUpdate = Util.limitExecByInterval(this._update, 150, this);
+    if (!options.updateWhenIdle) {
+      _limitedUpdate = Util.limitExecByInterval(this._update, 150, this);
       map.on(EventType.MOVE, this._limitedUpdate, this);
     }
 
-    this._reset();
-    this._update();
+    _reset();
+    _update();
   }
 
   Function _limitedUpdate;
@@ -221,8 +222,8 @@ class TileLayer extends Object with core.Events implements Layer {
   }
 
   void onRemove(BaseMap map) {
-    //this._container.parentNode.removeChild(this._container);
-    this._container.remove();
+    //_container.parentNode.removeChild(_container);
+    _container.remove();
 
     map.off(EventType.VIEWRESET, this._reset, this);
     map.off(EventType.MOVEEND, this._update, this);
@@ -231,7 +232,7 @@ class TileLayer extends Object with core.Events implements Layer {
 //      'moveend': this._update
 //    }, this);
 
-    if (this._animated) {
+    if (_animated) {
       map.off(EventType.ZOOMANIM, this._animateZoom, this);
       map.off(EventType.ZOOMEND, this._endZoomAnim, this);
 //      map.off({
@@ -240,23 +241,23 @@ class TileLayer extends Object with core.Events implements Layer {
 //      }, this);
     }
 
-    if (!this.options.updateWhenIdle) {
+    if (!options.updateWhenIdle) {
       map.off(EventType.MOVE, this._limitedUpdate, this);
     }
 
-    this._container = null;
-    this._map = null;
+    _container = null;
+    _map = null;
   }
 
   /**
    * Brings the tile layer to the top of all tile layers.
    */
   void bringToFront() {
-    final pane = this._map.panes['tilePane'];
+    final pane = _map.panes['tilePane'];
 
-    if (this._container != null) {
-      pane.append(this._container);
-      this._setAutoZIndex(pane, math.max);
+    if (_container != null) {
+      pane.append(_container);
+      _setAutoZIndex(pane, math.max);
     }
   }
 
@@ -264,33 +265,33 @@ class TileLayer extends Object with core.Events implements Layer {
    * Brings the tile layer to the bottom of all tile layers.
    */
   void bringToBack() {
-    final pane = this._map.panes['tilePane'];
+    final pane = _map.panes['tilePane'];
 
-    if (this._container != null) {
-      pane.insertBefore(this._container, pane.firstChild);
-      this._setAutoZIndex(pane, math.min);
+    if (_container != null) {
+      pane.insertBefore(_container, pane.firstChild);
+      _setAutoZIndex(pane, math.min);
     }
   }
 
   String getAttribution() {
-    return this.options.attribution;
+    return options.attribution;
   }
 
   /**
    * Returns the HTML element that contains the tiles for this layer.
    */
   Element getContainer() {
-    return this._container;
+    return _container;
   }
 
   /**
    * Changes the opacity of the tile layer.
    */
   void setOpacity(num opacity) {
-    this.options.opacity = opacity;
+    options.opacity = opacity;
 
-    if (this._map != null) {
-      this._updateOpacity();
+    if (_map != null) {
+      _updateOpacity();
     }
   }
 
@@ -298,18 +299,18 @@ class TileLayer extends Object with core.Events implements Layer {
    * Sets the zIndex of the tile layer.
    */
   void setZIndex(num zIndex) {
-    this.options.zIndex = zIndex;
-    this._updateZIndex();
+    options.zIndex = zIndex;
+    _updateZIndex();
   }
 
   /**
    * Updates the layer's URL template and redraws it.
    */
   void setUrl(String url, [bool noRedraw=false]) {
-    this._url = url;
+    _url = url;
 
     if (!noRedraw) {
-      this.redraw();
+      redraw();
     }
   }
 
@@ -317,15 +318,15 @@ class TileLayer extends Object with core.Events implements Layer {
    * Causes the layer to clear all the tiles and request them again.
    */
   void redraw() {
-    if (this._map != null) {
-      this._reset(true);
-      this._update();
+    if (_map != null) {
+      _reset(true);
+      _update();
     }
   }
 
   void _updateZIndex() {
-    if (this._container && this.options.zIndex != null) {
-      this._container.style.zIndex = this.options.zIndex.toString();
+    if (_container && options.zIndex != null) {
+      _container.style.zIndex = options.zIndex.toString();
     }
   }
 
@@ -337,7 +338,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
     for (int i = 0; i < layers.length; i++) {
 
-      if (layers[i] != this._container) {
+      if (layers[i] != _container) {
         zIndex = int.parse(layers[i].style.zIndex, radix: 10);
 
         if (!zIndex.isNaN) {
@@ -346,168 +347,171 @@ class TileLayer extends Object with core.Events implements Layer {
       }
     }
 
-    this.options.zIndex = (edgeZIndex.isFinite ? edgeZIndex : 0) + compare(1, -1);
-    this._container.style.zIndex = this.options.zIndex.toString();
+    options.zIndex = (edgeZIndex.isFinite ? edgeZIndex : 0) + compare(1, -1);
+    _container.style.zIndex = options.zIndex.toString();
   }
 
   void _updateOpacity() {
-    final tiles = this._tiles;
+    final tiles = _tiles;
 
     if (Browser.ielt9) {
       for (var i in tiles) {
-        DomUtil.setOpacity(tiles[i], this.options.opacity);
+        DomUtil.setOpacity(tiles[i], options.opacity);
       }
     } else {
-      DomUtil.setOpacity(this._container, this.options.opacity);
+      DomUtil.setOpacity(_container, options.opacity);
     }
   }
+
+  Element _bgBuffer, _tileContainer;
 
   void _initContainer() {
-    final tilePane = this._map.panes['tilePane'];
+    final tilePane = _map.panes['tilePane'];
 
-    if (this._container == null) {
-      this._container = DomUtil.create('div', 'leaflet-layer');
+    if (_container == null) {
+      _container = DomUtil.create('div', 'leaflet-layer');
 
-      this._updateZIndex();
+      _updateZIndex();
 
-      if (this._animated) {
-        var className = 'leaflet-tile-container';
+      if (_animated) {
+        final className = 'leaflet-tile-container';
 
-        this._bgBuffer = DomUtil.create('div', className, this._container);
-        this._tileContainer = DomUtil.create('div', className, this._container);
+        _bgBuffer = DomUtil.create('div', className, _container);
+        _tileContainer = DomUtil.create('div', className, _container);
 
       } else {
-        this._tileContainer = this._container;
+        _tileContainer = _container;
       }
 
-      tilePane.append(this._container);
+      tilePane.append(_container);
 
-      if (this.options.opacity < 1) {
-        this._updateOpacity();
+      if (options.opacity < 1) {
+        _updateOpacity();
       }
     }
   }
+
+  int _tilesToLoad;
+  List _unusedTiles;
 
   void _reset([bool hard = false]/*[core.Event e = null]*/) {
-    for (var key in this._tiles) {
-      this.fire('tileunload', {'tile': this._tiles[key]});
+    for (var key in _tiles) {
+      fire(EventType.TILEUNLOAD, {'tile': _tiles[key]});
     }
 
-    this._tiles = {};
-    this._tilesToLoad = 0;
+    _tiles = {};
+    _tilesToLoad = 0;
 
-    if (this.options.reuseTiles) {
-      this._unusedTiles = [];
+    if (options.reuseTiles) {
+      _unusedTiles = [];
     }
 
-    this._tileContainer.innerHTML = '';
+    _tileContainer.setInnerHtml('');
 
-    if (this._animated && hard) {
-      this._clearBgBuffer();
+    if (_animated && hard) {
+      _clearBgBuffer();
     }
 
-    this._initContainer();
+    _initContainer();
   }
 
-  _getTileSize() {
-    var map = this._map,
-        zoom = map.getZoom() + this.options.zoomOffset,
-        zoomN = this.options.maxNativeZoom,
-        tileSize = this.options.tileSize;
+  num _getTileSize() {
+    final map = _map,
+        zoom = map.getZoom() + options.zoomOffset,
+        zoomN = options.maxNativeZoom;
+    num tileSize = options.tileSize;
 
     if (zoomN && zoom > zoomN) {
-      tileSize = Math.round(map.getZoomScale(zoom) / map.getZoomScale(zoomN) * tileSize);
+      tileSize = (map.getZoomScale(zoom) / map.getZoomScale(zoomN) * tileSize).round();
     }
 
     return tileSize;
   }
 
-  _update() {
+  void _update() {
 
-    if (!this._map) { return; }
+    if (_map == null) { return; }
 
-    var map = this._map,
+    final map = _map,
         bounds = map.getPixelBounds(),
         zoom = map.getZoom(),
-        tileSize = this._getTileSize();
+        tileSize = _getTileSize();
 
-    if (zoom > this.options.maxZoom || zoom < this.options.minZoom) {
+    if (zoom > options.maxZoom || zoom < options.minZoom) {
       return;
     }
 
-    var tileBounds = L.bounds(
+    final tileBounds = new LatLngBounds(
             bounds.min.divideBy(tileSize)._floor(),
             bounds.max.divideBy(tileSize)._floor());
 
-    this._addTilesFromCenterOut(tileBounds);
+    _addTilesFromCenterOut(tileBounds);
 
-    if (this.options.unloadInvisibleTiles || this.options.reuseTiles) {
-      this._removeOtherTiles(tileBounds);
+    if (options.unloadInvisibleTiles || options.reuseTiles) {
+      _removeOtherTiles(tileBounds);
     }
   }
 
-  _addTilesFromCenterOut(bounds) {
-    var queue = [],
+  void _addTilesFromCenterOut(LatLngBounds bounds) {
+    final queue = new List<geom.Point>(),
         center = bounds.getCenter();
 
-    var j, i, point;
-
-    for (j = bounds.min.y; j <= bounds.max.y; j++) {
+    for (num j = bounds.min.y; j <= bounds.max.y; j++) {
       for (i = bounds.min.x; i <= bounds.max.x; i++) {
-        point = new L.Point(i, j);
+        final point = new geom.Point(i, j);
 
-        if (this._tileShouldBeLoaded(point)) {
-          queue.push(point);
+        if (_tileShouldBeLoaded(point)) {
+          queue.add(point);
         }
       }
     }
 
-    var tilesToLoad = queue.length;
+    final tilesToLoad = queue.length;
 
     if (tilesToLoad == 0) { return; }
 
     // load tiles in order of their distance to center
-    queue.sort((a, b) {
+    queue.sort((geom.Point a, geom.Point b) {
       return a.distanceTo(center) - b.distanceTo(center);
     });
 
     var fragment = document.createDocumentFragment();
 
     // if its the first batch of tiles to load
-    if (!this._tilesToLoad) {
-      this.fire('loading');
+    if (_tilesToLoad == 0) {
+      fire(EventType.LOADING);
     }
 
-    this._tilesToLoad += tilesToLoad;
+    _tilesToLoad += tilesToLoad;
 
-    for (i = 0; i < tilesToLoad; i++) {
-      this._addTile(queue[i], fragment);
+    for (int i = 0; i < tilesToLoad; i++) {
+      _addTile(queue[i], fragment);
     }
 
-    this._tileContainer.appendChild(fragment);
+    _tileContainer.append(fragment);
   }
 
-  _tileShouldBeLoaded(tilePoint) {
-    if (this._tiles.contains(tilePoint.x + ':' + tilePoint.y)) {
+  bool _tileShouldBeLoaded(geom.Point tilePoint) {
+    if (_tiles.containsKey('${tilePoint.x}:${tilePoint.y}')) {
       return false; // already loaded
     }
 
-    var options = this.options;
-
     if (!options.continuousWorld) {
-      var limit = this._getWrapTileNum();
+      final limit = _getWrapTileNum();
 
       // don't load if exceeds world bounds
       if ((options.noWrap && (tilePoint.x < 0 || tilePoint.x >= limit.x)) ||
-        tilePoint.y < 0 || tilePoint.y >= limit.y) { return false; }
+          tilePoint.y < 0 || tilePoint.y >= limit.y) {
+        return false;
+      }
     }
 
-    if (options.bounds) {
-      var tileSize = options.tileSize,
+    if (options.bounds != null) {
+      final tileSize = options.tileSize,
           nwPoint = tilePoint.multiplyBy(tileSize),
-          sePoint = nwPoint.add([tileSize, tileSize]),
-          nw = this._map.unproject(nwPoint),
-          se = this._map.unproject(sePoint);
+          sePoint = nwPoint.add([tileSize, tileSize]);
+      LatLng nw = _map.unproject(nwPoint),
+          se = _map.unproject(sePoint);
 
       // TODO temporary hack, will be removed after refactoring projections
       // https://github.com/Leaflet/Leaflet/issues/1618
@@ -516,75 +520,76 @@ class TileLayer extends Object with core.Events implements Layer {
         se = se.wrap();
       }
 
-      if (!options.bounds.intersects([nw, se])) { return false; }
+      if (!options.bounds.intersects([nw, se])) {
+        return false;
+      }
     }
 
     return true;
   }
 
-  _removeOtherTiles(bounds) {
-    var kArr, x, y, key;
+  void _removeOtherTiles(bounds) {
+//    var kArr, x, y, key;
 
-    for (key in this._tiles) {
-      kArr = key.split(':');
-      x = parseInt(kArr[0], 10);
-      y = parseInt(kArr[1], 10);
+    for (var key in _tiles) {
+      final kArr = key.split(':');
+      final x = int.parse(kArr[0], radix:10);
+      final y = int.parse(kArr[1], radix:10);
 
       // remove tile if it's out of bounds
       if (x < bounds.min.x || x > bounds.max.x || y < bounds.min.y || y > bounds.max.y) {
-        this._removeTile(key);
+        _removeTile(key);
       }
     }
   }
 
-  _removeTile(key) {
-    var tile = this._tiles[key];
+  void _removeTile(String key) {
+    final tile = _tiles[key];
 
-    this.fire('tileunload', {'tile': tile, 'url': tile.src});
+    fire(EventType.TILEUNLOAD, {'tile': tile, 'url': tile.src});
 
-    if (this.options.reuseTiles) {
-      L.DomUtil.removeClass(tile, 'leaflet-tile-loaded');
-      this._unusedTiles.push(tile);
+    if (options.reuseTiles) {
+      DomUtil.removeClass(tile, 'leaflet-tile-loaded');
+      _unusedTiles.add(tile);
 
-    } else if (tile.parentNode == this._tileContainer) {
-      this._tileContainer.removeChild(tile);
+    } else if (tile.parentNode == _tileContainer) {
+      //_tileContainer.removeChild(tile);
+      tile.remove();
     }
 
     // for https://github.com/CloudMade/Leaflet/issues/137
-    if (!L.Browser.android) {
+    if (!Browser.android) {
       tile.onload = null;
-      tile.src = L.Util.emptyImageUrl;
+      tile.src = Util.emptyImageUrl;
     }
 
-    delete(this._tiles[key]);
+    _tiles.remove(key);
   }
 
-  _addTile(tilePoint, container) {
-    var tilePos = this._getTilePos(tilePoint);
+  void _addTile(geom.Point tilePoint, Element container) {
+    final tilePos = _getTilePos(tilePoint);
 
     // get unused tile - or create a new tile
-    var tile = this._getTile();
+    final tile = _getTile();
 
     /*
     Chrome 20 layouts much faster with top/left (verify with timeline, frames)
     Android 4 browser has display issues with top/left and requires transform instead
     (other browsers don't currently care) - see debug/hacks/jitter.html for an example
     */
-    L.DomUtil.setPosition(tile, tilePos, L.Browser.chrome);
+    DomUtil.setPosition(tile, tilePos, Browser.chrome);
 
-    this._tiles[tilePoint.x + ':' + tilePoint.y] = tile;
+    _tiles['${tilePoint.x}:${tilePoint.y}'] = tile;
 
-    this._loadTile(tile, tilePoint);
+    _loadTile(tile, tilePoint);
 
-    if (tile.parentNode != this._tileContainer) {
-      container.appendChild(tile);
+    if (tile.parentNode != _tileContainer) {
+      container.append(tile);
     }
   }
 
-  _getZoomForUrl() {
-
-    var options = this.options,
-        zoom = this._map.getZoom();
+  num _getZoomForUrl() {
+    num zoom = _map.getZoom();
 
     if (options.zoomReverse) {
       zoom = options.maxZoom - zoom;
@@ -592,124 +597,124 @@ class TileLayer extends Object with core.Events implements Layer {
 
     zoom += options.zoomOffset;
 
-    return options.maxNativeZoom ? Math.min(zoom, options.maxNativeZoom) : zoom;
+    return options.maxNativeZoom != 0 ? math.min(zoom, options.maxNativeZoom) : zoom;
   }
 
-  _getTilePos(tilePoint) {
-    var origin = this._map.getPixelOrigin(),
-        tileSize = this._getTileSize();
+  geom.Point _getTilePos(geom.Point tilePoint) {
+    final origin = _map.getPixelOrigin(),
+        tileSize = _getTileSize();
 
     return tilePoint.multiplyBy(tileSize).subtract(origin);
   }
 
   // image-specific code (override to implement e.g. Canvas or SVG tile layer)
 
-  getTileUrl(tilePoint) {
-    return L.Util.template(this._url, L.extend({
-      s: this._getSubdomain(tilePoint),
-      z: tilePoint.z,
-      x: tilePoint.x,
-      y: tilePoint.y
-    }, this.options));
+  String getTileUrl(geom.Point tilePoint) {
+    return Util.template(_url, extend({
+      's': _getSubdomain(tilePoint),
+      'z': tilePoint.z,
+      'x': tilePoint.x,
+      'y': tilePoint.y
+    }, options));
   }
 
-  _getWrapTileNum() {
-    var crs = this._map.options.crs,
-        size = crs.getSize(this._map.getZoom());
-    return size.divideBy(this._getTileSize())._floor();
+  geom.Point _getWrapTileNum() {
+    final crs = _map.stateOptions.crs,
+        size = crs.getSize(_map.getZoom());
+    return size.divideBy(_getTileSize())._floor();
   }
 
-  _adjustTilePoint(tilePoint) {
+  void _adjustTilePoint(geom.Point tilePoint) {
 
-    var limit = this._getWrapTileNum();
+    final limit = _getWrapTileNum();
 
     // wrap tile coordinates
-    if (!this.options.continuousWorld && !this.options.noWrap) {
+    if (!options.continuousWorld && !options.noWrap) {
       tilePoint.x = ((tilePoint.x % limit.x) + limit.x) % limit.x;
     }
 
-    if (this.options.tms) {
+    if (options.tms) {
       tilePoint.y = limit.y - tilePoint.y - 1;
     }
 
-    tilePoint.z = this._getZoomForUrl();
+    tilePoint.z = _getZoomForUrl();
   }
 
-  _getSubdomain(tilePoint) {
-    var index = Math.abs(tilePoint.x + tilePoint.y) % this.options.subdomains.length;
-    return this.options.subdomains[index];
+  String _getSubdomain(geom.Point tilePoint) {
+    var index = (tilePoint.x + tilePoint.y).abs() % options.subdomains.length;
+    return options.subdomains[index];
   }
 
-  _getTile() {
-    if (this.options.reuseTiles && this._unusedTiles.length > 0) {
-      var tile = this._unusedTiles.pop();
-      this._resetTile(tile);
+  Element _getTile() {
+    if (options.reuseTiles && _unusedTiles.length > 0) {
+      var tile = _unusedTiles.pop();
+      _resetTile(tile);
       return tile;
     }
-    return this._createTile();
+    return _createTile();
   }
 
   // Override if data stored on a tile needs to be cleaned up before reuse
-  _resetTile(/*tile*/) {}
+  _resetTile(tile) {}
 
-  _createTile() {
-    var tile = L.DomUtil.create('img', 'leaflet-tile');
-    tile.style.width = tile.style.height = this._getTileSize() + 'px';
+  Element _createTile() {
+    final tile = DomUtil.create('img', 'leaflet-tile');
+    tile.style.width = tile.style.height = _getTileSize() + 'px';
     tile.galleryimg = 'no';
 
-    tile.onselectstart = tile.onmousemove = L.Util.falseFn;
+    tile.onselectstart = tile.onmousemove = Util.falseFn;
 
-    if (L.Browser.ielt9 && this.options.opacity != null) {
-      L.DomUtil.setOpacity(tile, this.options.opacity);
+    if (Browser.ielt9 && options.opacity != null) {
+      DomUtil.setOpacity(tile, options.opacity);
     }
     // without this hack, tiles disappear after zoom on Chrome for Android
     // https://github.com/Leaflet/Leaflet/issues/2078
-    if (L.Browser.mobileWebkit3d) {
+    if (Browser.mobileWebkit3d) {
       tile.style.WebkitBackfaceVisibility = 'hidden';
     }
     return tile;
   }
 
-  _loadTile(tile, tilePoint) {
+  void _loadTile(Element tile, geom.Point tilePoint) {
     tile._layer  = this;
-    tile.onload  = this._tileOnLoad;
-    tile.onerror = this._tileOnError;
+    tile.onload  = _tileOnLoad;
+    tile.onerror = _tileOnError;
 
-    this._adjustTilePoint(tilePoint);
-    tile.src     = this.getTileUrl(tilePoint);
+    _adjustTilePoint(tilePoint);
+    tile.src     = getTileUrl(tilePoint);
 
-    this.fire('tileloadstart', {
+    fire(EventType.TILELOADSTART, {
       'tile': tile,
       'url': tile.src
     });
   }
 
-  _tileLoaded() {
-    this._tilesToLoad--;
+  void _tileLoaded() {
+    _tilesToLoad--;
 
-    if (this._animated) {
-      L.DomUtil.addClass(this._tileContainer, 'leaflet-zoom-animated');
+    if (_animated) {
+      DomUtil.addClass(_tileContainer, 'leaflet-zoom-animated');
     }
 
-    if (!this._tilesToLoad) {
-      this.fire('load');
+    if (_tilesToLoad == 0) {
+      fire(EventType.LOAD);
 
-      if (this._animated) {
+      if (_animated) {
         // clear scaled tiles after all new tiles are loaded (for performance)
-        clearTimeout(this._clearBgBufferTimer);
-        this._clearBgBufferTimer = setTimeout(L.bind(this._clearBgBuffer, this), 500);
+        clearTimeout(_clearBgBufferTimer);
+        _clearBgBufferTimer = setTimeout(bind(_clearBgBuffer, this), 500);
       }
     }
   }
 
-  _tileOnLoad() {
-    var layer = this._layer;
+  void _tileOnLoad() {
+    final layer = _layer;
 
     //Only if we are loading an actual image
-    if (this.src != L.Util.emptyImageUrl) {
-      L.DomUtil.addClass(this, 'leaflet-tile-loaded');
+    if (this.src != Util.emptyImageUrl) {
+      DomUtil.addClass(this, 'leaflet-tile-loaded');
 
-      layer.fire('tileload', {
+      layer.fire(EventType.TILELOAD, {
         'tile': this,
         'url': this.src
       });
@@ -718,10 +723,10 @@ class TileLayer extends Object with core.Events implements Layer {
     layer._tileLoaded();
   }
 
-  _tileOnError() {
-    var layer = this._layer;
+  void _tileOnError() {
+    final layer = _layer;
 
-    layer.fire('tileerror', {
+    layer.fire(EventType.TILEERROR, {
       'tile': this,
       'url': this.src
     });
