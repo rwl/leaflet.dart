@@ -4,3 +4,6 @@ pubspec.lock
 
 .idea/
 leaflet.iml
+
+.project
+/.settings/
