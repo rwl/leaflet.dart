@@ -1,74 +1,95 @@
 part of leaflet.layer.vector;
 
-class PolylineOptions {
-  // How much to simplify the polyline on each zoom level. More means better performance and smoother look, and less means more accurate representation.
+class PolylineOptions extends PathOptions {
+  /**
+   * How much to simplify the polyline on each zoom level. More means better performance and smoother look, and less means more accurate representation.
+   */
   num smoothFactor  = 1.0;
-  // Disabled polyline clipping.
+
+  /**
+   * Disabled polyline clipping.
+   */
   bool noClip  = false;
 }
 
-// Polyline is used to display polylines on a map.
+/**
+ * Polyline is used to display polylines on a map.
+ */
 class Polyline extends Path {
 
   List<LatLng> _latlngs;
   List<Point> _originalPoints;
   List _parts;
 
-  Polyline(List<LatLng> latlngs, Map<String, Object> options) : super(options) {
-    this._latlngs = this._convertLatLngs(latlngs);
+  Polyline(List<LatLng> latlngs, PolylineOptions polylineOptions) : super(polylineOptions) {
+    _latlngs = latlngs;//_convertLatLngs(latlngs);
+    //polylineOptions = polylineOptions;
   }
 
-  Map<String, Object> options = {
+  PolylineOptions get polylineOptions => options as PolylineOptions;
+  /*Map<String, Object> options = {
     // how much to simplify the polyline on each zoom level
     // more = better performance and smoother look, less = more accurate
     'smoothFactor': 1.0,
     'noClip': false
-  };
+  };*/
 
   projectLatlngs() {
-    this._originalPoints = [];
+    _originalPoints = [];
 
-    final len = this._latlngs.length;
+    final len = _latlngs.length;
     for (var i = 0; i < len; i++) {
-      this._originalPoints[i] = this._map.latLngToLayerPoint(this._latlngs[i]);
+      _originalPoints[i] = _map.latLngToLayerPoint(_latlngs[i]);
     }
   }
 
   getPathString() {
-    final len = this._parts.length;
+    final len = _parts.length;
     String str = '';
     for (var i = 0; i < len; i++) {
-      str += this._getPathPartStr(this._parts[i]);
+      str += _getPathPartStr(_parts[i]);
     }
     return str;
   }
 
+  /**
+   * Returns an array of the points in the path.
+   */
   getLatLngs() {
-    return this._latlngs;
+    return _latlngs;
   }
 
+  /**
+   * Replaces all the points in the polyline with the given array of geographical points.
+   */
   setLatLngs(List<LatLng> latlngs) {
-    this._latlngs = this._convertLatLngs(latlngs);
-    return this.redraw();
+    _latlngs = latlngs;//_convertLatLngs(latlngs);
+    return redraw();
   }
 
-  addLatLng(latlng) {
-    this._latlngs.add(new LatLng.latLng(latlng));
-    return this.redraw();
+  /**
+   * Adds a given point to the polyline.
+   */
+  addLatLng(LatLng latlng) {
+    _latlngs.add(new LatLng.latLng(latlng));
+    return redraw();
   }
 
+  /**
+   * Allows adding, removing or replacing points in the polyline. Syntax is the same as in Array#splice. Returns the array of removed points (if any).
+   */
   spliceLatLngs(int index, int howMany) { // (Number index, Number howMany)
     final sub = _latlngs.sublist(index, index+howMany);
     _latlngs.removeRange(index, index+howMany);
-//    var removed = [].splice.apply(this._latlngs, arguments);
-    this._convertLatLngs(this._latlngs, true);
-    this.redraw();
+//    var removed = [].splice.apply(_latlngs, arguments);
+    //_convertLatLngs(_latlngs, true);
+    redraw();
     return sub;
   }
 
   closestLayerPoint(p) {
     var minDistance = double.INFINITY;
-    var parts = this._parts, p1, p2, minPoint = null;
+    var parts = _parts, p1, p2, minPoint = null;
 
     final jLen = parts.length;
     for (var j = 0; j < jLen; j++) {
@@ -90,23 +111,24 @@ class Polyline extends Path {
     return minPoint;
   }
 
+  /**
+   * Returns the LatLngBounds of the polyline.
+   */
   getBounds() {
-    return new LatLngBounds(this.getLatLngs());
+    return new LatLngBounds(getLatLngs());
   }
 
-  _convertLatLngs(/*List<LatLng>*/var latlngs, [bool overwrite = false]) {
-    var i, len;
-    final target = overwrite ? latlngs : [];
+  /*List<LatLng> _convertLatLngs(List<List<LatLng>> latlngs) {//, [bool overwrite = false]) {
+    final target = [];//overwrite ? latlngs : [];
 
-    len = latlngs.length;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < latlngs.length; i++) {
       if (latlngs[i] is List && !(latlngs[i][0] is num)) {
         return target;
       }
       target[i] = new LatLng.latLng(latlngs[i]);
     }
     return target;
-  }
+  }*/
 
   _initEvents() {
     super._initEvents();
@@ -128,19 +150,19 @@ class Polyline extends Path {
   }
 
   _clipPoints() {
-    var points = this._originalPoints,
+    var points = _originalPoints,
         len = points.length,
         segment;
 
-    if (this.options['noClip']) {
-      this._parts = [points];
+    if (polylineOptions.noClip) {
+      _parts = [points];
       return;
     }
 
-    this._parts = [];
+    _parts = [];
 
-    final parts = this._parts;
-    final vp = this._map._pathViewport;
+    final parts = _parts;
+    final vp = _map._pathViewport;
     final lu = LineUtil;
 
     int k = 0;
@@ -163,19 +185,19 @@ class Polyline extends Path {
 
   // simplify each clipped part of the polyline
   _simplifyPoints() {
-    var parts = this._parts;
+    var parts = _parts;
     final lu = LineUtil;
 
     for (int i = 0; i < parts.length; i++) {
-      parts[i] = lu.simplify(parts[i], this.options['smoothFactor']);
+      parts[i] = lu.simplify(parts[i], polylineOptions.smoothFactor);
     }
   }
 
   _updatePath() {
-    if (this._map == null) { return; }
+    if (_map == null) { return; }
 
-    this._clipPoints();
-    this._simplifyPoints();
+    _clipPoints();
+    _simplifyPoints();
 
     super._updatePath();
   }

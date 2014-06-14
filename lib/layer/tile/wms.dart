@@ -71,7 +71,9 @@ class WMS extends TileLayer {
 //    L.setOptions(this, options);
   }
 
-  onAdd(map) {
+  CRS _crs;
+
+  onAdd(BaseMap map) {
 
     this._crs = this.options.crs || map.options.crs;
 

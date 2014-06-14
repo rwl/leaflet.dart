@@ -30,7 +30,7 @@ class LatLng {
   static final RAD_TO_DEG = 180 / math.PI;
   static final MAX_MARGIN = 1.0E-9; // max margin of error for the "equals" check
 
-  bool equals(LatLng obj) { // (LatLng) -> Boolean
+  bool operator ==(LatLng obj) { // (LatLng) -> Boolean
     if (obj == null) { return false; }
 
     obj = new LatLng.latLng(obj);

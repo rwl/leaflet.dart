@@ -1,37 +1,41 @@
 part of leaflet.layer.vector;
 
-// Polygon is used to display polygons on a map.
+class PolygonOptions extends PolylineOptions {
+  bool fill = true;
+}
+
+/**
+ * Polygon is used to display polygons on a map.
+ *
+ * Note that points you pass when creating a polygon shouldn't have an additional last point equal to the first one - it's better to filter out such points.
+ */
 class Polygon extends Polyline {
 
-  Map<String, Object> options = {
+  /*Map<String, Object> options = {
     'fill': true
-  };
+  };*/
 
-  List _holes;
+  PolygonOptions get polygonOptions => options as PolygonOptions;
+
+  List<List<LatLng>> _holes;
   List _holePoints;
 
-  Polygon(latlngs, options) : super(latlngs, options) {
-    this._initWithHoles(latlngs);
-  }
+  Polygon(List<LatLng> latlngs, PolygonOptions options, [this._holes=null]) : super(latlngs, options) {
 
-  _initWithHoles(/*List<LatLng>*/var latlngs) {
-    if (latlngs && latlngs[0] is List && (!(latlngs[0][0] is num))) {
-      this._latlngs = this._convertLatLngs(latlngs[0]);
-      this._holes = latlngs.removeAt(1);
-
+    if (_holes != null) {
       for (int i = 0; i < _holes.length; i++) {
-        final hole = this._holes[i] = this._convertLatLngs(this._holes[i]);
-        if (hole[0].equals(hole[hole.length - 1])) {
-          hole.pop();
+        final hole = _holes[i];// = this._convertLatLngs(_holes[i]);
+        if (hole[0] == hole[hole.length - 1]) {
+          hole.removeLast();
         }
       }
     }
 
-    // filter out last point if its equal to the first one
-    latlngs = this._latlngs;
+    // Filter out last point if its equal to the first one.
+    latlngs = _latlngs;
 
-    if (latlngs.length >= 2 && latlngs[0].equals(latlngs[latlngs.length - 1])) {
-      latlngs.pop();
+    if (latlngs.length >= 2 && latlngs[0] == latlngs[latlngs.length - 1]) {
+      latlngs.removeLast();
     }
   }
 
@@ -40,45 +44,56 @@ class Polygon extends Polyline {
 
     // project polygon holes points
     // TODO move this logic to Polyline to get rid of duplication
-    this._holePoints = [];
+    _holePoints = [];
 
-    if (this._holes == null) { return; }
+    if (_holes == null) { return; }
 
     for (int i = 0; i < _holes.length; i++) {
-      this._holePoints[i] = [];
+      _holePoints[i] = [];
 
-      for (j = 0; j < _holes[i].length; j++) {
-        this._holePoints[i][j] = this._map.latLngToLayerPoint(this._holes[i][j]);
+      for (int j = 0; j < _holes[i].length; j++) {
+        _holePoints[i][j] = _map.latLngToLayerPoint(_holes[i][j]);
       }
     }
   }
 
-  setLatLngs(var latlngs) {
+  /*setLatLngs(var latlngs) {
     if (latlngs && latlngs[0] is List && (!(latlngs[0][0] is num))) {
-      this._initWithHoles(latlngs);
-      return this.redraw();
+      _initWithHoles(latlngs);
+      return redraw();
     } else {
       return super.setLatLngs(latlngs);
     }
+  }*/
+
+  setHoles(List<List<LatLng>> holes) {
+    _holes = holes;
+    for (int i = 0; i < _holes.length; i++) {
+      final hole = _holes[i];// = _convertLatLngs(_holes[i]);
+      if (hole[0] == hole[hole.length - 1]) {
+        hole.removeLast();
+      }
+    }
+    redraw();
   }
 
   _clipPoints() {
-    var points = this._originalPoints;
+    var points = _originalPoints;
     final newParts = [];
 
-    this._parts = [points];
-    this._parts.addAll(this._holePoints);
+    _parts = [points];
+    _parts.addAll(_holePoints);
 
-    if (this.options['noClip']) { return; }
+    if (polylineOptions.noClip) { return; }
 
     for (int i = 0; i < _parts.length; i++) {
-      var clipped = PolyUtil.clipPolygon(this._parts[i], this._map._pathViewport);
+      var clipped = PolyUtil.clipPolygon(_parts[i], _map._pathViewport);
       if (clipped.length) {
         newParts.add(clipped);
       }
     }
 
-    this._parts = newParts;
+    _parts = newParts;
   }
 
   _getPathPartStr(points) {

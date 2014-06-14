@@ -1,6 +1,6 @@
 library leaflet.layer;
 
-import 'dart:html';
+import 'dart:html' show CanvasElement;
 import 'dart:math' as math show min, max;
 
 import '../core/core.dart' as core;

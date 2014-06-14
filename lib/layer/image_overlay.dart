@@ -1,31 +1,41 @@
 part of leaflet.layer;
 
 class ImageOverlayOptions {
-  // The opacity of the image overlay.
+  /**
+   * The opacity of the image overlay.
+   */
   num opacity = 1.0;
-  // The attribution text of the image overlay.
+
+  /**
+   * The attribution text of the image overlay.
+   */
   String attribution = '';
 }
 
-// ImageOverlay is used to overlay images over the map (to specific geographical bounds).
-class ImageOverlay extends Object with Events {
+/**
+ * ImageOverlay is used to overlay images over the map (to specific geographical bounds).
+ */
+class ImageOverlay extends Object with core.Events {
 
-  Map<String, Object> options = {
+  ImageOverlayOptions options;
+
+  /*Map<String, Object> options = {
     'opacity': 1
-  };
+  };*/
 
   String _url;
   LatLngBounds _bounds;
   BaseMap _map;
   var _image;
 
-  ImageOverlay(String url, LatLngBounds bounds, Map<String, Object> options) {
+  ImageOverlay(String url, LatLngBounds bounds, this.options) {
     this._url = url;
     this._bounds = new LatLngBounds.latLngBounds(bounds);
-
-    this.options.addAll(options);
   }
 
+  /**
+   * Adds the overlay to the map.
+   */
   onAdd(BaseMap map) {
     this._map = map;
 
@@ -35,10 +45,10 @@ class ImageOverlay extends Object with Events {
 
     map.panes['overlayPane'].append(this._image);
 
-    map.on('viewreset', this._reset, this);
+    map.on(EventType.VIEWRESET, this._reset, this);
 
-    if (map.options['zoomAnimation'] && Browser.any3d) {
-      map.on('zoomanim', this._animateZoom, this);
+    if (map.animationOptions.zoomAnimation && Browser.any3d) {
+      map.on(EventType.ZOOMANIM, this._animateZoom, this);
     }
 
     this._reset();
@@ -59,13 +69,20 @@ class ImageOverlay extends Object with Events {
     return this;
   }
 
+  /**
+   * Sets the opacity of the overlay.
+   */
   setOpacity(opacity) {
-    this.options['opacity'] = opacity;
+    this.options.opacity = opacity;
     this._updateOpacity();
     return this;
   }
 
-  // TODO remove bringToFront/bringToBack duplication from TileLayer/Path
+  /**
+   * Brings the layer to the top of all overlays.
+   *
+   * TODO remove bringToFront/bringToBack duplication from TileLayer/Path
+   */
   bringToFront() {
     if (this._image) {
       this._map.panes['overlayPane'].append(this._image);
@@ -73,6 +90,9 @@ class ImageOverlay extends Object with Events {
     return this;
   }
 
+  /**
+   * Brings the layer to the bottom of all overlays.
+   */
   bringToBack() {
     final pane = this._map.panes['overlayPane'];
     if (this._image) {
@@ -81,19 +101,22 @@ class ImageOverlay extends Object with Events {
     return this;
   }
 
-  setUrl(url) {
+  /**
+   * Changes the URL of the image.
+   */
+  setUrl(String url) {
     this._url = url;
     this._image.src = this._url;
   }
 
   getAttribution() {
-    return this.options['attribution'];
+    return this.options.attribution;
   }
 
   _initImage() {
     this._image = DomUtil.create('img', 'leaflet-image-layer');
 
-    if (this._map.options['zoomAnimation'] && Browser.any3d) {
+    if (this._map.animationOptions.zoomAnimation && Browser.any3d) {
       DomUtil.addClass(this._image, 'leaflet-zoom-animated');
     } else {
       DomUtil.addClass(this._image, 'leaflet-zoom-hide');
@@ -138,10 +161,10 @@ class ImageOverlay extends Object with Events {
   }
 
   _onImageLoad() {
-    this.fire('load');
+    this.fire(EventType.LOAD);
   }
 
   _updateOpacity() {
-    DomUtil.setOpacity(this._image, this.options['opacity']);
+    DomUtil.setOpacity(this._image, this.options.opacity);
   }
 }

@@ -1,6 +1,6 @@
 library leaflet.layer.vector;
 
-import 'dart:html';
+import 'dart:html' show window, Element;
 import 'dart:math' as math;
 
 import '../../core/core.dart';

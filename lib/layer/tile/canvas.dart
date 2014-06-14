@@ -1,24 +1,28 @@
 part of leaflet.layer.tile;
 
 class CanvasOptions {
-  // Indicates that tiles will be drawn asynchronously. tileDrawn method should be called for each tile after drawing completion.
+  /**
+   * Indicates that tiles will be drawn asynchronously. tileDrawn method should be called for each tile after drawing completion.
+   */
   bool async = false;
 }
 
-// Canvas is a class that you can use as a base for creating
-// dynamically drawn Canvas-based tile layers.
-class Canvas extends TileLayer {
-  var options = {
-    'async': false
-  };
+/**
+ * Canvas is a class that you can use as a base for creating
+ * dynamically drawn Canvas-based tile layers.
+ */
+abstract class Canvas extends TileLayer {
 
-  Canvas(options) {
-    L.setOptions(this, options);
-  }
+  CanvasOptions options;
+  /*var options = {
+    'async': false
+  };*/
+
+  Canvas(this.options, TileLayerOptions tileLayerOptions) : super("", tileLayerOptions);
 
   redraw() {
     if (this._map) {
-      this._reset({hard: true});
+      this._reset({'hard': true});
       this._update();
     }
 
@@ -50,11 +54,16 @@ class Canvas extends TileLayer {
     }
   }
 
-  drawTile(/*tile, tilePoint*/) {
+  /**
+   * You need to define this method after creating the instance to draw tiles; canvas is the actual canvas tile on which you can draw, tilePoint represents the tile numbers, and zoom is the current zoom.
+   */
+  drawTile(/*CanvasElement tile, Point tilePoint, num zoom*/);
     // override with rendering code
-  }
 
-  tileDrawn(tile) {
+  /**
+   * If async option is defined, this function should be called for each tile after drawing completion. canvas is the same canvas element, that was passed to drawTile.
+   */
+  tileDrawn(CanvasElement tile) {
     this._tileOnLoad.call(tile);
   }
 }

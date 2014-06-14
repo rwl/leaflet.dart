@@ -1,62 +1,74 @@
 part of leaflet.layer.vector;
 
+class CircleOptions extends PathOptions {
+  bool fill = true;
+}
+
 // Circle is a circle overlay (with a certain radius in meters).
 class Circle extends Path {
 
-  Map<String, Object> options = {
-    'fill': true
-  };
+  //CircleOptions circleOptions;
+  CircleOptions get circleOptions => options as CircleOptions;
 
   LatLng _latlng;
   var _mRadius;
   Point _point;
   num _radius;
 
-  Circle(LatLng latlng, num radius, Map<String, Object> options) : super(options) {
+  Circle(LatLng latlng, num radius, CircleOptions circleOptions) : super(circleOptions) {
 //    L.Path.prototype.initialize.call(this, options);
 
-    this._latlng = new LatLng.latLng(latlng);
-    this._mRadius = radius;
+    _latlng = new LatLng.latLng(latlng);
+    _mRadius = radius;
   }
 
+  /**
+   * Sets the position of a circle to a new location.
+   */
   setLatLng(latlng) {
-    this._latlng = new LatLng.latLng(latlng);
-    return this.redraw();
+    _latlng = new LatLng.latLng(latlng);
+    return redraw();
   }
 
+  /**
+   * Sets the radius of a circle. Units are in meters.
+   */
   setRadius(radius) {
-    this._mRadius = radius;
-    return this.redraw();
+    _mRadius = radius;
+    return redraw();
   }
 
   projectLatlngs() {
-    var lngRadius = this._getLngRadius(),
-        latlng = this._latlng,
-        pointLeft = this._map.latLngToLayerPoint([latlng.lat, latlng.lng - lngRadius]);
+    var lngRadius = _getLngRadius(),
+        latlng = _latlng,
+        pointLeft = _map.latLngToLayerPoint([latlng.lat, latlng.lng - lngRadius]);
 
-    this._point = this._map.latLngToLayerPoint(latlng);
-    this._radius = math.max(this._point.x - pointLeft.x, 1);
+    _point = _map.latLngToLayerPoint(latlng);
+    _radius = math.max(_point.x - pointLeft.x, 1);
   }
 
   getBounds() {
-    var lngRadius = this._getLngRadius(),
-        latRadius = (this._mRadius / 40075017) * 360,
-        latlng = this._latlng;
+    var lngRadius = _getLngRadius(),
+        latRadius = (_mRadius / 40075017) * 360,
+        latlng = _latlng;
 
     return new LatLngBounds(
             [latlng.lat - latRadius, latlng.lng - lngRadius],
             [latlng.lat + latRadius, latlng.lng + lngRadius]);
   }
 
+  /**
+   * Returns the current geographical position of the circle.
+   */
   getLatLng() {
-    return this._latlng;
+    return _latlng;
   }
 
   getPathString() {
-    var p = this._point,
-        r = this._radius;
+    var p = _point,
+        r = _radius;
 
-    if (this._checkIfEmpty()) {
+    if (_checkIfEmpty()) {
       return '';
     }
 
@@ -71,27 +83,30 @@ class Circle extends Path {
     }
   }
 
+  /**
+   * Returns the current radius of a circle. Units are in meters.
+   */
   getRadius() {
-    return this._mRadius;
+    return _mRadius;
   }
 
   // TODO Earth hardcoded, move into projection code!
 
   _getLatRadius() {
-    return (this._mRadius / 40075017) * 360;
+    return (_mRadius / 40075017) * 360;
   }
 
   _getLngRadius() {
-    return this._getLatRadius() / math.cos(LatLng.DEG_TO_RAD * this._latlng.lat);
+    return _getLatRadius() / math.cos(LatLng.DEG_TO_RAD * _latlng.lat);
   }
 
   _checkIfEmpty() {
-    if (this._map == null) {
+    if (_map == null) {
       return false;
     }
-    var vp = this._map._pathViewport,
-        r = this._radius,
-        p = this._point;
+    var vp = _map._pathViewport,
+        r = _radius,
+        p = _point;
 
     return p.x - r > vp.max.x || p.y - r > vp.max.y ||
            p.x + r < vp.min.x || p.y + r < vp.min.y;
