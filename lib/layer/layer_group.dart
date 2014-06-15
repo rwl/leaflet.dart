@@ -2,134 +2,164 @@ part of leaflet.layer;
 
 typedef LayerFunc(var layer);
 
-// LayerGroup is a class to combine several layers into one so that
-// you can manipulate the group (e.g. add/remove it) as one layer.
+/**
+ * LayerGroup is a class to combine several layers into one so that
+ * you can manipulate the group (e.g. add/remove it) as one layer.
+ */
 class LayerGroup {
-  Map _layers;
+
+  Map<String, Layer> _layers;
   BaseMap _map;
 
-  LayerGroup(layers) {
-    this._layers = {};
+  /**
+   * Create a layer group, optionally given an initial set of layers.
+   */
+  LayerGroup([List<Layer> layers=null]) {
+    _layers = {};
 
-    var i, len;
-
-    if (layers) {
-      len = layers.length;
-      for (i = 0; i < len; i++) {
-        this.addLayer(layers[i]);
+    if (layers != null) {
+      for (int i = 0; i < layers.length; i++) {
+        addLayer(layers[i]);
       }
     }
   }
 
-  addLayer(String layer) {
-    var id = this.getLayerId(layer);
+  /**
+   * Adds a given layer to the group.
+   */
+  addLayer(Layer layer) {
+    var id = getLayerId(layer);
 
-    this._layers[id] = layer;
+    _layers[id] = layer;
 
-    if (this._map != null) {
-      this._map.addLayer(layer);
+    if (_map != null) {
+      _map.addLayer(layer);
     }
 
     return this;
   }
 
-  removeLayer(String layer) {
-    var id = this._layers.containsKey(layer) ? layer : this.getLayerId(layer);
-
-    if (this._map && this._layers[id]) {
-      this._map.removeLayer(this._layers[id]);
-    }
-
-    this._layers.remove(id);
-
-    return this;
+  /**
+   * Removes a given layer from the group.
+   */
+  removeLayer(Layer layer) {
+    var id = getLayerId(layer);
+    removeLayerId(id);
   }
 
+  /**
+   * Removes a given layer of the given id from the group.
+   */
+  removeLayerId(String id) {
+    if (_map && _layers[id]) {
+      _map.removeLayer(_layers[id]);
+    }
+
+    _layers.remove(id);
+  }
+
+  /**
+   * Returns true if the given layer is currently added to the group.
+   */
   hasLayer(String layer) {
     if (layer == null) { return false; }
 
-    return (this._layers.containsKey(layer) || this._layers.containsKey(this.getLayerId(layer)));
+    return (_layers.containsKey(layer) || _layers.containsKey(getLayerId(layer)));
   }
 
+  /**
+   * Removes all the layers from the group.
+   */
   clearLayers() {
-    //this.eachLayer(this.removeLayer, this);
-    this.eachLayer((layer) {
-      this.removeLayer(layer);
+    eachLayer((layer) {
+      removeLayer(layer);
     });
     return this;
   }
 
-  /*invoke(methodName) {
-    var args = Array.prototype.slice.call(arguments, 1);
-    var i, layer;
-
-    for (i in this._layers) {
-      layer = this._layers[i];
-
-      if (layer[methodName]) {
-        layer[methodName].apply(layer, args);
-      }
-    }
-
-    return this;
-  }*/
-
   onAdd(BaseMap map) {
-    this._map = map;
-    //this.eachLayer(map.addLayer, map);
-    this.eachLayer((layer) {
+    _map = map;
+    eachLayer((layer) {
       map.addLayer(layer);
     });
   }
 
   onRemove(BaseMap map) {
-    //this.eachLayer(map.removeLayer, map);
-    this.eachLayer((layer) {
+    eachLayer((layer) {
       map.removeLayer(layer);
     });
-    this._map = null;
+    _map = null;
   }
 
+  /**
+   * Adds the group of layers to the map.
+   */
   addTo(BaseMap map) {
     map.addLayer(this);
-    return this;
   }
 
-  /*eachLayer(method, context) {
-    for (var i in this._layers) {
-      method.call(context, this._layers[i]);
-    }
-    return this;
-  }*/
-
+  /**
+   * Iterates over the layers of the group.
+   */
   eachLayer(LayerFunc fn) {
-    this._layers.forEach((i, layer) {
+    _layers.forEach((i, layer) {
       fn(layer);
     });
   }
 
-  getLayer(id) {
-    return this._layers[id];
+  /**
+   * Returns the layer with the given id.
+   */
+  getLayer(String id) {
+    return _layers[id];
   }
 
-  getLayers() {
-    var layers = [];
-
-    for (var i in this._layers) {
-      layers.add(this._layers[i]);
-    }
-    return layers;
+  /**
+   * Returns an array of all the layers added to the group.
+   */
+  List<Layer> getLayers() {
+    return _layers.values;
   }
 
   setZIndex(zIndex) {
-    //return this.invoke('setZIndex', zIndex);
     eachLayer((layer) {
       layer.setZIndex(zIndex);
     });
-    return this;
   }
 
   getLayerId(layer) {
     return Util.stamp(layer);
+  }
+
+  toGeoJSON() {
+
+    var geometry = feature && feature.geometry;
+    List jsons = [];
+    var json;
+
+    if (geometry && geometry.type == 'MultiPoint') {
+      return multiToGeoJSON('MultiPoint').call(this);
+    }
+
+    var isGeometryCollection = geometry && geometry.type == 'GeometryCollection';
+
+    eachLayer((layer) {
+      if (layer.toGeoJSON) {
+        json = layer.toGeoJSON();
+        jsons.add(isGeometryCollection ? json.geometry : GeoJSON.asFeature(json));
+      }
+    });
+
+    if (isGeometryCollection) {
+      return GeoJSON.getFeature(this, {
+        'geometries': jsons,
+        'type': 'GeometryCollection'
+      });
+    }
+
+    return {
+      'type': 'FeatureCollection',
+      'features': jsons
+    };
   }
 }

@@ -1085,4 +1085,42 @@ class BaseMap extends Object with core.Events {
 
     return math.max(min, math.min(max, zoom));
   }
+
+  /* Control extensions */
+
+  Map _controlCorners;
+
+  Map get controlCorners => _controlCorners;
+
+  addControl(Control control) {
+    control.addTo(this);
+    return this;
+  }
+
+  removeControl(control) {
+    control.removeFrom(this);
+    return this;
+  }
+
+  _initControlPos() {
+    final corners = this._controlCorners = {};
+    String l = 'leaflet-';
+    final container = this._controlContainer =
+                DomUtil.create('div', l + 'control-container', this._container);
+
+    createCorner(String vSide, String hSide) {
+      var className = l + vSide + ' ' + l + hSide;
+
+      corners[vSide + hSide] = DomUtil.create('div', className, container);
+    }
+
+    createCorner('top', 'left');
+    createCorner('top', 'right');
+    createCorner('bottom', 'left');
+    createCorner('bottom', 'right');
+  }
+
+  _clearControlPos() {
+    this._container.removeChild(this._controlContainer);
+  }
 }

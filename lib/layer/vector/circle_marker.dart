@@ -50,4 +50,11 @@ class CircleMarker extends Circle {
   getRadius() {
     return this._radius;
   }
+
+  toGeoJSON() {
+    return GeoJSON.getFeature(this, {
+      'type': 'Point',
+      'coordinates': GeoJSON.latLngToCoords(_getLatLng())
+    });
+  }
 }

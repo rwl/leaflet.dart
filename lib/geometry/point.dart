@@ -1,12 +1,18 @@
 part of leaflet.geometry;
 
-// Point represents a point with x and y coordinates.
+/**
+ * Point represents a point with x and y coordinates.
+ */
 class Point {
+
   num x, y;
 
-  Point(num x, num y, [bool round=false]) {
-    this.x = (round ? x.round() : x);
-    this.y = (round ? y.round() : y);
+  /**
+   * Creates a Point object with the given x and y coordinates. If optional round is set to true, rounds the x and y values.
+   */
+  Point(num xx, num yy, [bool round = false]) {
+    x = (round ? xx.round() : xx);
+    y = (round ? yy.round() : yy);
   }
 
   factory Point.point(Point p) {
@@ -17,98 +23,139 @@ class Point {
     return new Point(a[0], a[1]);
   }
 
-  clone() {
+  /**
+   * Returns a copy of the current point.
+   */
+  Point clone() {
     return new Point(x, y);
   }
 
-  // non-destructive, returns a new point
-  add(point) {
-    return this.clone()._add(new Point.point(point));
+  /**
+   * Returns the result of addition of the current and the given points.
+   *
+   * Non-destructive, returns a new point.
+   */
+  Point add(Point point) {
+    final c = clone();
+    c._add(new Point.point(point));
+    return c;
   }
 
-  // destructive, used directly for performance in situations where it's safe to modify existing point
-  Point _add(point) {
-    this.x += point.x;
-    this.y += point.y;
-    return this;
+  /**
+   * Destructive, used directly for performance in situations where it's safe to modify existing point.
+   */
+  void _add(Point point) {
+    x += point.x;
+    y += point.y;
   }
 
-  subtract(point) {
-    return this.clone()._subtract(new Point.point(point));
+  /**
+   * Returns the result of subtraction of the given point from the current.
+   */
+  Point subtract(Point point) {
+    final c = clone();
+    c._subtract(new Point.point(point));
+    return c;
   }
 
-  _subtract(point) {
-    this.x -= point.x;
-    this.y -= point.y;
-    return this;
+  void _subtract(Point point) {
+    x -= point.x;
+    y -= point.y;
   }
 
-  divideBy(num) {
-    return this.clone()._divideBy(num);
+  /**
+   * Returns the result of division of the current point by the given number. If optional round is set to true, returns a rounded result.
+   */
+  Point divideBy(num x, [bool round = false]) {
+    final c = clone();
+    c._divideBy(x);
+    if (round) {
+      c._round();
+    }
+    return c;
   }
 
-  _divideBy(num) {
-    this.x /= num;
-    this.y /= num;
-    return this;
+  void _divideBy(num xx) {
+    x /= xx;
+    y /= xx;
   }
 
-  multiplyBy(num) {
-    return this.clone()._multiplyBy(num);
+  /**
+   * Returns the result of multiplication of the current point by the given number.
+   */
+  Point multiplyBy(num x) {
+    final c = clone();
+    c._multiplyBy(x);
+    return c;
   }
 
-  _multiplyBy(num) {
-    this.x *= num;
-    this.y *= num;
-    return this;
+  void _multiplyBy(num xx) {
+    x *= xx;
+    y *= xx;
   }
 
-  round() {
-    return this.clone()._round();
+  /**
+   * Returns a copy of the current point with rounded coordinates.
+   */
+  Point round() {
+    final c = clone();
+    c._round();
+    return c;
   }
 
-  _round() {
-    this.x = this.x.round();
-    this.y = this.y.round();
-    return this;
+  void _round() {
+    x = x.round();
+    y = y.round();
   }
 
-  floor() {
-    return this.clone()._floor();
+  /**
+   * Returns a copy of the current point with floored coordinates (rounded down).
+   */
+  Point floor() {
+    final c = clone();
+    c._floor();
+    return c;
   }
 
-  _floor() {
-    this.x = this.x.floor();
-    this.y = this.y.floor();
-    return this;
+  void _floor() {
+    x = x.floor();
+    y = y.floor();
   }
 
-  distanceTo(point) {
+  /**
+   * Returns the distance between the current and the given points.
+   */
+  num distanceTo(Point point) {
     point = new Point.point(point);
 
-    var x = point.x - this.x,
-        y = point.y - this.y;
+    final xx = point.x - x;
+    final yy = point.y - y;
 
-    return math.sqrt(x * x + y * y);
+    return math.sqrt(xx * xx + yy * yy);
   }
 
-  bool equals(Point point) {
+  /**
+   * Returns true if the given point has the same coordinates.
+   */
+  bool operator ==(Point point) {
     point = new Point.point(point);
 
-    return point.x == this.x &&
-           point.y == this.y;
+    return point.x == x && point.y == y;
   }
 
+  /**
+   * Returns true if the both coordinates of the given point are less than the corresponding current point coordinates (in absolute values).
+   */
   bool contains(Point point) {
     point = new Point.point(point);
 
-    return point.x.abs() <= this.x.abs() &&
-           point.y.abs() <= this.y.abs();
+    return point.x.abs() <= x.abs() && point.y.abs() <= y.abs();
   }
 
-  toString() {
-    return 'Point(' +
-            Util.formatNum(this.x) + ', ' +
-            Util.formatNum(this.y) + ')';
+  /**
+   * Returns a string representation of the point for debugging purposes.
+   */
+  String toString() {
+    return 'Point(${Util.formatNum(x)}, ${Util.formatNum(y)})';
   }
 }

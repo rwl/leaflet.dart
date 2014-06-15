@@ -1,11 +1,12 @@
 library leaflet.layer.marker;
 
-import 'dart:html';
+import 'dart:html' show document, Element, ImageElement, DivElement;
 
 import '../../core/core.dart' as core;
 import '../../core/core.dart' show EventType;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
+import '../../geometry/geometry.dart' as geom;
 import '../../dom/dom.dart';
 
 part 'default_icon.dart';
@@ -15,33 +16,62 @@ part 'marker_drag.dart';
 part 'popup_marker.dart';
 
 class MarkerOptions {
-  // Icon class to use for rendering the marker. See Icon documentation for
-  // details on how to customize the marker icon. Set to new Icon.Default()
-  // by default.
+  /**
+   * Icon class to use for rendering the marker. See Icon documentation for
+   * details on how to customize the marker icon. Set to new Icon.Default()
+   * by default.
+   */
   Icon icon;
-  // If false, the marker will not emit mouse events and will act as a part
-  // of the underlying map.
+
+  /**
+   * If false, the marker will not emit mouse events and will act as a part
+   * of the underlying map.
+   */
   bool clickable = true;
-  // Whether the marker is draggable with mouse/touch or not.
+
+  /**
+   * Whether the marker is draggable with mouse/touch or not.
+   */
   bool draggable = false;
-  // Whether the marker can be tabbed to with a keyboard and clicked by
-  // pressing enter.
+
+  /**
+   * Whether the marker can be tabbed to with a keyboard and clicked by
+   * pressing enter.
+   */
   bool keyboard = true;
-  // Text for the browser tooltip that appear on marker hover (no tooltip by
-  // default).
+
+  /**
+   * Text for the browser tooltip that appear on marker hover (no tooltip by
+   * default).
+   */
   String  title = '';
-  // Text for the alt attribute of the icon image (useful for accessibility).
+
+  /**
+   * Text for the alt attribute of the icon image (useful for accessibility).
+   */
   String  alt = '';
-  // By default, marker images zIndex is set automatically based on its
-  // latitude. Use this option if you want to put the marker on top of all
-  // others (or below), specifying a high value like 1000 (or high negative
-  // value, respectively).
+
+  /**
+   * By default, marker images zIndex is set automatically based on its
+   * latitude. Use this option if you want to put the marker on top of all
+   * others (or below), specifying a high value like 1000 (or high negative
+   * value, respectively).
+   */
   num zIndexOffset  = 0;
-  // The opacity of the marker.
+
+  /**
+   * The opacity of the marker.
+   */
   num opacity = 1.0;
-  // If true, the marker will get on top of others when you hover the mouse over it.
+
+  /**
+   * If true, the marker will get on top of others when you hover the mouse over it.
+   */
   bool riseOnHover  = false;
-  // The z-index offset used for the riseOnHover feature.
+
+  /**
+   * The z-index offset used for the riseOnHover feature.
+   */
   num riseOffset  = 250;
 }
 
@@ -361,5 +391,12 @@ class Marker extends Object with core.Events {
 
   void _resetZIndex() {
     _updateZIndex(0);
+  }
+
+  toGeoJSON() {
+    return GeoJSON.getFeature(this, {
+      'type': 'Point',
+      'coordinates': GeoJSON.latLngToCoords(_getLatLng())
+    });
   }
 }

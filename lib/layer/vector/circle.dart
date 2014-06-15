@@ -111,4 +111,11 @@ class Circle extends Path {
     return p.x - r > vp.max.x || p.y - r > vp.max.y ||
            p.x + r < vp.min.x || p.y + r < vp.min.y;
   }
+
+  toGeoJSON() {
+    return GeoJSON.getFeature(this, {
+      'type': 'Point',
+      'coordinates': GeoJSON.latLngToCoords(_getLatLng())
+    });
+  }
 }

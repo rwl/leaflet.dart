@@ -1,14 +1,21 @@
 part of leaflet.layer;
 
-// FeatureGroup extends LayerGroup by introducing mouse events and additional methods
-// shared between a group of interactive layers (like vectors or markers).
-class FeatureGroup extends LayerGroup with Events {
+/**
+ * FeatureGroup extends LayerGroup by introducing mouse events and additional methods
+ * shared between a group of interactive layers (like vectors or markers).
+ */
+class FeatureGroup extends LayerGroup with core.Events {
 
-  static final EVENTS = 'click dblclick mouseover mouseout mousemove contextmenu popupopen popupclose';
+  static final EVENTS = [EventType.CLICK, EventType.DBLCLICK, EventType.MOUSEOVER,
+    EventType.MOUSEOUT, EventType.MOUSEMOVE, EventType.CONTEXTMENU,
+    EventType.POPUPOPEN, EventType.POPUPCLOSE];
 
   var _popupContent, _popupOptions;
 
-  FeatureGroup(List layers) : super(layers);
+  /**
+   * Create a layer group, optionally given an initial set of layers.
+   */
+  FeatureGroup([List<Layer> layers=null]) : super(layers);
 
   addLayer(layer) {
     if (this.hasLayer(layer)) {
@@ -25,7 +32,7 @@ class FeatureGroup extends LayerGroup with Events {
       layer.bindPopup(this._popupContent, this._popupOptions);
     }
 
-    return this.fire('layeradd', {'layer': layer});
+    return this.fire(EventType.LAYERADD, {'layer': layer});
   }
 
   removeLayer(layer) {
@@ -50,7 +57,10 @@ class FeatureGroup extends LayerGroup with Events {
     return this.fire('layerremove', {layer: layer});
   }
 
-  bindPopup(content, options) {
+  /**
+   * Binds a popup with a particular HTML content to a click on any layer from the group that has a bindPopup method.
+   */
+  bindPopup(String content, PopupOptions options) {
     this._popupContent = content;
     this._popupOptions = options;
     //return this.invoke('bindPopup', content, options);
@@ -61,21 +71,27 @@ class FeatureGroup extends LayerGroup with Events {
   }
 
   openPopup(latlng) {
-    // open popup on the first layer
-    for (var id in this._layers) {
+    // Open popup on the first layer.
+    for (String id in this._layers) {
       this._layers[id].openPopup(latlng);
       break;
     }
     return this;
   }
 
-  setStyle(style) {
+  /**
+   * Sets the given path options to each layer of the group that has a setStyle method.
+   */
+  setStyle(PathOptions style) {
     //return this.invoke('setStyle', style);
     this.eachLayer((layer) {
       layer.setStyle(style);
     });
   }
 
+  /**
+   * Brings the layer group to the top of all other layers.
+   */
   bringToFront() {
     //return this.invoke('bringToFront');
     this.eachLayer((layer) {
@@ -83,6 +99,9 @@ class FeatureGroup extends LayerGroup with Events {
     });
   }
 
+  /**
+   * Brings the layer group to the bottom of all other layers.
+   */
   bringToBack() {
     //return this.invoke('bringToBack');
     this.eachLayer((layer) {
@@ -90,6 +109,9 @@ class FeatureGroup extends LayerGroup with Events {
     });
   }
 
+  /**
+   * Returns the LatLngBounds of the Feature Group (created from bounds and coordinates of its children).
+   */
   getBounds() {
     var bounds = new LatLngBounds();
 

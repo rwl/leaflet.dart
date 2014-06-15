@@ -17,7 +17,6 @@ class PolylineOptions extends PathOptions {
  */
 class Polyline extends Path {
 
-  List<LatLng> _latlngs;
   List<Point> _originalPoints;
   List _parts;
 
@@ -200,5 +199,12 @@ class Polyline extends Path {
     _simplifyPoints();
 
     super._updatePath();
+  }
+
+  toGeoJSON() {
+    return GeoJSON.getFeature(this, {
+      'type': 'LineString',
+      'coordinates': GeoJSON.latLngsToCoords(getLatLngs())
+    });
   }
 }

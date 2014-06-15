@@ -14,7 +14,7 @@ class PathOptions {
   /**
    * Stroke width in pixels.
    */
-  num weight  = 5;
+  num weight = 5;
 
   /**
    * Stroke opacity.
@@ -39,7 +39,7 @@ class PathOptions {
   /**
    * A string that defines the stroke dash pattern. Doesn't work on canvas-powered layers (e.g. Android 2).
    */
-  String  dashArray;
+  String dashArray;
 
   /**
    * A string that defines shape to be used at the end of the stroke.
@@ -64,7 +64,7 @@ class PathOptions {
   /**
    * Custom class name set on an element.
    */
-  String className = '';
+  String className;// = '';
 }
 
 /**
@@ -98,10 +98,12 @@ abstract class Path extends Object with Events {
   };*/
   PathOptions options;
 
+  List<LatLng> _latlngs;
+
   BaseMap _map;
   var _container, _stroke, _fill;
 
-  Path(this.options) ;
+  Path(this.options);
 
   onAdd(BaseMap map) {
     _map = map;
@@ -177,46 +179,249 @@ abstract class Path extends Object with Events {
     return this;
   }
 
+
+  /*
+   * Popup extensions to Path (polylines, polygons, circles).
+   */
+
+  Popup _popup;
+  bool _popupHandlersAdded = false;
+
   /**
    * Binds a popup with a particular HTML content to a click on this path.
    */
-  bindPopupHtml(String html, PopupOptions options);
+  bindPopupHtml(String html, PopupOptions options) {
+    _popup = new Popup(options, this);
+    _popup.setContent(html);
+  }
 
-  bindPopupElement(Element el);
+  bindPopupElement(Element elem, PopupOptions options) {
+    _popup = new Popup(options, this);
+    _popup.setContent(elem);
+  }
 
   /**
    * Binds a given popup object to the path.
    */
-  bindPopup(Popup popup, PopupOptions options);
+  bindPopup(Popup popup, PopupOptions options) {
+    _popup = popup;
+
+    if (!_popupHandlersAdded) {
+      on(EventType.CLICK, _openPopup, this);
+      on(EventType.REMOVE, closePopup, this);
+
+      _popupHandlersAdded = true;
+    }
+  }
 
   /**
    * Unbinds the popup previously bound to the path with bindPopup.
    */
-  unbindPopup();
+  unbindPopup() {
+    if (_popup != null) {
+      _popup = null;
+      off(EventType.CLICK, _openPopup);
+      off(EventType.REMOVE, closePopup);
+
+      _popupHandlersAdded = false;
+    }
+    return this;
+  }
 
   /**
    * Opens the popup previously bound by the bindPopup method in the given point, or in one of the path's points if not specified.
    */
-  openPopup(LatLng latlng);
+  openPopup([LatLng latlng = null]) {
+
+    if (_popup != null) {
+      // Open the popup from one of the path's points if not specified.
+      if (latlng == null) {
+        latlng = _latlngs[(_latlngs.length / 2).floor()];
+      }
+
+      _openPopup({
+        'latlng': latlng
+      });
+    }
+
+    return this;
+  }
 
   /**
    * Closes the path's bound popup if it is opened.
    */
-  closePopup();
+  closePopup() {
+    if (_popup != null) {
+      _popup._close();
+    }
+    return this;
+  }
+
+  _openPopup(e) {
+    _popup.setLatLng(e.latlng);
+    _map.openPopup(_popup);
+  }
 
   /**
    * Returns the LatLngBounds of the path.
    */
   LatLngBounds getBounds();
 
+
+  /*
+   * SVG-specific rendering code.
+   */
+
+  static const SVG_NS = 'http://www.w3.org/2000/svg';
+
+  Element _path;
+
   /**
    * Brings the layer to the top of all path layers.
    */
-  void bringToFront();
+  bringToFront() {
+    final root = _map._pathRoot,
+        path = _container;
+
+    if (path && root.lastChild != path) {
+      root.appendChild(path);
+    }
+  }
 
   /**
    * Brings the layer to the bottom of all path layers.
    */
-  void bringToBack();
+  bringToBack() {
+    final root = _map._pathRoot,
+        path = _container,
+        first = root.firstChild;
 
+    if (path && first != path) {
+      root.insertBefore(path, first);
+    }
+  }
+
+  // Form path string here.
+  getPathString();
+
+  _createElement(String name) {
+    return document.createElementNS(SVG_NS, name);
+  }
+
+  _initElements() {
+    _map._initPathRoot();
+    _initPath();
+    _initStyle();
+  }
+
+  _initPath() {
+    _container = _createElement('g');
+
+    _path = _createElement('path');
+
+    if (options.className != null) {
+      DomUtil.addClass(_path, options.className);
+    }
+
+    _container.appendChild(_path);
+  }
+
+  _initStyle() {
+    if (options.stroke) {
+      _path.setAttribute('stroke-linejoin', 'round');
+      _path.setAttribute('stroke-linecap', 'round');
+    }
+    if (options.fill) {
+      _path.setAttribute('fill-rule', 'evenodd');
+    }
+    if (options.pointerEvents != null) {
+      _path.setAttribute('pointer-events', options.pointerEvents);
+    }
+    if (!options.clickable && options.pointerEvents == null) {
+      _path.setAttribute('pointer-events', 'none');
+    }
+    _updateStyle();
+  }
+
+  _updateStyle() {
+    if (options.stroke) {
+      _path.setAttribute('stroke', options.color);
+      _path.setAttribute('stroke-opacity', options.opacity.toString());
+      _path.setAttribute('stroke-width', options.weight.toString());
+      if (options.dashArray != null) {
+        _path.setAttribute('stroke-dasharray', options.dashArray);
+      } else {
+        _path.attributes.remove('stroke-dasharray');
+      }
+      if (options.lineCap != null) {
+        _path.setAttribute('stroke-linecap', options.lineCap);
+      }
+      if (options.lineJoin != null) {
+        _path.setAttribute('stroke-linejoin', options.lineJoin);
+      }
+    } else {
+      _path.setAttribute('stroke', 'none');
+    }
+    if (options.fill) {
+      _path.setAttribute('fill', options.fillColor != null ? options.fillColor : options.color);
+      _path.setAttribute('fill-opacity', options.fillOpacity.toString());
+    } else {
+      _path.setAttribute('fill', 'none');
+    }
+  }
+
+  _updatePath() {
+    var str = getPathString();
+    if (!str) {
+      // fix webkit empty string parsing bug
+      str = 'M0 0';
+    }
+    _path.setAttribute('d', str);
+  }
+
+  // TODO remove duplication with Map
+  _initEvents() {
+    if (options.clickable) {
+      if (Browser.svg || !Browser.vml) {
+        DomUtil.addClass(_path, 'leaflet-clickable');
+      }
+
+      DomEvent.on(_container, 'click', _onMouseClick, this);
+
+      var events = ['dblclick', 'mousedown', 'mouseover',
+                    'mouseout', 'mousemove', 'contextmenu'];
+      for (var i = 0; i < events.length; i++) {
+        DomEvent.on(_container, events[i], _fireMouseEvent, this);
+      }
+    }
+  }
+
+  _onMouseClick(e) {
+    if (_map.dragging && _map.dragging.moved()) { return; }
+
+    _fireMouseEvent(e);
+  }
+
+  _fireMouseEvent(e) {
+    if (!hasEventListeners(e.type)) { return; }
+
+    var map = _map,
+        containerPoint = map.mouseEventToContainerPoint(e),
+        layerPoint = map.containerPointToLayerPoint(containerPoint),
+        latlng = map.layerPointToLatLng(layerPoint);
+
+    fire(e.type, {
+      'latlng': latlng,
+      'layerPoint': layerPoint,
+      'containerPoint': containerPoint,
+      'originalEvent': e
+    });
+
+    if (e.type == 'contextmenu') {
+      DomEvent.preventDefault(e);
+    }
+    if (e.type != 'mousemove') {
+      DomEvent.stopPropagation(e);
+    }
+  }
 }

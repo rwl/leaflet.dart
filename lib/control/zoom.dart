@@ -1,62 +1,72 @@
 part of leaflet.control;
 
-class ZoomOptions {
-  // The position of the control (one of the map corners). See control positions.
+class ZoomOptions extends ControlOptions {
+  /**
+   * The position of the control (one of the map corners). See control positions.
+   */
   ControlPosition position  = ControlPosition.TOPLEFT;
-  // The text set on the zoom in button.
+
+  /**
+   * The text set on the zoom in button.
+   */
   String  zoomInText = '+';
-  // The text set on the zoom out button.
+
+  /**
+   * The text set on the zoom out button.
+   */
   String  zoomOutText = '-';
-  // The title set on the zoom in button.
+
+  /**
+   * The title set on the zoom in button.
+   */
   String  zoomInTitle = 'Zoom in';
-  // The title set on the zoom out button.
+
+  /**
+   * The title set on the zoom out button.
+   */
   String  zoomOutTitle = 'Zoom out';
 }
 
 // Zoom is used for the default zoom buttons on the map.
 class Zoom extends Control {
 
-  Zoom() : super({});
+  ZoomOptions get zoomOptions => options as ZoomOptions;
 
-  final Map<String, Object> options = {
-    'position': 'topleft',
-    'zoomInText': '+',
-    'zoomInTitle': 'Zoom in',
-    'zoomOutText': '-',
-    'zoomOutTitle': 'Zoom out'
-  };
+  Zoom(ZoomOptions options) : super(options);
 
-  var _zoomInButton, _zoomOutButton;
+  Element _zoomInButton, _zoomOutButton;
 
   onAdd(BaseMap map) {
     final zoomName = 'leaflet-control-zoom',
-        container = DomUtil.create('div', zoomName + ' leaflet-bar');
+        container = DomUtil.create('div', '$zoomName leaflet-bar');
 
-    this._map = map;
+    _map = map;
 
-    this._zoomInButton = this._createButton(
-            this.options['zoomInText'], this.options['zoomInTitle'],
-            zoomName + '-in', container, this._zoomIn, this);
-    this._zoomOutButton = this._createButton(
-            this.options['zoomOutText'], this.options['zoomOutTitle'],
-            zoomName + '-out', container, this._zoomOut, this);
+    _zoomInButton = _createButton(
+            zoomOptions.zoomInText, zoomOptions.zoomInTitle,
+            '$zoomName-in', container, _zoomIn, this);
+    _zoomOutButton = _createButton(
+            zoomOptions.zoomOutText, zoomOptions.zoomOutTitle,
+            '$zoomName-out', container, _zoomOut, this);
 
-    this._updateDisabled();
-    map.on('zoomend zoomlevelschange', this._updateDisabled, this);
+    _updateDisabled();
+    map.on(EventType.ZOOMEND, _updateDisabled, this);
+    map.on(EventType.ZOOMLEVELSCHANGE, _updateDisabled, this);
 
     return container;
   }
 
   onRemove(map) {
-    map.off('zoomend zoomlevelschange', this._updateDisabled, this);
+    map.off(EventType.ZOOMEND, _updateDisabled, this);
+    map.off(EventType.ZOOMLEVELSCHANGE, _updateDisabled, this);
   }
 
   _zoomIn(e) {
-    this._map.zoomIn(e.shiftKey ? 3 : 1);
+    _map.zoomIn(e.shiftKey ? 3 : 1);
   }
 
   _zoomOut(e) {
-    this._map.zoomOut(e.shiftKey ? 3 : 1);
+    _map.zoomOut(e.shiftKey ? 3 : 1);
   }
 
   _createButton(html, title, className, container, fn, context) {
@@ -73,23 +83,23 @@ class Zoom extends Control {
         .on(link, 'dblclick', stop)
         .on(link, 'click', DomEvent.preventDefault)
         .on(link, 'click', fn, context)
-        .on(link, 'click', this._refocusOnMap, context);
+        .on(link, 'click', _refocusOnMap, context);
 
     return link;
   }
 
   _updateDisabled() {
-    final map = this._map,
+    final map = _map,
       className = 'leaflet-disabled';
 
-    DomUtil.removeClass(this._zoomInButton, className);
-    DomUtil.removeClass(this._zoomOutButton, className);
+    DomUtil.removeClass(_zoomInButton, className);
+    DomUtil.removeClass(_zoomOutButton, className);
 
     if (map._zoom == map.getMinZoom()) {
-      DomUtil.addClass(this._zoomOutButton, className);
+      DomUtil.addClass(_zoomOutButton, className);
     }
     if (map._zoom == map.getMaxZoom()) {
-      DomUtil.addClass(this._zoomInButton, className);
+      DomUtil.addClass(_zoomInButton, className);
     }
   }
 }
