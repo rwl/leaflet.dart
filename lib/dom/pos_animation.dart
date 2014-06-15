@@ -1,6 +1,8 @@
 part of leaflet.dom;
 
-// PosAnimation is used by Leaflet internally for pan animations.
+/**
+ * PosAnimation is used by Leaflet internally for pan animations.
+ */
 class PosAnimation extends Object with Events {
 
   Element _el;
@@ -8,6 +10,9 @@ class PosAnimation extends Object with Events {
   Point _newPos;
   var _stepTimer;
 
+  /**
+   * Run an animation of a given element to a new position, optionally setting duration in seconds (0.25 by default) and easing linearity factor (3rd argument of the cubic bezier curve, 0.5 by default)
+   */
   run(Element el, Point newPos, [num duration, num easeLinearity]) { // (HTMLElement, Point[, Number, Number])
     this.stop();
 

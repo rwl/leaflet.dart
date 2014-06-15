@@ -15,6 +15,8 @@ part 'options.dart';
 
 final containerProp = new Expando<Element>('_leaflet');
 
+typedef LayerFunc(Layer layer);
+
 class BaseMap extends Object with core.Events {
   /*Map<String, Object> options = {
     'crs': crs.EPSG3857,
@@ -34,6 +36,12 @@ class BaseMap extends Object with core.Events {
   List _handlers;
 
   Map _layers;
+
+  /**
+   * For internal use only.
+   */
+  //Map get layers => _layers;
+
   Map _zoomBoundLayers;
   int _tileLayersNum, _tileLayersToLoad;
 
@@ -353,6 +361,12 @@ class BaseMap extends Object with core.Events {
     if (layer == null) { return false; }
 
     return _layers.containsKey(core.Util.stamp(layer));
+  }
+
+  void eachLayer(LayerFunc fn) {
+    _layers.forEach((k, layer) {
+      fn(layer);
+    });
   }
 
   /*eachLayer(method, context) {

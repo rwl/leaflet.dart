@@ -27,7 +27,9 @@ class ZoomOptions extends ControlOptions {
   String  zoomOutTitle = 'Zoom out';
 }
 
-// Zoom is used for the default zoom buttons on the map.
+/**
+ * Zoom is used for the default zoom buttons on the map.
+ */
 class Zoom extends Control {
 
   ZoomOptions get zoomOptions => options as ZoomOptions;
@@ -56,7 +58,7 @@ class Zoom extends Control {
     return container;
   }
 
-  onRemove(map) {
+  onRemove(BaseMap map) {
     map.off(EventType.ZOOMEND, _updateDisabled, this);
     map.off(EventType.ZOOMLEVELSCHANGE, _updateDisabled, this);
   }
@@ -69,7 +71,7 @@ class Zoom extends Control {
     _map.zoomOut(e.shiftKey ? 3 : 1);
   }
 
-  _createButton(html, title, className, container, fn, context) {
+  _createButton(String html, String title, String className, Element container, Function fn, var context) {
     final link = DomUtil.create('a', className, container);
     link.setInnerHTML(html);
     link.href = '#';

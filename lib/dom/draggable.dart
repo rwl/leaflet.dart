@@ -1,6 +1,8 @@
 part of leaflet.dom;
 
-// Draggable allows you to add dragging capabilities to any element. Supports mobile devices too.
+/**
+ * Draggable allows you to add dragging capabilities to any element. Supports mobile devices too.
+ */
 class Draggable extends Object with Events {
 
   static var START = Browser.touch ? ['touchstart', 'mousedown'] : ['mousedown'];
@@ -22,11 +24,17 @@ class Draggable extends Object with Events {
   Point _startPoint;
   var _startPos, _newPos, _animRequest;
 
+  /**
+   * Creates a Draggable object for moving the given element when you start dragging the dragHandle element (equals the element itself by default).
+   */
   Draggable(element, dragStartTarget) {
     this._element = element;
     this._dragStartTarget = dragStartTarget || element;
   }
 
+  /**
+   * Enables the dragging ability.
+   */
   enable() {
     if (this._enabled) { return; }
 
@@ -37,6 +45,9 @@ class Draggable extends Object with Events {
     this._enabled = true;
   }
 
+  /**
+   * Disables the dragging ability.
+   */
   disable() {
     if (!this._enabled) { return; }
 

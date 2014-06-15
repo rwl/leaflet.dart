@@ -10,7 +10,7 @@ import '../map/map.dart';
 import '../geo/geo.dart';
 import '../geometry/geometry.dart' as geom;
 import './marker/marker.dart';
-import './vector/vector.dart' show Polygon;
+import './vector/vector.dart' show Polygon, PathOptions;
 
 part 'feature_group.dart';
 part 'geo_json.dart';
@@ -36,4 +36,10 @@ abstract class Layer {
    * map.removeLayer(layer).
    */
   onRemove(BaseMap map);
+
+  String getAttribution() {
+    return null;
+  }
+
+  void setZIndex(int idx) {}
 }

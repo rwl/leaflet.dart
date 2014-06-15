@@ -202,17 +202,27 @@ class Event {
   }
 }
 */
-// Events is used to add custom events functionality to Leaflet classes.
+
+/**
+ * Events is used to add custom events functionality to Leaflet classes.
+ */
 class Events {
+
   //Map _leaflet_events;
   Map<EventType, List<Event>> _events;
   Map<EventType, Map<int, List<Event>>> _contextEvents;
   Map<EventType, int> _numContextEvents;
 
+  /**
+   * Alias to addEventListener.
+   */
   on(EventType types, Action fn, [BaseMap context=null]) {
     return addEventListener(types, fn);
   }
 
+  /**
+   * Adds a listener function (fn) to a particular event type of the object. You can optionally specify the context of the listener (object the this keyword will point to).
+   */
   addEventListener(EventType types, Action fn, [Map context=null]) { // (String, Function[, Object]) or (Object[, Object])
 
     // types can be a map of types/handlers
@@ -299,10 +309,18 @@ class Events {
 //    return (events.containsKey(type) && events[type].length > 0) || (events.containsKey(type + '_idx') && events[type + '_idx_len'] > 0);
   }
 
+  /**
+   * Alias to removeEventListener.
+   */
   off([String types = null, Action fn = null, BaseMap context = null]) {
     return removeEventListener(types, fn, context);
   }
 
+  /**
+   * Removes a previously added listener function. If no function is specified, it will remove all the listeners of that particular event from the object.
+   *
+   * An alias to clearAllEventListeners when you use it without arguments.
+   */
   removeEventListener([String types = null, Action fn = null, Map context = null]) { // ([String, Function, Object]) or (Object[, Object])
     //if (!this[eventsKey]) {
     if (_events == null && _contextEvents == null) {
@@ -367,6 +385,9 @@ class Events {
     return this;
   }
 
+  /**
+   * Removes all listeners to all events on the object.
+   */
   clearAllEventListeners() {
     //this.remove(eventsKey);
 //    _leaflet_events = null;
@@ -376,10 +397,16 @@ class Events {
     return this;
   }
 
+  /**
+   * Alias to fireEvent.
+   */
   fire(EventType type, [Map data = null]) {
     return fireEvent(type, data);
   }
 
+  /**
+   * Fires an event of the specified type. You can optionally provide an data object — the first argument of the listener function will contain its properties.
+   */
   fireEvent(EventType type, [Map data = null]) { // (String[, Object])
     if (!this.hasEventListeners(type)) {
       return this;
@@ -424,11 +451,17 @@ class Events {
     return this;
   }
 
+  /**
+   * Alias to addOneTimeEventListener.
+   */
   /*once(types, fn, context) {
     return addOneTimeEventListener(types, fn, context);
-  }
+  }*/
 
-  addOneTimeEventListener(types, fn, context) {
+  /**
+   * The same as above except the listener will only get fired once and then removed.
+   */
+  /*addOneTimeEventListener(types, fn, context) {
 
     if (Util.invokeEach(types, this.addOneTimeEventListener, this, fn, context)) { return this; }
 

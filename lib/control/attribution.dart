@@ -1,116 +1,119 @@
 part of leaflet.control;
 
-class AttributionOptions {
-  // The position of the control (one of the map corners). See control positions.
+class AttributionOptions extends ControlOptions {
+  /**
+   * The position of the control (one of the map corners). See control positions.
+   */
   ControlPosition position = ControlPosition.BOTTOMRIGHT;
-  // The HTML text shown before the attributions. Pass false to disable.
-  String  prefix = 'Leaflet';
+
+  /**
+   * The HTML text shown before the attributions. Set null to disable.
+   */
+  String prefix = '<a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>';
 }
 
-// Attribution is used for displaying attribution on the map (added by default).
+/**
+ * Attribution is used for displaying attribution on the map (added by default).
+ */
 class Attribution extends Control {
 
-  final Map<String, Object> options = {
-    'position': 'bottomright',
-    'prefix': '<a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
-  };
+  AttributionOptions get attributionOptions => options as AttributionOptions;
 
-  Map _attributions;
+  Map<String, int> _attributions;
 
-  Attribution(Map<String, Object> options) : super(options) {
-    this.options.addAll(options);
-
-    this._attributions = {};
+  Attribution(AttributionOptions options) : super(options) {
+    _attributions = {};
   }
 
-  onAdd(map) {
-    this._container = DomUtil.create('div', 'leaflet-control-attribution');
-    DomEvent.disableClickPropagation(this._container);
+  onAdd(BaseMap map) {
+    _container = DomUtil.create('div', 'leaflet-control-attribution');
+    DomEvent.disableClickPropagation(_container);
 
-    for (var i in map._layers) {
-      if (map._layers[i].getAttribution) {
-        this.addAttribution(map._layers[i].getAttribution());
+    map.eachLayer((Layer layer) {
+      final att = layer.getAttribution();
+      if (att != null) {
+        addAttribution(att);
       }
+    });
+
+    map.on(EventType.LAYERADD, _onLayerAdd, this);
+    map.on(EventType.LAYERREMOVE, _onLayerRemove, this);
+
+    _update();
+
+    return _container;
+  }
+
+  onRemove(BaseMap map) {
+    map.off(EventType.LAYERADD, _onLayerAdd);
+    map.off(EventType.LAYERREMOVE, _onLayerRemove);
+  }
+
+  /**
+   * Sets the text before the attributions.
+   */
+  setPrefix(String prefix) {
+    attributionOptions.prefix = prefix;
+    _update();
+  }
+
+  /**
+   * Adds an attribution text (e.g. 'Vector data &copy; Mapbox').
+   */
+  void addAttribution(String text) {
+    if (text == null) {
+      return;
     }
 
-    map
-        .on('layeradd', this._onLayerAdd, this)
-        .on('layerremove', this._onLayerRemove, this);
-
-    this._update();
-
-    return this._container;
-  }
-
-  onRemove(map) {
-    map
-        .off('layeradd', this._onLayerAdd)
-        .off('layerremove', this._onLayerRemove);
-
-  }
-
-  setPrefix(prefix) {
-    this.options['prefix'] = prefix;
-    this._update();
-    return this;
-  }
-
-  addAttribution(String text) {
-    if (text == null) { return null; }
-
-    if (!this._attributions[text]) {
-      this._attributions[text] = 0;
+    if (!_attributions.containsKey(text)) {
+      _attributions[text] = 0;
     }
-    this._attributions[text]++;
+    _attributions[text]++;
 
-    this._update();
-
-    return this;
+    _update();
   }
 
-  removeAttribution(text) {
-    if (text == null) { return null; }
-
-    if (this._attributions[text]) {
-      this._attributions[text]--;
-      this._update();
+  /**
+   * Removes an attribution text.
+   */
+  void removeAttribution(String text) {
+    if (text == null) {
+      return;
     }
 
-    return this;
+    if (_attributions.containsKey(text)) {
+      _attributions[text]--;
+      _update();
+    }
   }
 
   _update() {
-    if (this._map == null) { return; }
-
-    var attribs = [];
-
-    for (var i in this._attributions) {
-      if (this._attributions[i]) {
-        attribs.add(i);
-      }
+    if (_map == null) {
+      return;
     }
 
-    var prefixAndAttribs = [];
+    final attribs = _attributions.values;
+    final prefixAndAttribs = [];
 
-    if (this.options.containsKey('prefix')) {
-      prefixAndAttribs.add(this.options['prefix']);
+    if (attributionOptions.prefix != null) {
+      prefixAndAttribs.add(attributionOptions.prefix);
     }
     if (attribs.length) {
       prefixAndAttribs.add(attribs.join(', '));
     }
 
-    this._container.innerHTML = prefixAndAttribs.join(' | ');
+    _container.setInnerHtml(prefixAndAttribs.join(' | '));
   }
 
-  _onLayerAdd(e) {
+  _onLayerAdd(Object obj, LayerEvent e) {
     if (e.layer.getAttribution != null) {
-      this.addAttribution(e.layer.getAttribution());
+      addAttribution(e.layer.getAttribution());
     }
   }
 
-  _onLayerRemove(e) {
+  _onLayerRemove(Object obj, LayerEvent e) {
     if (e.layer.getAttribution != null) {
-      this.removeAttribution(e.layer.getAttribution());
+      removeAttribution(e.layer.getAttribution());
     }
   }
 }

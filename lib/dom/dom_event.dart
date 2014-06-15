@@ -2,9 +2,16 @@ part of leaflet.dom;
 
 final DomEvent = new _DomEvent();
 
-// DomEvent contains functions for working with DOM events.
+/**
+ * DomEvent contains functions for working with DOM events.
+ */
 class _DomEvent {
-  /* inspired by John Resig, Dean Edwards and YUI addEvent implementations */
+
+  /**
+   * Adds a listener fn to the element's DOM event of the specified type. this keyword inside the listener will point to context, or to the element if not specified.
+   *
+   * Inspired by John Resig, Dean Edwards and YUI addEvent implementations.
+   */
   addListener(obj, type, fn, context) { // (HTMLElement, String, Function[, Object])
 
     var id = L.stamp(fn),
@@ -62,6 +69,9 @@ class _DomEvent {
     return this;
   }
 
+  /**
+   * Removes an event listener from the element.
+   */
   removeListener(obj, type, fn) {  // (HTMLElement, String, Function)
 
     var id = L.stamp(fn),
@@ -95,6 +105,9 @@ class _DomEvent {
     return this;
   }
 
+  /**
+   * Stop the given event from propagation to parent elements.
+   */
   stopPropagation(e) {
 
     if (e.stopPropagation) {
@@ -115,6 +128,9 @@ class _DomEvent {
       .on(el, 'MozMousePixelScroll', stop);
   }
 
+  /**
+   * Adds stopPropagation to the element's 'click', 'doubleclick', 'mousedown' and 'touchstart' events.
+   */
   disableClickPropagation(el) {
     var stop = L.DomEvent.stopPropagation;
 
@@ -127,6 +143,9 @@ class _DomEvent {
       .on(el, 'dblclick', stop);
   }
 
+  /**
+   * Prevents the default action of the event from happening (such as following a link in the href of the a element, or doing a POST request with page reload when form is submitted).
+   */
   preventDefault(e) {
 
     if (e.preventDefault) {
@@ -137,12 +156,18 @@ class _DomEvent {
     return this;
   }
 
+  /**
+   * Does stopPropagation and preventDefault at the same time.
+   */
   stop(e) {
     return L.DomEvent
       .preventDefault(e)
       .stopPropagation(e);
   }
 
+  /**
+   * Gets normalized mouse position from a DOM event relative to the container or to the whole page if not specified.
+   */
   getMousePosition(e, container) {
     if (!container) {
       return new L.Point(e.clientX, e.clientY);
@@ -155,6 +180,9 @@ class _DomEvent {
       e.clientY - rect.top - container.clientTop);
   }
 
+  /**
+   * Gets normalized wheel delta from a mousewheel DOM event.
+   */
   getWheelDelta(e) {
 
     var delta = 0;

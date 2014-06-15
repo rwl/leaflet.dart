@@ -1,12 +1,14 @@
 library leaflet.control;
 
-import 'dart:html';
+import 'dart:collection' show LinkedHashMap;
+import 'dart:html' show Element;
 import 'dart:math' as math;
 
-import '../core/core.dart';
+import '../core/core.dart' show Event, EventType, LayerEvent;
 import '../map/map.dart';
 import '../geo/geo.dart';
 import '../dom/dom.dart';
+import '../layer/layer.dart' show Layer;
 
 part 'attribution.dart';
 part 'layers.dart';

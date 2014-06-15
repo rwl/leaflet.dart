@@ -2,13 +2,31 @@ part of leaflet.dom;
 
 final DomUtil = new _DomUtil();
 
-// DomUtil contains various utility functions for working with DOM.
+/**
+ * DomUtil contains various utility functions for working with DOM.
+ */
 class _DomUtil {
 
+  /**
+   * Vendor-prefixed transition style name (e.g. 'webkitTransition' for WebKit).
+   */
+  String TRANSITION;
+
+  /**
+   * Vendor-prefixed transform style name.
+   */
+  String TRANSFORM;
+
+  /**
+   * Returns an element with the given id if a string was passed, or just returns the element if it was passed directly.
+   */
   get(id) {
     return (id is String ? document.getElementById(id) : id);
   }
 
+  /**
+   * Returns the value for a certain style attribute on an element, including computed values or values set through CSS.
+   */
   getStyle(el, style) {
 
     var value = el.style[style];
@@ -25,6 +43,9 @@ class _DomUtil {
     return value == 'auto' ? null : value;
   }
 
+  /**
+   * Returns the offset to the viewport for the requested element.
+   */
   getViewportOffset(element) {
 
     var top = 0,
@@ -35,7 +56,7 @@ class _DomUtil {
         pos;
 
     do {
-      top  += el.offsetTop  || 0;
+      top += el.offsetTop || 0;
       left += el.offsetLeft || 0;
 
       //add borders
@@ -44,10 +65,12 @@ class _DomUtil {
 
       pos = L.DomUtil.getStyle(el, 'position');
 
-      if (el.offsetParent == docBody && pos == 'absolute') { break; }
+      if (el.offsetParent == docBody && pos == 'absolute') {
+        break;
+      }
 
       if (pos == 'fixed') {
-        top  += docBody.scrollTop  || docEl.scrollTop  || 0;
+        top += docBody.scrollTop || docEl.scrollTop || 0;
         left += docBody.scrollLeft || docEl.scrollLeft || 0;
         break;
       }
@@ -62,7 +85,7 @@ class _DomUtil {
         }
 
         //calculate full y offset since we're breaking out of the loop
-        top += r.top + (docBody.scrollTop  || docEl.scrollTop  || 0);
+        top += r.top + (docBody.scrollTop || docEl.scrollTop || 0);
 
         break;
       }
@@ -74,9 +97,11 @@ class _DomUtil {
     el = element;
 
     do {
-      if (el == docBody) { break; }
+      if (el == docBody) {
+        break;
+      }
 
-      top  -= el.scrollTop  || 0;
+      top -= el.scrollTop || 0;
       left -= el.scrollLeft || 0;
 
       el = el.parentNode;
@@ -93,6 +118,9 @@ class _DomUtil {
     return L.DomUtil._docIsLtr;
   }
 
+  /**
+   * Creates an element with tagName, sets the className, and optionally appends it to container element.
+   */
   create(tagName, className, container) {
 
     var el = document.createElement(tagName);
@@ -105,6 +133,9 @@ class _DomUtil {
     return el;
   }
 
+  /**
+   * Returns true if the element class attribute contains name.
+   */
   hasClass(el, name) {
     if (el.classList != null) {
       return el.classList.contains(name);
@@ -113,10 +144,14 @@ class _DomUtil {
     return className.length > 0 && new RegExp(r'(^|\\s)' + name + '(\\s|\$)').test(className);
   }
 
+  /**
+   * Adds name to the element's class attribute.
+   */
   addClass(el, name) {
     if (el.classList != null) {
       var classes = L.Util.splitWords(name);
-      for (var i = 0, len = classes.length; i < len; i++) {
+      for (var i = 0,
+          len = classes.length; i < len; i++) {
         el.classList.add(classes[i]);
       }
     } else if (!L.DomUtil.hasClass(el, name)) {
@@ -125,6 +160,9 @@ class _DomUtil {
     }
   }
 
+  /**
+   * Removes name from the element's class attribute.
+   */
   removeClass(el, name) {
     if (el.classList != null) {
       el.classList.remove(name);
@@ -146,6 +184,9 @@ class _DomUtil {
     return el.className.baseVal == null ? el.className : el.className.baseVal;
   }
 
+  /**
+   * Set the opacity of an element (including old IE support). Value must be from 0 to 1.
+   */
   setOpacity(el, value) {
 
     if (el.style.contains('opacity')) {
@@ -162,7 +203,9 @@ class _DomUtil {
       } catch (e) {
         // don't set opacity to 1 if we haven't already set an opacity,
         // it isn't needed and breaks transparent pngs.
-        if (value == 1) { return; }
+        if (value == 1) {
+          return;
+        }
       }
 
       value = Math.round(value * 100);
@@ -176,6 +219,9 @@ class _DomUtil {
     }
   }
 
+  /**
+   * Goes through the array of style names and returns the first name that is a valid style name for an element. If no such name is found, it returns false. Useful for vendor-prefixed styles like transform.
+   */
   testProp(props) {
 
     var style = document.documentElement.style;
@@ -188,6 +234,9 @@ class _DomUtil {
     return false;
   }
 
+  /**
+   * Returns a CSS transform string to move an element by the offset provided in the given point. Uses 3D translate on WebKit for hardware-accelerated transforms and 2D on other browsers.
+   */
   getTranslateString(point) {
     // on WebKit browsers (Chrome/Safari/iOS Safari/Android) using translate3d instead of translate
     // makes animation smoother as it ensures HW accel is used. Firefox 13 doesn't care
@@ -200,6 +249,9 @@ class _DomUtil {
     return open + point.x + 'px,' + point.y + 'px' + close;
   }
 
+  /**
+   * Returns a CSS transform string to scale an element (with the given scale origin).
+   */
   getScaleString(scale, origin) {
 
     var preTranslateStr = L.DomUtil.getTranslateString(origin.add(origin.multiplyBy(-1 * scale))),
@@ -208,19 +260,25 @@ class _DomUtil {
     return preTranslateStr + scaleStr;
   }
 
+  /**
+   * Sets the position of an element to coordinates specified by point, using CSS translate or top/left positioning depending on the browser (used by Leaflet internally to position its layers). Forces top/left positioning if disable3D is true.
+   */
   setPosition(el, point, disable3D) { // (HTMLElement, Point[, Boolean])
 
     // jshint camelcase: false
     el._leaflet_pos = point;
 
     if (!disable3D && L.Browser.any3d) {
-      el.style[L.DomUtil.TRANSFORM] =  L.DomUtil.getTranslateString(point);
+      el.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(point);
     } else {
       el.style.left = point.x + 'px';
       el.style.top = point.y + 'px';
     }
   }
 
+  /**
+   * Returns the coordinates of an element previously positioned with setPosition.
+   */
   getPosition(el) {
     // this method is only used for elements previously positioned using setPosition,
     // so it's safe to cache the position for performance

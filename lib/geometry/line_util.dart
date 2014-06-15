@@ -2,13 +2,17 @@ part of leaflet.geometry;
 
 final LineUtil = new _LineUtil();
 
-// LineUtil contains different utility functions for line segments
-// and polylines (clipping, simplification, distances, etc.)
+/**
+ * LineUtil contains different utility functions for line segments
+ * and polylines (clipping, simplification, distances, etc.)
+ */
 class _LineUtil {
 
-  // Simplify polyline with vertex reduction and Douglas-Peucker simplification.
-  // Improves rendering performance dramatically by lessening the number of points to draw.
-
+  /**
+   * Dramatically reduces the number of points in a polyline while retaining its shape and returns a new array of simplified points. Used for a huge performance boost when processing/displaying Leaflet polylines for each zoom level and also reducing visual noise. tolerance affects the amount of simplification (lesser value means higher quality but slower and with more points).
+   *
+   * Douglas-Peucker simplification
+   */
   simplify(/*Point[]*/ points, /*Number*/ tolerance) {
     if (!tolerance || !points.length) {
       return points.slice();
@@ -25,20 +29,27 @@ class _LineUtil {
     return points;
   }
 
-  // distance from a point to a segment between two points
+  /**
+   * Returns the distance between point p and segment p1 to p2.
+   */
   pointToSegmentDistance(/*Point*/ p, /*Point*/ p1, /*Point*/ p2) {
     return Math.sqrt(this._sqClosestPointOnSegment(p, p1, p2, true));
   }
 
+  /**
+   * Returns the closest point from a point p on a segment p1 to p2.
+   */
   closestPointOnSegment(/*Point*/ p, /*Point*/ p1, /*Point*/ p2) {
     return this._sqClosestPointOnSegment(p, p1, p2);
   }
 
-  // Douglas-Peucker simplification, see http://en.wikipedia.org/wiki/Douglas-Peucker_algorithm
+  /**
+   * Douglas-Peucker simplification, see http://en.wikipedia.org/wiki/Douglas-Peucker_algorithm
+   */
   _simplifyDP(points, sqTolerance) {
 
     var len = points.length,
-        ArrayConstructor = typeof Uint8Array !== undefined + '' ? Uint8Array : Array,
+        //ArrayConstructor = typeof Uint8Array !== undefined + '' ? Uint8Array : Array,
         markers = new ArrayConstructor(len);
 
     markers[0] = markers[len - 1] = 1;
@@ -95,9 +106,11 @@ class _LineUtil {
     return reducedPoints;
   }
 
-  // Cohen-Sutherland line clipping algorithm.
-  // Used to avoid rendering parts of a polyline that are not currently visible.
-
+  /**
+   * Clips the segment a to b by rectangular bounds (modifying the segment points directly!). Used by Leaflet to only show polyline points that are on the screen or near, increasing performance.
+   *
+   * Cohen-Sutherland line clipping algorithm.
+   */
   clipSegment(a, b, bounds, useLastCode) {
     var codeA = useLastCode ? this._lastCode : this._getBitCode(a, bounds),
         codeB = this._getBitCode(b, bounds),

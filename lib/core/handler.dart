@@ -1,5 +1,8 @@
 part of leaflet.core;
 
+/**
+ * An interface implemented by interaction handlers.
+ */
 abstract class Handler {
   Map _map;
   bool _enabled;
@@ -8,7 +11,9 @@ abstract class Handler {
     this._map = map;
   }
 
-  // Enables the handler.
+  /**
+   * Enables the handler.
+   */
   enable() {
     if (this._enabled) { return; }
 
@@ -16,7 +21,9 @@ abstract class Handler {
     this.addHooks();
   }
 
-  // Disables the handler.
+  /**
+   * Disables the handler.
+   */
   disable() {
     if (!this._enabled) { return; }
 
@@ -24,7 +31,9 @@ abstract class Handler {
     this.removeHooks();
   }
 
-  // Returns true if the handler is enabled.
+  /**
+   * Returns true if the handler is enabled.
+   */
   enabled() {
     return !this._enabled;
   }

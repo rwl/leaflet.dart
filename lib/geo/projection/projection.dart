@@ -10,12 +10,18 @@ part 'lon_lat.dart';
 part 'mercator.dart';
 part 'spherical_mercator.dart';
 
-// An object with methods for projecting geographical coordinates of the world
-// onto a flat surface (and back).
+/**
+ * An object with methods for projecting geographical coordinates of the world
+ * onto a flat surface (and back).
+ */
 abstract class Projection {
-  // Projects geographical coordinates into a 2D point.
+  /**
+   * Projects geographical coordinates into a 2D point.
+   */
   Point project(LatLng latlng);
 
-  // The inverse of project. Projects a 2D point into geographical location.
+  /**
+   * The inverse of project. Projects a 2D point into geographical location.
+   */
   LatLng unproject(Point point);
 }
