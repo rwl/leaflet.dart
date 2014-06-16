@@ -172,7 +172,7 @@ class DragEndEvent extends Event {
   num distance;
 }
 
-typedef bool Action(Object obj, Event event);
+typedef /*bool*/void Action(Object obj, Event event);
 /*
 class Event {
   Action action;
@@ -217,13 +217,13 @@ class Events {
    * Alias to addEventListener.
    */
   on(EventType types, Action fn, [BaseMap context=null]) {
-    return addEventListener(types, fn);
+    return addEventListener(types, fn, context);
   }
 
   /**
    * Adds a listener function (fn) to a particular event type of the object. You can optionally specify the context of the listener (object the this keyword will point to).
    */
-  addEventListener(EventType types, Action fn, [Map context=null]) { // (String, Function[, Object]) or (Object[, Object])
+  addEventListener(EventType types, Action fn, [BaseMap context=null]) { // (String, Function[, Object]) or (Object[, Object])
 
     // types can be a map of types/handlers
 //    if (L.Util.invokeEach(types, this.addEventListener, this, fn, context)) { return this; }

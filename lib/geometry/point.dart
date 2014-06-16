@@ -35,16 +35,16 @@ class Point {
    *
    * Non-destructive, returns a new point.
    */
-  Point add(Point point) {
+  Point operator +(Point point) {
     final c = clone();
-    c._add(new Point.point(point));
+    c.add(new Point.point(point));
     return c;
   }
 
   /**
    * Destructive, used directly for performance in situations where it's safe to modify existing point.
    */
-  void _add(Point point) {
+  void add(Point point) {
     x += point.x;
     y += point.y;
   }
@@ -52,13 +52,13 @@ class Point {
   /**
    * Returns the result of subtraction of the given point from the current.
    */
-  Point subtract(Point point) {
+  Point operator -(Point point) {
     final c = clone();
-    c._subtract(new Point.point(point));
+    c.subtract(new Point.point(point));
     return c;
   }
 
-  void _subtract(Point point) {
+  void subtract(Point point) {
     x -= point.x;
     y -= point.y;
   }
@@ -66,16 +66,16 @@ class Point {
   /**
    * Returns the result of division of the current point by the given number. If optional round is set to true, returns a rounded result.
    */
-  Point divideBy(num x, [bool round = false]) {
+  Point operator /(num x) {//, [bool round = false]) {
     final c = clone();
-    c._divideBy(x);
-    if (round) {
+    c.divideBy(x);
+    /*if (round) {
       c._round();
-    }
+    }*/
     return c;
   }
 
-  void _divideBy(num xx) {
+  void divideBy(num xx) {
     x /= xx;
     y /= xx;
   }
@@ -83,13 +83,13 @@ class Point {
   /**
    * Returns the result of multiplication of the current point by the given number.
    */
-  Point multiplyBy(num x) {
+  Point operator *(num x) {
     final c = clone();
-    c._multiplyBy(x);
+    c.multiplyBy(x);
     return c;
   }
 
-  void _multiplyBy(num xx) {
+  void multiplyBy(num xx) {
     x *= xx;
     y *= xx;
   }
@@ -97,13 +97,13 @@ class Point {
   /**
    * Returns a copy of the current point with rounded coordinates.
    */
-  Point round() {
+  Point rounded() {
     final c = clone();
-    c._round();
+    c.round();
     return c;
   }
 
-  void _round() {
+  void round() {
     x = x.round();
     y = y.round();
   }

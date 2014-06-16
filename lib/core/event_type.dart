@@ -206,4 +206,6 @@ class EventType {
   static const CLOSE  = const EventType._internal('close');
 
   static const ZOOMANIM = const EventType._internal('zoomanim');
+
+  static const TILELAYERSLOAD = const EventType._internal('tilelayersload');
 }

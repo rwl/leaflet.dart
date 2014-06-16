@@ -29,7 +29,7 @@ class Bounds {
   /**
    * Creates a Bounds object from two coordinates (usually top-left and bottom-right corners).
    */
-  factory Bounds.points(Point a, Point b) {
+  factory Bounds.between(Point a, Point b) {
     return new Bounds([a, b]);
   }
 

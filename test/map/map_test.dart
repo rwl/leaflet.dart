@@ -1,72 +1,88 @@
+
+import 'dart:html' show document;
+
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart';
+import 'package:leaflet/map/map.dart' show BaseMap, containerProp;
+import 'package:leaflet/geo/geo.dart' show LatLng;
+import 'package:leaflet/core/core.dart' show Event, EventType;
 
 
 main() {
   useHtmlEnhancedConfiguration();
 
   group('Map', () {
-    var spy, map;
+    BaseMap map;
+    bool called;
 
     setUp(() {
-      map = new Map(document.createElement('div'));
+      map = new BaseMap(document.createElement('div'));
+      called = false;
     });
 
     group('#remove', () {
       test('fires an unload event if loaded', () {
-        var container = document.createElement('div'),
-          map = new L.Map(container).setView([0, 0], 0),
-          spy = sinon.spy();
-        map.on('unload', spy);
+        final container = document.createElement('div'),
+          map = new BaseMap(container)..setView(new LatLng(0, 0), 0);
+        map.on(EventType.UNLOAD, (Object obj, Event e) {
+          called = true;
+        });
         map.remove();
-        expect(spy.called).to.be.ok();
+        expect(called, isTrue);
       });
 
       test('fires no unload event if not loaded', () {
-        var container = document.createElement('div'),
-            map = new L.Map(container),
-          spy = sinon.spy();
-        map.on('unload', spy);
+        final container = document.createElement('div'),
+            map = new BaseMap(container);
+        map.on(EventType.UNLOAD, (Object obj, Event e) {
+          called = true;
+        });
         map.remove();
-        expect(spy.called).not.to.be.ok();
+        expect(called, isFalse);
       });
 
-      describe('corner case checking', () {
+      test('corner case checking', () {
         test('throws an exception upon reinitialization', () {
-          var container = document.createElement('div'),
-            map = new L.Map(container);
-          expect(() {
-            L.map(container);
-          }).to.throwException((e) {
-            expect(e.message).to.eql('Map container is already initialized.');
-          });
+          final container = document.createElement('div'),
+            map = new BaseMap(container);
+          try {
+            new BaseMap(container);
+            fail('Exception expected');
+          } catch (e) {
+            expect(e.message, equals('Map container is already initialized.'));
+          }
           map.remove();
         });
 
-        test('throws an exception if a container is not found', () {
+        /*test('throws an exception if a container is not found', () {
           expect(() {
             L.map('nonexistentdivelement');
           }).to.throwException((e) {
             expect(e.message).to.eql('Map container not found.');
           });
           map.remove();
-        });
+        });*/
       });
 
       test('undefines container._leaflet', () {
-        var container = document.createElement('div'),
-            map = new L.Map(container);
+        final container = document.createElement('div'),
+            map = new BaseMap(container);
         map.remove();
-        expect(container._leaflet).to.be(undefined);
+        expect(containerProp[container], isNull);
       });
 
       test('unbinds events', () {
-        var container = document.createElement('div'),
-            map = new L.Map(container).setView([0, 0], 1),
-          spy = sinon.spy();
+        final container = document.createElement('div'),
+            map = new BaseMap(container)..setView(new LatLng(0, 0), 1);
 
-        map.on('click dblclick mousedown mouseup mousemove', spy);
+        final fn = (Object obj, Event e) {
+          called = true;
+        };
+        map.on(EventType.CLICK, fn);
+        map.on(EventType.DBLCLICK, fn);
+        map.on(EventType.MOUSEDOWN, fn);
+        map.on(EventType.MOUSEUP, fn);
+        map.on(EventType.MOUSEMOVE, fn);
         map.remove();
 
         happen.click(container);
@@ -75,51 +91,51 @@ main() {
         happen.mouseup(container);
         happen.mousemove(container);
 
-        expect(spy.called).to.not.be.ok();
+        expect(called, isFalse);
       });
     });
 
 
-    describe('#getCenter', () {
-      it('throws if not set before', () {
-        expect(() {
-          map.getCenter();
-        }).to.throwError();
+    test('#getCenter', () {
+      test('throws if not set before', () {
+        expect(map.getCenter(), throwsException);
       });
 
-      it('returns a precise center when zoomed in after being set (#426)', () {
-        var center = L.latLng(10, 10);
+      test('returns a precise center when zoomed in after being set (#426)', () {
+        final center = new LatLng(10, 10);
         map.setView(center, 1);
         map.setZoom(19);
-        expect(map.getCenter()).to.eql(center);
+        expect(map.getCenter(), equals(center));
       });
 
-      it('returns correct center after invalidateSize (#1919)', () {
-        map.setView(L.latLng(10, 10), 1);
+      test('returns correct center after invalidateSize (#1919)', () {
+        map.setView(new LatLng(10, 10), 1);
         map.invalidateSize();
-        expect(map.getCenter()).not.to.eql(L.latLng(10, 10));
+        expect(map.getCenter(), isNot(equals(new LatLng(10, 10))));
       });
     });
 
-    describe('#whenReady', () {
-      describe('when the map has not yet been loaded', () {
+    test('#whenReady', () {
+      test('when the map has not yet been loaded', () {
         test('calls the callback when the map is loaded', () {
-          var spy = sinon.spy();
-          map.whenReady(spy);
-          expect(spy.called).to.not.be.ok();
+          map.whenReady(() {
+            called = true;
+          });
+          expect(called, isFalse);
 
-          map.setView([0, 0], 1);
-          expect(spy.called).to.be.ok();
+          map.setView(new LatLng(0, 0), 1);
+          expect(called, isTrue);
         });
       });
 
-      describe('when the map has already been loaded', () {
+      test('when the map has already been loaded', () {
         test('calls the callback immediately', () {
-          var spy = sinon.spy();
-          map.setView([0, 0], 1);
-          map.whenReady(spy);
+          map.setView(new LatLng(0, 0), 1);
+          map.whenReady(() {
+            called = true;
+          });
 
-          expect(spy.called).to.be.ok();
+          expect(called, isTrue);
         });
       });
     });

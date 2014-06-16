@@ -45,19 +45,19 @@ class InteractionOptions {
   /**
    * Whether the map be draggable with mouse/touch or not.
    */
-  bool dragging  = true;
+  bool dragging = true;
 
   /**
    * Whether the map can be zoomed by touch-dragging with two fingers.
    */
-  bool touchZoom   = true;
+  bool touchZoom = true;
 
   /**
    * Whether the map can be zoomed by using the mouse wheel. If passed
    * 'center', it will zoom to the center of the view regardless of where
    * the mouse was.
    */
-  bool scrollWheelZoom   = true;
+  bool scrollWheelZoom = true;
 
   /**
    * Whether the map can be zoomed in by double clicking on it and zoomed out
@@ -65,50 +65,50 @@ class InteractionOptions {
    * zoom will zoom to the center of the view regardless of where the mouse
    * was.
    */
-  bool doubleClickZoom   = true;
+  bool doubleClickZoom = true;
 
   /**
    * Whether the map can be zoomed to a rectangular area specified by dragging
    * the mouse while pressing shift.
    */
-  bool boxZoom   = true;
+  bool boxZoom = true;
 
   /**
    * Enables mobile hacks for supporting instant taps (fixing 200ms click delay
    * on iOS/Android) and touch holds (fired as contextmenu events).
    */
-  bool tap   = true;
+  bool tap = true;
 
   /**
    * The max number of pixels a user can shift his finger during touch for it
    * to be considered a valid tap.
    */
-  num tapTolerance  = 15;
+  num tapTolerance = 15;
 
   /**
    * Whether the map automatically handles browser window resize to update
    * itself.
    */
-  bool trackResize   = true;
+  bool trackResize = true;
 
   /**
    * With this option enabled, the map tracks when you pan to another "copy"
    * of the world and seamlessly jumps to the original one so that all overlays
    * like markers and vector layers are still visible.
    */
-  bool worldCopyJump   = false;
+  bool worldCopyJump = false;
 
   /**
    * Set it to false if you don't want popups to close when user clicks the
    * map.
    */
-  bool closePopupOnClick   = true;
+  bool closePopupOnClick = true;
 
   /**
    * Set it to false if you don't want the map to zoom beyond min/max zoom and
    * then bounce back when pinch-zooming.
    */
-  bool bounceAtZoomLimits  = true;
+  bool bounceAtZoomLimits = true;
 }
 
 class KeyboardNavigationOptions {
@@ -116,17 +116,17 @@ class KeyboardNavigationOptions {
    * Makes the map focusable and allows users to navigate the map with keyboard
    * arrows and +/- keys.
    */
-  bool keyboard  = true;
+  bool keyboard = true;
 
   /**
    * Amount of pixels to pan when pressing an arrow key.
    */
-  num keyboardPanOffset   = 80;
+  num keyboardPanOffset = 80;
 
   /**
    * Number of zoom levels to change when pressing + or - key.
    */
-  num keyboardZoomOffset  = 1;
+  num keyboardZoomOffset = 1;
 }
 
 class PanningInertiaOptions {
@@ -135,17 +135,17 @@ class PanningInertiaOptions {
    * builds momentum while dragging and continues moving in the same direction
    * for some time. Feels especially nice on touch devices.
    */
-  bool inertia   = true;
+  bool inertia = true;
 
   /**
    * The rate with which the inertial movement slows down, in pixels/second2.
    */
-  num inertiaDeceleration   = 3000;
+  num inertiaDeceleration = 3000;
 
   /**
    * Max speed of the inertial movement, in pixels/second.
    */
-  num inertiaMaxSpeed   = 1500;
+  num inertiaMaxSpeed = 1500;
 
   /**
    * Number of milliseconds that should pass between stopping the movement and
@@ -159,12 +159,12 @@ class ControlOptions {
   /**
    * Whether the zoom control is added to the map by default.
    */
-  bool zoomControl   = true;
+  bool zoomControl = true;
 
   /**
    * Whether the attribution control is added to the map by default.
    */
-  bool attributionControl  = true;
+  bool attributionControl = true;
 }
 
 class AnimationOptions {
@@ -183,7 +183,7 @@ class AnimationOptions {
   /**
    * Won't animate zoom if the zoom difference exceeds this value.
    */
-  num zoomAnimationThreshold  = 4;
+  num zoomAnimationThreshold = 4;
 
   /**
    * Whether markers animate their zoom with the zoom animation, if disabled
@@ -191,6 +191,11 @@ class AnimationOptions {
    * enabled in all browsers that support CSS3 Transitions except Android.
    */
   bool markerZoomAnimation;
+
+  AnimationOptions() {
+    fadeAnimation = DomUtil.TRANSITION && !Browser.android23;
+    markerZoomAnimation = DomUtil.TRANSITION && Browser.any3d;
+  }
 }
 
 class LocateOptions {
@@ -199,13 +204,13 @@ class LocateOptions {
    * detecting it once) using W3C watchPosition method. You can later stop
    * watching using map.stopLocate() method.
    */
-  bool watch   = false;
+  bool watch = false;
 
   /**
    * If true, automatically sets the map view to the user location with
    * respect to detection accuracy, or to world view if geolocation failed.
    */
-  bool setView   = false;
+  bool setView = false;
 
   /**
    * The maximum zoom for automatic view setting when using `setView` option.
@@ -216,14 +221,14 @@ class LocateOptions {
    * Number of milliseconds to wait for a response from geolocation before
    * firing a locationerror event.
    */
-  num timeout   = 10000;
+  num timeout = 10000;
 
   /**
    * Maximum age of detected location. If less than this amount of milliseconds
    * passed since last geolocation response, locate will return a cached
    * location.
    */
-  num maximumAge  = 0;
+  num maximumAge = 0;
 
   /**
    * Enables high accuracy, see description in the W3C spec.
@@ -235,7 +240,7 @@ class ZoomPanOptions {
   /**
    * If true, the map view will be completely reset (without any animations).
    */
-  bool reset   = false;
+  bool reset = false;
 
   /**
    * Sets the options for the panning (without the zoom change) if it occurs.
@@ -262,12 +267,12 @@ class ZoomPanOptions {
    * you have some control overlays on the map like a sidebar and you don't want
    * them to obscure objects you're zooming to.
    */
-  geom.Point   paddingTopLeft;
+  geom.Point paddingTopLeft;
 
   /**
    * The same for bottom right corner of the map.
    */
-  geom.Point   paddingBottomRight  = new geom.Point(0, 0);
+  geom.Point paddingBottomRight = new geom.Point(0, 0);
 
   /**
    * Equivalent of setting both top left and bottom right padding to the same
@@ -287,8 +292,7 @@ class ZoomPanOptions {
    */
   num maxZoom;
 
-  ZoomPanOptions({this.reset: false, this.pan, this.zoom, this.paddingTopLeft: null,
-    this.paddingBottomRight: null, this.maxZoom}) {
+  ZoomPanOptions({this.reset: false, this.pan, this.zoom, this.paddingTopLeft: null, this.paddingBottomRight: null, this.maxZoom}) {
     if (paddingTopLeft == null) {
       paddingTopLeft = new geom.Point(0, 0);
     }
@@ -312,20 +316,20 @@ class PanOptions {
   /**
    * Duration of animated panning.
    */
-  num duration  = 0.25;
+  num duration = 0.25;
 
   /**
    * The curvature factor of panning animation easing (third parameter of the
    * Cubic Bezier curve). 1.0 means linear animation, the less the more bowed
    * the curve.
    */
-  num easeLinearity   = 0.25;
+  num easeLinearity = 0.25;
 
   /**
    * If true, panning won't fire movestart event on start (used internally for
    * panning inertia).
    */
-  bool noMoveStart   = false;
+  bool noMoveStart = false;
 }
 
 class ZoomOptions {

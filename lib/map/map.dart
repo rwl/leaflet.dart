@@ -1,15 +1,20 @@
 library leaflet.map;
 
-import 'dart:html';
+import 'dart:html' show Element, window;
 import 'dart:math' as math;
+import 'dart:async' show Timer;
 
-import '../core/core.dart' as core;
-import '../core/core.dart' show EventType;
-import '../geo/geo.dart';
-import '../geo/crs/crs.dart';
+import '../core/core.dart' show Handler, Events;
+import '../core/core.dart' show Event, EventType, MouseEvent, Util, Browser;
+import '../geo/geo.dart' show LatLng, LatLngBounds;
+import '../geo/crs/crs.dart' show CRS, EPSG3857;
+import '../geometry/geometry.dart' show Bounds;
 import '../geometry/geometry.dart' as geom;
-import '../layer/layer.dart';
-import '../layer/tile/tile.dart';
+import '../control/control.dart' show Control, Zoom, Attribution;
+import '../dom/dom.dart' show DomEvent, DomUtil;
+import '../layer/layer.dart' show Layer;
+import '../layer/tile/tile.dart' show TileLayer;
+import './handler/handler.dart';
 
 part 'options.dart';
 
@@ -17,13 +22,8 @@ final containerProp = new Expando<Element>('_leaflet');
 
 typedef LayerFunc(Layer layer);
 
-class BaseMap extends Object with core.Events {
-  /*Map<String, Object> options = {
-    'crs': crs.EPSG3857,
-    'fadeAnimation': DomUtil.TRANSITION && !Browser.android23,
-    'trackResize': true,
-    'markerZoomAnimation': DomUtil.TRANSITION && Browser.any3d
-  };*/
+class BaseMap extends Object with Events {
+
   MapStateOptions stateOptions;
   InteractionOptions interactionOptions;
   KeyboardNavigationOptions keyboardNavigationOptions;
@@ -33,25 +33,63 @@ class BaseMap extends Object with core.Events {
   LocateOptions locateOptions;
   ZoomPanOptions zoomPanOptions;
 
-  List _handlers;
+  List<Handler> _handlers;
 
-  Map _layers;
-
-  /**
-   * For internal use only.
-   */
-  //Map get layers => _layers;
+  Map<String, Layer> _layers;
 
   Map _zoomBoundLayers;
   int _tileLayersNum, _tileLayersToLoad;
 
-  /*factory BaseMap.elem(Element id, Map<String, Object> options) {
-    return new BaseMap(id, options);
-  }
+  num _zoom;
+  bool _loaded;
 
-  factory BaseMap.id(String id, Map<String, Object> options) {
-    return new BaseMap(id, options);
-  }*/
+  bool _sizeChanged;
+  LatLng _initialCenter;
+
+  /**
+   * Map dragging handler (by both mouse and touch).
+   */
+  Drag dragging;
+
+  /**
+   * Touch zoom handler.
+   */
+  TouchZoom touchZoom;
+
+  /**
+   * Double click zoom handler.
+   */
+  DoubleClickZoom doubleClickZoom;
+
+  /**
+   * Scroll wheel zoom handler.
+   */
+  ScrollWheelZoom scrollWheelZoom;
+
+  /**
+   * Box (shift-drag with mouse) zoom handler.
+   */
+  BoxZoom boxZoom;
+
+  /**
+   * Keyboard navigation handler.
+   */
+  Keyboard keyboard;
+
+  /**
+   * Mobile touch hacks (quick tap and touch hold) handler.
+   */
+  Tap tap;
+
+  /**
+   * Zoom control.
+   */
+  Zoom zoomControl;
+
+  /**
+   * Attribution control.
+   */
+  Attribution attributionControl;
 
   BaseMap(Element container, {MapStateOptions stateOptions: null, InteractionOptions interactionOptions: null,
       KeyboardNavigationOptions keyboardNavigationOptions: null, PanningInertiaOptions panningInertiaOptions: null,
@@ -94,8 +132,8 @@ class BaseMap extends Object with core.Events {
     _initContainer(container);
     _initLayout();
 
-    // hack for https://github.com/Leaflet/Leaflet/issues/1980
-//    this._onResize = L.bind(this._onResize, this);
+    // Hack for https://github.com/Leaflet/Leaflet/issues/1980
+    //_onResize = L.bind(_onResize, this);
 
     _initEvents();
 
@@ -104,7 +142,7 @@ class BaseMap extends Object with core.Events {
     }
 
     if (stateOptions.center != null && zoomPanOptions.zoom != null) {
-      setView(new LatLng.latLng(stateOptions.center), zoomPanOptions.zoom, new ZoomPanOptions(reset: true));
+      setView(new LatLng.latLng(stateOptions.center), stateOptions.zoom, new ZoomPanOptions(reset: true));
     }
 
     _handlers = [];
@@ -113,13 +151,13 @@ class BaseMap extends Object with core.Events {
     _zoomBoundLayers = {};
     _tileLayersNum = 0;
 
-    callInitHooks();
+    //callInitHooks();
 
     _addLayers(stateOptions.layers);
   }
 
 
-  // public methods that modify map state
+  /* Public methods that modify map state */
 
   /**
    * Sets the view of the map (geographical center and zoom) with the given
@@ -127,18 +165,15 @@ class BaseMap extends Object with core.Events {
    *
    * Replaced by animation-powered implementation in Map.PanAnimation
    */
-  setView(LatLng center, num zoom, [ZoomPanOptions options = null]) {
+  void setView(LatLng center, num zoom, [ZoomPanOptions options = null]) {
     zoom = zoom == null ? getZoom() : zoom;
     _resetView(new LatLng.latLng(center), _limitZoom(zoom));
   }
 
-  num _zoom;
-  bool _loaded;
-
   /**
    * Sets the zoom of the map.
    */
-  setZoom(num zoom, [ZoomOptions options=null]) {
+  void setZoom(num zoom, [ZoomOptions options=null]) {
     if (!_loaded) {
       _zoom = _limitZoom(zoom);
       return;
@@ -149,14 +184,14 @@ class BaseMap extends Object with core.Events {
   /**
    * Increases the zoom of the map by delta (1 by default).
    */
-  zoomIn([num delta = 1, ZoomOptions options = null]) {
+  void zoomIn([num delta = 1, ZoomOptions options = null]) {
     return setZoom(_zoom + delta, options);
   }
 
   /**
    * Decreases the zoom of the map by delta (1 by default).
    */
-  zoomOut([num delta = 1, ZoomOptions options = null]) {
+  void zoomOut([num delta = 1, ZoomOptions options = null]) {
     return setZoom(_zoom - delta, options);
   }
 
@@ -164,7 +199,7 @@ class BaseMap extends Object with core.Events {
    * Zooms the map while keeping a specified point on the map stationary
    * (e.g. used internally for scroll zoom and double-click zoom).
    */
-  setZoomAroundLatLng(LatLng latlng, num zoom, [ZoomOptions options = null]) {
+  void setZoomAroundLatLng(LatLng latlng, num zoom, [ZoomOptions options = null]) {
     setZoomAround(latLngToContainerPoint(latlng), zoom, options);
   }
 
@@ -172,12 +207,12 @@ class BaseMap extends Object with core.Events {
    * Zooms the map while keeping a specified point on the map stationary
    * (e.g. used internally for scroll zoom and double-click zoom).
    */
-  setZoomAround(geom.Point containerPoint, num zoom, [ZoomOptions options = null]) {
+  void setZoomAround(geom.Point containerPoint, num zoom, [ZoomOptions options = null]) {
     final scale = getZoomScale(zoom),
-        viewHalf = getSize().divideBy(2),
+        viewHalf = getSize() / 2,
 
-        centerOffset = containerPoint.subtract(viewHalf).multiplyBy(1 - 1 / scale),
-        newCenter = containerPointToLatLng(viewHalf.add(centerOffset));
+        centerOffset = (containerPoint - viewHalf) * (1 - 1 / scale),
+        newCenter = containerPointToLatLng(viewHalf + centerOffset);
 
     setView(newCenter, zoom, new ZoomPanOptions(zoom: options));
   }
@@ -186,11 +221,11 @@ class BaseMap extends Object with core.Events {
    * Sets a map view that contains the given geographical bounds with the
    * maximum zoom level possible.
    */
-  fitBounds(LatLngBounds bounds, [ZoomPanOptions options = null]) {
+  void fitBounds(LatLngBounds bounds, [ZoomPanOptions options = null]) {
     if (options == null) {
       options = new ZoomPanOptions();
     }
-//    bounds = bounds.getBounds ? bounds.getBounds() : new LatLngBounds.latLngBounds(bounds);
+    //bounds = bounds.getBounds ? bounds.getBounds() : new LatLngBounds.latLngBounds(bounds);
 
     geom.Point paddingTL;
     if (options.paddingTopLeft != null) {
@@ -209,12 +244,12 @@ class BaseMap extends Object with core.Events {
       paddingBR = new geom.Point(0, 0);
     }
 
-    var zoom = getBoundsZoom(bounds, false, paddingTL.add(paddingBR));
-    final paddingOffset = paddingBR.subtract(paddingTL).divideBy(2),
+    var zoom = getBoundsZoom(bounds, false, paddingTL + paddingBR);
+    final paddingOffset = (paddingBR - paddingTL) / 2,
 
         swPoint = project(bounds.getSouthWest(), zoom),
         nePoint = project(bounds.getNorthEast(), zoom),
-        center = unproject(swPoint.add(nePoint).divideBy(2).add(paddingOffset), zoom);
+        center = unproject(((swPoint + nePoint) / 2) + paddingOffset, zoom);
 
     if (options != null && options.maxZoom != null) {
       zoom = math.min(options.maxZoom, zoom);
@@ -228,7 +263,7 @@ class BaseMap extends Object with core.Events {
    * zoom level possible.
    */
   void fitWorld([ZoomPanOptions options = null]) {
-    fitBounds(new LatLngBounds.array([[-90, -180], [90, 180]]), options);
+    fitBounds(new LatLngBounds.between(new LatLng(-90, -180), new LatLng(90, 180)), options);
   }
 
   /**
@@ -280,7 +315,7 @@ class BaseMap extends Object with core.Events {
     var center = getCenter(),
       newCenter = _limitCenter(center, _zoom, bounds);
 
-    if (center.equals(newCenter)) { return; }
+    if (center == newCenter) { return; }
 
     panTo(newCenter, options);
   }
@@ -293,9 +328,9 @@ class BaseMap extends Object with core.Events {
   void addLayer(Layer layer) {
     // TODO method is too big, refactor
 
-    var id = core.Util.stamp(layer);
+    var id = Util.stamp(layer);
 
-    if (_layers[id]) { return; }
+    if (_layers.containsKey(id)) { return; }
 
     _layers[id] = layer;
 
@@ -325,7 +360,7 @@ class BaseMap extends Object with core.Events {
    * Removes the given layer from the map.
    */
   void removeLayer(Layer layer) {
-    var id = core.Util.stamp(layer);
+    final id = Util.stamp(layer);
 
     if (!_layers.containsKey(id)) { return; }
 
@@ -360,7 +395,7 @@ class BaseMap extends Object with core.Events {
   bool hasLayer(Layer layer) {
     if (layer == null) { return false; }
 
-    return _layers.containsKey(core.Util.stamp(layer));
+    return _layers.containsKey(Util.stamp(layer));
   }
 
   void eachLayer(LayerFunc fn) {
@@ -369,15 +404,7 @@ class BaseMap extends Object with core.Events {
     });
   }
 
-  /*eachLayer(method, context) {
-    for (var i in _layers) {
-      method.call(context, _layers[i]);
-    }
-    return this;
-  }*/
-
-  bool _sizeChanged;
-  LatLng _initialCenter;
+  Timer _sizeTimer;
 
   /**
    * Checks if the map container size changed and updates the map if so — call
@@ -389,19 +416,14 @@ class BaseMap extends Object with core.Events {
   void invalidateSize({bool animate: true, bool pan: true, bool debounceMoveend: false}) {
     if (!_loaded) { return; }
 
-    /*options = L.extend({
-      animate: false,
-      pan: true
-    }, options == true ? {animate: true} : options);*/
-
-    var oldSize = getSize();
+    final oldSize = getSize();
     _sizeChanged = true;
     _initialCenter = null;
 
-    var newSize = getSize(),
-        oldCenter = oldSize.divideBy(2).round(),
-        newCenter = newSize.divideBy(2).round(),
-        offset = oldCenter.subtract(newCenter);
+    final newSize = getSize(),
+        oldCenter = (oldSize / 2).rounded(),
+        newCenter = (newSize / 2).rounded(),
+        offset = oldCenter - newCenter;
 
     if (!offset.x && !offset.y) { return; }
 
@@ -416,8 +438,10 @@ class BaseMap extends Object with core.Events {
       fire(EventType.MOVE);
 
       if (debounceMoveend) {
-        clearTimeout(_sizeTimer);
-        _sizeTimer = setTimeout(bind(this.fire, this, EventType.MOVEEND), 200);
+        _sizeTimer.cancel();
+        _sizeTimer = new Timer(const Duration(milliseconds: 200), () {
+          fire(EventType.MOVEEND);
+        });
       } else {
         fire(EventType.MOVEEND);
       }
@@ -463,9 +487,9 @@ class BaseMap extends Object with core.Events {
     containerProp[_container] = null;
 
     _clearPanes();
-    if (_clearControlPos) {
-      _clearControlPos();
-    }
+    //if (_clearControlPos) {
+    _clearControlPos();
+    //}
 
     _clearHandlers();
 
@@ -502,7 +526,7 @@ class BaseMap extends Object with core.Events {
         sw = unproject(bounds.getBottomLeft()),
         ne = unproject(bounds.getTopRight());
 
-    return new LatLngBounds(sw, ne);
+    return new LatLngBounds.between(sw, ne);
   }
 
   /**
@@ -545,11 +569,11 @@ class BaseMap extends Object with core.Events {
     bool zoomNotFound = true;
     var boundsSize;
 
-    padding = new Point.point(padding);
+    padding = new geom.Point.point(padding);
 
     do {
       zoom++;
-      boundsSize = project(se, zoom).subtract(project(nw, zoom)).add(padding);
+      boundsSize = project(se, zoom) - project(nw, zoom) + padding;
       zoomNotFound = !inside ? size.contains(boundsSize) : boundsSize.x < size.x || boundsSize.y < size.y;
 
     } while (zoomNotFound && zoom <= maxZoom);
@@ -581,9 +605,9 @@ class BaseMap extends Object with core.Events {
    * Returns the bounds of the current map view in projected pixel coordinates
    * (sometimes useful in layer and overlay implementations).
    */
-  Bounds getPixelBounds() {
-    var topLeftPoint = _getTopLeftPoint();
-    return new Bounds(topLeftPoint, topLeftPoint.add(getSize()));
+  geom.Bounds getPixelBounds() {
+    final topLeftPoint = _getTopLeftPoint();
+    return new geom.Bounds.between(topLeftPoint, topLeftPoint + getSize());
   }
 
   geom.Point _initialTopLeftPoint;
@@ -646,7 +670,7 @@ class BaseMap extends Object with core.Events {
    * Returns the geographical coordinates of a given map layer point.
    */
   LatLng layerPointToLatLng(geom.Point point) {
-    final projectedPoint = new geom.Point.point(point).add(getPixelOrigin());
+    final projectedPoint = new geom.Point.point(point) + getPixelOrigin();
     return unproject(projectedPoint);
   }
 
@@ -655,8 +679,8 @@ class BaseMap extends Object with core.Events {
    * coordinates (useful for placing overlays on the map).
    */
   geom.Point latLngToLayerPoint(LatLng latlng) {
-    var projectedPoint = project(new LatLng.latLng(latlng))._round();
-    return projectedPoint._subtract(getPixelOrigin());
+    var projectedPoint = project(new LatLng.latLng(latlng))..round();
+    return projectedPoint - getPixelOrigin();
   }
 
   /**
@@ -664,7 +688,7 @@ class BaseMap extends Object with core.Events {
    * to the map layer.
    */
   geom.Point containerPointToLayerPoint(geom.Point point) {
-    return new geom.Point.point(point).subtract(_getMapPanePos());
+    return new geom.Point.point(point) - _getMapPanePos();
   }
 
   /**
@@ -672,7 +696,7 @@ class BaseMap extends Object with core.Events {
    * map container.
    */
   geom.Point layerPointToContainerPoint(geom.Point point) {
-    return new geom.Point.point(point).add(_getMapPanePos());
+    return new geom.Point.point(point) + _getMapPanePos();
   }
 
   /**
@@ -695,7 +719,7 @@ class BaseMap extends Object with core.Events {
    * Returns the pixel coordinates of a mouse click (relative to the top left
    * corner of the map) given its event object.
    */
-  geom.Point mouseEventToContainerPoint(core.Event e) {
+  geom.Point mouseEventToContainerPoint(Event e) {
     return DomEvent.getMousePosition(e, _container);
   }
 
@@ -742,9 +766,9 @@ class BaseMap extends Object with core.Events {
     var container = _container;
 
     DomUtil.addClass(container, 'leaflet-container' +
-      (core.Browser.touch ? ' leaflet-touch' : '') +
-      (core.Browser.retina ? ' leaflet-retina' : '') +
-      (core.Browser.ielt9 ? ' leaflet-oldie' : '') +
+      (Browser.touch ? ' leaflet-touch' : '') +
+      (Browser.retina ? ' leaflet-retina' : '') +
+      (Browser.ielt9 ? ' leaflet-oldie' : '') +
       (animationOptions.fadeAnimation ? ' leaflet-fade-anim' : ''));
 
     var position = DomUtil.getStyle(container, 'position');
@@ -755,9 +779,9 @@ class BaseMap extends Object with core.Events {
 
     _initPanes();
 
-    if (_initControlPos) {
-      _initControlPos();
-    }
+    //if (_initControlPos) {
+    _initControlPos();
+    //}
   }
 
   Map<String, Element> _panes;
@@ -784,7 +808,7 @@ class BaseMap extends Object with core.Events {
     }
   }
 
-  void _createPane(String className, [Element container=null]) {
+  Element _createPane(String className, [Element container=null]) {
     return DomUtil.create('div', className, container != null ? container : _panes['objectsPane']);
   }
 
@@ -824,7 +848,7 @@ class BaseMap extends Object with core.Events {
     if (!preserveMapOffset) {
       DomUtil.setPosition(_mapPane, new geom.Point(0, 0));
     } else {
-      _initialTopLeftPoint._add(_getMapPanePos());
+      _initialTopLeftPoint.add(_getMapPanePos());
     }
 
     _tileLayersToLoad = _tileLayersNum;
@@ -834,7 +858,7 @@ class BaseMap extends Object with core.Events {
 
     if (loading) {
       fire(EventType.LOAD);
-      eachLayer(_layerAdd, this);
+      eachLayer(_layerAdd);
     }
 
     fire(EventType.VIEWRESET, {'hard': !preserveMapOffset});
@@ -886,7 +910,7 @@ class BaseMap extends Object with core.Events {
     }
   }
 
-  bool _panInsideMaxBounds([Object obj=null, core.Event event=null]) {
+  void _panInsideMaxBounds([Object obj=null, Event event=null]) {
     panInsideBounds(stateOptions.maxBounds);
   }
 
@@ -928,16 +952,17 @@ class BaseMap extends Object with core.Events {
     }
   }
 
+  String _resizeRequest;
+
   void _onResize() {
-    core.Util.cancelAnimFrame(_resizeRequest);
-    _resizeRequest = core.Util.requestAnimFrame(
-            () { invalidateSize(debounceMoveend: true); }, this, false, _container);
+    Util.cancelAnimFrame(_resizeRequest);
+    _resizeRequest = Util.requestAnimFrame(() {
+      invalidateSize(debounceMoveend: true);
+    }, this, false, _container);
   }
 
-  void _onMouseClick(core.Event e) {
-    if (!_loaded ||
-        (!e._simulated && ((this.dragging && this.dragging.moved()) || (this.boxZoom && this.boxZoom.moved()))) ||
-        DomEvent._skipped(e)) {
+  void _onMouseClick(Event e) {
+    if (!_loaded || (/*!e._simulated && */((dragging != null && dragging.moved()) || (boxZoom != null && boxZoom.moved()))) || DomEvent._skipped(e)) {
       return;
     }
 
@@ -945,7 +970,7 @@ class BaseMap extends Object with core.Events {
     _fireMouseEvent(e);
   }
 
-  void _fireMouseEvent(core.Event e) {
+  void _fireMouseEvent(Event e) {
     if (!_loaded || DomEvent._skipped(e)) {
       return;
     }
@@ -972,7 +997,7 @@ class BaseMap extends Object with core.Events {
     });
   }
 
-  bool _onTileLayerLoad(Object obj, core.Event event) {
+  void _onTileLayerLoad(Object obj, Event event) {
     _tileLayersToLoad--;
     if (_tileLayersNum && _tileLayersToLoad == 0) {
       fire(EventType.TILELAYERSLOAD);
@@ -1013,37 +1038,37 @@ class BaseMap extends Object with core.Events {
 
   bool _moved() {
     final pos = _getMapPanePos();
-    return pos != null && !pos.equals([0, 0]);
+    return pos != null && pos != new geom.Point(0, 0);
   }
 
   geom.Point _getTopLeftPoint() {
-    return getPixelOrigin().subtract(_getMapPanePos());
+    return getPixelOrigin() - _getMapPanePos();
   }
 
   geom.Point _getNewTopLeftPoint(LatLng center, [num zoom = null]) {
-    var viewHalf = getSize()._divideBy(2);
+    var viewHalf = getSize() / 2;
     // TODO round on display, not calculation to increase precision?
-    return project(center, zoom)._subtract(viewHalf)._round();
+    return (project(center, zoom) - viewHalf).rounded();
   }
 
   //internal use only
   geom.Point latLngToNewLayerPoint(LatLng latlng, num newZoom, LatLng newCenter) {
-    var topLeft = _getNewTopLeftPoint(newCenter, newZoom).add(_getMapPanePos());
-    return project(latlng, newZoom)._subtract(topLeft);
+    var topLeft = _getNewTopLeftPoint(newCenter, newZoom) + _getMapPanePos();
+    return project(latlng, newZoom) - topLeft;
   }
 
   /**
    * Layer point of the current center.
    */
   geom.Point _getCenterLayerPoint() {
-    return containerPointToLayerPoint(getSize()._divideBy(2));
+    return containerPointToLayerPoint(getSize() / 2);
   }
 
   /**
    * Offset of the specified place to the current center in pixels.
    */
   geom.Point _getCenterOffset(LatLng latlng) {
-    return latLngToLayerPoint(latlng).subtract(_getCenterLayerPoint());
+    return latLngToLayerPoint(latlng) - _getCenterLayerPoint();
   }
 
   /**
@@ -1054,11 +1079,11 @@ class BaseMap extends Object with core.Events {
     if (bounds == null) { return center; }
 
     final centerPoint = project(center, zoom),
-        viewHalf = getSize().divideBy(2),
-        viewBounds = new Bounds(centerPoint.subtract(viewHalf), centerPoint.add(viewHalf)),
+        viewHalf = getSize() / 2,
+        viewBounds = new Bounds.between(centerPoint - viewHalf, centerPoint + viewHalf),
         offset = _getBoundsOffset(viewBounds, bounds, zoom);
 
-    return unproject(centerPoint.add(offset), zoom);
+    return unproject(centerPoint + offset, zoom);
   }
 
   /**
@@ -1068,9 +1093,9 @@ class BaseMap extends Object with core.Events {
     if (bounds == null) { return offset; }
 
     var viewBounds = getPixelBounds(),
-        newBounds = new Bounds(viewBounds.min.add(offset), viewBounds.max.add(offset));
+        newBounds = new Bounds.between(viewBounds.min + offset, viewBounds.max + offset);
 
-    return offset.add(_getBoundsOffset(newBounds, bounds));
+    return offset + _getBoundsOffset(newBounds, bounds);
   }
 
   /**
@@ -1078,8 +1103,8 @@ class BaseMap extends Object with core.Events {
    * zoom.
    */
   geom.Point _getBoundsOffset(Bounds pxBounds, LatLngBounds maxBounds, [num zoom=null]) {
-    final nwOffset = project(maxBounds.getNorthWest(), zoom).subtract(pxBounds.min),
-        seOffset = project(maxBounds.getSouthEast(), zoom).subtract(pxBounds.max),
+    final nwOffset = project(maxBounds.getNorthWest(), zoom) - pxBounds.min,
+        seOffset = project(maxBounds.getSouthEast(), zoom) - pxBounds.max,
 
         dx = _rebound(nwOffset.x, -seOffset.x),
         dy = _rebound(nwOffset.y, -seOffset.y);
@@ -1106,6 +1131,8 @@ class BaseMap extends Object with core.Events {
 
   Map get controlCorners => _controlCorners;
 
+  Element _controlContainer;
+
   addControl(Control control) {
     control.addTo(this);
     return this;
@@ -1117,10 +1144,10 @@ class BaseMap extends Object with core.Events {
   }
 
   _initControlPos() {
-    final corners = this._controlCorners = {};
+    final corners = _controlCorners = {};
     String l = 'leaflet-';
-    final container = this._controlContainer =
-                DomUtil.create('div', l + 'control-container', this._container);
+    final container = _controlContainer =
+                DomUtil.create('div', l + 'control-container', _container);
 
     createCorner(String vSide, String hSide) {
       var className = l + vSide + ' ' + l + hSide;
@@ -1135,6 +1162,7 @@ class BaseMap extends Object with core.Events {
   }
 
   _clearControlPos() {
-    this._container.removeChild(this._controlContainer);
+    //_container.removeChild(_controlContainer);
+    _controlContainer.remove();
   }
 }
