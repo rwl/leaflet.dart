@@ -26,8 +26,8 @@ class Attribution extends Control {
   }
 
   onAdd(BaseMap map) {
-    _container = DomUtil.create('div', 'leaflet-control-attribution');
-    DomEvent.disableClickPropagation(_container);
+    _container = dom.create('div', 'leaflet-control-attribution');
+    dom.disableClickPropagation(_container);
 
     map.eachLayer((Layer layer) {
       final att = layer.getAttribution();

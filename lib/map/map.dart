@@ -165,7 +165,7 @@ class BaseMap extends Object with Events {
    *
    * Replaced by animation-powered implementation in Map.PanAnimation
    */
-  void setView(LatLng center, num zoom, [ZoomPanOptions options = null]) {
+  void setView(LatLng center, [num zoom = null, ZoomPanOptions options = null]) {
     zoom = zoom == null ? getZoom() : zoom;
     _resetView(new LatLng.latLng(center), _limitZoom(zoom));
   }

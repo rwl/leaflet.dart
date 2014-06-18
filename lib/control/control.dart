@@ -1,13 +1,13 @@
 library leaflet.control;
 
 import 'dart:collection' show LinkedHashMap;
-import 'dart:html' show Element;
+import 'dart:html' show Element, document;
 import 'dart:math' as math;
+import 'dart:async' show Timer;
 
-import '../core/core.dart' show Event, EventType, LayerEvent;
+import '../core/core.dart' show Event, EventType, LayerEvent, Util, Browser;
 import '../map/map.dart';
-import '../geo/geo.dart';
-import '../dom/dom.dart';
+import '../dom/dom.dart' as dom;
 import '../layer/layer.dart' show Layer;
 
 part 'attribution.dart';
@@ -73,7 +73,7 @@ abstract class Control {
   /**
    * Sets the position of the control.
    */
-  setPosition(ControlPosition position) {
+  void setPosition(ControlPosition position) {
     final map = _map;
 
     if (map) {
@@ -85,42 +85,38 @@ abstract class Control {
     if (map) {
       map.addControl(this);
     }
-
-    return this;
   }
 
   /**
    * Returns the HTML container of the control.
    */
-  getContainer() {
+  Element getContainer() {
     return _container;
   }
 
   /**
    * Adds the control to the map.
    */
-  addTo(BaseMap map) {
+  void addTo(BaseMap map) {
     _map = map;
 
     final container = _container = onAdd(map);
     final pos = getPosition(),
         corner = map.controlCorners[pos];
 
-    DomUtil.addClass(container, 'leaflet-control');
+    dom.addClass(container, 'leaflet-control');
 
     if (pos.toString().indexOf('bottom') != -1) {
       corner.insertBefore(container, corner.firstChild);
     } else {
       corner.append(container);
     }
-
-    return this;
   }
 
   /**
    * Removes the control from the map.
    */
-  removeFrom(BaseMap map) {
+  void removeFrom(BaseMap map) {
     final pos = getPosition(),
         corner = map.controlCorners[pos];
 
@@ -130,11 +126,9 @@ abstract class Control {
     //if (onRemove != null) {
     onRemove(map);
     //}
-
-    return this;
   }
 
-  _refocusOnMap() {
+  void _refocusOnMap() {
     if (_map != null) {
       _map.getContainer().focus();
     }

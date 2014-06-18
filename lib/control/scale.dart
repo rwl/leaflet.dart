@@ -42,7 +42,7 @@ class Scale extends Control {
     _map = map;
 
     final className = 'leaflet-control-scale',
-        container = DomUtil.create('div', className);
+        container = dom.create('div', className);
 
     _addScales(options, className, container);
 
@@ -58,10 +58,10 @@ class Scale extends Control {
 
   _addScales(options, className, container) {
     if (options['metric']) {
-      _mScale = DomUtil.create('div', className + '-line', container);
+      _mScale = dom.create('div', className + '-line', container);
     }
     if (options['imperial']) {
-      _iScale = DomUtil.create('div', className + '-line', container);
+      _iScale = dom.create('div', className + '-line', container);
     }
   }
 

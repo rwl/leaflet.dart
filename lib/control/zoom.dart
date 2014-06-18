@@ -40,7 +40,7 @@ class Zoom extends Control {
 
   onAdd(BaseMap map) {
     final zoomName = 'leaflet-control-zoom',
-        container = DomUtil.create('div', '$zoomName leaflet-bar');
+        container = dom.create('div', '$zoomName leaflet-bar');
 
     _map = map;
 
@@ -51,7 +51,7 @@ class Zoom extends Control {
             zoomOptions.zoomOutText, zoomOptions.zoomOutTitle,
             '$zoomName-out', container, _zoomOut, this);
 
-    _updateDisabled();
+    _updateDisabled(null, null);
     map.on(EventType.ZOOMEND, _updateDisabled, this);
     map.on(EventType.ZOOMLEVELSCHANGE, _updateDisabled, this);
 
@@ -72,36 +72,35 @@ class Zoom extends Control {
   }
 
   _createButton(String html, String title, String className, Element container, Function fn, var context) {
-    final link = DomUtil.create('a', className, container);
-    link.setInnerHTML(html);
+    final link = dom.create('a', className, container);
+    link.innerHtml = html;
     link.href = '#';
     link.title = title;
 
-    final stop = DomEvent.stopPropagation;
+    final stop = dom.stopPropagation;
 
-    DomEvent
-        .on(link, 'click', stop)
-        .on(link, 'mousedown', stop)
-        .on(link, 'dblclick', stop)
-        .on(link, 'click', DomEvent.preventDefault)
-        .on(link, 'click', fn, context)
-        .on(link, 'click', _refocusOnMap, context);
+    dom.on(link, 'click', stop);
+    dom.on(link, 'mousedown', stop);
+    dom.on(link, 'dblclick', stop);
+    dom.on(link, 'click', dom.preventDefault);
+    dom.on(link, 'click', fn, context);
+    dom.on(link, 'click', _refocusOnMap, context);
 
     return link;
   }
 
-  _updateDisabled() {
+  _updateDisabled(Object obj, Event e) {
     final map = _map,
       className = 'leaflet-disabled';
 
-    DomUtil.removeClass(_zoomInButton, className);
-    DomUtil.removeClass(_zoomOutButton, className);
+    dom.removeClass(_zoomInButton, className);
+    dom.removeClass(_zoomOutButton, className);
 
     if (map._zoom == map.getMinZoom()) {
-      DomUtil.addClass(_zoomOutButton, className);
+      dom.addClass(_zoomOutButton, className);
     }
     if (map._zoom == map.getMaxZoom()) {
-      DomUtil.addClass(_zoomInButton, className);
+      dom.addClass(_zoomInButton, className);
     }
   }
 }
