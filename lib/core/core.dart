@@ -11,6 +11,7 @@ import '../layer/layer.dart' show Layer, Popup;
 import '../map/map.dart' show BaseMap;
 
 part 'browser.dart';
+part 'event.dart';
 part 'events.dart';
 part 'event_type.dart';
 part 'handler.dart';

@@ -261,9 +261,12 @@ String getScaleString(num scale, geom.Point origin) {
 }
 
 /**
- * Sets the position of an element to coordinates specified by point, using CSS translate or top/left positioning depending on the browser (used by Leaflet internally to position its layers). Forces top/left positioning if disable3D is true.
+ * Sets the position of an element to coordinates specified by point, using
+ * CSS translate or top/left positioning depending on the browser (used by
+ * Leaflet internally to position its layers). Forces top/left positioning
+ * if disable3D is true.
  */
-void setPosition(Element el, geom.Point point, bool disable3D) { // (HTMLElement, Point[, Boolean])
+void setPosition(Element el, geom.Point point, [bool disable3D=false]) {
 
   // jshint camelcase: false
   el._leaflet_pos = point;

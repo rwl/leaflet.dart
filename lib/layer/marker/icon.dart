@@ -68,20 +68,6 @@ class IconOptions {
  */
 class Icon {
 
-  /*final Map<String, Object> options = {
-
-    iconUrl: (String) (required)
-    iconRetinaUrl: (String) (optional, used for retina devices if detected)
-    iconSize: (Point) (can be set through CSS)
-    iconAnchor: (Point) (centered by default, can be set in CSS with negative margins)
-    popupAnchor: (Point) (if not specified, popup opens in the anchor point)
-    shadowUrl: (String) (no shadow by default)
-    shadowRetinaUrl: (String) (optional, used for retina devices if detected)
-    shadowSize: (Point)
-    shadowAnchor: (Point)
-
-    'className': ''
-  };*/
   IconOptions options;
 
   Icon(this.options);
@@ -141,7 +127,7 @@ class Icon {
     }
 
     if (anchor == null && size != null) {
-      anchor = size.divideBy(2, true);
+      anchor = (size / 2).rounded();
     }
 
     img.className = 'leaflet-marker-$iconType ${options.className}';

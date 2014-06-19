@@ -7,6 +7,9 @@ part of leaflet.dom;
  */
 //class _DomEvent {}
 
+/**
+ * Alias for addListener.
+ */
 void on(Element obj, String type, Function fn, [Object context=null]) {
   addListener(obj, type, fn, context);
 }
@@ -71,6 +74,13 @@ void addListener(Element obj, String type, Function fn, Object context) { // (HT
   obj[key] = handler;
 
   return;
+}
+
+/**
+ * Alias for removeListener.
+ */
+void off(Element obj, String type, Function fn) {
+  removeListener(obj, type, fn);
 }
 
 /**

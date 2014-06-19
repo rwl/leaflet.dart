@@ -30,7 +30,7 @@ class PopupOptions {
 }
 
 // Popup is used for displaying popups on the map.
-class Popup extends Object with core.Events {
+class Popup extends Layer with core.Events {
 
   /*Map<String, Object> options = {
     'minWidth': 50,
@@ -48,7 +48,7 @@ class Popup extends Object with core.Events {
   };*/
   final PopupOptions options;
 
-  var _source;
+  Events _source;
   bool _animated, _isOpen;
   BaseMap _map;
   var _container;
@@ -60,7 +60,7 @@ class Popup extends Object with core.Events {
   var _tip, _tipContainer;
   var _containerWidth, _containerBottom, _containerLeft;
 
-  Popup(this.options, this._source) {
+  Popup(this.options, [this._source=null]) {
     _animated = Browser.any3d && options.zoomAnimation;
     _isOpen = false;
   }
@@ -339,5 +339,12 @@ class Popup extends Object with core.Events {
   void _onCloseButtonClick(core.Event e) {
     _close();
     DomEvent.stop(e);
+  }
+
+  /**
+   * For internal use.
+   */
+  void set open(bool isOpen) {
+    _isOpen = isOpen;
   }
 }

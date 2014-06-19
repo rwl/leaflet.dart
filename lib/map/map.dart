@@ -12,7 +12,7 @@ import '../geometry/geometry.dart' show Bounds;
 import '../geometry/geometry.dart' as geom;
 import '../control/control.dart' show Control, Zoom, Attribution;
 import '../dom/dom.dart' show DomEvent, DomUtil;
-import '../layer/layer.dart' show Layer;
+import '../layer/layer.dart' show Layer, Popup, PopupOptions;
 import '../layer/tile/tile.dart' show TileLayer;
 import './handler/handler.dart';
 
@@ -1164,5 +1164,43 @@ class BaseMap extends Object with Events {
   _clearControlPos() {
     //_container.removeChild(_controlContainer);
     _controlContainer.remove();
+  }
+
+
+  /* Popup extensions */
+
+  Popup _popup;
+
+  openPopupString(String content, LatLng latlng, PopupOptions options) {
+    final popup = new Popup(options)
+              ..setLatLng(latlng)
+              ..setContent(content);
+    openPopup(popup);
+  }
+  openPopupElement(Element content, LatLng latlng, PopupOptions options) {
+    final popup = new Popup(options)
+              ..setLatLng(latlng)
+              ..setContent(content);
+    openPopup(popup);
+  }
+
+  openPopup(Popup popup) { // (Popup) or (String || HTMLElement, LatLng[, Object])
+    closePopup();
+
+    popup.open = true;
+
+    _popup = popup;
+    addLayer(popup);
+  }
+
+  closePopup([Popup popup=null]) {
+    if (popup == null || popup == _popup) {
+      popup = _popup;
+      _popup = null;
+    }
+    if (popup != null) {
+      removeLayer(popup);
+      popup.open = false;
+    }
   }
 }

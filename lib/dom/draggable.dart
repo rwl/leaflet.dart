@@ -24,6 +24,8 @@ class Draggable extends Object with Events {
   Point _startPoint;
   var _startPos, _newPos, _animRequest;
 
+  bool get moved =>_moved;
+
   /**
    * Creates a Draggable object for moving the given element when you start dragging the dragHandle element (equals the element itself by default).
    */

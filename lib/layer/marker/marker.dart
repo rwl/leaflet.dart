@@ -1,19 +1,18 @@
 library leaflet.layer.marker;
 
-import 'dart:html' show document, Element, ImageElement, DivElement;
+import 'dart:html' show document, Element, ImageElement, DivElement, KeyboardEvent;
 
-import '../../core/core.dart' as core;
-import '../../core/core.dart' show EventType;
+import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geometry/geometry.dart' as geom;
-import '../../dom/dom.dart';
+import '../../dom/dom.dart' as dom;
+import '../layer.dart' show Layer, GeoJSON, Popup;
 
 part 'default_icon.dart';
 part 'div_icon.dart';
 part 'icon.dart';
 part 'marker_drag.dart';
-part 'popup_marker.dart';
 
 class MarkerOptions {
   /**
@@ -76,13 +75,14 @@ class MarkerOptions {
 }
 
 
-
-// Marker is used to display clickable/draggable icons on the map.
-class Marker extends Object with core.Events {
+/**
+ * Marker is used to display clickable/draggable icons on the map.
+ */
+class Marker extends Layer with Events {
 
   LatLng _latlng;
   BaseMap _map;
-  core.Handler dragging;
+  MarkerDrag dragging;
   var _icon, _shadow;
   var _zIndex;
 
@@ -107,24 +107,26 @@ class Marker extends Object with core.Events {
   void onAdd(BaseMap map) {
     _map = map;
 
-    map.on(EventType.VIEWRESET, this.update, this);
+    map.on(EventType.VIEWRESET, update, this);
 
     _initIcon();
     update();
     fire(EventType.ADD);
 
     if (map.animationOptions.zoomAnimation && map.animationOptions.markerZoomAnimation) {
-      map.on(EventType.ZOOMANIM, this._animateZoom, this);
+      map.on(EventType.ZOOMANIM, _animateZoom, this);
     }
   }
 
-  // Adds the marker to the map.
+  /**
+   * Adds the marker to the map.
+   */
   void addTo(BaseMap map) {
     map.addLayer(this);
   }
 
   void onRemove(BaseMap map) {
-    if (dragging) {
+    if (dragging != null) {
       dragging.disable();
     }
 
@@ -133,10 +135,8 @@ class Marker extends Object with core.Events {
 
     fire(EventType.REMOVE);
 
-    map.off({
-      'viewreset': this.update,
-      'zoomanim': this._animateZoom
-    }, this);
+    map.off(EventType.VIEWRESET, update, this);
+    map.off(EventType.ZOOMANIM, _animateZoom, this);
 
     _map = null;
   }
@@ -177,9 +177,9 @@ class Marker extends Object with core.Events {
 
   // Updates the marker position, useful if coordinates of its latLng object
   // were changed directly.
-  void update() {
+  void update([Object obj=null, Event e=null]) {
     if (_icon != null) {
-      var pos = _map.latLngToLayerPoint(_latlng).round();
+      final pos = _map.latLngToLayerPoint(_latlng).rounded();
       _setPos(pos);
     }
   }
@@ -208,7 +208,7 @@ class Marker extends Object with core.Events {
       }
     }
 
-    DomUtil.addClass(icon, classToAdd);
+    dom.addClass(icon, classToAdd);
 
     if (options.keyboard) {
       icon.tabIndex = '0';
@@ -219,9 +219,8 @@ class Marker extends Object with core.Events {
     _initInteraction();
 
     if (options.riseOnHover) {
-      DomEvent
-        .on(icon, 'mouseover', _bringToFront, this)
-        .on(icon, 'mouseout', _resetZIndex, this);
+      dom.on(icon, 'mouseover', _bringToFront, this);
+      dom.on(icon, 'mouseout', _resetZIndex, this);
     }
 
     final newShadow = options.icon.createShadow(_shadow);
@@ -233,7 +232,7 @@ class Marker extends Object with core.Events {
     }
 
     if (newShadow != null) {
-      DomUtil.addClass(newShadow, classToAdd);
+      dom.addClass(newShadow, classToAdd);
     }
     _shadow = newShadow;
 
@@ -256,9 +255,8 @@ class Marker extends Object with core.Events {
 
   void _removeIcon() {
     if (options.riseOnHover) {
-      DomEvent
-          .off(_icon, 'mouseover', _bringToFront)
-          .off(_icon, 'mouseout', _resetZIndex);
+      dom.off(_icon, 'mouseover', _bringToFront);
+      dom.off(_icon, 'mouseout', _resetZIndex);
     }
 
     //this._map.panes['markerPane'].removeChild(this._icon);
@@ -276,10 +274,10 @@ class Marker extends Object with core.Events {
   }
 
   void _setPos(pos) {
-    DomUtil.setPosition(_icon, pos);
+    dom.setPosition(_icon, pos);
 
     if (_shadow != null) {
-      DomUtil.setPosition(_shadow, pos);
+      dom.setPosition(_shadow, pos);
     }
 
     _zIndex = pos.y + options.zIndexOffset;
@@ -292,7 +290,7 @@ class Marker extends Object with core.Events {
   }
 
   _animateZoom(num zoom, LatLng center) {
-    final pos = _map.latLngToNewLayerPoint(_latlng, zoom, center).round();
+    final pos = _map.latLngToNewLayerPoint(_latlng, zoom, center).rounded();
 
     _setPos(pos);
   }
@@ -306,33 +304,33 @@ class Marker extends Object with core.Events {
     final events = [EventType.DBLCLICK, EventType.MOUSEDOWN, EventType.MOUSEOVER,
                     EventType.MOUSEOUT, EventType.CONTEXTMENU];
 
-    DomUtil.addClass(icon, 'leaflet-clickable');
-    DomEvent.on(icon, 'click', this._onMouseClick, this);
-    DomEvent.on(icon, 'keypress', this._onKeyPress, this);
+    dom.addClass(icon, 'leaflet-clickable');
+    dom.on(icon, 'click', _onMouseClick, this);
+    dom.on(icon, 'keypress', _onKeyPress, this);
 
     for (int i = 0; i < events.length; i++) {
-      DomEvent.on(icon, events[i], this._fireMouseEvent, this);
+      dom.on(icon, events[i], _fireMouseEvent, this);
     }
 
-    if (Handler.MarkerDrag) {
-      dragging = new Handler.MarkerDrag(this);
+    //if (Handler.MarkerDrag) {
+    dragging = new MarkerDrag(this);
 
-      if (options.draggable) {
-        dragging.enable();
-      }
+    if (options.draggable) {
+      dragging.enable();
     }
+    //}
   }
 
-  void _onMouseClick(core.Event e) {
+  void _onMouseClick(Event e) {
     final wasDragged = dragging != null && dragging.moved();
 
     if (hasEventListeners(e.type) || wasDragged) {
-      DomEvent.stopPropagation(e);
+      dom.stopPropagation(e);
     }
 
     if (wasDragged) { return; }
 
-    if ((!dragging || !dragging._enabled) && _map.dragging != null && _map.dragging.moved()) {
+    if ((dragging == null || !dragging.enabled()) && _map.dragging != null && _map.dragging.moved()) {
       return;
     }
 
@@ -342,7 +340,7 @@ class Marker extends Object with core.Events {
     });
   }
 
-  void _onKeyPress(core.Event e) {
+  void _onKeyPress(KeyboardEvent e) {
     if (e.keyCode == 13) {
       fire(EventType.CLICK, {
         'originalEvent': e,
@@ -351,7 +349,7 @@ class Marker extends Object with core.Events {
     }
   }
 
-  void _fireMouseEvent(core.Event e) {
+  void _fireMouseEvent(Event e) {
 
     fire(e.type, {
       'originalEvent': e,
@@ -361,12 +359,12 @@ class Marker extends Object with core.Events {
     // TODO proper custom event propagation
     // this line will always be called if marker is in a FeatureGroup
     if (e.type == 'contextmenu' && hasEventListeners(e.type)) {
-      DomEvent.preventDefault(e);
+      dom.preventDefault(e);
     }
     if (e.type != 'mousedown') {
-      DomEvent.stopPropagation(e);
+      dom.stopPropagation(e);
     } else {
-      DomEvent.preventDefault(e);
+      dom.preventDefault(e);
     }
   }
 
@@ -379,9 +377,9 @@ class Marker extends Object with core.Events {
   }
 
   void _updateOpacity() {
-    DomUtil.setOpacity(_icon, options.opacity);
+    dom.setOpacity(_icon, options.opacity);
     if (_shadow != null) {
-      DomUtil.setOpacity(_shadow, options.opacity);
+      dom.setOpacity(_shadow, options.opacity);
     }
   }
 
@@ -393,10 +391,96 @@ class Marker extends Object with core.Events {
     _updateZIndex(0);
   }
 
+
+  /* Popup extension to Marker, adding popup-related methods. */
+
+  var _popup;
+  bool _popupHandlersAdded;
+
+  //Popup(LatLng latlng, Map<String, Object> options) : super(latlng, options);
+
+  openPopup() {
+    if (_popup != null && _map != null && !_map.hasLayer(_popup)) {
+      _popup.setLatLng(_latlng);
+      _map.openPopup(_popup);
+    }
+
+    return this;
+  }
+
+  void closePopup([Object obj=null, Event e=null]) {
+    if (_popup) {
+      _popup._close();
+    }
+  }
+
+  void togglePopup(Object obj, Event e) {
+    if (_popup) {
+      if (_popup._isOpen) {
+        closePopup();
+      } else {
+        openPopup();
+      }
+    }
+  }
+
+  void bindPopup(var content, Map<String, Object> options) {
+    geom.Point anchor = new geom.Point(options['icon'].options['popupAnchor'] || [0, 0]);
+
+    anchor = anchor + this.options['offset'];
+
+    if (options != null && options.containsKey('offset')) {
+      anchor = anchor + options['offset'];
+    }
+
+    options = new Map.from(options);
+    options['offset'] = anchor;
+
+    if (!_popupHandlersAdded) {
+      this.on(EventType.CLICK, togglePopup, this);
+      this.on(EventType.REMOVE, closePopup, this);
+      this.on(EventType.MOVE, _movePopup, this);
+      _popupHandlersAdded = true;
+    }
+
+    if (content is Popup) {
+      content.options.addAll(options);
+      _popup = content;
+    } else {
+      _popup = new Popup(options, this)
+        ..setContent(content);
+    }
+  }
+
+  void setPopupContent(content) {
+    if (_popup) {
+      _popup.setContent(content);
+    }
+  }
+
+  void unbindPopup() {
+    if (_popup) {
+      _popup = null;
+      this.off(EventType.CLICK, togglePopup, this);
+      this.off(EventType.REMOVE, closePopup, this);
+      this.off(EventType.MOVE, _movePopup, this);
+      _popupHandlersAdded = false;
+    }
+  }
+
+  getPopup() {
+    return _popup;
+  }
+
+  _movePopup(Object obj, LocationEvent e) {
+    _popup.setLatLng(e.latlng);
+  }
+
+
   toGeoJSON() {
     return GeoJSON.getFeature(this, {
       'type': 'Point',
-      'coordinates': GeoJSON.latLngToCoords(_getLatLng())
+      'coordinates': GeoJSON.latLngToCoords(getLatLng())
     });
   }
 }

@@ -7,7 +7,10 @@ class DivIconOptions extends IconOptions {
   geom.Point iconSize = new geom.Point(12, 12);
 
   /**
-   * The coordinates of the "tip" of the icon (relative to its top left corner). The icon will be aligned so that this point is at the marker's geographical location. Centered by default if size is specified, also can be set in CSS with negative margins.
+   * The coordinates of the "tip" of the icon (relative to its top left
+   * corner). The icon will be aligned so that this point is at the
+   * marker's geographical location. Centered by default if size is
+   * specified, also can be set in CSS with negative margins.
    */
   geom.Point iconAnchor;
 
