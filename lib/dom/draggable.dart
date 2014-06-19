@@ -5,6 +5,8 @@ part of leaflet.dom;
  */
 class Draggable extends Object with Events {
 
+  static bool disabled = false;// TODO implement global drag disable
+
   static var START = Browser.touch ? ['touchstart', 'mousedown'] : ['mousedown'];
   static var END = {
       'mousedown': 'mouseup',

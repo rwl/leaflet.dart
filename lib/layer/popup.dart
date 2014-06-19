@@ -1,35 +1,75 @@
 part of leaflet.layer;
 
 class PopupOptions {
-  // Max width of the popup.
+  /**
+   * Max width of the popup.
+   */
   num maxWidth  = 300;
-  // Min width of the popup.
+
+  /**
+   * Min width of the popup.
+   */
   num minWidth  = 50;
-  // If set, creates a scrollable container of the given height inside a popup if its content exceeds it.
+
+  /**
+   * If set, creates a scrollable container of the given height inside a popup if its content exceeds it.
+   */
   num maxHeight;
-  // Set it to false if you don't want the map to do panning animation to fit the opened popup.
+
+  /**
+   * Set it to false if you don't want the map to do panning animation to fit the opened popup.
+   */
   bool autoPan = true;
-  // Set it to true if you want to prevent users from panning the popup off of the screen while it is open.
+
+  /**
+   * Set it to true if you want to prevent users from panning the popup off of the screen while it is open.
+   */
   bool keepInView  = false;
-  // Controls the presense of a close button in the popup.
+
+  /**
+   * Controls the presense of a close button in the popup.
+   */
   bool closeButton = true;
-  // The offset of the popup position. Useful to control the anchor of the popup when opening it on some overlays.
+
+  /**
+   * The offset of the popup position. Useful to control the anchor of the popup when opening it on some overlays.
+   */
   geom.Point offset  = new geom.Point(0, 6);
-  // The margin between the popup and the top left corner of the map view after autopanning was performed.
+
+  /**
+   * The margin between the popup and the top left corner of the map view after autopanning was performed.
+   */
   geom.Point autoPanPaddingTopLeft;
-  // The margin between the popup and the bottom right corner of the map view after autopanning was performed.
+
+  /**
+   * The margin between the popup and the bottom right corner of the map view after autopanning was performed.
+   */
   geom.Point autoPanPaddingBottomRight;
-  // Equivalent of setting both top left and bottom right autopan padding to the same value.
+
+  /**
+   * Equivalent of setting both top left and bottom right autopan padding to the same value.
+   */
   geom.Point autoPanPadding = new geom.Point(5, 5);
-  // Whether to animate the popup on zoom. Disable it if you have problems with Flash content inside popups.
+
+  /**
+   * Whether to animate the popup on zoom. Disable it if you have problems with Flash content inside popups.
+   */
   bool zoomAnimation = true;
-  // Set it to false if you want to override the default behavior of the popup closing when user clicks the map (set globally by the Map closePopupOnClick option).
+
+  /**
+   * Set it to false if you want to override the default behavior of the popup closing when user clicks the map (set globally by the Map closePopupOnClick option).
+   */
   bool closeOnClick;
-  // A custom class name to assign to the popup.
+
+  /**
+   * A custom class name to assign to the popup.
+   */
   String className = '';
 }
 
-// Popup is used for displaying popups on the map.
+/**
+ * Popup is used for displaying popups on the map.
+ */
 class Popup extends Layer with core.Events {
 
   /*Map<String, Object> options = {
@@ -190,6 +230,13 @@ class Popup extends Layer with core.Events {
     return events;
   }
 
+  /**
+   * For internal use.
+   */
+  void close() {
+    _close();
+  }
+
   void _close() {
     if (_map != null) {
       _map.closePopup(this);
@@ -340,6 +387,11 @@ class Popup extends Layer with core.Events {
     _close();
     DomEvent.stop(e);
   }
+
+  /**
+   * For internal use.
+   */
+  bool get open => _isOpen;
 
   /**
    * For internal use.

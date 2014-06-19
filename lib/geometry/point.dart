@@ -113,13 +113,13 @@ class Point {
   /**
    * Returns a copy of the current point with floored coordinates (rounded down).
    */
-  Point floor() {
+  Point floored() {
     final c = clone();
-    c._floor();
+    c.floor();
     return c;
   }
 
-  void _floor() {
+  void floor() {
     x = x.floor();
     y = y.floor();
   }

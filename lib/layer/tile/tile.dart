@@ -10,7 +10,6 @@ import '../../geo/geo.dart';
 import '../layer.dart';
 import '../../geometry/geometry.dart' as geom;
 
-part 'anim.dart';
 part 'canvas.dart';
 part 'tile_layer.dart';
 part 'wms.dart';

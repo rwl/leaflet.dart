@@ -72,6 +72,8 @@ class MarkerOptions {
    * The z-index offset used for the riseOnHover feature.
    */
   num riseOffset  = 250;
+
+  geom.Point offset;
 }
 
 
@@ -392,12 +394,10 @@ class Marker extends Layer with Events {
   }
 
 
-  /* Popup extension to Marker, adding popup-related methods. */
+  /* Popup extensions to Marker */
 
-  var _popup;
+  Popup _popup;
   bool _popupHandlersAdded;
-
-  //Popup(LatLng latlng, Map<String, Object> options) : super(latlng, options);
 
   openPopup() {
     if (_popup != null && _map != null && !_map.hasLayer(_popup)) {
@@ -409,14 +409,14 @@ class Marker extends Layer with Events {
   }
 
   void closePopup([Object obj=null, Event e=null]) {
-    if (_popup) {
-      _popup._close();
+    if (_popup != null) {
+      _popup.close();
     }
   }
 
   void togglePopup(Object obj, Event e) {
-    if (_popup) {
-      if (_popup._isOpen) {
+    if (_popup != null) {
+      if (_popup.open) {
         closePopup();
       } else {
         openPopup();
@@ -424,17 +424,20 @@ class Marker extends Layer with Events {
     }
   }
 
-  void bindPopup(var content, Map<String, Object> options) {
-    geom.Point anchor = new geom.Point(options['icon'].options['popupAnchor'] || [0, 0]);
-
-    anchor = anchor + this.options['offset'];
-
-    if (options != null && options.containsKey('offset')) {
-      anchor = anchor + options['offset'];
+  void bindPopup(Popup popup, MarkerOptions options) {
+    geom.Point anchor = new geom.Point(0, 0);
+    if (options.icon.options.popupAnchor != null) {
+      anchor = new geom.Point.point(options.icon.options.popupAnchor);
     }
 
-    options = new Map.from(options);
-    options['offset'] = anchor;
+    anchor = anchor + this.options.offset;
+
+    if (options != null && options.offset != null) {
+      anchor = anchor + options.offset;
+    }
+
+    options = new MarkerOptions.from(options);
+    options.offset = anchor;
 
     if (!_popupHandlersAdded) {
       this.on(EventType.CLICK, togglePopup, this);
@@ -443,23 +446,23 @@ class Marker extends Layer with Events {
       _popupHandlersAdded = true;
     }
 
-    if (content is Popup) {
-      content.options.addAll(options);
-      _popup = content;
-    } else {
-      _popup = new Popup(options, this)
-        ..setContent(content);
-    }
+    //if (content is Popup) {
+      popup.options.addAll(options);
+      _popup = popup;
+    //} else {
+    //  _popup = new Popup(options, this)
+    //    ..setContent(content);
+    //}
   }
 
-  void setPopupContent(content) {
-    if (_popup) {
+  void setPopupContent(var content) {
+    if (_popup != null) {
       _popup.setContent(content);
     }
   }
 
   void unbindPopup() {
-    if (_popup) {
+    if (_popup != null) {
       _popup = null;
       this.off(EventType.CLICK, togglePopup, this);
       this.off(EventType.REMOVE, closePopup, this);
@@ -468,11 +471,11 @@ class Marker extends Layer with Events {
     }
   }
 
-  getPopup() {
+  Popup getPopup() {
     return _popup;
   }
 
-  _movePopup(Object obj, LocationEvent e) {
+  void _movePopup(Object obj, LocationEvent e) {
     _popup.setLatLng(e.latlng);
   }
 

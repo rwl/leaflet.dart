@@ -4,14 +4,14 @@ import 'dart:html' show Element, window;
 import 'dart:math' as math;
 import 'dart:async' show Timer;
 
-import '../core/core.dart' show Handler, Events;
+import '../core/core.dart' show Handler, Events, stamp;
 import '../core/core.dart' show Event, EventType, MouseEvent, Util, Browser;
 import '../geo/geo.dart' show LatLng, LatLngBounds;
 import '../geo/crs/crs.dart' show CRS, EPSG3857;
 import '../geometry/geometry.dart' show Bounds;
 import '../geometry/geometry.dart' as geom;
 import '../control/control.dart' show Control, Zoom, Attribution;
-import '../dom/dom.dart' show DomEvent, DomUtil;
+import '../dom/dom.dart' as dom;
 import '../layer/layer.dart' show Layer, Popup, PopupOptions;
 import '../layer/tile/tile.dart' show TileLayer;
 import './handler/handler.dart';
@@ -165,10 +165,10 @@ class BaseMap extends Object with Events {
    *
    * Replaced by animation-powered implementation in Map.PanAnimation
    */
-  void setView(LatLng center, [num zoom = null, ZoomPanOptions options = null]) {
+  /*void setView(LatLng center, [num zoom = null, ZoomPanOptions options = null]) {
     zoom = zoom == null ? getZoom() : zoom;
     _resetView(new LatLng.latLng(center), _limitZoom(zoom));
-  }
+  }*/
 
   /**
    * Sets the zoom of the map.
@@ -277,7 +277,7 @@ class BaseMap extends Object with Events {
   /**
    * Pans the map by a given number of pixels (animated).
    */
-  void panBy(geom.Point offset) {
+  /*void panBy(geom.Point offset) {
     // replaced with animated panBy in Map.PanAnimation.js
     fire(EventType.MOVESTART);
 
@@ -285,7 +285,7 @@ class BaseMap extends Object with Events {
 
     fire(EventType.MOVE);
     fire(EventType.MOVEEND);
-  }
+  }*/
 
   /**
    * Restricts the map view to the given bounds (see map maxBounds option).
@@ -328,7 +328,7 @@ class BaseMap extends Object with Events {
   void addLayer(Layer layer) {
     // TODO method is too big, refactor
 
-    var id = Util.stamp(layer);
+    final id = stamp(layer);
 
     if (_layers.containsKey(id)) { return; }
 
@@ -360,7 +360,7 @@ class BaseMap extends Object with Events {
    * Removes the given layer from the map.
    */
   void removeLayer(Layer layer) {
-    final id = Util.stamp(layer);
+    final id = stamp(layer);
 
     if (!_layers.containsKey(id)) { return; }
 
@@ -383,7 +383,7 @@ class BaseMap extends Object with Events {
     if (animationOptions.zoomAnimation && layer is TileLayer) {
       _tileLayersNum--;
       _tileLayersToLoad--;
-      layer.off('load', _onTileLayerLoad, this);
+      layer.off(EventType.LOAD, _onTileLayerLoad, this);
     }
 
     return;
@@ -395,7 +395,7 @@ class BaseMap extends Object with Events {
   bool hasLayer(Layer layer) {
     if (layer == null) { return false; }
 
-    return _layers.containsKey(Util.stamp(layer));
+    return _layers.containsKey(stamp(layer));
   }
 
   void eachLayer(LayerFunc fn) {
@@ -720,7 +720,7 @@ class BaseMap extends Object with Events {
    * corner of the map) given its event object.
    */
   geom.Point mouseEventToContainerPoint(Event e) {
-    return DomEvent.getMousePosition(e, _container);
+    return dom.getMousePosition(e, _container);
   }
 
   /**
@@ -745,7 +745,7 @@ class BaseMap extends Object with Events {
   Element _container;
 
   void _initContainerID(String id) {
-    final container = DomUtil.get(id);
+    final container = dom.get(id);
     if (container == null) {
       throw new Exception('Map container not found.');
     }
@@ -765,13 +765,13 @@ class BaseMap extends Object with Events {
   _initLayout() {
     var container = _container;
 
-    DomUtil.addClass(container, 'leaflet-container' +
+    dom.addClass(container, 'leaflet-container' +
       (Browser.touch ? ' leaflet-touch' : '') +
       (Browser.retina ? ' leaflet-retina' : '') +
       (Browser.ielt9 ? ' leaflet-oldie' : '') +
       (animationOptions.fadeAnimation ? ' leaflet-fade-anim' : ''));
 
-    var position = DomUtil.getStyle(container, 'position');
+    final position = dom.getStyle(container, 'position');
 
     if (position != 'absolute' && position != 'relative' && position != 'fixed') {
       container.style.position = 'relative';
@@ -802,14 +802,14 @@ class BaseMap extends Object with Events {
     var zoomHide = ' leaflet-zoom-hide';
 
     if (!animationOptions.markerZoomAnimation) {
-      DomUtil.addClass(panes['markerPane'], zoomHide);
-      DomUtil.addClass(panes['shadowPane'], zoomHide);
-      DomUtil.addClass(panes['popupPane'], zoomHide);
+      dom.addClass(panes['markerPane'], zoomHide);
+      dom.addClass(panes['shadowPane'], zoomHide);
+      dom.addClass(panes['popupPane'], zoomHide);
     }
   }
 
   Element _createPane(String className, [Element container=null]) {
-    return DomUtil.create('div', className, container != null ? container : _panes['objectsPane']);
+    return dom.create('div', className, container != null ? container : _panes['objectsPane']);
   }
 
   void _clearPanes() {
@@ -846,7 +846,7 @@ class BaseMap extends Object with Events {
     _initialTopLeftPoint = _getNewTopLeftPoint(center);
 
     if (!preserveMapOffset) {
-      DomUtil.setPosition(_mapPane, new geom.Point(0, 0));
+      dom.setPosition(_mapPane, new geom.Point(0, 0));
     } else {
       _initialTopLeftPoint.add(_getMapPanePos());
     }
@@ -873,7 +873,7 @@ class BaseMap extends Object with Events {
   }
 
   void _rawPanBy(geom.Point offset) {
-    DomUtil.setPosition(_mapPane, _getMapPanePos().subtract(offset));
+    dom.setPosition(_mapPane, _getMapPanePos() - offset);
   }
 
   _getZoomSpan() {
@@ -923,12 +923,12 @@ class BaseMap extends Object with Events {
   // map events
 
   void _initEvents([bool on = true]) {
-    if (DomEvent == null) { return; }
+    //if (DomEvent == null) { return; }
 
     if (on) {
-      DomEvent.on(_container, 'click', _onMouseClick, this);
+      dom.on(_container, 'click', _onMouseClick, this);
     } else {
-      DomEvent.off(_container, 'click', _onMouseClick, this);
+      dom.off(_container, 'click', _onMouseClick);//, this);
     }
 
     final events = [EventType.DBLCLICK, EventType.MOUSEDOWN, EventType.MOUSEUP,
@@ -937,17 +937,17 @@ class BaseMap extends Object with Events {
 
     for (int i = 0; i < events.length; i++) {
       if (on) {
-        DomEvent.on(_container, events[i], _fireMouseEvent, this);
+        dom.on(_container, events[i], _fireMouseEvent, this);
       } else {
-        DomEvent.off(_container, events[i], _fireMouseEvent, this);
+        dom.off(_container, events[i], _fireMouseEvent);//, this);
       }
     }
 
     if (interactionOptions.trackResize) {
       if (on) {
-        DomEvent.on(window, 'resize', _onResize, this);
+        dom.on(window, 'resize', _onResize, this);
       } else {
-        DomEvent.off(window, 'resize', _onResize, this);
+        dom.off(window, 'resize', _onResize);//, this);
       }
     }
   }
@@ -955,14 +955,14 @@ class BaseMap extends Object with Events {
   String _resizeRequest;
 
   void _onResize() {
-    Util.cancelAnimFrame(_resizeRequest);
-    _resizeRequest = Util.requestAnimFrame(() {
+    cancelAnimFrame(_resizeRequest);
+    _resizeRequest = requestAnimFrame(() {
       invalidateSize(debounceMoveend: true);
     }, this, false, _container);
   }
 
   void _onMouseClick(Event e) {
-    if (!_loaded || (/*!e._simulated && */((dragging != null && dragging.moved()) || (boxZoom != null && boxZoom.moved()))) || DomEvent._skipped(e)) {
+    if (!_loaded || (/*!e._simulated && */((dragging != null && dragging.moved()) || (boxZoom != null && boxZoom.moved()))) || dom._skipped(e)) {
       return;
     }
 
@@ -971,7 +971,7 @@ class BaseMap extends Object with Events {
   }
 
   void _fireMouseEvent(Event e) {
-    if (!_loaded || DomEvent._skipped(e)) {
+    if (!_loaded || dom._skipped(e)) {
       return;
     }
 
@@ -982,7 +982,7 @@ class BaseMap extends Object with Events {
     if (!hasEventListeners(type)) { return; }
 
     if (type == EventType.CONTEXTMENU) {
-      DomEvent.preventDefault(e);
+      dom.preventDefault(e);
     }
 
     final containerPoint = mouseEventToContainerPoint(e),
@@ -1033,7 +1033,7 @@ class BaseMap extends Object with Events {
   /* Private methods for getting map state */
 
   geom.Point _getMapPanePos() {
-    return DomUtil.getPosition(_mapPane);
+    return dom.getPosition(_mapPane);
   }
 
   bool _moved() {
@@ -1133,11 +1133,17 @@ class BaseMap extends Object with Events {
 
   Element _controlContainer;
 
+  /**
+   * Adds the given control to the map.
+   */
   addControl(Control control) {
     control.addTo(this);
     return this;
   }
 
+  /**
+   * Removes the given control from the map.
+   */
   removeControl(control) {
     control.removeFrom(this);
     return this;
@@ -1147,12 +1153,12 @@ class BaseMap extends Object with Events {
     final corners = _controlCorners = {};
     String l = 'leaflet-';
     final container = _controlContainer =
-                DomUtil.create('div', l + 'control-container', _container);
+                dom.create('div', l + 'control-container', _container);
 
     createCorner(String vSide, String hSide) {
       var className = l + vSide + ' ' + l + hSide;
 
-      corners[vSide + hSide] = DomUtil.create('div', className, container);
+      corners[vSide + hSide] = dom.create('div', className, container);
     }
 
     createCorner('top', 'left');
@@ -1171,6 +1177,9 @@ class BaseMap extends Object with Events {
 
   Popup _popup;
 
+  /**
+   * Creates a popup with the specified options and opens it in the given point on a map.
+   */
   openPopupString(String content, LatLng latlng, PopupOptions options) {
     final popup = new Popup(options)
               ..setLatLng(latlng)
@@ -1184,6 +1193,9 @@ class BaseMap extends Object with Events {
     openPopup(popup);
   }
 
+  /**
+   * Opens the specified popup while closing the previously opened (to make sure only one is opened at one time for usability).
+   */
   openPopup(Popup popup) { // (Popup) or (String || HTMLElement, LatLng[, Object])
     closePopup();
 
@@ -1193,6 +1205,9 @@ class BaseMap extends Object with Events {
     addLayer(popup);
   }
 
+  /**
+   * Closes the popup previously opened with openPopup (or the given one).
+   */
   closePopup([Popup popup=null]) {
     if (popup == null || popup == _popup) {
       popup = _popup;
@@ -1202,5 +1217,294 @@ class BaseMap extends Object with Events {
       removeLayer(popup);
       popup.open = false;
     }
+  }
+
+
+  /* Extends Map to handle zoom animations */
+
+  bool _animatingZoom;
+  var _zoomAnimated;
+  var _animateToCenter;
+  var _animateToZoom;
+
+  _catchTransitionEnd(e) {
+    if (this._animatingZoom && e.propertyName.indexOf('transform') >= 0) {
+      this._onZoomTransitionEnd();
+    }
+  }
+
+  bool _nothingToAnimate() {
+    return this._container.querySelectorAll('.leaflet-zoom-animated').length == 0;
+  }
+
+  _tryAnimatedZoom(center, zoom, options) {
+
+    if (this._animatingZoom) { return true; }
+
+    options = options || {};
+
+    // don't animate if disabled, not supported or zoom difference is too large
+    if (!this._zoomAnimated || options.animate == false || this._nothingToAnimate() ||
+            (zoom - this._zoom).abs() > this.animationOptions.zoomAnimationThreshold) { return false; }
+
+    // offset is the pixel coords of the zoom origin relative to the current center
+    final scale = this.getZoomScale(zoom),
+        offset = this._getCenterOffset(center) / (1 - 1 / scale),
+      origin = this._getCenterLayerPoint() + offset;
+
+    // don't animate if the zoom origin isn't within one screen from the current center, unless forced
+    if (options.animate != true && !this.getSize().contains(offset)) { return false; }
+
+    this.fire(EventType.MOVESTART);
+    this.fire(EventType.ZOOMSTART);
+
+    this._animateZoom(center, zoom, origin, scale, null, true);
+
+    return true;
+  }
+
+  _animateZoom(center, zoom, origin, scale, delta, backwards) {
+
+    this._animatingZoom = true;
+
+    // put transform transition on all layers with leaflet-zoom-animated class
+    dom.addClass(this._mapPane, 'leaflet-zoom-anim');
+
+    // remember what center/zoom to set after animation
+    this._animateToCenter = center;
+    this._animateToZoom = zoom;
+
+    // disable any dragging during animation
+    //if (L.Draggable) {
+    dom.Draggable.disabled = true;
+    //}
+
+    this.fire(EventType.ZOOMANIM, {
+      center: center,
+      zoom: zoom,
+      origin: origin,
+      scale: scale,
+      delta: delta,
+      backwards: backwards
+    });
+  }
+
+  _onZoomTransitionEnd() {
+
+    this._animatingZoom = false;
+
+    dom.removeClass(this._mapPane, 'leaflet-zoom-anim');
+
+    this._resetView(this._animateToCenter, this._animateToZoom, true, true);
+
+    //if (L.Draggable) {
+    dom.Draggable.disabled = false;
+    //}
+  }
+
+
+
+  /* Panning animation extensions */
+
+  dom.PosAnimation _panAnim;
+
+  /**
+   * Sets the view of the map (geographical center and zoom) with the given animation options.
+   */
+  setView(center, zoom, options) {
+
+    zoom = zoom == null ? this._zoom : this._limitZoom(zoom);
+    center = this._limitCenter(L.latLng(center), zoom, this.options.maxBounds);
+    options = options || {};
+
+    if (this._panAnim) {
+      this._panAnim.stop();
+    }
+
+    if (this._loaded && !options.reset && options != true) {
+
+      if (options.animate != null) {
+        options.zoom = L.extend({animate: options.animate}, options.zoom);
+        options.pan = L.extend({animate: options.animate}, options.pan);
+      }
+
+      // try animating pan or zoom
+      var animated = (this._zoom != zoom) ?
+        this._tryAnimatedZoom && this._tryAnimatedZoom(center, zoom, options.zoom) :
+        this._tryAnimatedPan(center, options.pan);
+
+      if (animated) {
+        // prevent resize handler call, the view will refresh after animation anyway
+        clearTimeout(this._sizeTimer);
+        return this;
+      }
+    }
+
+    // animation didn't start, just reset the map view
+    this._resetView(center, zoom);
+
+    return this;
+  }
+
+  /**
+   * Pans the map by a given number of pixels (animated).
+   */
+  panBy(offset, options) {
+    offset = new geom.Point.point(offset).rounded();
+    options = options || {};
+
+    if (!offset.x && !offset.y) {
+      return this;
+    }
+
+    if (this._panAnim == null) {
+      this._panAnim = new dom.PosAnimation();
+
+      this._panAnim.on(EventType.STEP, this._onPanTransitionStep, this);
+      this._panAnim.on(EventType.END, this._onPanTransitionEnd, this);
+    }
+
+    // don't fire movestart if animating inertia
+    if (!options.noMoveStart) {
+      this.fire(EventType.MOVESTART);
+    }
+
+    // animate pan unless animate: false specified
+    if (options.animate != false) {
+      dom.addClass(this._mapPane, 'leaflet-pan-anim');
+
+      final newPos = this._getMapPanePos() - offset;
+      this._panAnim.run(this._mapPane, newPos, options.duration != null ? options.duration : 0.25, options.easeLinearity);
+    } else {
+      this._rawPanBy(offset);
+      this.fire(EventType.MOVE);
+      this.fire(EventType.MOVEEND);
+    }
+
+    return this;
+  }
+
+  _onPanTransitionStep(Object obj, Event e) {
+    this.fire(EventType.MOVE);
+  }
+
+  _onPanTransitionEnd(Object obj, Event e) {
+    dom.removeClass(this._mapPane, 'leaflet-pan-anim');
+    this.fire(EventType.MOVEEND);
+  }
+
+  _tryAnimatedPan(center, options) {
+    // difference between the new and current centers in pixels
+    final offset = this._getCenterOffset(center).floored();
+
+    // don't animate too far unless animate: true specified in options
+    if ((options && options.animate) != true && !this.getSize().contains(offset)) { return false; }
+
+    this.panBy(offset, options);
+
+    return true;
+  }
+
+
+
+  /* Convenient shortcuts for using browser geolocation features */
+
+  var _defaultLocateOptions = {
+    'watch': false,
+    'setView': false,
+    'maxZoom': double.INFINITY,
+    'timeout': 10000,
+    'maximumAge': 0,
+    'enableHighAccuracy': false
+  };
+
+  /**
+   * Tries to locate the user using the Geolocation API, firing a locationfound event with location data on success or a locationerror event on failure, and optionally sets the map view to the user's location with respect to detection accuracy (or to the world view if geolocation failed).
+   */
+  locate(Map options) {
+
+    options = this._locateOptions = L.extend(this._defaultLocateOptions, options);
+
+    if (!navigator.geolocation) {
+      this._handleGeolocationError({
+        'code': 0,
+        'message': 'Geolocation not supported.'
+      });
+      return this;
+    }
+
+    var onResponse = L.bind(this._handleGeolocationResponse, this),
+      onError = L.bind(this._handleGeolocationError, this);
+
+    if (options.watch) {
+      this._locationWatchId =
+              navigator.geolocation.watchPosition(onResponse, onError, options);
+    } else {
+      navigator.geolocation.getCurrentPosition(onResponse, onError, options);
+    }
+    return this;
+  }
+
+  /**
+   * Stops watching location previously initiated by map.locate(watch: true) and aborts resetting the map view if map.locate was called with (setView: true).
+   */
+  stopLocate() {
+    if (navigator.geolocation) {
+      navigator.geolocation.clearWatch(this._locationWatchId);
+    }
+    if (this._locateOptions) {
+      this._locateOptions.setView = false;
+    }
+    return this;
+  }
+
+  _handleGeolocationError(error) {
+    var c = error.code,
+        message = error.message ||
+                (c == 1 ? 'permission denied' :
+                (c == 2 ? 'position unavailable' : 'timeout'));
+
+    if (this._locateOptions.setView && !this._loaded) {
+      this.fitWorld();
+    }
+
+    this.fire('locationerror', {
+      code: c,
+      message: 'Geolocation error: ' + message + '.'
+    });
+  }
+
+  _handleGeolocationResponse(pos) {
+    var lat = pos.coords.latitude,
+        lng = pos.coords.longitude,
+        latlng = new L.LatLng(lat, lng),
+
+        latAccuracy = 180 * pos.coords.accuracy / 40075017,
+        lngAccuracy = latAccuracy / Math.cos(L.LatLng.DEG_TO_RAD * lat),
+
+        bounds = L.latLngBounds(
+                [lat - latAccuracy, lng - lngAccuracy],
+                [lat + latAccuracy, lng + lngAccuracy]),
+
+        options = this._locateOptions;
+
+    if (options.setView) {
+      var zoom = Math.min(this.getBoundsZoom(bounds), options.maxZoom);
+      this.setView(latlng, zoom);
+    }
+
+    var data = {
+      latlng: latlng,
+      bounds: bounds,
+      timestamp: pos.timestamp
+    };
+
+    for (var i in pos.coords) {
+      if (pos.coords[i] is num) {
+        data[i] = pos.coords[i];
+      }
+    }
+
+    this.fire('locationfound', data);
   }
 }
