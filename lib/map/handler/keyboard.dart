@@ -1,6 +1,8 @@
 part of leaflet.map.handler;
 
-// Keyboard is handling keyboard interaction with the map, enabled by default.
+/**
+ * Keyboard is handling keyboard interaction with the map, enabled by default.
+ */
 class Keyboard extends Handler {
 
   var keyCodes = {
@@ -12,9 +14,9 @@ class Keyboard extends Handler {
     'zoomOut': [189, 109, 173]
   };
 
-  initialize(map) {
-    this._map = map;
+  Keyboard(BaseMap map) : super(map);
 
+  initialize(map) {
     this._setPanOffset(map.options.keyboardPanOffset);
     this._setZoomOffset(map.options.keyboardZoomOffset);
   }

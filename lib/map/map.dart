@@ -1,11 +1,11 @@
 library leaflet.map;
 
-import 'dart:html' show Element, window;
+import 'dart:html' show Element, window, MouseEvent;
 import 'dart:math' as math;
 import 'dart:async' show Timer;
 
 import '../core/core.dart' show Handler, Events, stamp;
-import '../core/core.dart' show Event, EventType, MouseEvent, Util, Browser;
+import '../core/core.dart' show Event, EventType, Util, Browser;
 import '../geo/geo.dart' show LatLng, LatLngBounds;
 import '../geo/crs/crs.dart' show CRS, EPSG3857;
 import '../geometry/geometry.dart' show Bounds;
@@ -45,6 +45,8 @@ class BaseMap extends Object with Events {
 
   bool _sizeChanged;
   LatLng _initialCenter;
+
+  Element _container;
 
   /**
    * Map dragging handler (by both mouse and touch).
@@ -719,7 +721,7 @@ class BaseMap extends Object with Events {
    * Returns the pixel coordinates of a mouse click (relative to the top left
    * corner of the map) given its event object.
    */
-  geom.Point mouseEventToContainerPoint(Event e) {
+  geom.Point mouseEventToContainerPoint(MouseEvent e) {
     return dom.getMousePosition(e, _container);
   }
 
@@ -741,8 +743,6 @@ class BaseMap extends Object with Events {
 
 
   /* Map initialization methods */
-
-  Element _container;
 
   void _initContainerID(String id) {
     final container = dom.get(id);
@@ -786,6 +786,8 @@ class BaseMap extends Object with Events {
 
   Map<String, Element> _panes;
   Element _mapPane, _tilePane;
+
+  Element get mapPane => _mapPane;
 
   void _initPanes() {
     final panes = _panes = new Map<String, Element>();
@@ -1089,7 +1091,7 @@ class BaseMap extends Object with Events {
   /**
    * Adjust offset for view to get inside bounds.
    */
-  geom.Point _limitOffset(geom.Point offset, LatLngBounds bounds) {
+  geom.Point /*_*/limitOffset(geom.Point offset, LatLngBounds bounds) {
     if (bounds == null) { return offset; }
 
     var viewBounds = getPixelBounds(),
@@ -1307,6 +1309,8 @@ class BaseMap extends Object with Events {
   /* Panning animation extensions */
 
   dom.PosAnimation _panAnim;
+
+  dom.PosAnimation get panAnim => _panAnim;
 
   /**
    * Sets the view of the map (geographical center and zoom) with the given animation options.

@@ -1,133 +1,138 @@
 part of leaflet.map.handler;
 
-// Drag is used to make the map draggable (with panning inertia), enabled by default.
+/**
+ * Drag is used to make the map draggable (with panning inertia), enabled
+ * by default.
+ */
 class Drag extends Handler {
+
+  dom.Draggable _draggable;
+  List<DateTime> _times;
+  List<geom.Point> _positions;
+  DateTime _lastTime;
+  geom.Point _lastPos;
+  num _initialWorldOffset, _worldWidth;
+
+  Drag(BaseMap map) : super(map);
+
   addHooks() {
-    if (!this._draggable) {
-      var map = this._map;
+    if (_draggable == null) {
 
-      this._draggable = new L.Draggable(map._mapPane, map._container);
+      _draggable = new dom.Draggable(map.mapPane, map.getContainer());
 
-      this._draggable.on({
-        'dragstart': this._onDragStart,
-        'drag': this._onDrag,
-        'dragend': this._onDragEnd
-      }, this);
+      _draggable.on(EventType.DRAGSTART, _onDragStart, this);
+      _draggable.on(EventType.DRAG, _onDrag, this);
+      _draggable.on(EventType.DRAGEND, _onDragEnd, this);
 
-      if (map.options.worldCopyJump) {
-        this._draggable.on('predrag', this._onPreDrag, this);
-        map.on('viewreset', this._onViewReset, this);
+      if (map.interactionOptions.worldCopyJump) {
+        _draggable.on(EventType.PREDRAG, _onPreDrag, this);
+        map.on(EventType.VIEWRESET, _onViewReset, this);
 
-        map.whenReady(this._onViewReset, this);
+        map.whenReady(_onViewReset, this);
       }
     }
-    this._draggable.enable();
+    _draggable.enable();
   }
 
   removeHooks() {
-    this._draggable.disable();
+    _draggable.disable();
   }
 
   moved() {
-    return this._draggable && this._draggable._moved;
+    return _draggable && _draggable.moved;
   }
 
-  _onDragStart() {
-    var map = this._map;
-
-    if (map._panAnim) {
-      map._panAnim.stop();
+  _onDragStart(Object obj, Event e) {
+    if (map.panAnim != null) {
+      map.panAnim.stop();
     }
 
-    map
-        .fire('movestart')
-        .fire('dragstart');
+    map.fire(EventType.MOVESTART);
+    map.fire(EventType.DRAGSTART);
 
-    if (map.options.inertia) {
-      this._positions = [];
-      this._times = [];
+    if (map.panningInertiaOptions.inertia) {
+      _positions = [];
+      _times = [];
     }
   }
 
-  _onDrag() {
-    if (this._map.options.inertia) {
-      var time = this._lastTime = /*+*/new Date(),
-          pos = this._lastPos = this._draggable._newPos;
+  _onDrag(Object obj, Event e) {
+    if (map.panningInertiaOptions.inertia) {
+      final time = _lastTime = /*+*/new DateTime.now(),
+          pos = _lastPos = _draggable.newPos;
 
-      this._positions.push(pos);
-      this._times.push(time);
+      _positions.add(pos);
+      _times.add(time);
 
-      if (time - this._times[0] > 200) {
-        this._positions.shift();
-        this._times.shift();
+      if (time.difference(_times[0]) > 200) {
+        _positions.removeAt(0);
+        _times.removeAt(0);
       }
     }
 
-    this._map
-        .fire('move')
-        .fire('drag');
+    map.fire(EventType.MOVE);
+    map.fire(EventType.DRAG);
   }
 
-  _onViewReset() {
+  _onViewReset(Object obj, Event e) {
     // TODO fix hardcoded Earth values
-    var pxCenter = this._map.getSize()._divideBy(2),
-        pxWorldCenter = this._map.latLngToLayerPoint([0, 0]);
+    final pxCenter = map.getSize() / 2,
+        pxWorldCenter = map.latLngToLayerPoint(new LatLng(0, 0));
 
-    this._initialWorldOffset = pxWorldCenter.subtract(pxCenter).x;
-    this._worldWidth = this._map.project([0, 180]).x;
+    _initialWorldOffset = (pxWorldCenter - pxCenter).x;
+    _worldWidth = map.project(new LatLng(0, 180)).x;
   }
 
-  _onPreDrag() {
+  _onPreDrag(Object obj, Event e) {
     // TODO refactor to be able to adjust map pane position after zoom
-    var worldWidth = this._worldWidth,
-        halfWidth = Math.round(worldWidth / 2),
-        dx = this._initialWorldOffset,
-        x = this._draggable._newPos.x,
+    final worldWidth = _worldWidth,
+        halfWidth = (worldWidth / 2).round(),
+        dx = _initialWorldOffset,
+        x = _draggable.newPos.x,
         newX1 = (x - halfWidth + dx) % worldWidth + halfWidth - dx,
         newX2 = (x + halfWidth + dx) % worldWidth - halfWidth - dx,
-        newX = Math.abs(newX1 + dx) < Math.abs(newX2 + dx) ? newX1 : newX2;
+        newX = (newX1 + dx).abs() < (newX2 + dx).abs() ? newX1 : newX2;
 
-    this._draggable._newPos.x = newX;
+    _draggable.newPos.x = newX;
   }
 
-  _onDragEnd(e) {
-    var map = this._map,
-        options = map.options,
-        delay = /*+*/new Date() - this._lastTime,
+  _onDragEnd(Object obj, Event e) {
+    final options = map.panningInertiaOptions,
+        delay = /*+*/new DateTime.now().difference(_lastTime),
 
-        noInertia = !options.inertia || delay > options.inertiaThreshold || !this._positions[0];
+        noInertia = !options.inertia || delay > options.inertiaThreshold || _positions.length == 0;
 
-    map.fire('dragend', e);
+    map.fire(EventType.DRAGEND, e);
 
     if (noInertia) {
-      map.fire('moveend');
+      map.fire(EventType.MOVEEND);
 
     } else {
 
-      var direction = this._lastPos.subtract(this._positions[0]),
-          duration = (this._lastTime + delay - this._times[0]) / 1000,
-          ease = options.easeLinearity,
+      final direction = _lastPos - _positions[0],
+          duration = (_lastTime.add(delay).difference(_times[0])),// / 1000,
+          ease = map.panOptions.easeLinearity,
 
-          speedVector = direction.multiplyBy(ease / duration),
-          speed = speedVector.distanceTo([0, 0]),
+          speedVector = direction * (ease / duration),
+          speed = speedVector.distanceTo(new geom.Point(0, 0)),
 
-          limitedSpeed = Math.min(options.inertiaMaxSpeed, speed),
-          limitedSpeedVector = speedVector.multiplyBy(limitedSpeed / speed),
+          limitedSpeed = math.min(options.inertiaMaxSpeed, speed),
+          limitedSpeedVector = speedVector * (limitedSpeed / speed),
 
-          decelerationDuration = limitedSpeed / (options.inertiaDeceleration * ease),
-          offset = limitedSpeedVector.multiplyBy(-decelerationDuration / 2).round();
+          decelerationDuration = limitedSpeed / (options.inertiaDeceleration * ease);
+      geom.Point offset = (limitedSpeedVector * (-decelerationDuration / 2)).rounded();
 
-      if (!offset.x || !offset.y) {
-        map.fire('moveend');
+      if (offset.x == 0 || offset.y == 0) {
+        map.fire(EventType.MOVEEND);
 
       } else {
-        offset = map._limitOffset(offset, map.options.maxBounds);
+        offset = map.limitOffset(offset, map.stateOptions.maxBounds);
 
-        L.Util.requestAnimFrame(() {
+        requestAnimFrame(() {
           map.panBy(offset, {
-            duration: decelerationDuration,
-            easeLinearity: ease,
-            noMoveStart: true
+            'duration': decelerationDuration,
+            'easeLinearity': ease,
+            'noMoveStart': true
           });
         });
       }

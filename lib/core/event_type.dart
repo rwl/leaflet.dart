@@ -211,4 +211,9 @@ class EventType {
   static const ZOOMANIM = const EventType._internal('zoomanim');
 
   static const TILELAYERSLOAD = const EventType._internal('tilelayersload');
+
+  static const BOXZOOMSTART = const EventType._internal('boxzoomstart');
+  static const BOXZOOMEND = const EventType._internal('boxzoomend');
+
+  static const PREDRAG = const EventType._internal('predrag');
 }

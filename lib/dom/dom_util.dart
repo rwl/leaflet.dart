@@ -289,3 +289,25 @@ geom.Point getPosition(Element el) {
   // jshint camelcase: false
   return el._leaflet_pos;
 }
+
+/**
+ * Makes sure text cannot be selected, for example during dragging.
+ */
+disableTextSelection() {
+  on(window, 'selectstart', preventDefault);
+}
+
+/**
+ * Makes text selection possible again.
+ */
+enableTextSelection() {
+  off(window, 'selectstart', preventDefault);
+}
+
+disableImageDrag() {
+  on(window, 'dragstart', preventDefault);
+}
+
+enableImageDrag() {
+  off(window, 'dragstart', preventDefault);
+}

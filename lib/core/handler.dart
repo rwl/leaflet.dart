@@ -9,9 +9,9 @@ abstract class Handler {
 
   bool _enabled;
 
-  void initialize(BaseMap map) {
-    _map = map;
-  }
+  Handler(this._map);
+
+  BaseMap get map => _map;
 
   /**
    * Enables the handler.
