@@ -4,40 +4,43 @@ part of leaflet.core;
  * An interface implemented by interaction handlers.
  */
 abstract class Handler {
-  Map _map;
+
+  BaseMap _map;
+
   bool _enabled;
 
-  initialize(map) {
-    this._map = map;
+  void initialize(BaseMap map) {
+    _map = map;
   }
 
   /**
    * Enables the handler.
    */
-  enable() {
-    if (this._enabled) { return; }
+  void enable() {
+    if (_enabled) { return; }
 
-    this._enabled = true;
-    this.addHooks();
+    _enabled = true;
+    addHooks();
   }
 
   /**
    * Disables the handler.
    */
-  disable() {
-    if (!this._enabled) { return; }
+  void disable() {
+    if (!_enabled) { return; }
 
-    this._enabled = false;
-    this.removeHooks();
+    _enabled = false;
+    removeHooks();
   }
 
   /**
    * Returns true if the handler is enabled.
    */
-  enabled() {
-    return !this._enabled;
+  bool enabled() {
+    return _enabled;
   }
 
-  addHooks();
-  removeHooks();
+  void addHooks();
+
+  void removeHooks();
 }

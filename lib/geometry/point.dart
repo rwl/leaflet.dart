@@ -7,6 +7,8 @@ class Point {
 
   num x, y;
 
+  int _code;
+
   /**
    * Creates a Point object with the given x and y coordinates. If optional round is set to true, rounds the x and y values.
    */
@@ -156,6 +158,6 @@ class Point {
    * Returns a string representation of the point for debugging purposes.
    */
   String toString() {
-    return 'Point(${Util.formatNum(x)}, ${Util.formatNum(y)})';
+    return 'Point(${formatNum(x)}, ${formatNum(y)})';
   }
 }

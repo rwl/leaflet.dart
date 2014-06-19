@@ -75,7 +75,7 @@ class Bounds {
    * Returns the size of the given bounds.
    */
   Point getSize() {
-    return max.subtract(min);
+    return max - min;
   }
 
   /**

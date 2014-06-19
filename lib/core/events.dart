@@ -2,177 +2,6 @@ part of leaflet.core;
 
 //const eventsKey = '_leaflet_events';
 
-class Event {
-  /**
-   * The event type (e.g. 'click').
-   */
-  EventType type;
-
-  /**
-   * The object that fired the event.
-   */
-  Object target;
-}
-
-class MouseEvent extends Event {
-  /**
-   * The geographical point where the mouse event occured.
-   */
-  LatLng latlng;
-
-  /**
-   * Pixel coordinates of the point where the mouse event occured relative to
-   * the map layer.
-   */
-  Point   layerPoint;
-
-  /**
-   * Pixel coordinates of the point where the mouse event occured relative to
-   * the map сontainer.
-   */
-  Point   containerPoint;
-
-  /**
-   * The original DOM mouse event fired by the browser.
-   */
-  DOMMouseEvent   originalEvent;
-}
-
-class LocationEvent extends Event {
-  /**
-   * Detected geographical location of the user.
-   */
-  LatLng  latlng;
-
-  /**
-   * Geographical bounds of the area user is located in (with respect to the
-   * accuracy of location).
-   */
-  LatLngBounds  bounds;
-
-  /**
-   * Accuracy of location in meters.
-   */
-  num accuracy;
-
-  /**
-   * Height of the position above the WGS84 ellipsoid in meters.
-   */
-  num altitude;
-
-  /**
-   * Accuracy of altitude in meters.
-   */
-  num altitudeAccuracy;
-
-  /**
-   * The direction of travel in degrees counting clockwise from true North.
-   */
-  num heading;
-
-  /**
-   * Current velocity in meters per second.
-   */
-  num speed;
-
-  /**
-   * The time when the position was acquired.
-   */
-  num timestamp;
-}
-
-class ErrorEvent extends Event {
-  /**
-   * Error message.
-   */
-  String message;
-
-  /**
-   * Error code (if applicable).
-   */
-  num code;
-}
-
-class LayerEvent extends Event {
-  /**
-   * The layer that was added or removed.
-   */
-  Layer layer;
-}
-
-class LayersControlEvent extends Event {
-  /**
-   * The layer that was added or removed.
-   */
-  Layer layer;
-
-  /**
-   * The name of the layer that was added or removed.
-   */
-  String name;
-}
-
-class TileEvent extends Event {
-  /**
-   * The tile element (image).
-   */
-  HTMLElement tile;
-
-  /**
-   * The source URL of the tile.
-   */
-  String url;
-}
-
-class ResizeEvent extends Event {
-  /**
-   * The old size before resize event.
-   */
-  Point   oldSize;
-
-  /**
-   * The new size after the resize event.
-   */
-  Point   newSize;
-}
-
-class GeoJSONEvent extends Event {
-  /**
-   * The layer for the GeoJSON feature that is being added to the map.
-   */
-  Layer layer;
-
-  /**
-   * GeoJSON properties of the feature.
-   */
-  Object  properties;
-
-  /**
-   * GeoJSON geometry type of the feature.
-   */
-  String geometryType;
-
-  /**
-   * GeoJSON ID of the feature (if present).
-   */
-  String id;
-}
-
-class PopupEvent extends Event {
-  /**
-   * The popup that was opened or closed.
-   */
-  Popup   popup;
-}
-
-class DragEndEvent extends Event {
-  /**
-   * The distance in pixels the draggable element was moved by.
-   */
-  num distance;
-}
-
-typedef /*bool*/void Action(Object obj, Event event);
 /*
 class Event {
   Action action;
@@ -245,7 +74,7 @@ class Events {
     //var contextId = context && context != this && L.stamp(context);
     var contextId = null;
     if (context != null && context != this) {
-      contextId = Util.stamp(context);
+      contextId = stamp(context);
     }
 //    int i, len;
 //    Map event;
@@ -253,11 +82,12 @@ class Events {
 //    Map typeIndex;
 
     // types can be a string of space-separated words
-    List<String> typesList = Util.splitWords(types);
+    //List<String> typesList = Util.splitWords(types);
+    List<EventType> typesList = [types];
 
     for (int i = 0; i < typesList.length; i++) {
-      final event = new Event.event(fn, context != null ? context : this);
       final type = typesList[i];
+      final event = new Event(type, context != null ? context : this, fn);
 
       if (contextId != null) {
         // store listeners of a particular context in a separate hash (if it has an id)
@@ -312,7 +142,7 @@ class Events {
   /**
    * Alias to removeEventListener.
    */
-  off([String types = null, Action fn = null, BaseMap context = null]) {
+  off([EventType types = null, Action fn = null, Object context = null]) {
     return removeEventListener(types, fn, context);
   }
 
@@ -321,7 +151,7 @@ class Events {
    *
    * An alias to clearAllEventListeners when you use it without arguments.
    */
-  removeEventListener([String types = null, Action fn = null, Map context = null]) { // ([String, Function, Object]) or (Object[, Object])
+  removeEventListener([EventType types = null, Action fn = null, Object context = null]) { // ([String, Function, Object]) or (Object[, Object])
     //if (!this[eventsKey]) {
     if (_events == null && _contextEvents == null) {
       return this;
@@ -337,14 +167,15 @@ class Events {
     //var contextId = context && context != this && L.stamp(context);
     int contextId = null;
     if (context != null && context != this) {
-      contextId = Util.stamp(context);
+      contextId = stamp(context);
     }
 //    Map typeIndex = null;
 //    int i, len, j;
 //    String indexKey, indexLenKey, type;
 //    List listeners, removed;
 
-    List<String> typesList = Util.splitWords(types);
+    //List<String> typesList = Util.splitWords(types);
+    List<EventType> typesList = [types];
 
 //    len = types.length;
     for (int i = 0; i < typesList.length; i++) {

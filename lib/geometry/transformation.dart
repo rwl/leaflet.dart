@@ -4,6 +4,7 @@ part of leaflet.geometry;
  * Transformation is an utility class to perform simple point transformations through a 2d-matrix.
  */
 class Transformation {
+
   num _a, _b, _c, _d;
 
   /**
@@ -14,15 +15,17 @@ class Transformation {
   /**
    * Returns a transformed point, optionally multiplied by the given scale.
    */
-  Point transform(Point point, num scale) { // (Point, Number) -> Point
-    return _transform(point.clone(), scale);
+  Point transform(Point point, num scale) {
+    final p = point.clone();
+    transformPoint(p, scale);
+    return p;
   }
 
   // destructive transform (faster)
-  Point _transform(Point point, [num scale = 1]) {
+  void transformPoint(Point point, [num scale = 1]) {
     point.x = scale * (_a * point.x + _b);
     point.y = scale * (_c * point.y + _d);
-    return point;
+    //return point;
   }
 
   /**
@@ -33,4 +36,5 @@ class Transformation {
             (point.x / scale - _b) / _a,
             (point.y / scale - _d) / _c);
   }
+
 }

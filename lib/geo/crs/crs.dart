@@ -19,6 +19,7 @@ part 'simple.dart';
  * CRS is a base object for all defined CRS (Coordinate Reference Systems) in Leaflet.
  */
 abstract class CRS {
+
   final proj.Projection _projection;
   final Transformation _transformation;
   final String _code;
@@ -45,10 +46,11 @@ abstract class CRS {
    * Projects geographical coordinates on a given zoom into pixel coordinates.
    */
   Point latLngToPoint(LatLng latlng, num zoom) { // (LatLng, Number) -> Point
-    final projectedPoint = this.projection.project(latlng);
-    final scale = this.scale(zoom);
+    final projectedPoint = projection.project(latlng);
+    final s = scale(zoom);
 
-    return this.transformation._transform(projectedPoint, scale);
+    transformation.transformPoint(projectedPoint, s);
+    return projectedPoint;
   }
 
   /**
@@ -56,10 +58,10 @@ abstract class CRS {
    * into geographical coordinates.
    */
   LatLng pointToLatLng(Point point, num zoom) { // (Point, Number[, Boolean]) -> LatLng
-    final scale = this.scale(zoom);
-    final untransformedPoint = this.transformation.untransform(point, scale);
+    final s = scale(zoom);
+    final untransformedPoint = transformation.untransform(point, s);
 
-    return this.projection.unproject(untransformedPoint);
+    return projection.unproject(untransformedPoint);
   }
 
   /**
@@ -67,7 +69,7 @@ abstract class CRS {
    * this CRS (e.g. meters for EPSG:3857, for passing it to WMS services).
    */
   Point project(LatLng latlng) {
-    return this.projection.project(latlng);
+    return projection.project(latlng);
   }
 
   /**
@@ -83,7 +85,7 @@ abstract class CRS {
    * Returns the size of the world in pixels for a particular zoom.
    */
   Point getSize(num zoom) {
-    var s = this.scale(zoom);
+    var s = scale(zoom);
     return new Point(s, s);
   }
 }

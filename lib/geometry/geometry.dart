@@ -3,6 +3,7 @@ library leaflet.geometry;
 import 'dart:math' as math;
 
 import '../core/core.dart';
+import '../geometry/geometry.dart' as geom;
 
 part 'bounds.dart';
 part 'line_util.dart';

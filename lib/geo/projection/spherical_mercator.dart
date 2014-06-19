@@ -8,20 +8,20 @@ final SphericalMercator = new _SphericalMercator();
 class _SphericalMercator implements Projection {
   static final double MAX_LATITUDE = 85.0511287798;
 
-  project(latlng) { // (LatLng) -> Point
-    var d = LatLng.DEG_TO_RAD,
+  geom.Point project(LatLng latlng) {
+    final d = LatLng.DEG_TO_RAD,
         max = MAX_LATITUDE,
         lat = math.max(math.min(max, latlng.lat), -max),
-        x = latlng.lng * d,
-        y = lat * d;
+        x = latlng.lng * d;
+    double y = lat * d;
 
     y = math.log(math.tan((math.PI / 4) + (y / 2)));
 
-    return new Point(x, y);
+    return new geom.Point(x, y);
   }
 
-  unproject(point) { // (Point, Boolean) -> LatLng
-    var d = LatLng.RAD_TO_DEG,
+  LatLng unproject(geom.Point point) {
+    final d = LatLng.RAD_TO_DEG,
         lng = point.x * d,
         lat = (2 * math.atan(math.exp(point.y)) - (math.PI / 2)) * d;
 

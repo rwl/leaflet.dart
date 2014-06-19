@@ -1,8 +1,11 @@
 part of leaflet.core;
 
 class EventType {
+
   final _value;
+
   const EventType._internal(this._value);
+
   toString() => '$_value';
 
   /**

@@ -16,7 +16,7 @@ class LatLngBounds {
    */
   LatLngBounds(List<LatLng> latlngs) {
     for (LatLng latlng in latlngs) {
-      this.extend(latlng);
+      extend(latlng);
     }
   }
 
@@ -30,20 +30,20 @@ class LatLngBounds {
   /**
    * Extend the bounds to contain the given point.
    */
-  extend(LatLng obj) {
+  void extend(LatLng obj) {
     if (obj == null) { return; }
 
     var latLng = new LatLng.latLng(obj);
 
-    if (this._southWest == null && this._northEast == null) {
-      this._southWest = new LatLng(obj.lat, obj.lng);
-      this._northEast = new LatLng(obj.lat, obj.lng);
+    if (_southWest == null && _northEast == null) {
+      _southWest = new LatLng(obj.lat, obj.lng);
+      _northEast = new LatLng(obj.lat, obj.lng);
     } else {
-      this._southWest.lat = math.min(obj.lat, this._southWest.lat);
-      this._southWest.lng = math.min(obj.lng, this._southWest.lng);
+      _southWest.lat = math.min(obj.lat, _southWest.lat);
+      _southWest.lng = math.min(obj.lng, _southWest.lng);
 
-      this._northEast.lat = math.max(obj.lat, this._northEast.lat);
-      this._northEast.lng = math.max(obj.lng, this._northEast.lng);
+      _northEast.lat = math.max(obj.lat, _northEast.lat);
+      _northEast.lng = math.max(obj.lng, _northEast.lng);
     }
   }
 
@@ -55,8 +55,8 @@ class LatLngBounds {
 
     obj = new LatLngBounds.latLngBounds(obj);
 
-    this.extend(obj._southWest);
-    this.extend(obj._northEast);
+    extend(obj._southWest);
+    extend(obj._northEast);
 
     return this;
   }
@@ -65,8 +65,8 @@ class LatLngBounds {
    * Returns bigger bounds created by extending the current bounds by a given percentage in each direction.
    */
   LatLngBounds pad(num bufferRatio) {
-    final sw = this._southWest;
-    final ne = this._northEast;
+    final sw = _southWest;
+    final ne = _northEast;
     final heightBuffer = (sw.lat - ne.lat).abs() * bufferRatio;
     final widthBuffer = (sw.lng - ne.lng).abs() * bufferRatio;
 
@@ -80,64 +80,64 @@ class LatLngBounds {
    */
   LatLng getCenter() {
     return new LatLng(
-            (this._southWest.lat + this._northEast.lat) / 2,
-            (this._southWest.lng + this._northEast.lng) / 2);
+            (_southWest.lat + _northEast.lat) / 2,
+            (_southWest.lng + _northEast.lng) / 2);
   }
 
   /**
    * Returns the south-west point of the bounds.
    */
   LatLng getSouthWest() {
-    return this._southWest;
+    return _southWest;
   }
 
   /**
    * Returns the north-east point of the bounds.
    */
   LatLng getNorthEast() {
-    return this._northEast;
+    return _northEast;
   }
 
   /**
    * Returns the north-west point of the bounds.
    */
   LatLng getNorthWest() {
-    return new LatLng(this.getNorth(), this.getWest());
+    return new LatLng(getNorth(), getWest());
   }
 
   /**
    * Returns the south-east point of the bounds.
    */
   LatLng getSouthEast() {
-    return new LatLng(this.getSouth(), this.getEast());
+    return new LatLng(getSouth(), getEast());
   }
 
   /**
    * Returns the west longitude of the bounds.
    */
   num getWest() {
-    return this._southWest.lng;
+    return _southWest.lng;
   }
 
   /**
    * Returns the south latitude of the bounds.
    */
   num getSouth() {
-    return this._southWest.lat;
+    return _southWest.lat;
   }
 
   /**
    * Returns the east longitude of the bounds.
    */
   num getEast() {
-    return this._northEast.lng;
+    return _northEast.lng;
   }
 
   /**
    * Returns the north latitude of the bounds.
    */
   num getNorth() {
-    return this._northEast.lat;
+    return _northEast.lat;
   }
 
   /**
@@ -146,8 +146,8 @@ class LatLngBounds {
   bool contains(LatLng obj) {
     obj = new LatLng.latLng(obj);
 
-    final sw = this._southWest,
-        ne = this._northEast;
+    final sw = _southWest,
+        ne = _northEast;
 
     final sw2 = obj;
     final ne2 = obj;
@@ -162,8 +162,8 @@ class LatLngBounds {
   bool containsBounds(LatLngBounds obj) {
     obj = new LatLngBounds.latLngBounds(obj);
 
-    final sw = this._southWest,
-        ne = this._northEast;
+    final sw = _southWest,
+        ne = _northEast;
 
     final sw2 = obj.getSouthWest();
     final ne2 = obj.getNorthEast();
@@ -178,8 +178,8 @@ class LatLngBounds {
   bool intersects(LatLngBounds bounds) {
     bounds = new LatLngBounds.latLngBounds(bounds);
 
-    final sw = this._southWest,
-        ne = this._northEast,
+    final sw = _southWest,
+        ne = _northEast,
         sw2 = bounds.getSouthWest(),
         ne2 = bounds.getNorthEast(),
 
@@ -193,7 +193,7 @@ class LatLngBounds {
    * Returns a string with bounding box coordinates in a 'southwest_lng,southwest_lat,northeast_lng,northeast_lat' format. Useful for sending requests to web services that return geo data.
    */
   String toBBoxString() {
-    return [this.getWest(), this.getSouth(), this.getEast(), this.getNorth()].join(',');
+    return [getWest(), getSouth(), getEast(), getNorth()].join(',');
   }
 
   /**
@@ -204,14 +204,14 @@ class LatLngBounds {
 
     bounds = new LatLngBounds.latLngBounds(bounds);
 
-    return this._southWest == bounds.getSouthWest() &&
-           this._northEast == bounds.getNorthEast();
+    return _southWest == bounds.getSouthWest() &&
+           _northEast == bounds.getNorthEast();
   }
 
   /**
    * Returns true if the bounds are properly initialized.
    */
   bool isValid() {
-    return this._southWest != null && this._northEast != null;
+    return _southWest != null && _northEast != null;
   }
 }
