@@ -14,95 +14,90 @@ class Keyboard extends Handler {
     'zoomOut': [189, 109, 173]
   };
 
+  bool _focused;
+  Map _panKeys;
+  Map _zoomKeys;
+
   Keyboard(BaseMap map) : super(map);
 
   initialize(map) {
-    this._setPanOffset(map.options.keyboardPanOffset);
-    this._setZoomOffset(map.options.keyboardZoomOffset);
+    _setPanOffset(map.options.keyboardPanOffset);
+    _setZoomOffset(map.options.keyboardZoomOffset);
   }
 
   addHooks() {
-    var container = this._map._container;
+    final container = map.getContainer();
 
     // make the container focusable by tabbing
     if (container.tabIndex == -1) {
       container.tabIndex = '0';
     }
 
-    L.DomEvent
-        .on(container, 'focus', this._onFocus, this)
-        .on(container, 'blur', this._onBlur, this)
-        .on(container, 'mousedown', this._onMouseDown, this);
+    dom.on(container, 'focus', _onFocus, this);
+    dom.on(container, 'blur', _onBlur, this);
+    dom.on(container, 'mousedown', _onMouseDown, this);
 
-    this._map
-        .on('focus', this._addHooks, this)
-        .on('blur', this._removeHooks, this);
+    map.on(EventType.FOCUS, _addHooks, this);
+    map.on(EventType.BLUR, _removeHooks, this);
   }
 
   removeHooks() {
-    this._removeHooks();
+    _removeHooks();
 
-    var container = this._map._container;
+    final container = map.getContainer();
 
-    L.DomEvent
-        .off(container, 'focus', this._onFocus, this)
-        .off(container, 'blur', this._onBlur, this)
-        .off(container, 'mousedown', this._onMouseDown, this);
+    dom.off(container, 'focus', _onFocus);
+    dom.off(container, 'blur', _onBlur);
+    dom.off(container, 'mousedown', _onMouseDown);
 
-    this._map
-        .off('focus', this._addHooks, this)
-        .off('blur', this._removeHooks, this);
+    map.off(EventType.FOCUS, _addHooks, this);
+    map.off(EventType.BLUR, _removeHooks, this);
   }
 
   _onMouseDown() {
-    if (this._focused) { return; }
+    if (_focused) { return; }
 
-    var body = document.body,
+    final  body = document.body,
         docEl = document.documentElement,
-        top = body.scrollTop || docEl.scrollTop,
-        left = body.scrollLeft || docEl.scrollLeft;
+        top = body.scrollTop /*|*/| docEl.scrollTop,
+        left = body.scrollLeft /*|*/| docEl.scrollLeft;
 
-    this._map._container.focus();
+    map.getContainer().focus();
 
     window.scrollTo(left, top);
   }
 
   _onFocus() {
-    this._focused = true;
-    this._map.fire('focus');
+    _focused = true;
+    map.fire(EventType.FOCUS);
   }
 
   _onBlur() {
-    this._focused = false;
-    this._map.fire('blur');
+    _focused = false;
+    map.fire(EventType.BLUR);
   }
 
   _setPanOffset(pan) {
-    var keys = this._panKeys = {},
-        codes = this.keyCodes,
-        i, len;
+    final keys = _panKeys = {},
+        codes = keyCodes;
 
-    len = codes.left.length;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < codes.left.length; i++) {
       keys[codes.left[i]] = [-1 * pan, 0];
     }
-    len = codes.right.length;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < codes.right.length; i++) {
       keys[codes.right[i]] = [pan, 0];
     }
-    len = codes.down.length;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < codes.down.length; i++) {
       keys[codes.down[i]] = [0, pan];
     }
-    len = codes.up.length;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < codes.up.length; i++) {
       keys[codes.up[i]] = [0, -1 * pan];
     }
   }
 
   _setZoomOffset(zoom) {
-    var keys = this._zoomKeys = {},
-        codes = this.keyCodes,
+    var keys = _zoomKeys = {},
+        codes = keyCodes,
         i, len;
 
     len = codes.zoomIn.length;
@@ -115,35 +110,34 @@ class Keyboard extends Handler {
     }
   }
 
-  _addHooks() {
-    L.DomEvent.on(document, 'keydown', this._onKeyDown, this);
+  _addHooks([Object obj=null, Event e=null]) {
+    dom.on(document, 'keydown', _onKeyDown, this);
   }
 
-  _removeHooks() {
-    L.DomEvent.off(document, 'keydown', this._onKeyDown, this);
+  _removeHooks([Object obj=null, Event e=null]) {
+    dom.off(document, 'keydown', _onKeyDown);
   }
 
-  _onKeyDown(e) {
-    var key = e.keyCode,
-        map = this._map;
+  _onKeyDown(html.KeyboardEvent e) {
+    final key = e.keyCode;
 
-    if (this._panKeys.contains(key)) {
+    if (_panKeys.containsKey(key)) {
 
-      if (map._panAnim && map._panAnim._inProgress) { return; }
+      if (map.panAnim != null && map.panAnim.inProgress) { return; }
 
-      map.panBy(this._panKeys[key]);
+      map.panBy(_panKeys[key]);
 
-      if (map.options.maxBounds) {
-        map.panInsideBounds(map.options.maxBounds);
+      if (map.stateOptions.maxBounds != null) {
+        map.panInsideBounds(map.stateOptions.maxBounds);
       }
 
-    } else if (this._zoomKeys.contains(key)) {
-      map.setZoom(map.getZoom() + this._zoomKeys[key]);
+    } else if (_zoomKeys.containsKey(key)) {
+      map.setZoom(map.getZoom() + _zoomKeys[key]);
 
     } else {
       return;
     }
 
-    L.DomEvent.stop(e);
+    dom.stop(e);
   }
 }

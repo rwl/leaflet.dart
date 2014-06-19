@@ -8,10 +8,10 @@ class MarkerDrag extends Handler {
   Marker _marker;
   dom.Draggable _draggable;
 
-  MarkerDrag(this._marker);
+  MarkerDrag(this._marker) : super(null);
 
   addHooks() {
-    var icon = _marker._icon;
+    final icon = _marker._icon;
     if (_draggable == null) {
       _draggable = new dom.Draggable(icon, icon);
     }

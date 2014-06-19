@@ -1120,7 +1120,10 @@ class BaseMap extends Object with Events {
       math.max(0, left.ceil()) - math.max(0, right.floor());
   }
 
-  num _limitZoom(num zoom) {
+  /**
+   * For internal use.
+   */
+  num limitZoom(num zoom) {
     var min = getMinZoom(),
         max = getMaxZoom();
 
@@ -1265,7 +1268,10 @@ class BaseMap extends Object with Events {
     return true;
   }
 
-  _animateZoom(center, zoom, origin, scale, delta, backwards) {
+  /**
+   * For internal use.
+   */
+  animateZoom(LatLng center, num zoom, geom.Point origin, num scale, [geom.Point delta=null, bool backwards=false]) {
 
     this._animatingZoom = true;
 
@@ -1353,7 +1359,7 @@ class BaseMap extends Object with Events {
   /**
    * Pans the map by a given number of pixels (animated).
    */
-  panBy(offset, options) {
+  panBy(offset, [options=null]) {
     offset = new geom.Point.point(offset).rounded();
     options = options || {};
 

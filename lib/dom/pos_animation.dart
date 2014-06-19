@@ -10,6 +10,8 @@ class PosAnimation extends Object with Events {
   Point _newPos;
   var _stepTimer;
 
+  bool get inProgress => _inProgress;
+
   /**
    * Run an animation of a given element to a new position, optionally setting duration in seconds (0.25 by default) and easing linearity factor (3rd argument of the cubic bezier curve, 0.5 by default)
    */

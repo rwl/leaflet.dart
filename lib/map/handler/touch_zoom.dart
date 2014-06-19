@@ -1,21 +1,28 @@
 part of leaflet.map.handler;
 
-// TouchZoom is used by Map to add pinch zoom on supported mobile browsers.
+/**
+ * TouchZoom is used by Map to add pinch zoom on supported mobile browsers.
+ */
 class TouchZoom extends Handler {
+
+  geom.Point _startCenter, _startDist, _centerOffset, _delta;
+  bool _moved, _zooming;
+  num _scale;
+
+  TouchZoom(BaseMap map) : super(map);
+
   addHooks() {
-    L.DomEvent.on(this._map._container, 'touchstart', this._onTouchStart, this);
+    dom.on(this.map.getContainer(), 'touchstart', this._onTouchStart, this);
   }
 
   removeHooks() {
-    L.DomEvent.off(this._map._container, 'touchstart', this._onTouchStart, this);
+    dom.off(this.map.getContainer(), 'touchstart', this._onTouchStart);
   }
 
-  _onTouchStart(e) {
-    var map = this._map;
+  _onTouchStart(html.TouchEvent e) {
+    if (e.touches == null || e.touches.length != 2 || map._animatingZoom || this._zooming) { return; }
 
-    if (!e.touches || e.touches.length != 2 || map._animatingZoom || this._zooming) { return; }
-
-    var p1 = map.mouseEventToLayerPoint(e.touches[0]),
+    final p1 = map.mouseEventToLayerPoint(e.touches[0]),
         p2 = map.mouseEventToLayerPoint(e.touches[1]),
         viewCenter = map._getCenterLayerPoint();
 
@@ -27,59 +34,54 @@ class TouchZoom extends Handler {
 
     this._centerOffset = viewCenter.subtract(this._startCenter);
 
-    if (map._panAnim) {
-      map._panAnim.stop();
+    if (map.panAnim != null) {
+      map.panAnim.stop();
     }
 
-    L.DomEvent
-        .on(document, 'touchmove', this._onTouchMove, this)
-        .on(document, 'touchend', this._onTouchEnd, this);
+    dom.on(document, 'touchmove', this._onTouchMove, this);
+    dom.on(document, 'touchend', this._onTouchEnd, this);
 
-    L.DomEvent.preventDefault(e);
+    dom.preventDefault(e);
   }
 
   _onTouchMove(e) {
-    var map = this._map;
+    if (e.touches == null || e.touches.length != 2 || !this._zooming) { return; }
 
-    if (!e.touches || e.touches.length != 2 || !this._zooming) { return; }
-
-    var p1 = map.mouseEventToLayerPoint(e.touches[0]),
+    final p1 = map.mouseEventToLayerPoint(e.touches[0]),
         p2 = map.mouseEventToLayerPoint(e.touches[1]);
 
     this._scale = p1.distanceTo(p2) / this._startDist;
-    this._delta = p1._add(p2)._divideBy(2)._subtract(this._startCenter);
+    this._delta = ((p1 + p2) / 2) - this._startCenter;
 
     if (this._scale == 1) { return; }
 
-    if (!map.options.bounceAtZoomLimits) {
+    if (map.interactionOptions.bounceAtZoomLimits = null) {
       if ((map.getZoom() == map.getMinZoom() && this._scale < 1) ||
           (map.getZoom() == map.getMaxZoom() && this._scale > 1)) { return; }
     }
 
     if (!this._moved) {
-      L.DomUtil.addClass(map._mapPane, 'leaflet-touching');
+      dom.addClass(map.mapPane, 'leaflet-touching');
 
-      map
-          .fire('movestart')
-          .fire('zoomstart');
+      map.fire(EventType.MOVESTART);
+      map.fire(EventType.ZOOMSTART);
 
       this._moved = true;
     }
 
-    L.Util.cancelAnimFrame(this._animRequest);
-    this._animRequest = L.Util.requestAnimFrame(
-            this._updateOnMove, this, true, this._map._container);
+    cancelAnimFrame(this._animRequest);
+    this._animRequest = requestAnimFrame(
+            this._updateOnMove, this, true, this.map.getContainer());
 
-    L.DomEvent.preventDefault(e);
+    dom.preventDefault(e);
   }
 
   _updateOnMove() {
-    var map = this._map,
-        origin = this._getScaleOrigin(),
+    final origin = this._getScaleOrigin(),
         center = map.layerPointToLatLng(origin),
         zoom = map.getScaleZoom(this._scale);
 
-    map._animateZoom(center, zoom, this._startCenter, this._scale, this._delta);
+    map.animateZoom(center, zoom, this._startCenter, this._scale, this._delta);
   }
 
   _onTouchEnd() {
@@ -88,32 +90,29 @@ class TouchZoom extends Handler {
       return;
     }
 
-    var map = this._map;
-
     this._zooming = false;
-    L.DomUtil.removeClass(map._mapPane, 'leaflet-touching');
-    L.Util.cancelAnimFrame(this._animRequest);
+    dom.removeClass(map.mapPane, 'leaflet-touching');
+    cancelAnimFrame(this._animRequest);
 
-    L.DomEvent
-        .off(document, 'touchmove', this._onTouchMove)
-        .off(document, 'touchend', this._onTouchEnd);
+    dom.off(document, 'touchmove', this._onTouchMove);
+    dom.off(document, 'touchend', this._onTouchEnd);
 
-    var origin = this._getScaleOrigin(),
+    final origin = this._getScaleOrigin(),
         center = map.layerPointToLatLng(origin),
 
         oldZoom = map.getZoom(),
         floatZoomDelta = map.getScaleZoom(this._scale) - oldZoom,
         roundZoomDelta = (floatZoomDelta > 0 ?
-                Math.ceil(floatZoomDelta) : Math.floor(floatZoomDelta)),
+                floatZoomDelta.ceil() : floatZoomDelta.floor()),
 
-        zoom = map._limitZoom(oldZoom + roundZoomDelta),
+        zoom = map.limitZoom(oldZoom + roundZoomDelta),
         scale = map.getZoomScale(zoom) / this._scale;
 
-    map._animateZoom(center, zoom, origin, scale);
+    map.animateZoom(center, zoom, origin, scale);
   }
 
-  _getScaleOrigin() {
-    var centerOffset = this._centerOffset.subtract(this._delta).divideBy(this._scale);
-    return this._startCenter.add(centerOffset);
+  geom.Point _getScaleOrigin() {
+    final centerOffset = (this._centerOffset - this._delta) / this._scale;
+    return this._startCenter + centerOffset;
   }
 }

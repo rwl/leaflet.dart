@@ -1,87 +1,98 @@
 part of leaflet.map.handler;
 
-// Tap is used to enable mobile hacks like quick taps and long hold.
+/**
+ * Tap is used to enable mobile hacks like quick taps and long hold.
+ */
 class Tap extends Handler {
-  addHooks() {
-    L.DomEvent.on(this._map._container, 'touchstart', this._onDown, this);
+
+  bool _fireClick;
+  Timer _holdTimeout;
+  geom.Point _startPos, _newPos;
+
+  Tap(BaseMap map) : super(map);
+
+  void addHooks() {
+    dom.on(map.getContainer(), 'touchstart', _onDown, this);
   }
 
-  removeHooks() {
-    L.DomEvent.off(this._map._container, 'touchstart', this._onDown, this);
+  void removeHooks() {
+    dom.off(map.getContainer(), 'touchstart', _onDown);
   }
 
-  _onDown(e) {
-    if (!e.touches) { return; }
+  void _onDown(html.TouchEvent e) {
+    if (e.touches == null) { return; }
 
-    L.DomEvent.preventDefault(e);
+    dom.preventDefault(e);
 
-    this._fireClick = true;
+    _fireClick = true;
 
     // don't simulate click or track longpress if more than 1 touch
     if (e.touches.length > 1) {
-      this._fireClick = false;
-      clearTimeout(this._holdTimeout);
+      _fireClick = false;
+      //clearTimeout(_holdTimeout);
+      _holdTimeout.cancel();
       return;
     }
 
-    var first = e.touches[0],
+    final first = e.touches.first,
         el = first.target;
 
-    this._startPos = this._newPos = new L.Point(first.clientX, first.clientY);
+    _startPos = _newPos = new geom.Point(first.client.x, first.client.y);
 
     // if touching a link, highlight it
     if (el.tagName && el.tagName.toLowerCase() == 'a') {
-      L.DomUtil.addClass(el, 'leaflet-active');
+      dom.addClass(el, 'leaflet-active');
     }
 
     // simulate long hold but setting a timeout
-    this._holdTimeout = setTimeout(L.bind(() {
-      if (this._isTapValid()) {
-        this._fireClick = false;
-        this._onUp();
-        this._simulateEvent('contextmenu', first);
+    //_holdTimeout = setTimeout(L.bind(() {
+    _holdTimeout = new Timer(new Duration(milliseconds: 1000), () {
+      if (_isTapValid()) {
+        _fireClick = false;
+        _onUp();
+        _simulateEvent('contextmenu', first);
       }
-    }, this), 1000);
+    });
+    //}, this), 1000);
 
-    L.DomEvent
-      .on(document, 'touchmove', this._onMove, this)
-      .on(document, 'touchend', this._onUp, this);
+    dom.on(document, 'touchmove', _onMove, this);
+    dom.on(document, 'touchend', _onUp, this);
   }
 
-  _onUp(e) {
-    clearTimeout(this._holdTimeout);
+  void _onUp([e=null]) {
+    //clearTimeout(_holdTimeout);
+    _holdTimeout.cancel();
 
-    L.DomEvent
-      .off(document, 'touchmove', this._onMove, this)
-      .off(document, 'touchend', this._onUp, this);
+    dom.off(document, 'touchmove', _onMove);
+    dom.off(document, 'touchend', _onUp);
 
-    if (this._fireClick && e && e.changedTouches) {
+    if (_fireClick && e && e.changedTouches) {
 
       var first = e.changedTouches[0],
           el = first.target;
 
       if (el && el.tagName && el.tagName.toLowerCase() == 'a') {
-        L.DomUtil.removeClass(el, 'leaflet-active');
+        dom.removeClass(el, 'leaflet-active');
       }
 
       // simulate click if the touch didn't move too much
-      if (this._isTapValid()) {
-        this._simulateEvent('click', first);
+      if (_isTapValid()) {
+        _simulateEvent('click', first);
       }
     }
   }
 
-  _isTapValid() {
-    return this._newPos.distanceTo(this._startPos) <= this._map.options.tapTolerance;
+  bool _isTapValid() {
+    return _newPos.distanceTo(_startPos) <= map.interactionOptions.tapTolerance;
   }
 
-  _onMove(e) {
-    var first = e.touches[0];
-    this._newPos = new L.Point(first.clientX, first.clientY);
+  _onMove(html.TouchEvent e) {
+    final first = e.touches.first;
+    _newPos = new geom.Point(first.client.x, first.client.y);
   }
 
-  _simulateEvent(type, e) {
-    var simulatedEvent = document.createEvent('MouseEvents');
+  _simulateEvent(type, html.TouchEvent e) {
+    final simulatedEvent = document.createEvent('MouseEvents');
 
     simulatedEvent._simulated = true;
     e.target._simulatedClick = true;

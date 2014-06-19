@@ -1,55 +1,70 @@
 part of leaflet.map.handler;
 
-// ScrollWheelZoom is used by L.Map to enable mouse scroll wheel zoom on the map.
+/**
+ * ScrollWheelZoom is used by L.Map to enable mouse scroll wheel zoom on the map.
+ */
 class ScrollWheelZoom extends Handler {
+
+  num _delta;
+  geom.Point _lastMousePos;
+  DateTime _startTime;
+  Timer _timer;
+
+  ScrollWheelZoom(BaseMap map) : super(map);
+
   addHooks() {
-    L.DomEvent.on(this._map._container, 'mousewheel', this._onWheelScroll, this);
-    L.DomEvent.on(this._map._container, 'MozMousePixelScroll', L.DomEvent.preventDefault);
-    this._delta = 0;
+    dom.on(map.getContainer(), 'mousewheel', _onWheelScroll, this);
+    dom.on(map.getContainer(), 'MozMousePixelScroll', dom.preventDefault);
+    _delta = 0;
   }
 
   removeHooks() {
-    L.DomEvent.off(this._map._container, 'mousewheel', this._onWheelScroll);
-    L.DomEvent.off(this._map._container, 'MozMousePixelScroll', L.DomEvent.preventDefault);
+    dom.off(map.getContainer(), 'mousewheel', _onWheelScroll);
+    dom.off(map.getContainer(), 'MozMousePixelScroll', dom.preventDefault);
   }
 
-  _onWheelScroll(e) {
-    var delta = L.DomEvent.getWheelDelta(e);
+  _onWheelScroll(html.MouseEvent e) {
+    final delta = dom.getWheelDelta(e);
 
-    this._delta += delta;
-    this._lastMousePos = this._map.mouseEventToContainerPoint(e);
+    _delta += delta;
+    _lastMousePos = map.mouseEventToContainerPoint(e);
 
-    if (!this._startTime) {
-      this._startTime = /*+*/new Date();
+    if (_startTime = null) {
+      _startTime = /*+*/new DateTime.now();
     }
 
-    var left = Math.max(40 - (/*+*/new Date() - this._startTime), 0);
+    var left = math.max(40 - (/*+*/new DateTime.now().difference(_startTime).inMilliseconds), 0);
 
-    clearTimeout(this._timer);
-    this._timer = setTimeout(L.bind(this._performZoom, this), left);
+    //clearTimeout(_timer);
+    //_timer = setTimeout(L.bind(_performZoom, this), left);
+    _timer.cancel();
+    _timer = new Timer(new Duration(milliseconds: left), () {
+      _performZoom();
+    });
 
-    L.DomEvent.preventDefault(e);
-    L.DomEvent.stopPropagation(e);
+    dom.preventDefault(e);
+    dom.stopPropagation(e);
   }
 
   _performZoom() {
-    var map = this._map,
-        delta = this._delta,
-        zoom = map.getZoom();
+    num delta = _delta;
+    final zoom = map.getZoom();
 
-    delta = delta > 0 ? Math.ceil(delta) : Math.floor(delta);
-    delta = Math.max(Math.min(delta, 4), -4);
-    delta = map._limitZoom(zoom + delta) - zoom;
+    delta = delta > 0 ? delta.ceil() : delta.floor();
+    delta = math.max(math.min(delta, 4), -4);
+    delta = map.limitZoom(zoom + delta) - zoom;
 
-    this._delta = 0;
-    this._startTime = null;
+    _delta = 0;
+    _startTime = null;
 
-    if (!delta) { return; }
+    if (delta == 0) {
+      return;
+    }
 
-    if (map.options.scrollWheelZoom == 'center') {
+    if (map.interactionOptions.scrollWheelZoom == 'center') {
       map.setZoom(zoom + delta);
     } else {
-      map.setZoomAround(this._lastMousePos, zoom + delta);
+      map.setZoomAround(_lastMousePos, zoom + delta);
     }
   }
 }
