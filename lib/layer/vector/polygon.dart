@@ -87,7 +87,7 @@ class Polygon extends Polyline {
     if (polylineOptions.noClip) { return; }
 
     for (int i = 0; i < _parts.length; i++) {
-      var clipped = PolyUtil.clipPolygon(_parts[i], _map._pathViewport);
+      var clipped = geom.clipPolygon(_parts[i], _map.pathViewport);
       if (clipped.length) {
         newParts.add(clipped);
       }
@@ -102,15 +102,13 @@ class Polygon extends Polyline {
   }
 
   toGeoJSON() {
-    List coords = [GeoJSON.latLngsToCoords(getLatLngs())];
-    var i, len, hole;
+    final coords = [GeoJSON.latLngsToCoords(getLatLngs())];
 
-    coords[0].push(coords[0][0]);
+    coords[0].add(coords[0][0]);
 
-    if (_holes) {
-      len = _holes.length;
-      for (i = 0; i < len; i++) {
-        hole = L.GeoJSON.latLngsToCoords(_holes[i]);
+    if (_holes != null) {
+      for (int i = 0; i < _holes.length; i++) {
+        final hole = GeoJSON.latLngsToCoords(_holes[i]);
         hole.add(hole[0]);
         coords.add(hole);
       }

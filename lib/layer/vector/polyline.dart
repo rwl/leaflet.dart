@@ -17,7 +17,7 @@ class PolylineOptions extends PathOptions {
  */
 class Polyline extends Path {
 
-  List<Point> _originalPoints;
+  List<geom.Point> _originalPoints;
   List _parts;
 
   Polyline(List<LatLng> latlngs, PolylineOptions polylineOptions) : super(polylineOptions) {
@@ -33,7 +33,7 @@ class Polyline extends Path {
     'noClip': false
   };*/
 
-  projectLatlngs() {
+  projectLatlngs([Object obj, Event e]) {
     _originalPoints = [];
 
     final len = _latlngs.length;
@@ -97,10 +97,10 @@ class Polyline extends Path {
       for (var i = 1; i < len; i++) {
         p1 = points[i - 1];
         p2 = points[i];
-        var sqDist = LineUtil._sqClosestPointOnSegment(p, p1, p2, true);
+        var sqDist = geom._sqClosestPointOnSegment(p, p1, p2, true);
         if (sqDist < minDistance) {
           minDistance = sqDist;
-          minPoint = LineUtil._sqClosestPointOnSegment(p, p1, p2);
+          minPoint = geom._sqClosestPointOnSegment(p, p1, p2);
         }
       }
     }
@@ -161,12 +161,11 @@ class Polyline extends Path {
     _parts = [];
 
     final parts = _parts;
-    final vp = _map._pathViewport;
-    final lu = LineUtil;
+    final vp = _map.pathViewport;
 
     int k = 0;
     for (int i = 0; i < len - 1; i++) {
-      segment = lu.clipSegment(points[i], points[i + 1], vp, i);
+      segment = geom.clipSegment(points[i], points[i + 1], vp, i != 0);
       if (!segment) {
         continue;
       }
@@ -184,15 +183,14 @@ class Polyline extends Path {
 
   // simplify each clipped part of the polyline
   _simplifyPoints() {
-    var parts = _parts;
-    final lu = LineUtil;
+    final parts = _parts;
 
     for (int i = 0; i < parts.length; i++) {
-      parts[i] = lu.simplify(parts[i], polylineOptions.smoothFactor);
+      parts[i] = geom.simplify(parts[i], polylineOptions.smoothFactor);
     }
   }
 
-  _updatePath() {
+  _updatePath([Object obj, Event e]) {
     if (_map == null) { return; }
 
     _clipPoints();

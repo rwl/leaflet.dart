@@ -25,46 +25,46 @@ class Circle extends Path {
   /**
    * Sets the position of a circle to a new location.
    */
-  setLatLng(latlng) {
+  void setLatLng(latlng) {
     _latlng = new LatLng.latLng(latlng);
-    return redraw();
+    redraw();
   }
 
   /**
    * Sets the radius of a circle. Units are in meters.
    */
-  setRadius(radius) {
+  void setRadius(radius) {
     _mRadius = radius;
-    return redraw();
+    redraw();
   }
 
-  projectLatlngs() {
-    var lngRadius = _getLngRadius(),
+  void projectLatlngs([Object obj=null, Event e=null]) {
+    final lngRadius = _getLngRadius(),
         latlng = _latlng,
-        pointLeft = _map.latLngToLayerPoint([latlng.lat, latlng.lng - lngRadius]);
+        pointLeft = _map.latLngToLayerPoint(new LatLng(latlng.lat, latlng.lng - lngRadius));
 
     _point = _map.latLngToLayerPoint(latlng);
     _radius = math.max(_point.x - pointLeft.x, 1);
   }
 
-  getBounds() {
-    var lngRadius = _getLngRadius(),
+  LatLngBounds getBounds() {
+    final lngRadius = _getLngRadius(),
         latRadius = (_mRadius / 40075017) * 360,
         latlng = _latlng;
 
-    return new LatLngBounds(
-            [latlng.lat - latRadius, latlng.lng - lngRadius],
-            [latlng.lat + latRadius, latlng.lng + lngRadius]);
+    return new LatLngBounds.between(
+            new LatLng(latlng.lat - latRadius, latlng.lng - lngRadius),
+            new LatLng(latlng.lat + latRadius, latlng.lng + lngRadius));
   }
 
   /**
    * Returns the current geographical position of the circle.
    */
-  getLatLng() {
+  LatLng getLatLng() {
     return _latlng;
   }
 
-  getPathString() {
+  String getPathString() {
     var p = _point,
         r = _radius;
 
@@ -73,38 +73,36 @@ class Circle extends Path {
     }
 
     if (Browser.svg) {
-      return 'M' + p.x + ',' + (p.y - r) +
-             'A' + r + ',' + r + ',0,1,1,' +
-             (p.x - 0.1) + ',' + (p.y - r) + ' z';
+      return 'M${p.x},${p.y - r}A$r,$r,0,1,1,${p.x - 0.1},${p.y - r} z';
     } else {
-      p._round();
+      p.round();
       r = r.round();
-      return 'AL ' + p.x + ',' + p.y + ' ' + r + ',' + r + ' 0,${65535 * 360}';
+      return 'AL ${p.x},${p.y} $r,$r 0,${65535 * 360}';
     }
   }
 
   /**
    * Returns the current radius of a circle. Units are in meters.
    */
-  getRadius() {
+  num getRadius() {
     return _mRadius;
   }
 
   // TODO Earth hardcoded, move into projection code!
 
-  _getLatRadius() {
+  num _getLatRadius() {
     return (_mRadius / 40075017) * 360;
   }
 
-  _getLngRadius() {
+  num _getLngRadius() {
     return _getLatRadius() / math.cos(LatLng.DEG_TO_RAD * _latlng.lat);
   }
 
-  _checkIfEmpty() {
+  bool _checkIfEmpty() {
     if (_map == null) {
       return false;
     }
-    var vp = _map._pathViewport,
+    final vp = _map.pathViewport,
         r = _radius,
         p = _point;
 
@@ -115,7 +113,7 @@ class Circle extends Path {
   toGeoJSON() {
     return GeoJSON.getFeature(this, {
       'type': 'Point',
-      'coordinates': GeoJSON.latLngToCoords(_getLatLng())
+      'coordinates': GeoJSON.latLngToCoords(getLatLng())
     });
   }
 }

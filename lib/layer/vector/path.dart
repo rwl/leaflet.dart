@@ -70,7 +70,7 @@ class PathOptions {
 /**
  * Path is a base class for rendering vector paths on a map. Inherited by Polyline, Circle, etc.
  */
-abstract class Path extends Object with Events {
+abstract class Path extends Layer with Events {
 
   // how much to extend the clip area around the map view
   // (relative to its size, e.g. 0.5 is half the screen in each direction)
@@ -101,7 +101,8 @@ abstract class Path extends Object with Events {
   List<LatLng> _latlngs;
 
   BaseMap _map;
-  var _container, _stroke, _fill;
+  Element _container;
+  var _stroke, _fill;
 
   Path(this.options);
 
@@ -117,7 +118,7 @@ abstract class Path extends Object with Events {
     this._updatePath();
 
     if (_container != null) {
-      _map._pathRoot.append(_container);
+      _map.pathRoot.append(_container);
     }
 
     fire(EventType.ADD);
@@ -129,13 +130,13 @@ abstract class Path extends Object with Events {
   /**
    * Adds the layer to the map.
    */
-  addTo(BaseMap map) {
+  void addTo(BaseMap map) {
     map.addLayer(this);
-    return this;
   }
 
-  onRemove(BaseMap map) {
-    map._pathRoot.removeChild(_container);
+  void onRemove(BaseMap map) {
+    //map.pathRoot.removeChild(_container);
+    _container.remove();
 
     // Need to fire remove event before we set _map to null as the event hooks might need the object
     fire(EventType.REMOVE);
@@ -151,32 +152,30 @@ abstract class Path extends Object with Events {
     map.off(EventType.MOVEEND, this._updatePath, this);
   }
 
-  projectLatlngs() {
-    // do all projection stuff here
-  }
+  /**
+   * Do all projection stuff here.
+   */
+  void projectLatlngs([Object obj=null, Event e=null]);
 
   /**
    * Changes the appearance of a Path based on the options in the Path options object.
    */
-  setStyle(PathOptions style) {
+  void setStyle(PathOptions style) {
     options = style;
 
-    if (_container) {
+    if (_container != null) {
       _updateStyle();
     }
-
-    return this;
   }
 
   /**
    * Redraws the layer. Sometimes useful after you changed the coordinates that the path uses.
    */
-  redraw() {
+  void redraw() {
     if (_map != null) {
       projectLatlngs();
       this._updatePath();
     }
-    return this;
   }
 
 
@@ -190,12 +189,12 @@ abstract class Path extends Object with Events {
   /**
    * Binds a popup with a particular HTML content to a click on this path.
    */
-  bindPopupHtml(String html, PopupOptions options) {
+  void bindPopupHtml(String html, PopupOptions options) {
     _popup = new Popup(options, this);
     _popup.setContent(html);
   }
 
-  bindPopupElement(Element elem, PopupOptions options) {
+  void bindPopupElement(Element elem, PopupOptions options) {
     _popup = new Popup(options, this);
     _popup.setContent(elem);
   }
@@ -203,7 +202,7 @@ abstract class Path extends Object with Events {
   /**
    * Binds a given popup object to the path.
    */
-  bindPopup(Popup popup, PopupOptions options) {
+  void bindPopup(Popup popup, PopupOptions options) {
     _popup = popup;
 
     if (!_popupHandlersAdded) {
@@ -217,7 +216,7 @@ abstract class Path extends Object with Events {
   /**
    * Unbinds the popup previously bound to the path with bindPopup.
    */
-  unbindPopup() {
+  void unbindPopup() {
     if (_popup != null) {
       _popup = null;
       off(EventType.CLICK, _openPopup);
@@ -225,13 +224,12 @@ abstract class Path extends Object with Events {
 
       _popupHandlersAdded = false;
     }
-    return this;
   }
 
   /**
    * Opens the popup previously bound by the bindPopup method in the given point, or in one of the path's points if not specified.
    */
-  openPopup([LatLng latlng = null]) {
+  void openPopup([LatLng latlng = null]) {
 
     if (_popup != null) {
       // Open the popup from one of the path's points if not specified.
@@ -239,25 +237,20 @@ abstract class Path extends Object with Events {
         latlng = _latlngs[(_latlngs.length / 2).floor()];
       }
 
-      _openPopup({
-        'latlng': latlng
-      });
+      _openPopup(null, new LocationEvent()..latlng = latlng);
     }
-
-    return this;
   }
 
   /**
    * Closes the path's bound popup if it is opened.
    */
-  closePopup() {
+  void closePopup(Object obj, Event e) {
     if (_popup != null) {
-      _popup._close();
+      _popup.close();
     }
-    return this;
   }
 
-  _openPopup(e) {
+  void _openPopup(Object obj, LocationEvent e) {
     _popup.setLatLng(e.latlng);
     _map.openPopup(_popup);
   }
@@ -280,11 +273,11 @@ abstract class Path extends Object with Events {
    * Brings the layer to the top of all path layers.
    */
   bringToFront() {
-    final root = _map._pathRoot,
+    final root = _map.pathRoot,
         path = _container;
 
     if (path && root.lastChild != path) {
-      root.appendChild(path);
+      root.append(path);
     }
   }
 
@@ -292,7 +285,7 @@ abstract class Path extends Object with Events {
    * Brings the layer to the bottom of all path layers.
    */
   bringToBack() {
-    final root = _map._pathRoot,
+    final root = _map.pathRoot,
         path = _container,
         first = root.firstChild;
 
@@ -320,10 +313,10 @@ abstract class Path extends Object with Events {
     _path = _createElement('path');
 
     if (options.className != null) {
-      DomUtil.addClass(_path, options.className);
+      dom.addClass(_path, options.className);
     }
 
-    _container.appendChild(_path);
+    _container.append(_path);
   }
 
   _initStyle() {
@@ -370,7 +363,7 @@ abstract class Path extends Object with Events {
     }
   }
 
-  _updatePath() {
+  _updatePath([Object obj, Event e]) {
     var str = getPathString();
     if (!str) {
       // fix webkit empty string parsing bug
@@ -383,15 +376,15 @@ abstract class Path extends Object with Events {
   _initEvents() {
     if (options.clickable) {
       if (Browser.svg || !Browser.vml) {
-        DomUtil.addClass(_path, 'leaflet-clickable');
+        dom.addClass(_path, 'leaflet-clickable');
       }
 
-      DomEvent.on(_container, 'click', _onMouseClick, this);
+      dom.on(_container, 'click', _onMouseClick, this);
 
       var events = ['dblclick', 'mousedown', 'mouseover',
                     'mouseout', 'mousemove', 'contextmenu'];
       for (var i = 0; i < events.length; i++) {
-        DomEvent.on(_container, events[i], _fireMouseEvent, this);
+        dom.on(_container, events[i], _fireMouseEvent, this);
       }
     }
   }
@@ -418,10 +411,10 @@ abstract class Path extends Object with Events {
     });
 
     if (e.type == 'contextmenu') {
-      DomEvent.preventDefault(e);
+      dom.preventDefault(e);
     }
     if (e.type != 'mousemove') {
-      DomEvent.stopPropagation(e);
+      dom.stopPropagation(e);
     }
   }
 }
