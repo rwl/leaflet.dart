@@ -5,7 +5,7 @@ part of leaflet.geometry;
  */
 class Point {
 
-  num x, y;
+  num x, y, z;
 
   int _code;
 

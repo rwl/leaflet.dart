@@ -2,6 +2,13 @@ part of leaflet.core;
 
 //final Util = new Util();
 
+/**
+ * Data URI string containing a base64-encoded empty GIF image. Used as a
+ * hack to free memory from unused images on WebKit-powered mobile devices
+ * (by setting image src to this string).
+ */
+String emptyImageUrl;
+
 final idProp = new Expando<Object>('_leaflet_id');
 
 /**

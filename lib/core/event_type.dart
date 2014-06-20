@@ -216,4 +216,13 @@ class EventType {
   static const BOXZOOMEND = const EventType._internal('boxzoomend');
 
   static const PREDRAG = const EventType._internal('predrag');
+
+  static const TILELOAD = const EventType._internal('tileload');
+  static const TILEUNLOAD = const EventType._internal('tileunload');
+
+  static const LOADING = const EventType._internal('loading');
+
+  static const TILELOADSTART = const EventType._internal('tileloadstart');
+
+  static const TILEERROR = const EventType._internal('tileerror');
 }

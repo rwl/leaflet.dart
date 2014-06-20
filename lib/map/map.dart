@@ -1232,6 +1232,8 @@ class BaseMap extends Object with Events {
   var _animateToCenter;
   var _animateToZoom;
 
+  bool get zoomAnimated => _zoomAnimated;
+
   _catchTransitionEnd(e) {
     if (this._animatingZoom && e.propertyName.indexOf('transform') >= 0) {
       this._onZoomTransitionEnd();

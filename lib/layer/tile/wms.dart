@@ -1,6 +1,6 @@
 part of leaflet.layer.tile;
 
-class WMSOptions {
+class WMSOptions extends TileLayerOptions {
   /**
    * Comma-separated list of WMS layers to show (required).
    */
@@ -46,17 +46,17 @@ class WMS extends TileLayer {
     'format': 'image/jpeg',
     'transparent': false
   };*/
-  WMSOptions wmsParams;
+  WMSOptions get wmsOptions => options as WMSOptions;
 
-  WMS(String url, this.wmsParams, TileLayerOptions options) : super(url, options) {
+  WMS(String url, WMSOptions options) : super(url, options) {
 
 //    var wmsParams = L.extend({}, this.defaultWmsParams),
     final tileSize = options.tileSize;// || this.options.tileSize;
 
     if (options.detectRetina && Browser.retina) {
-      wmsParams.width = wmsParams.height = tileSize * 2;
+      wmsOptions.width = wmsOptions.height = tileSize * 2;
     } else {
-      wmsParams.width = wmsParams.height = tileSize;
+      wmsOptions.width = wmsOptions.height = tileSize;
     }
 
     /*for (var i in options) {
@@ -72,22 +72,28 @@ class WMS extends TileLayer {
   }
 
   CRS _crs;
+  double _wmsVersion;
 
   onAdd(BaseMap map) {
 
-    this._crs = this.options.crs || map.options.crs;
+    this._crs = this.wmsOptions.crs != null ? wmsOptions.crs : map.stateOptions.crs;
 
-    this._wmsVersion = parseFloat(this.wmsParams.version);
+    this._wmsVersion = double.parse(this.wmsOptions.version);
 
-    var projectionKey = this._wmsVersion >= 1.3 ? 'crs' : 'srs';
-    this.wmsParams[projectionKey] = this._crs.code;
+    //var projectionKey = this._wmsVersion >= 1.3 ? 'crs' : 'srs';
+    if (_wmsVersion >= 1.3) {
+      this.wmsOptions.crs = this._crs.code;
+    } else {
+      wmsOptions.srs = this._crs.code;
+    }
 
-    L.TileLayer.prototype.onAdd.call(this, map);
+    //L.TileLayer.prototype.onAdd.call(this, map);
+    super.onAdd(map);
   }
 
   getTileUrl(tilePoint) { // (Point, Number) -> String
 
-    var map = this._map,
+    final map = this._map,
         tileSize = this.options.tileSize,
 
         nwPoint = tilePoint.multiplyBy(tileSize),
@@ -95,27 +101,26 @@ class WMS extends TileLayer {
 
         nw = this._crs.project(map.unproject(nwPoint, tilePoint.z)),
         se = this._crs.project(map.unproject(sePoint, tilePoint.z)),
-        bbox = this._wmsVersion >= 1.3 && this._crs == L.CRS.EPSG4326 ?
+        bbox = this._wmsVersion >= 1.3 && this._crs == EPSG4326 ?
             [se.y, nw.x, nw.y, se.x].join(',') :
             [nw.x, se.y, se.x, nw.y].join(','),
 
-        url = L.Util.template(this._url, {s: this._getSubdomain(tilePoint)});
+        url = core.template(this._url, {'s': this._getSubdomain(tilePoint)});
 
-    return url + L.Util.getParamString(this.wmsParams, url, true) + '&BBOX=' + bbox;
+    return url + core.getParamString(this.wmsOptions, url, true) + '&BBOX=' + bbox;
   }
 
   /**
    * Merges an object with the new parameters and re-requests tiles on the
    * current screen (unless noRedraw was set to true).
    */
-  setParams(params, noRedraw) {
+  setParams(WMSOptions params, bool noRedraw) {
 
-    L.extend(this.wmsParams, params);
+    //L.extend(this.wmsParams, params);
+    wmsOptions.merge(params);
 
     if (!noRedraw) {
       this.redraw();
     }
-
-    return this;
   }
 }

@@ -126,6 +126,7 @@ class TileLayer extends Object with core.Events implements Layer {
   String _url;
   BaseMap _map;
   bool _animated;
+  Timer _clearBgBufferTimer;
 
 //  final Map<String, Object> options = {
 //    'minZoom': 0,
@@ -181,31 +182,31 @@ class TileLayer extends Object with core.Events implements Layer {
 
   void onAdd(BaseMap map) {
     _map = map;
-    _animated = map._zoomAnimated;
+    _animated = map.zoomAnimated;
 
     // create a container div for tiles
     _initContainer();
 
     // set up events
-    map.on(EventType.VIEWRESET, this._animateZoom, this);
-    map.on(EventType.MOVEEND, this._update, this);
+    map.on(EventType.VIEWRESET, _animateZoom, this);
+    map.on(EventType.MOVEEND, _update, this);
 //    map.on({
-//      'viewreset': this._reset,
-//      'moveend': this._update
+//      'viewreset': _reset,
+//      'moveend': _update
 //    }, this);
 
     if (_animated) {
-      map.on(EventType.ZOOMANIM, this._animateZoom, this);
-      map.on(EventType.ZOOMEND, this._endZoomAnim, this);
+      map.on(EventType.ZOOMANIM, _animateZoom, this);
+      map.on(EventType.ZOOMEND, _endZoomAnim, this);
 //      map.on({
-//        'zoomanim': this._animateZoom,
-//        'zoomend': this._endZoomAnim
+//        'zoomanim': _animateZoom,
+//        'zoomend': _endZoomAnim
 //      }, this);
     }
 
     if (!options.updateWhenIdle) {
-      _limitedUpdate = Util.limitExecByInterval(this._update, 150, this);
-      map.on(EventType.MOVE, this._limitedUpdate, this);
+      _limitedUpdate = limitExecByInterval(_update, 150, this);
+      map.on(EventType.MOVE, _limitedUpdate, this);
     }
 
     _reset();
@@ -225,24 +226,24 @@ class TileLayer extends Object with core.Events implements Layer {
     //_container.parentNode.removeChild(_container);
     _container.remove();
 
-    map.off(EventType.VIEWRESET, this._reset, this);
-    map.off(EventType.MOVEEND, this._update, this);
+    map.off(EventType.VIEWRESET, _reset, this);
+    map.off(EventType.MOVEEND, _update, this);
 //    map.off({
-//      'viewreset': this._reset,
-//      'moveend': this._update
+//      'viewreset': _reset,
+//      'moveend': _update
 //    }, this);
 
     if (_animated) {
-      map.off(EventType.ZOOMANIM, this._animateZoom, this);
-      map.off(EventType.ZOOMEND, this._endZoomAnim, this);
+      map.off(EventType.ZOOMANIM, _animateZoom, this);
+      map.off(EventType.ZOOMEND, _endZoomAnim, this);
 //      map.off({
-//        'zoomanim': this._animateZoom,
-//        'zoomend': this._endZoomAnim
+//        'zoomanim': _animateZoom,
+//        'zoomend': _endZoomAnim
 //      }, this);
     }
 
     if (!options.updateWhenIdle) {
-      map.off(EventType.MOVE, this._limitedUpdate, this);
+      map.off(EventType.MOVE, _limitedUpdate, this);
     }
 
     _container = null;
@@ -356,10 +357,10 @@ class TileLayer extends Object with core.Events implements Layer {
 
     if (Browser.ielt9) {
       for (var i in tiles) {
-        DomUtil.setOpacity(tiles[i], options.opacity);
+        dom.setOpacity(tiles[i], options.opacity);
       }
     } else {
-      DomUtil.setOpacity(_container, options.opacity);
+      dom.setOpacity(_container, options.opacity);
     }
   }
 
@@ -369,15 +370,15 @@ class TileLayer extends Object with core.Events implements Layer {
     final tilePane = _map.panes['tilePane'];
 
     if (_container == null) {
-      _container = DomUtil.create('div', 'leaflet-layer');
+      _container = dom.create('div', 'leaflet-layer');
 
       _updateZIndex();
 
       if (_animated) {
         final className = 'leaflet-tile-container';
 
-        _bgBuffer = DomUtil.create('div', className, _container);
-        _tileContainer = DomUtil.create('div', className, _container);
+        _bgBuffer = dom.create('div', className, _container);
+        _tileContainer = dom.create('div', className, _container);
 
       } else {
         _tileContainer = _container;
@@ -394,7 +395,7 @@ class TileLayer extends Object with core.Events implements Layer {
   int _tilesToLoad;
   List _unusedTiles;
 
-  void _reset([bool hard = false]/*[core.Event e = null]*/) {
+  void _reset([Object obj, Event e, bool hard = false]) {
     for (var key in _tiles) {
       fire(EventType.TILEUNLOAD, {'tile': _tiles[key]});
     }
@@ -428,7 +429,7 @@ class TileLayer extends Object with core.Events implements Layer {
     return tileSize;
   }
 
-  void _update() {
+  void _update([Object obj=null, Event e=null]) {
 
     if (_map == null) { return; }
 
@@ -441,9 +442,9 @@ class TileLayer extends Object with core.Events implements Layer {
       return;
     }
 
-    final tileBounds = new LatLngBounds(
-            bounds.min.divideBy(tileSize)._floor(),
-            bounds.max.divideBy(tileSize)._floor());
+    final tileBounds = new geom.Bounds.between(
+            (bounds.min / tileSize).floored(),
+            (bounds.max / tileSize).floored());
 
     _addTilesFromCenterOut(tileBounds);
 
@@ -452,12 +453,12 @@ class TileLayer extends Object with core.Events implements Layer {
     }
   }
 
-  void _addTilesFromCenterOut(LatLngBounds bounds) {
+  void _addTilesFromCenterOut(geom.Bounds bounds) {
     final queue = new List<geom.Point>(),
         center = bounds.getCenter();
 
     for (num j = bounds.min.y; j <= bounds.max.y; j++) {
-      for (i = bounds.min.x; i <= bounds.max.x; i++) {
+      for (num i = bounds.min.x; i <= bounds.max.x; i++) {
         final point = new geom.Point(i, j);
 
         if (_tileShouldBeLoaded(point)) {
@@ -508,8 +509,8 @@ class TileLayer extends Object with core.Events implements Layer {
 
     if (options.bounds != null) {
       final tileSize = options.tileSize,
-          nwPoint = tilePoint.multiplyBy(tileSize),
-          sePoint = nwPoint.add([tileSize, tileSize]);
+          nwPoint = tilePoint * tileSize,
+          sePoint = nwPoint + new geom.Point(tileSize, tileSize);
       LatLng nw = _map.unproject(nwPoint),
           se = _map.unproject(sePoint);
 
@@ -520,7 +521,7 @@ class TileLayer extends Object with core.Events implements Layer {
         se = se.wrap();
       }
 
-      if (!options.bounds.intersects([nw, se])) {
+      if (!options.bounds.intersects(new LatLngBounds.between(nw, se))) {
         return false;
       }
     }
@@ -528,9 +529,7 @@ class TileLayer extends Object with core.Events implements Layer {
     return true;
   }
 
-  void _removeOtherTiles(bounds) {
-//    var kArr, x, y, key;
-
+  void _removeOtherTiles(geom.Bounds bounds) {
     for (var key in _tiles) {
       final kArr = key.split(':');
       final x = int.parse(kArr[0], radix:10);
@@ -549,7 +548,7 @@ class TileLayer extends Object with core.Events implements Layer {
     fire(EventType.TILEUNLOAD, {'tile': tile, 'url': tile.src});
 
     if (options.reuseTiles) {
-      DomUtil.removeClass(tile, 'leaflet-tile-loaded');
+      dom.removeClass(tile, 'leaflet-tile-loaded');
       _unusedTiles.add(tile);
 
     } else if (tile.parentNode == _tileContainer) {
@@ -560,7 +559,7 @@ class TileLayer extends Object with core.Events implements Layer {
     // for https://github.com/CloudMade/Leaflet/issues/137
     if (!Browser.android) {
       tile.onload = null;
-      tile.src = Util.emptyImageUrl;
+      tile.src = core.emptyImageUrl;
     }
 
     _tiles.remove(key);
@@ -577,7 +576,7 @@ class TileLayer extends Object with core.Events implements Layer {
     Android 4 browser has display issues with top/left and requires transform instead
     (other browsers don't currently care) - see debug/hacks/jitter.html for an example
     */
-    DomUtil.setPosition(tile, tilePos, Browser.chrome);
+    dom.setPosition(tile, tilePos, Browser.chrome);
 
     _tiles['${tilePoint.x}:${tilePoint.y}'] = tile;
 
@@ -604,13 +603,13 @@ class TileLayer extends Object with core.Events implements Layer {
     final origin = _map.getPixelOrigin(),
         tileSize = _getTileSize();
 
-    return tilePoint.multiplyBy(tileSize).subtract(origin);
+    return (tilePoint * tileSize) - origin;
   }
 
   // image-specific code (override to implement e.g. Canvas or SVG tile layer)
 
   String getTileUrl(geom.Point tilePoint) {
-    return Util.template(_url, extend({
+    return core.template(_url, extend({
       's': _getSubdomain(tilePoint),
       'z': tilePoint.z,
       'x': tilePoint.x,
@@ -647,7 +646,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
   Element _getTile() {
     if (options.reuseTiles && _unusedTiles.length > 0) {
-      var tile = _unusedTiles.pop();
+      final tile = _unusedTiles.removeLast();
       _resetTile(tile);
       return tile;
     }
@@ -658,14 +657,14 @@ class TileLayer extends Object with core.Events implements Layer {
   _resetTile(tile) {}
 
   Element _createTile() {
-    final tile = DomUtil.create('img', 'leaflet-tile');
-    tile.style.width = tile.style.height = _getTileSize() + 'px';
+    final tile = dom.create('img', 'leaflet-tile');
+    tile.style.width = tile.style.height = '${_getTileSize()}px';
     tile.galleryimg = 'no';
 
-    tile.onselectstart = tile.onmousemove = Util.falseFn;
+    tile.onselectstart = tile.onmousemove = core.falseFn;
 
     if (Browser.ielt9 && options.opacity != null) {
-      DomUtil.setOpacity(tile, options.opacity);
+      dom.setOpacity(tile, options.opacity);
     }
     // without this hack, tiles disappear after zoom on Chrome for Android
     // https://github.com/Leaflet/Leaflet/issues/2078
@@ -693,7 +692,7 @@ class TileLayer extends Object with core.Events implements Layer {
     _tilesToLoad--;
 
     if (_animated) {
-      DomUtil.addClass(_tileContainer, 'leaflet-zoom-animated');
+      dom.addClass(_tileContainer, 'leaflet-zoom-animated');
     }
 
     if (_tilesToLoad == 0) {
@@ -701,8 +700,14 @@ class TileLayer extends Object with core.Events implements Layer {
 
       if (_animated) {
         // clear scaled tiles after all new tiles are loaded (for performance)
-        clearTimeout(_clearBgBufferTimer);
-        _clearBgBufferTimer = setTimeout(bind(_clearBgBuffer, this), 500);
+        //clearTimeout(_clearBgBufferTimer);
+        //_clearBgBufferTimer = setTimeout(bind(_clearBgBuffer, this), 500);
+        if (_clearBgBufferTimer != null) {
+          _clearBgBufferTimer.cancel();
+        }
+        _clearBgBufferTimer = new Timer(const Duration(milliseconds: 500), () {
+          _clearBgBuffer();
+        });
       }
     }
   }
@@ -711,8 +716,8 @@ class TileLayer extends Object with core.Events implements Layer {
     final layer = _layer;
 
     //Only if we are loading an actual image
-    if (this.src != Util.emptyImageUrl) {
-      DomUtil.addClass(this, 'leaflet-tile-loaded');
+    if (this.src != core.emptyImageUrl) {
+      dom.addClass(this, 'leaflet-tile-loaded');
 
       layer.fire(EventType.TILELOAD, {
         'tile': this,
@@ -742,82 +747,87 @@ class TileLayer extends Object with core.Events implements Layer {
 
   /* Zoom animation logic for TileLayer */
 
-  _animateZoom(e) {
-    if (!this._animating) {
-      this._animating = true;
-      this._prepareBgBuffer();
+  bool _animating;
+
+  void _animateZoom(Object obj, Event e) {
+    if (!_animating) {
+      _animating = true;
+      _prepareBgBuffer();
     }
 
-    var bg = this._bgBuffer,
-        transform = L.DomUtil.TRANSFORM,
-        initialTransform = e.delta ? L.DomUtil.getTranslateString(e.delta) : bg.style[transform],
-        scaleStr = L.DomUtil.getScaleString(e.scale, e.origin);
+    final bg = _bgBuffer,
+        transform = dom.TRANSFORM,
+        initialTransform = e.delta ? dom.getTranslateString(e.delta) : bg.style[transform],
+        scaleStr = dom.getScaleString(e.scale, e.origin);
 
     bg.style[transform] = e.backwards ?
         scaleStr + ' ' + initialTransform :
         initialTransform + ' ' + scaleStr;
   }
 
-  _endZoomAnim() {
-    var front = this._tileContainer,
-        bg = this._bgBuffer;
+  void _endZoomAnim(Object obj, e Event) {
+    final front = _tileContainer,
+        bg = _bgBuffer;
 
     front.style.visibility = '';
-    front.parentNode.appendChild(front); // Bring to fore
+    front.parentNode.append(front); // Bring to fore
 
     // force reflow
-    L.Util.falseFn(bg.offsetWidth);
+    core.falseFn(bg.offsetWidth);
 
-    this._animating = false;
+    _animating = false;
   }
 
-  _clearBgBuffer() {
-    var map = this._map;
+  void _clearBgBuffer() {
+    final map = _map;
 
     if (map && !map._animatingZoom && !map.touchZoom._zooming) {
-      this._bgBuffer.innerHTML = '';
-      this._bgBuffer.style[L.DomUtil.TRANSFORM] = '';
+      _bgBuffer.setInnerHtml('');
+      _bgBuffer.style[dom.TRANSFORM] = '';
     }
   }
 
-  _prepareBgBuffer() {
+  void _prepareBgBuffer() {
 
-    var front = this._tileContainer,
-        bg = this._bgBuffer;
+    final front = _tileContainer;
+    Element bg = _bgBuffer;
 
     // if foreground layer doesn't have many tiles but bg layer does,
     // keep the existing bg layer and just zoom it some more
 
-    var bgLoaded = this._getLoadedTilesPercentage(bg),
-        frontLoaded = this._getLoadedTilesPercentage(front);
+    final bgLoaded = _getLoadedTilesPercentage(bg),
+        frontLoaded = _getLoadedTilesPercentage(front);
 
     if (bg && bgLoaded > 0.5 && frontLoaded < 0.5) {
 
       front.style.visibility = 'hidden';
-      this._stopLoadingImages(front);
+      _stopLoadingImages(front);
       return;
     }
 
     // prepare the buffer to become the front tile pane
     bg.style.visibility = 'hidden';
-    bg.style[L.DomUtil.TRANSFORM] = '';
+    bg.style[dom.TRANSFORM] = '';
 
     // switch out the current layer to be the new bg layer (and vice-versa)
-    this._tileContainer = bg;
-    bg = this._bgBuffer = front;
+    _tileContainer = bg;
+    bg = _bgBuffer = front;
 
-    this._stopLoadingImages(bg);
+    _stopLoadingImages(bg);
 
     //prevent bg buffer from clearing right after zoom
-    clearTimeout(this._clearBgBufferTimer);
+    //clearTimeout(_clearBgBufferTimer);
+    if (_clearBgBufferTimer != null) {
+      _clearBgBufferTimer.cancel();
+    }
   }
 
-  _getLoadedTilesPercentage(container) {
-    var tiles = container.getElementsByTagName('img'),
-        i, len, count = 0;
+  num _getLoadedTilesPercentage(Element container) {
+    final tiles = container.querySelectorAll('img');
+    int count = 0;
 
-    len = tiles.length;
-    for (i = 0; i < len; i++) {
+    final len = tiles.length;
+    for (int i = 0; i < len; i++) {
       if (tiles[i].complete) {
         count++;
       }
@@ -825,19 +835,21 @@ class TileLayer extends Object with core.Events implements Layer {
     return count / len;
   }
 
-  // stops loading all tiles in the background layer
-  _stopLoadingImages(container) {
-    var tiles = Array.prototype.slice.call(container.getElementsByTagName('img')),
-        i, len, tile;
+  /**
+   * Stops loading all tiles in the background layer.
+   */
+  void _stopLoadingImages(Element container) {
+    //var tiles = Array.prototype.slice.call(container.getElementsByTagName('img'));
+    final tiles = container.querySelectorAll('img');
 
-    len = tiles.length;
-    for (i = 0; i < len; i++) {
-      tile = tiles[i];
+    final len = tiles.length;
+    for (int i = 0; i < len; i++) {
+      final tile = tiles[i];
 
       if (!tile.complete) {
-        tile.onload = L.Util.falseFn;
-        tile.onerror = L.Util.falseFn;
-        tile.src = L.Util.emptyImageUrl;
+        tile.onload = core.falseFn;
+        tile.onerror = core.falseFn;
+        tile.src = core.emptyImageUrl;
 
         tile.parentNode.removeChild(tile);
       }

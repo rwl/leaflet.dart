@@ -5,18 +5,17 @@ final DomUtil = new _DomUtil();
 /**
  * DomUtil contains various utility functions for working with DOM.
  */
-class _DomUtil {
+//class _DomUtil {
 
-  /**
-   * Vendor-prefixed transition style name (e.g. 'webkitTransition' for WebKit).
-   */
-  String TRANSITION;
+/**
+ * Vendor-prefixed transition style name (e.g. 'webkitTransition' for WebKit).
+ */
+String TRANSITION;
 
-  /**
-   * Vendor-prefixed transform style name.
-   */
-  String TRANSFORM;
-}
+/**
+ * Vendor-prefixed transform style name.
+ */
+String TRANSFORM;
 
 /**
  * Returns an element with the given id if a string was passed, or just returns the element if it was passed directly.
