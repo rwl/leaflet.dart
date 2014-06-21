@@ -70,7 +70,7 @@ class PopupOptions {
 /**
  * Popup is used for displaying popups on the map.
  */
-class Popup extends Layer with core.Events {
+class Popup extends Layer with Events {
 
   /*Map<String, Object> options = {
     'minWidth': 50,
@@ -115,24 +115,26 @@ class Popup extends Layer with core.Events {
     final bool animFade = map.animationOptions.fadeAnimation;
 
     if (animFade) {
-      DomUtil.setOpacity(_container, 0);
+      dom.setOpacity(_container, 0);
     }
     map.panes['popupPane'].append(_container);
 
-    map.on(_getEvents(), this);
+    _getEvents().forEach((EventType et, Action a) {
+      map.on(et, a, this);
+    });
 
     update();
 
     if (animFade) {
-      DomUtil.setOpacity(_container, 1);
+      dom.setOpacity(_container, 1);
     }
 
     fire(EventType.OPEN);
 
     map.fire(EventType.POPUPOPEN, {'popup': this});
 
-    if (_source) {
-      _source.fire('popupopen', {'popup': this});
+    if (_source != null) {
+      _source.fire(EventType.POPUPOPEN, {'popup': this});
     }
   }
 
@@ -152,12 +154,14 @@ class Popup extends Layer with core.Events {
     //map.panes['popupPane'].removeChild(_container);
     _container.remove();
 
-    Util.falseFn(_container.offsetWidth); // force reflow
+    core.falseFn(_container.offsetWidth); // force reflow
 
-    map.off(_getEvents(), this);
+    _getEvents().forEach((EventType et, Action a) {
+      map.off(et, a, this);
+    });
 
     if (map.animationOptions.fadeAnimation) {
-      DomUtil.setOpacity(_container, 0);
+      dom.setOpacity(_container, 0);
     }
 
     _map = null;
@@ -166,8 +170,8 @@ class Popup extends Layer with core.Events {
 
     map.fire(EventType.POPUPCLOSE, {'popup': this});
 
-    if (_source) {
-      _source.fire('popupclose', {'popup': this});
+    if (_source != null) {
+      _source.fire(EventType.POPUPCLOSE, {'popup': this});
     }
   }
 
@@ -212,7 +216,7 @@ class Popup extends Layer with core.Events {
     _adjustPan();
   }
 
-  Map<EventType, Function>_getEvents() {
+  Map<EventType, Action>_getEvents() {
     final events = {
       EventType.VIEWRESET: _updatePosition
     };
@@ -247,29 +251,29 @@ class Popup extends Layer with core.Events {
     final prefix = 'leaflet-popup',
       containerClass = prefix + ' ' + options.className + ' leaflet-zoom-' +
               (_animated ? 'animated' : 'hide'),
-      container = _container = DomUtil.create('div', containerClass);
+      container = _container = dom.create('div', containerClass);
 
     if (options.closeButton) {
       final closeButton = _closeButton =
-              DomUtil.create('a', prefix + '-close-button', container);
+              dom.create('a', prefix + '-close-button', container);
       closeButton.href = '#close';
-      closeButton.innerHTML = '&#215;';
-      DomEvent.disableClickPropagation(closeButton);
+      closeButton.setInnerHtml('&#215;');
+      dom.disableClickPropagation(closeButton);
 
-      DomEvent.on(closeButton, 'click', _onCloseButtonClick, this);
+      dom.on(closeButton, 'click', _onCloseButtonClick, this);
     }
 
     final wrapper = _wrapper =
-            DomUtil.create('div', prefix + '-content-wrapper', container);
-    DomEvent.disableClickPropagation(wrapper);
+            dom.create('div', prefix + '-content-wrapper', container);
+    dom.disableClickPropagation(wrapper);
 
-    _contentNode = DomUtil.create('div', prefix + '-content', wrapper);
+    _contentNode = dom.create('div', prefix + '-content', wrapper);
 
-    DomEvent.disableScrollPropagation(_contentNode);
-    DomEvent.on(wrapper, 'contextmenu', DomEvent.stopPropagation);
+    dom.disableScrollPropagation(_contentNode);
+    dom.on(wrapper, 'contextmenu', dom.stopPropagation);
 
-    _tipContainer = DomUtil.create('div', prefix + '-tip-container', container);
-    _tip = DomUtil.create('div', prefix + '-tip', _tipContainer);
+    _tipContainer = dom.create('div', prefix + '-tip-container', container);
+    _tip = dom.create('div', prefix + '-tip', _tipContainer);
   }
 
   void _updateContent() {
@@ -308,10 +312,10 @@ class Popup extends Layer with core.Events {
         scrolledClass = 'leaflet-popup-scrolled';
 
     if (maxHeight && height > maxHeight) {
-      style.height = maxHeight + 'px';
-      DomUtil.addClass(container, scrolledClass);
+      style.height = '${maxHeight}px';
+      dom.addClass(container, scrolledClass);
     } else {
-      DomUtil.removeClass(container, scrolledClass);
+      dom.removeClass(container, scrolledClass);
     }
 
     _containerWidth = _container.offsetWidth;
@@ -325,7 +329,7 @@ class Popup extends Layer with core.Events {
         offset = new geom.Point.point(options.offset);
 
     if (animated) {
-      DomUtil.setPosition(_container, pos);
+      dom.setPosition(_container, pos);
     }
 
     _containerBottom = -offset.y - (animated ? 0 : pos.y);
@@ -339,7 +343,7 @@ class Popup extends Layer with core.Events {
   void _zoomAnimation(num zoom, LatLng center) {
     var pos = _map.latLngToNewLayerPoint(_latlng, zoom, center);
 
-    DomUtil.setPosition(_container, pos);
+    dom.setPosition(_container, pos);
   }
 
   void _adjustPan() {
@@ -352,7 +356,7 @@ class Popup extends Layer with core.Events {
     final layerPos = new geom.Point(_containerLeft, -containerHeight - _containerBottom);
 
     if (_animated) {
-      layerPos._add(DomUtil.getPosition(_container));
+      layerPos.add(dom.getPosition(_container));
     }
 
     final containerPos = map.layerPointToContainerPoint(layerPos),
@@ -385,7 +389,7 @@ class Popup extends Layer with core.Events {
 
   void _onCloseButtonClick(core.Event e) {
     _close();
-    DomEvent.stop(e);
+    dom.stop(e);
   }
 
   /**

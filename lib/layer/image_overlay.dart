@@ -15,13 +15,9 @@ class ImageOverlayOptions {
 /**
  * ImageOverlay is used to overlay images over the map (to specific geographical bounds).
  */
-class ImageOverlay extends Object with core.Events {
+class ImageOverlay extends Layer with Events {
 
   ImageOverlayOptions options;
-
-  /*Map<String, Object> options = {
-    'opacity': 1
-  };*/
 
   String _url;
   LatLngBounds _bounds;
@@ -29,53 +25,52 @@ class ImageOverlay extends Object with core.Events {
   var _image;
 
   ImageOverlay(String url, LatLngBounds bounds, this.options) {
-    this._url = url;
-    this._bounds = new LatLngBounds.latLngBounds(bounds);
+    _url = url;
+    _bounds = new LatLngBounds.latLngBounds(bounds);
   }
 
   /**
    * Adds the overlay to the map.
    */
-  onAdd(BaseMap map) {
-    this._map = map;
+  void onAdd(BaseMap map) {
+    _map = map;
 
-    if (this._image == null) {
-      this._initImage();
+    if (_image == null) {
+      _initImage();
     }
 
-    map.panes['overlayPane'].append(this._image);
+    map.panes['overlayPane'].append(_image);
 
-    map.on(EventType.VIEWRESET, this._reset, this);
+    map.on(EventType.VIEWRESET, _reset, this);
 
     if (map.animationOptions.zoomAnimation && Browser.any3d) {
-      map.on(EventType.ZOOMANIM, this._animateZoom, this);
+      map.on(EventType.ZOOMANIM, _animateZoom, this);
     }
 
-    this._reset();
+    _reset();
   }
 
-  onRemove(map) {
-    map.getPanes().overlayPane.removeChild(this._image);
+  void onRemove(BaseMap map) {
+    //map.panes['overlayPane'].removeChild(_image);
+    _image.remove();
 
-    map.off('viewreset', this._reset, this);
+    map.off(EventType.VIEWRESET, _reset, this);
 
-    if (map.options.zoomAnimation) {
-      map.off('zoomanim', this._animateZoom, this);
+    if (map.animationOptions.zoomAnimation) {
+      map.off(EventType.ZOOMANIM, _animateZoom, this);
     }
   }
 
-  addTo(map) {
+  void addTo(BaseMap map) {
     map.addLayer(this);
-    return this;
   }
 
   /**
    * Sets the opacity of the overlay.
    */
-  setOpacity(opacity) {
-    this.options.opacity = opacity;
-    this._updateOpacity();
-    return this;
+  void setOpacity(num opacity) {
+    options.opacity = opacity;
+    _updateOpacity();
   }
 
   /**
@@ -83,88 +78,85 @@ class ImageOverlay extends Object with core.Events {
    *
    * TODO remove bringToFront/bringToBack duplication from TileLayer/Path
    */
-  bringToFront() {
-    if (this._image) {
-      this._map.panes['overlayPane'].append(this._image);
+  void bringToFront() {
+    if (_image) {
+      _map.panes['overlayPane'].append(_image);
     }
-    return this;
   }
 
   /**
    * Brings the layer to the bottom of all overlays.
    */
-  bringToBack() {
-    final pane = this._map.panes['overlayPane'];
-    if (this._image) {
-      pane.insertBefore(this._image, pane.firstChild);
+  void bringToBack() {
+    final pane = _map.panes['overlayPane'];
+    if (_image) {
+      pane.insertBefore(_image, pane.firstChild);
     }
-    return this;
   }
 
   /**
    * Changes the URL of the image.
    */
-  setUrl(String url) {
-    this._url = url;
-    this._image.src = this._url;
+  void setUrl(String url) {
+    _url = url;
+    _image.src = _url;
   }
 
-  getAttribution() {
-    return this.options.attribution;
+  String getAttribution() {
+    return options.attribution;
   }
 
-  _initImage() {
-    this._image = DomUtil.create('img', 'leaflet-image-layer');
+  void _initImage() {
+    _image = dom.create('img', 'leaflet-image-layer');
 
-    if (this._map.animationOptions.zoomAnimation && Browser.any3d) {
-      DomUtil.addClass(this._image, 'leaflet-zoom-animated');
+    if (_map.animationOptions.zoomAnimation && Browser.any3d) {
+      dom.addClass(_image, 'leaflet-zoom-animated');
     } else {
-      DomUtil.addClass(this._image, 'leaflet-zoom-hide');
+      dom.addClass(_image, 'leaflet-zoom-hide');
     }
 
-    this._updateOpacity();
+    _updateOpacity();
 
     // TODO: createImage util method to remove duplication
-//    L.extend(this._image, {
+//    L.extend(_image, {
 //      'galleryimg': 'no',
 //      'onselectstart': Util.falseFn,
 //      'onmousemove': Util.falseFn,
-//      'onload': bind(this._onImageLoad, this),
-//      'src': this._url
+//      'onload': bind(_onImageLoad, this),
+//      'src': _url
 //    });
   }
 
-  _animateZoom(e) {
-    var map = this._map,
-        image = this._image,
+  void _animateZoom(Object obj, Event e) {
+    final map = _map,
+        image = _image,
         scale = map.getZoomScale(e.zoom),
-        nw = this._bounds.getNorthWest(),
-        se = this._bounds.getSouthEast(),
+        nw = _bounds.getNorthWest(),
+        se = _bounds.getSouthEast(),
 
         topLeft = map.latLngToNewLayerPoint(nw, e.zoom, e.center),
-        size = map.latLngToNewLayerPoint(se, e.zoom, e.center)._subtract(topLeft),
-        origin = topLeft._add(size._multiplyBy((1 / 2) * (1 - 1 / scale)));
+        size = map.latLngToNewLayerPoint(se, e.zoom, e.center) - topLeft,
+        origin = topLeft + (size * ((1 / 2) * (1 - 1 / scale)));
 
-    image.style[DomUtil.TRANSFORM] =
-            DomUtil.getTranslateString(origin) + ' scale($scale) ';
+    image.style[dom.TRANSFORM] = dom.getTranslateString(origin) + ' scale($scale) ';
   }
 
-  _reset() {
-    var image   = this._image,
-        topLeft = this._map.latLngToLayerPoint(this._bounds.getNorthWest()),
-        size = this._map.latLngToLayerPoint(this._bounds.getSouthEast())._subtract(topLeft);
+  void _reset([Object obj, Event e]) {
+    final image = _image,
+        topLeft = _map.latLngToLayerPoint(_bounds.getNorthWest()),
+        size = _map.latLngToLayerPoint(_bounds.getSouthEast()) - topLeft;
 
-    DomUtil.setPosition(image, topLeft);
+    dom.setPosition(image, topLeft);
 
-    image.style.width  = size.x + 'px';
-    image.style.height = size.y + 'px';
+    image.style.width = '${size.x}px';
+    image.style.height = '${size.y}px';
   }
 
-  _onImageLoad() {
-    this.fire(EventType.LOAD);
+  void _onImageLoad() {
+    fire(EventType.LOAD);
   }
 
-  _updateOpacity() {
-    DomUtil.setOpacity(this._image, this.options.opacity);
+  void _updateOpacity() {
+    dom.setOpacity(_image, options.opacity);
   }
 }

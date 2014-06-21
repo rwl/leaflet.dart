@@ -6,7 +6,7 @@ typedef LayerFunc(var layer);
  * LayerGroup is a class to combine several layers into one so that
  * you can manipulate the group (e.g. add/remove it) as one layer.
  */
-class LayerGroup {
+class LayerGroup extends Layer {
 
   Map<String, Layer> _layers;
   BaseMap _map;
@@ -27,30 +27,28 @@ class LayerGroup {
   /**
    * Adds a given layer to the group.
    */
-  addLayer(Layer layer) {
-    var id = getLayerId(layer);
+  void addLayer(Layer layer) {
+    final id = getLayerId(layer);
 
     _layers[id] = layer;
 
     if (_map != null) {
       _map.addLayer(layer);
     }
-
-    return this;
   }
 
   /**
    * Removes a given layer from the group.
    */
-  removeLayer(Layer layer) {
-    var id = getLayerId(layer);
+  void removeLayer(Layer layer) {
+    final id = getLayerId(layer);
     removeLayerId(id);
   }
 
   /**
    * Removes a given layer of the given id from the group.
    */
-  removeLayerId(String id) {
+  void removeLayerId(String id) {
     if (_map && _layers[id]) {
       _map.removeLayer(_layers[id]);
     }
@@ -61,7 +59,7 @@ class LayerGroup {
   /**
    * Returns true if the given layer is currently added to the group.
    */
-  hasLayer(String layer) {
+  bool hasLayer(String layer) {
     if (layer == null) { return false; }
 
     return (_layers.containsKey(layer) || _layers.containsKey(getLayerId(layer)));
@@ -70,21 +68,21 @@ class LayerGroup {
   /**
    * Removes all the layers from the group.
    */
-  clearLayers() {
+  void clearLayers() {
     eachLayer((layer) {
       removeLayer(layer);
     });
     return this;
   }
 
-  onAdd(BaseMap map) {
+  void onAdd(BaseMap map) {
     _map = map;
     eachLayer((layer) {
       map.addLayer(layer);
     });
   }
 
-  onRemove(BaseMap map) {
+  void onRemove(BaseMap map) {
     eachLayer((layer) {
       map.removeLayer(layer);
     });
@@ -94,14 +92,14 @@ class LayerGroup {
   /**
    * Adds the group of layers to the map.
    */
-  addTo(BaseMap map) {
+  void addTo(BaseMap map) {
     map.addLayer(this);
   }
 
   /**
    * Iterates over the layers of the group.
    */
-  eachLayer(LayerFunc fn) {
+  void eachLayer(LayerFunc fn) {
     _layers.forEach((i, layer) {
       fn(layer);
     });
@@ -110,7 +108,7 @@ class LayerGroup {
   /**
    * Returns the layer with the given id.
    */
-  getLayer(String id) {
+  Layer getLayer(String id) {
     return _layers[id];
   }
 
@@ -121,23 +119,25 @@ class LayerGroup {
     return _layers.values;
   }
 
-  setZIndex(zIndex) {
+  void setZIndex(zIndex) {
     eachLayer((layer) {
       layer.setZIndex(zIndex);
     });
   }
 
-  getLayerId(layer) {
-    return Util.stamp(layer);
+  int getLayerId(layer) {
+    return stamp(layer);
   }
+
+  var feature;
 
   toGeoJSON() {
 
-    var geometry = feature && feature.geometry;
+    var geometry = feature != null ? feature.geometry : null;
     List jsons = [];
     var json;
 
-    if (geometry && geometry.type == 'MultiPoint') {
+    if (geometry != null && geometry.type == 'MultiPoint') {
       return multiToGeoJSON('MultiPoint').call(this);
     }
 

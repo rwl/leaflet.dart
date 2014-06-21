@@ -54,13 +54,12 @@ class GeoJSON extends FeatureGroup {
   /**
    * Adds a GeoJSON object to the layer.
    */
-  addData(geojson) {
-    var features = geojson is List ? geojson : geojson.features;
-    var i, len, feature;
+  void addData(geojson) {
+    final features = geojson is List ? geojson : geojson.features;
 
-    if (features) {
-      len = features.length;
-      for (i = 0; i < len; i++) {
+    if (features != null) {
+      final len = features.length;
+      for (int i = 0; i < len; i++) {
         // Only add this if geometry or geometries are set and not null
         feature = features[i];
         if (feature.geometries || feature.geometry || feature.features || feature.coordinates) {
@@ -74,7 +73,7 @@ class GeoJSON extends FeatureGroup {
       return this;
     }
 
-    var layer = GeoJSON.geometryToLayer(geojson, options.pointToLayer, options.coordsToLatLng, options);
+    final layer = GeoJSON.geometryToLayer(geojson, options.pointToLayer, options.coordsToLatLng, options);
     layer.feature = GeoJSON.asFeature(geojson);
 
     layer.defaultOptions = layer.options;
@@ -84,13 +83,13 @@ class GeoJSON extends FeatureGroup {
       options.onEachFeature(geojson, layer);
     }
 
-    return addLayer(layer);
+    addLayer(layer);
   }
 
   /**
    * Resets the given vector layer's style to the original GeoJSON style, useful for resetting style after hover events.
    */
-  resetStyle(Path layer) {
+  void resetStyle(Path layer) {
     final style = options.style;
     if (style != null) {
       // reset any custom styles
@@ -103,13 +102,13 @@ class GeoJSON extends FeatureGroup {
   /**
    * Changes styles of GeoJSON vector layers with the given style function.
    */
-  setStyle(StyleFunc style) {
+  void setStyle(StyleFunc style) {
     eachLayer((layer) {
       _setLayerStyle(layer, style);
     });
   }
 
-  _setLayerStyle(layer, style) {
+  void _setLayerStyle(layer, style) {
     if (style is Function) {
       style = style(layer.feature);
     }
@@ -122,7 +121,7 @@ class GeoJSON extends FeatureGroup {
   /**
    * Creates a layer from a given GeoJSON feature.
    */
-  static geometryToLayer(geojson, pointToLayer, coordsToLatLng, vectorOptions) {
+  static Layer geometryToLayer(geojson, pointToLayer, coordsToLatLng, vectorOptions) {
     var geometry = geojson.type == 'Feature' ? geojson.geometry : geojson,
         coords = geometry.coordinates,
         latlng, latlngs, i, len;
@@ -205,8 +204,8 @@ class GeoJSON extends FeatureGroup {
     return latlngs;
   }
 
-  static latLngToCoords(latlng) {
-    var coords = [latlng.lng, latlng.lat];
+  static List latLngToCoords(LatLng latlng) {
+    final coords = [latlng.lng, latlng.lat];
 
     if (latlng.alt != null) {
       coords.add(latlng.alt);
@@ -214,10 +213,10 @@ class GeoJSON extends FeatureGroup {
     return coords;
   }
 
-  static latLngsToCoords(latLngs) {
+  static List latLngsToCoords(latLngs) {
     var coords = [];
 
-    for (var i = 0, len = latLngs.length; i < len; i++) {
+    for (int i = 0, len = latLngs.length; i < len; i++) {
       coords.add(GeoJSON.latLngToCoords(latLngs[i]));
     }
 

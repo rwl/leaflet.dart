@@ -225,4 +225,6 @@ class EventType {
   static const TILELOADSTART = const EventType._internal('tileloadstart');
 
   static const TILEERROR = const EventType._internal('tileerror');
+
+  static const CONTENTUPDATE = const EventType._internal('contentupdate');
 }
