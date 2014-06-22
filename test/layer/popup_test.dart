@@ -1,85 +1,89 @@
+import 'dart:html' show document, Element;
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-
+import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/geo/geo.dart' show LatLng;
+import 'package:leaflet/layer/layer.dart' show Popup;
+import 'package:leaflet/layer/marker/marker.dart' show Marker;
 
 main() {
   useHtmlEnhancedConfiguration();
 
   group('Popup', () {
-
-    var c, map;
+    Element c;
+    BaseMap map;
 
     setUp(() {
       c = document.createElement('div');
       c.style.width = '400px';
       c.style.height = '400px';
-      map = new L.Map(c);
-      map.setView(new L.LatLng(55.8, 37.6), 6);
+      map = new BaseMap(c);
+      map.setView(new LatLng(55.8, 37.6), 6);
     });
 
     test('closes on map click when map has closePopupOnClick option', () {
-      map.options.closePopupOnClick = true;
+      map.interactionOptions.closePopupOnClick = true;
 
-      var popup = new L.Popup()
-      .setLatLng(new L.LatLng(55.8, 37.6))
-      .openOn(map);
+      final popup = new Popup()
+        ..setLatLng(new LatLng(55.8, 37.6))
+        ..openOn(map);
 
       happen.click(c);
 
-      expect(map.hasLayer(popup)).to.be(false);
+      expect(map.hasLayer(popup), isFalse);
     });
 
     test('closes on map click when popup has closeOnClick option', () {
-      map.options.closePopupOnClick = false;
+      map.interactionOptions.closePopupOnClick = false;
 
-      var popup = new L.Popup({closeOnClick: true})
-        .setLatLng(new L.LatLng(55.8, 37.6))
-        .openOn(map);
+      final popup = new Popup({'closeOnClick': true})
+        ..setLatLng(new LatLng(55.8, 37.6))
+        ..openOn(map);
 
       happen.click(c);
 
-      expect(map.hasLayer(popup)).to.be(false);
+      expect(map.hasLayer(popup), isFalse);
     });
 
     test('does not close on map click when popup has closeOnClick: false option', () {
-      map.options.closePopupOnClick = true;
+      map.interactionOptions.closePopupOnClick = true;
 
-      var popup = new L.Popup({closeOnClick: false})
-        .setLatLng(new L.LatLng(55.8, 37.6))
-        .openOn(map);
+      final popup = new Popup({'closeOnClick': false})
+        ..setLatLng(new LatLng(55.8, 37.6))
+        ..openOn(map);
 
       happen.click(c);
 
-      expect(map.hasLayer(popup)).to.be(true);
+      expect(map.hasLayer(popup), isTrue);
     });
 
     test('toggles its visibility when marker is clicked', () {
-      var marker = new L.Marker(new L.LatLng(55.8, 37.6));
+      final marker = new Marker(new LatLng(55.8, 37.6));
       map.addLayer(marker);
 
       marker.bindPopup('Popup1').openPopup();
 
-      map.options.closePopupOnClick = true;
+      map.interactionOptions.closePopupOnClick = true;
       happen.click(c);
 
       // toggle open popup
       sinon.spy(marker, 'openPopup');
       marker.fire('click');
-      expect(marker.openPopup.calledOnce).to.be(true);
-      expect(map.hasLayer(marker._popup)).to.be(true);
+      expect(marker.openPopup.calledOnce, isTrue);
+      expect(map.hasLayer(marker._popup), isTrue);
       marker.openPopup.restore();
 
       // toggle close popup
       sinon.spy(marker, 'closePopup');
       marker.fire('click');
-      expect(marker.closePopup.calledOnce).to.be(true);
-      expect(map.hasLayer(marker._popup)).to.be(false);
+      expect(marker.closePopup.calledOnce, isTrue);
+      expect(map.hasLayer(marker._popup), isFalse);
       marker.closePopup.restore();
     });
 
     test('should trigger popupopen on marker when popup opens', () {
-      var marker1 = new L.Marker(new L.LatLng(55.8, 37.6));
-      var marker2 = new L.Marker(new L.LatLng(57.123076977278, 44.861962891635));
+      final marker1 = new Marker(new LatLng(55.8, 37.6));
+      final marker2 = new Marker(new LatLng(57.123076977278, 44.861962891635));
 
       map.addLayer(marker1);
       map.addLayer(marker2);
@@ -91,16 +95,16 @@ main() {
 
       marker1.on('popupopen', spy);
 
-      expect(spy.called).to.be(false);
+      expect(spy.called, isFalse);
       marker2.openPopup();
-      expect(spy.called).to.be(false);
+      expect(spy.called, isFalse);
       marker1.openPopup();
-      expect(spy.called).to.be(true);
+      expect(spy.called, isTrue);
     });
 
     test('should trigger popupclose on marker when popup closes', () {
-      var marker1 = new L.Marker(new L.LatLng(55.8, 37.6));
-      var marker2 = new L.Marker(new L.LatLng(57.123076977278, 44.861962891635));
+      final marker1 = new Marker(new LatLng(55.8, 37.6));
+      final marker2 = new Marker(new LatLng(57.123076977278, 44.861962891635));
 
       map.addLayer(marker1);
       map.addLayer(marker2);
@@ -112,16 +116,16 @@ main() {
 
       marker1.on('popupclose', spy);
 
-      expect(spy.called).to.be(false);
+      expect(spy.called, isFalse);
       marker2.openPopup();
-      expect(spy.called).to.be(false);
+      expect(spy.called, isFalse);
       marker1.openPopup();
-      expect(spy.called).to.be(false);
+      expect(spy.called, isFalse);
       marker2.openPopup();
-      expect(spy.called).to.be(true);
+      expect(spy.called, isTrue);
       marker1.openPopup();
       marker1.closePopup();
-      expect(spy.callCount).to.be(2);
+      expect(spy.callCount, equals(2));
     });
   });
 }
