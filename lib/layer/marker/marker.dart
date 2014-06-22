@@ -100,9 +100,12 @@ class Marker extends Layer with Events {
     'riseOnHover': false,
     'riseOffset': 250
   };*/
-  final MarkerOptions options;
+  MarkerOptions options;
 
-  Marker(LatLng latlng, this.options) {
+  Marker(LatLng latlng, [this.options=null]) {
+    if (options == null) {
+      options = new MarkerOptions();
+    }
     _latlng = new LatLng.latLng(latlng);
   }
 

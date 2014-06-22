@@ -151,12 +151,16 @@ class TileLayer extends Object with core.Events implements Layer {
 //    'unloadInvisibleTiles': core.Browser.mobile,
 //    'updateWhenIdle': core.Browser.mobile
 //  };
-  final TileLayerOptions options;
+  TileLayerOptions options;
 
   Element _container;
   Map _tiles;
 
-  TileLayer(this._url, this.options) {
+  TileLayer([this._url="", this.options=null]) {
+    if (options == null) {
+      options = new TileLayerOptions();
+    }
+
     // detecting retina displays, adjusting tileSize and zoom levels
     if (options.detectRetina && Browser.retina && options.maxZoom > 0) {
 

@@ -4,7 +4,7 @@ library leaflet.dom;
 import 'dart:html' show document, Element;
 import 'dart:math' as math;
 
-import '../core/core.dart' show Events;
+import '../core/core.dart' show Events, Browser, stamp;
 //import '../map/map.dart';
 //import '../geo/geo.dart';
 import '../geometry/geometry.dart' as geom;

@@ -5,7 +5,7 @@ import 'dart:html' show Element, document;
 import 'dart:math' as math;
 import 'dart:async' show Timer;
 
-import '../core/core.dart' show Event, EventType, LayerEvent, Util, Browser;
+import '../core/core.dart' show Event, EventType, LayerEvent, Util, Browser, stamp;
 import '../map/map.dart';
 import '../dom/dom.dart' as dom;
 import '../layer/layer.dart' show Layer;

@@ -1,52 +1,58 @@
+
+import 'dart:html' show document, Element;
+
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/control/attribution.dart';
-import 'package:leaflet/leaflet.dart' as L;
+
+import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/control/control.dart' show Attribution;
 
 
 main() {
   useHtmlEnhancedConfiguration();
 
   group('Control.Attribution', () {
-    var map, control, container;
+    BaseMap map;
+    Attribution control;
+    Element container;
 
     setUp(() {
-      map = L.map(document.createElement('div'));
-      control = new L.Control.Attribution({
-        prefix: 'prefix'
-      }).addTo(map);
+      map = new BaseMap(document.createElement('div'));
+      control = new Attribution({
+        'prefix': 'prefix'
+      })..addTo(map);
       container = control.getContainer();
     });
 
     test('contains just prefix if no attributions added', () {
-      expect(container.innerHTML).to.eql('prefix');
+      expect(container.innerHTML, equals('prefix'));
     });
 
-    describe('#addAttribution', () {
+    group('#addAttribution', () {
       test('adds one attribution correctly', () {
         control.addAttribution('foo');
-        expect(container.innerHTML).to.eql('prefix | foo');
+        expect(container.innerHTML, equals('prefix | foo'));
       });
 
       test('adds no duplicate attributions', () {
         control.addAttribution('foo');
         control.addAttribution('foo');
-        expect(container.innerHTML).to.eql('prefix | foo');
+        expect(container.innerHTML, equals('prefix | foo'));
       });
 
       test('adds several attributions listed with comma', () {
         control.addAttribution('foo');
         control.addAttribution('bar');
-        expect(container.innerHTML).to.eql('prefix | foo, bar');
+        expect(container.innerHTML, equals('prefix | foo, bar'));
       });
     });
 
-    describe('#removeAttribution', () {
+    group('#removeAttribution', () {
       test('removes attribution correctly', () {
         control.addAttribution('foo');
         control.addAttribution('bar');
         control.removeAttribution('foo');
-        expect(container.innerHTML).to.eql('prefix | bar');
+        expect(container.innerHTML, equals('prefix | bar'));
       });
       test('does nothing if removing attribution that was not present', () {
         control.addAttribution('foo');
@@ -55,21 +61,21 @@ main() {
         control.removeAttribution('baz');
         control.removeAttribution('baz');
         control.removeAttribution('');
-        expect(container.innerHTML).to.eql('prefix | foo');
+        expect(container.innerHTML, equals('prefix | foo'));
       });
     });
 
-    describe('#setPrefix', () {
+    group('#setPrefix', () {
       test('changes prefix', () {
         control.setPrefix('bla');
-        expect(container.innerHTML).to.eql('bla');
+        expect(container.innerHTML, equals('bla'));
       });
     });
 
-    describe('control.attribution factory', () {
-      test('creates Control.Attribution instance', () {
-        var options = {prefix: 'prefix'};
-        expect(L.control.attribution(options)).to.eql(new L.Control.Attribution(options));
+    group('control.attribution factory', () {
+      test('creates control.Attribution instance', () {
+        var options = {'prefix': 'prefix'};
+        expect(new attribution(options), equals(new Attribution(options)));
       });
     });
   });

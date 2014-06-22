@@ -21,20 +21,20 @@ void on(Element obj, String type, Function fn, [Object context=null]) {
  */
 void addListener(Element obj, String type, Function fn, Object context) { // (HTMLElement, String, Function[, Object])
 
-  var id = L.stamp(fn),
-      key = '_leaflet_' + type + id,
-      handler, originalHandler, newType;
+  final id = stamp(fn),
+      key = '_leaflet_' + type + id;
 
   if (obj[key]) { return; }
 
-  handler = (e) {
-    return fn.call(context || obj, e || L.DomEvent._getEvent());
+  var handler = (e) {
+    return fn.call(context || obj, e || _getEvent());
   };
 
-  if (L.Browser.pointer && type.indexOf('touch') == 0) {
-    return addPointerListener(obj, type, handler, id);
+  if (Browser.pointer && type.indexOf('touch') == 0) {
+    addPointerListener(obj, type, handler, id);
+    return;
   }
-  if (L.Browser.touch && (type == 'dblclick') && addDoubleTapListener) {
+  if (Browser.touch && (type == 'dblclick') && addDoubleTapListener) {
     addDoubleTapListener(obj, handler, id);
   }
 
@@ -88,13 +88,13 @@ void off(Element obj, String type, Function fn) {
  */
 void removeListener(Element obj, String type, Function fn) {  // (HTMLElement, String, Function)
 
-  var id = L.stamp(fn),
+  var id = stamp(fn),
       key = '_leaflet_' + type + id,
       handler = obj[key];
 
-  if (!handler) { return; }
+  if (handler == null) { return; }
 
-  if (L.Browser.pointer && type.indexOf('touch') == 0) {
+  if (Browser.pointer && type.indexOf('touch') == 0) {
     removePointerListener(obj, type, id);
   } else if (L.Browser.touch && (type == 'dblclick') && removeDoubleTapListener) {
     removeDoubleTapListener(obj, id);

@@ -1323,7 +1323,7 @@ class BaseMap extends Object with Events {
   /**
    * Sets the view of the map (geographical center and zoom) with the given animation options.
    */
-  void setView(center, zoom, options) {
+  void setView(LatLng center, num zoom, [ZoomPanOptions options=null]) {
 
     zoom = zoom == null ? _zoom : _limitZoom(zoom);
     center = _limitCenter(L.latLng(center), zoom, options.maxBounds);

@@ -29,13 +29,21 @@ class Layers extends Control {
   bool _handlingClick;
   var _form;
   var _layersLink;
-  var _baseLayersList, _overlaysList;
-  var _separator;
+  Element _baseLayersList, _overlaysList, _separator;
+
+  /**
+   * For internal use.
+   */
+  Element get baseLayersList => _baseLayersList;
+  Element get overlaysList => _overlaysList;
 
   /**
    * Creates an attribution control with the given layers. Base layers will be switched with radio buttons, while overlays will be switched with checkboxes. Note that all base layers should be passed in the base layers object, but only one should be added to the map during map instantiation.
    */
-  Layers(LinkedHashMap<String, Layer> baseLayers, LinkedHashMap<String, Layer> overlays, LayersOptions options) : super(options) {
+  Layers(LinkedHashMap<String, Layer> baseLayers, LinkedHashMap<String, Layer> overlays, [LayersOptions options=null]) : super(options) {
+    if (options == null) {
+      options = new LayersOptions();
+    }
     _layers = {};
     _lastZIndex = 0;
     _handlingClick = false;
@@ -84,7 +92,7 @@ class Layers extends Control {
    * Remove the given layer from the control.
    */
   void removeLayer(layer) {
-    var id = Util.stamp(layer);
+    final id = stamp(layer);
     _layers.remove(id);
     _update();
   }
@@ -94,7 +102,7 @@ class Layers extends Control {
         container = _container = dom.create('div', className);
 
     //Makes this work on IE10 Touch devices by stopping it from firing a mouseout event when the touch is released
-    container.setAttribute('aria-haspopup', true);
+    container.setAttribute('aria-haspopup', 'true');
 
     if (!Browser.touch) {
       dom.disableClickPropagation(container);
@@ -143,7 +151,7 @@ class Layers extends Control {
   }
 
   void _addLayer(Layer layer, String name, [bool overlay=false]) {
-    final id = Util.stamp(layer);
+    final id = stamp(layer);
 
     _layers[id] = {
       'layer': layer,
@@ -179,7 +187,7 @@ class Layers extends Control {
   }
 
   void _onLayerChange(Object obj, LayerEvent e) {
-    final obj = _layers[Util.stamp(e.layer)];
+    final obj = _layers[stamp(e.layer)];
 
     if (!obj) { return; }
 
@@ -225,7 +233,7 @@ class Layers extends Control {
       input = _createRadioElement('leaflet-base-layers', checked);
     }
 
-    input.layerId = Util.stamp(obj.layer);
+    input.layerId = stamp(obj.layer);
 
     dom.on(input, 'click', _onInputClick, this);
 

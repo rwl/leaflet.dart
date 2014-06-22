@@ -1,75 +1,98 @@
+
+import 'dart:html' show document;
+
+import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/core/core.dart' show EventType, Event, Action;
+import 'package:leaflet/control/control.dart' show Layers;
+import 'package:leaflet/layer/tile/tile.dart' show TileLayer;
+import 'package:leaflet/layer/marker/marker.dart' show Marker;
+import 'package:leaflet/geo/geo.dart' show LatLng;
+
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' as L;
 
 
 main() {
   useHtmlEnhancedConfiguration();
 
   group('Control.Layers', () {
-    var map;
+    BaseMap map;
+
+    bool called;
+    List<Object> objs;
+    List<Event> events;
+    Action action = (Object obj, Event e) {
+      called = true;
+      objs.add(obj);
+      events.add(e);
+    };
 
     setUp(() {
-      map = new Map(document.createElement('div'));
+      map = new BaseMap(document.createElement('div'));
+      called = false;
+      objs = new List<Object>();
+      events = new List<Event>();
     });
 
-    describe('baselayerchange event', () {
+    group('baselayerchange event', () {
       test('is fired on input that changes the base layer', () {
-        var baseLayers = {'Layer 1': L.tileLayer(), 'Layer 2': L.tileLayer()},
-          layers = L.control.layers(baseLayers).addTo(map),
-          spy = sinon.spy();
+        final baseLayers = {'Layer 1': new TileLayer(), 'Layer 2': new TileLayer()},
+          layers = new Layers(baseLayers)..addTo(map);
+          //spy = sinon.spy();
 
-        map.on('baselayerchange', spy)
-          .whenReady(() {
-            happen.click(layers._baseLayersList.getElementsByTagName('input')[0]);
 
-            expect(spy.called).to.be.ok();
-            expect(spy.mostRecentCall.args[0].layer).to.be(baseLayers['Layer 1']);
+        map.on(EventType.BASELAYERCHANGE, action)
+          ..whenReady(() {
+            happen.click(layers.baseLayersList.querySelectorAll('input')[0]);
+
+            expect(called, isTrue);
+            expect(events[0].layer, equals(baseLayers['Layer 1']));
           });
       });
 
       test('is not fired on input that doesn\'t change the base layer', () {
-        var overlays = {'Marker 1': L.marker([0, 0]), 'Marker 2': L.marker([0, 0])},
-          layers = L.control.layers({}, overlays).addTo(map),
-          spy = sinon.spy();
+        final overlays = {'Marker 1': new Marker(new LatLng(0, 0)),
+                          'Marker 2': new Marker(new LatLng(0, 0))};
+        final layers = new Layers({}, overlays)..addTo(map);
+          //spy = sinon.spy();
 
-        map.on('baselayerchange', spy);
+        map.on(EventType.BASELAYERCHANGE, action);
         happen.click(layers._overlaysList.getElementsByTagName('input')[0]);
 
-        expect(spy.called).to.not.be.ok();
+        expect(called, isFalse);
       });
     });
 
-    describe('updates', () {
-      beforeEach(() {
-        map.setView([0, 0], 14);
+    group('updates', () {
+      setUp(() {
+        map.setView(new LatLng(0, 0), 14);
       });
 
       test('when an included layer is addded or removed', () {
-        var baseLayer = L.tileLayer(),
-          overlay = L.marker([0, 0]),
-          layers = L.control.layers({'Base': baseLayer}, {'Overlay': overlay}).addTo(map);
+        final baseLayer = new TileLayer(),
+          overlay = new Marker(new LatLng(0, 0)),
+          layers = new Layers({'Base': baseLayer}, {'Overlay': overlay})..addTo(map);
 
-        var spy = sinon.spy(layers, '_update');
+        //var spy = sinon.spy(layers, '_update');
 
         map.addLayer(overlay);
         map.removeLayer(overlay);
 
-        expect(spy.called).to.be.ok();
-        expect(spy.callCount).to.eql(2);
+        expect(spy.called, isTrue);
+        expect(spy.callCount, equals(2));
       });
 
       test('not when a non-included layer is added or removed', () {
-        var baseLayer = L.tileLayer(),
-          overlay = L.marker([0, 0]),
-          layers = L.control.layers({'Base': baseLayer}).addTo(map);
+        final baseLayer = new TileLayer(),
+          overlay = new Marker(new LatLng(0, 0)),
+          layers = new Layers({'Base': baseLayer})..addTo(map);
 
-        var spy = sinon.spy(layers, '_update');
+        //var spy = sinon.spy(layers, '_update');
 
         map.addLayer(overlay);
         map.removeLayer(overlay);
 
-        expect(spy.called).to.not.be.ok();
+        expect(spy.called, isFalse);
       });
     });
   });

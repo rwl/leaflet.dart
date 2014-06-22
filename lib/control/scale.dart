@@ -34,7 +34,11 @@ class Scale extends Control {
 
   ScaleOptions get scaleOptions => options as ScaleOptions;
 
-  Scale(ScaleOptions options) : super(options);
+  Scale([ScaleOptions options=null]) : super(options) {
+    if (options == null) {
+      options = new ScaleOptions();
+    }
+  }
 
   Element _mScale, _iScale;
 
