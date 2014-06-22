@@ -111,11 +111,13 @@ List<geom.Point> _reducePoints(points, sqTolerance) {
 int _lastCode;
 
 /**
- * Clips the segment a to b by rectangular bounds (modifying the segment points directly!). Used by Leaflet to only show polyline points that are on the screen or near, increasing performance.
+ * Clips the segment a to b by rectangular bounds (modifying the segment
+ * points directly!). Used by Leaflet to only show polyline points that
+ * are on the screen or near, increasing performance.
  *
  * Cohen-Sutherland line clipping algorithm.
  */
-clipSegment(geom.Point a, geom.Point b, Bounds bounds, bool useLastCode) {
+clipSegment(geom.Point a, geom.Point b, Bounds bounds, [bool useLastCode=false]) {
   int codeA = useLastCode ? _lastCode : _getBitCode(a, bounds),
       codeB = _getBitCode(b, bounds);
 

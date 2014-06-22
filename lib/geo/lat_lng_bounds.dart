@@ -50,15 +50,13 @@ class LatLngBounds {
   /**
    * Extend the bounds to contain the given bounds.
    */
-  LatLngBounds extendBounds(LatLngBounds obj) {
-    if (obj == null) { return this; }
+  void extendBounds([LatLngBounds obj=null]) {
+    if (obj == null) { return; }
 
     obj = new LatLngBounds.latLngBounds(obj);
 
     extend(obj._southWest);
     extend(obj._northEast);
-
-    return this;
   }
 
   /**

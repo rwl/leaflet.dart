@@ -18,7 +18,7 @@ class Bounds {
   /**
    * Creates a Bounds object defined by the points it contains.
    */
-  Bounds(List<Point> points) {
+  Bounds([List<Point> points=null]) {
     if (points == null) { return; }
 
     for (var i = 0, len = points.length; i < len; i++) {

@@ -37,7 +37,11 @@ class DivIcon extends Icon {
 
   DivIconOptions get divIconOptions => options as DivIconOptions;
 
-  DivIcon(DivIconOptions options) : super(options);
+  DivIcon([DivIconOptions options=null]) : super(options) {
+    if (options == null) {
+      options = new DivIconOptions("");
+    }
+  }
 
   Element createIcon([Element oldIcon=null]) {
     final div = (oldIcon != null && oldIcon.tagName.toUpperCase() == 'DIV') ? oldIcon : new DivElement();

@@ -20,7 +20,10 @@ class Polygon extends Polyline {
   List<List<LatLng>> _holes;
   List _holePoints;
 
-  Polygon(List<LatLng> latlngs, PolygonOptions options, [this._holes=null]) : super(latlngs, options) {
+  Polygon(List<LatLng> latlngs, [PolygonOptions options=null, this._holes=null]) : super(latlngs, options) {
+    if (options == null) {
+      options = PolygonOptions();
+    }
 
     if (_holes != null) {
       for (int i = 0; i < _holes.length; i++) {

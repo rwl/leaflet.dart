@@ -1,39 +1,42 @@
+import 'dart:html' show document;
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-
+import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/geo/geo.dart' show LatLng;
+import 'package:leaflet/layer/vector/vector.dart' show Polygon;
 
 main() {
   useHtmlEnhancedConfiguration();
 
   group('Polygon', () {
 
-    var c = document.createElement('div');
+    final c = document.createElement('div');
     c.style.width = '400px';
     c.style.height = '400px';
-    var map = new L.Map(c);
-    map.setView(new L.LatLng(55.8, 37.6), 6);
+    var map = new BaseMap(c);
+    map.setView(new LatLng(55.8, 37.6), 6);
 
     group('#initialize', () {
       test('doesn\'t overwrite the given latlng array', () {
-        var originalLatLngs = [
+        final originalLatLngs = [
                                [1, 2],
                                [3, 4]
                                ];
-        var sourceLatLngs = originalLatLngs.slice();
+        final sourceLatLngs = originalLatLngs.slice();
 
-        var polygon = new L.Polygon(sourceLatLngs);
+        final polygon = new Polygon(sourceLatLngs);
 
-        expect(sourceLatLngs).to.eql(originalLatLngs);
-        expect(polygon._latlngs).to.not.eql(sourceLatLngs);
+        expect(sourceLatLngs, equals(originalLatLngs));
+        expect(polygon._latlngs, isNot(equals(sourceLatLngs)));
       });
 
       test('can be called with an empty array', () {
-        var polygon = new L.Polygon([]);
-        expect(polygon.getLatLngs()).to.eql([]);
+        final polygon = new Polygon([]);
+        expect(polygon.getLatLngs(), equals([]));
       });
 
       test('can be initialized with holes', () {
-        var originalLatLngs = [
+        final originalLatLngs = [
                                [ //external rink
                                  [0, 10], [10, 10], [10, 0]
                                  ], [ //hole
@@ -41,30 +44,30 @@ main() {
                                       ]
                                ];
 
-        var polygon = new L.Polygon(originalLatLngs);
+        final polygon = new Polygon(originalLatLngs);
 
         //getLatLngs() returns only external ring
-        expect(polygon.getLatLngs()).to.eql([L.latLng([0, 10]), L.latLng([10, 10]), L.latLng([10, 0])]);
+        expect(polygon.getLatLngs(), equals([new LatLng(0, 10), new LatLng(10, 10), new LatLng(10, 0)]));
       });
     });
 
     group('#setLatLngs', () {
       test('doesn\'t overwrite the given latlng array', () {
-        var originalLatLngs = [
+        final originalLatLngs = [
                                [1, 2],
                                [3, 4]
                                ];
-        var sourceLatLngs = originalLatLngs.slice();
+        final sourceLatLngs = originalLatLngs.slice();
 
-        var polygon = new L.Polygon(sourceLatLngs);
+        final polygon = new Polygon(sourceLatLngs);
 
         polygon.setLatLngs(sourceLatLngs);
 
-        expect(sourceLatLngs).to.eql(originalLatLngs);
+        expect(sourceLatLngs, equals(originalLatLngs));
       });
 
       test('can be set external ring and holes', () {
-        var latLngs = [
+        final latLngs = [
                        [ //external rink
                          [0, 10], [10, 10], [10, 0]
                          ], [ //hole
@@ -72,27 +75,27 @@ main() {
                               ]
                        ];
 
-        var polygon = new L.Polygon([]);
+        final polygon = new Polygon([]);
         polygon.setLatLngs(latLngs);
 
         //getLatLngs() returns only external ring
-        expect(polygon.getLatLngs()).to.eql([L.latLng([0, 10]), L.latLng([10, 10]), L.latLng([10, 0])]);
+        expect(polygon.getLatLngs(), equals([new LatLng(0, 10), new LatLng(10, 10), new LatLng(10, 0)]));
       });
     });
 
     group('#spliceLatLngs', () {
       test('splices the internal latLngs', () {
-        var latLngs = [
+        final latLngs = [
                        [1, 2],
                        [3, 4],
                        [5, 6]
                        ];
 
-        var polygon = new L.Polygon(latLngs);
+        final polygon = new Polygon(latLngs);
 
         polygon.spliceLatLngs(1, 1, [7, 8]);
 
-        expect(polygon._latlngs).to.eql([L.latLng([1, 2]), L.latLng([7, 8]), L.latLng([5, 6])]);
+        expect(polygon._latlngs, equals([new LatLng(1, 2), new LatLng(7, 8), new LatLng(5, 6)]));
       });
     });
   });

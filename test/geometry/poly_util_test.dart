@@ -1,34 +1,32 @@
 import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-
+import 'package:leaflet/geometry/geometry.dart' as geom;
+import 'package:leaflet/geometry/geometry.dart' show Bounds;
 
 main() {
-  useHtmlEnhancedConfiguration();
-
   group('PolyUtil', () {
 
     group('#clipPolygon', () {
       test('clips polygon by bounds', () {
-        var bounds = L.bounds([0, 0], [10, 10]);
+        final bounds = new Bounds.between(new geom.Point(0, 0), new geom.Point(10, 10));
 
-        var points = [
-                      new L.Point(5, 5),
-                      new L.Point(15, 10),
-                      new L.Point(10, 15)
+        final points = [
+                      new geom.Point(5, 5),
+                      new geom.Point(15, 10),
+                      new geom.Point(10, 15)
                       ];
 
-        var clipped = L.PolyUtil.clipPolygon(points, bounds);
+        final clipped = geom.clipPolygon(points, bounds);
 
-        for (var i = 0, len = clipped.length; i < len; i++) {
+        for (int i = 0, len = clipped.length; i < len; i++) {
           delete(clipped[i]._code);
         }
 
-        expect(clipped).to.eql([
-                                new L.Point(7.5, 10),
-                                new L.Point(5, 5),
-                                new L.Point(10, 7.5),
-                                new L.Point(10, 10)
-                                ]);
+        expect(clipped, equals([
+                                new geom.Point(7.5, 10),
+                                new geom.Point(5, 5),
+                                new geom.Point(10, 7.5),
+                                new geom.Point(10, 10)
+                                ]));
       });
     });
   });

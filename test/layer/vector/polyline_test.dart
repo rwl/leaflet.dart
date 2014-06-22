@@ -1,62 +1,65 @@
+import 'dart:html' show document;
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-
+import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/geo/geo.dart' show LatLng;
+import 'package:leaflet/layer/vector/vector.dart' show Polyline;
 
 main() {
   useHtmlEnhancedConfiguration();
 
   group('Polyline', () {
 
-    var c = document.createElement('div');
+    final c = document.createElement('div');
     c.style.width = '400px';
     c.style.height = '400px';
-    var map = new L.Map(c);
-    map.setView(new L.LatLng(55.8, 37.6), 6);
+    final map = new BaseMap(c);
+    map.setView(new LatLng(55.8, 37.6), 6);
 
     group('#initialize', () {
       test('doesn\'t overwrite the given latlng array', () {
-        var originalLatLngs = [
+        final originalLatLngs = [
                                [1, 2],
                                [3, 4]
                                ];
-        var sourceLatLngs = originalLatLngs.slice();
+        final sourceLatLngs = originalLatLngs.slice();
 
-        var polyline = new L.Polyline(sourceLatLngs);
+        final polyline = new Polyline(sourceLatLngs);
 
-        expect(sourceLatLngs).to.eql(originalLatLngs);
-        expect(polyline._latlngs).to.not.eql(sourceLatLngs);
+        expect(sourceLatLngs, equals(originalLatLngs));
+        expect(polyline._latlngs, isNot(equals(sourceLatLngs)));
       });
     });
 
     group('#setLatLngs', () {
       test('doesn\'t overwrite the given latlng array', () {
-        var originalLatLngs = [
+        final originalLatLngs = [
                                [1, 2],
                                [3, 4]
                                ];
-        var sourceLatLngs = originalLatLngs.slice();
+        final sourceLatLngs = originalLatLngs.slice();
 
-        var polyline = new L.Polyline(sourceLatLngs);
+        final polyline = new Polyline(sourceLatLngs);
 
         polyline.setLatLngs(sourceLatLngs);
 
-        expect(sourceLatLngs).to.eql(originalLatLngs);
+        expect(sourceLatLngs, equals(originalLatLngs));
       });
     });
 
     group('#spliceLatLngs', () {
       test('splices the internal latLngs', () {
-        var latLngs = [
+        final latLngs = [
                        [1, 2],
                        [3, 4],
                        [5, 6]
                        ];
 
-        var polyline = new L.Polyline(latLngs);
+        final polyline = new Polyline(latLngs);
 
         polyline.spliceLatLngs(1, 1, [7, 8]);
 
-        expect(polyline._latlngs).to.eql([L.latLng([1, 2]), L.latLng([7, 8]), L.latLng([5, 6])]);
+        expect(polyline._latlngs, equals([new LatLng(1, 2), new LatLng(7, 8), new LatLng(5, 6)]));
       });
     });
   });

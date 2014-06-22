@@ -1,150 +1,147 @@
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
+import 'package:leaflet/geo/geo.dart' show LatLngBounds, LatLng;
 
 
 main() {
   useHtmlEnhancedConfiguration();
 
   group('LatLngBounds', () {
-    var a, c;
+    LatLngBounds a, c;
 
     setUp(() {
-      a = new L.LatLngBounds(
-          new L.LatLng(14, 12),
-          new L.LatLng(30, 40));
-      c = new L.LatLngBounds();
+      a = new LatLngBounds.between(
+          new LatLng(14, 12),
+          new LatLng(30, 40));
+      c = new LatLngBounds.between();
     });
 
     group('constructor', () {
-      it('instantiates either passing two latlngs or an array of latlngs', () {
-        var b = new L.LatLngBounds([
-                                    new L.LatLng(14, 12),
-                                    new L.LatLng(30, 40)
+      test('instantiates either passing two latlngs or an array of latlngs', () {
+        final b = new LatLngBounds([
+                                    new LatLng(14, 12),
+                                    new LatLng(30, 40)
                                     ]);
-        expect(b).to.eql(a);
-        expect(b.getNorthWest()).to.eql(new L.LatLng(30, 12));
+        expect(b, equals(a));
+        expect(b.getNorthWest(), equals(new LatLng(30, 12)));
       });
     });
 
     group('#extend', () {
-      it('extends the bounds by a given point', () {
-        a.extend(new L.LatLng(20, 50));
-        expect(a.getNorthEast()).to.eql(new L.LatLng(30, 50));
+      test('extends the bounds by a given point', () {
+        a.extend(new LatLng(20, 50));
+        expect(a.getNorthEast(), equals(new LatLng(30, 50)));
       });
 
-      it('extends the bounds by given bounds', () {
-        a.extend([[20, 50], [8, 40]]);
-        expect(a.getSouthEast()).to.eql(new L.LatLng(8, 50));
+      test('extends the bounds by given bounds', () {
+        a.extendBounds(new LatLngBounds.between(new LatLng(20, 50), new LatLng(8, 40)));
+        expect(a.getSouthEast(), equals(new LatLng(8, 50)));
       });
 
-      it('extends the bounds by undefined', () {
-        expect(a.extend()).to.eql(a);
+      test('extends the bounds by undefined', () {
+        a.extendBounds();
+        expect(a, equals(a));
       });
 
-      it('extends the bounds by raw object', () {
+      /*test('extends the bounds by raw object', () {
         a.extend({lat: 20, lng: 50});
         expect(a.getNorthEast()).to.eql(new L.LatLng(30, 50));
-      });
+      });*/
     });
 
     group('#getCenter', () {
-      it('returns the bounds center', () {
-        expect(a.getCenter()).to.eql(new L.LatLng(22, 26));
+      test('returns the bounds center', () {
+        expect(a.getCenter(), equals(new LatLng(22, 26)));
       });
     });
 
     group('#pad', () {
-      it('pads the bounds by a given ratio', () {
+      test('pads the bounds by a given ratio', () {
         var b = a.pad(0.5);
 
-        expect(b).to.eql(L.latLngBounds([[6, -2], [38, 54]]));
+        expect(b, equals(new LatLngBounds([new LatLng(6, -2), new LatLng(38, 54)])));
       });
     });
 
     group('#equals', () {
-      it('returns true if bounds equal', () {
-        expect(a.equals([[14, 12], [30, 40]])).to.eql(true);
-        expect(a.equals([[14, 13], [30, 40]])).to.eql(false);
-        expect(a.equals(null)).to.eql(false);
+      test('returns true if bounds equal', () {
+        expect(a == new LatLngBounds([new LatLng(14, 12), new LatLng(30, 40)]), isTrue);
+        expect(a == new LatLngBounds([new LatLng(14, 13), new LatLng(30, 40)]), isFalse);
+        expect(a == null, isFalse);
       });
     });
 
     group('#isValid', () {
-      it('returns true if properly set up', () {
-        expect(a.isValid()).to.be.ok();
+      test('returns true if properly set up', () {
+        expect(a.isValid(), isTrue);
       });
-      it('returns false if is invalid', () {
-        expect(c.isValid()).to.not.be.ok();
+      test('returns false if is invalid', () {
+        expect(c.isValid(), isFalse);
       });
-      it('returns true if extended', () {
-        c.extend([0, 0]);
-        expect(c.isValid()).to.be.ok();
+      test('returns true if extended', () {
+        c.extend(new LatLng(0, 0));
+        expect(c.isValid(), isTrue);
       });
     });
 
     group('#getWest', () {
-      it('returns a proper bbox west value', () {
-        expect(a.getWest()).to.eql(12);
+      test('returns a proper bbox west value', () {
+        expect(a.getWest(), equals(12));
       });
     });
 
     group('#getSouth', () {
-      it('returns a proper bbox south value', () {
-        expect(a.getSouth()).to.eql(14);
+      test('returns a proper bbox south value', () {
+        expect(a.getSouth(), equals(14));
       });
-
     });
 
     group('#getEast', () {
-      it('returns a proper bbox east value', () {
-        expect(a.getEast()).to.eql(40);
+      test('returns a proper bbox east value', () {
+        expect(a.getEast(), equals(40));
       });
-
     });
 
     group('#getNorth', () {
-      it('returns a proper bbox north value', () {
-        expect(a.getNorth()).to.eql(30);
+      test('returns a proper bbox north value', () {
+        expect(a.getNorth(), equals(30));
       });
-
     });
 
     group('#toBBoxString', () {
-      it('returns a proper left,bottom,right,top bbox', () {
-        expect(a.toBBoxString()).to.eql('12,14,40,30');
+      test('returns a proper left,bottom,right,top bbox', () {
+        expect(a.toBBoxString(), equals('12,14,40,30'));
       });
-
     });
 
     group('#getNorthWest', () {
-      it('returns a proper north-west LatLng', () {
-        expect(a.getNorthWest()).to.eql(new L.LatLng(a.getNorth(), a.getWest()));
+      test('returns a proper north-west LatLng', () {
+        expect(a.getNorthWest(), equals(new LatLng(a.getNorth(), a.getWest())));
       });
-
     });
 
     group('#getSouthEast', () {
-      it('returns a proper south-east LatLng', () {
-        expect(a.getSouthEast()).to.eql(new L.LatLng(a.getSouth(), a.getEast()));
+      test('returns a proper south-east LatLng', () {
+        expect(a.getSouthEast(), equals(new LatLng(a.getSouth(), a.getEast())));
       });
     });
 
     group('#contains', () {
-      it('returns true if contains latlng point', () {
-        expect(a.contains([16, 20])).to.eql(true);
-        expect(L.latLngBounds(a).contains([5, 20])).to.eql(false);
+      test('returns true if contains latlng point', () {
+        expect(a.contains(new LatLng(16, 20)), isTrue);
+        expect(new LatLngBounds.latLngBounds(a).contains(new LatLng(5, 20)), isFalse);
       });
 
-      it('returns true if contains bounds', () {
-        expect(a.contains([[16, 20], [20, 40]])).to.eql(true);
-        expect(a.contains([[16, 50], [8, 40]])).to.eql(false);
+      test('returns true if contains bounds', () {
+        expect(a.containsBounds(new LatLngBounds.between(new LatLng(16, 20), new LatLng(20, 40))), isTrue);
+        expect(a.containsBounds(new LatLngBounds.between(new LatLng(16, 50), new LatLng(8, 40))), isFalse);
       });
     });
 
     group('#intersects', () {
-      it('returns true if intersects the given bounds', () {
-        expect(a.intersects([[16, 20], [50, 60]])).to.eql(true);
-        expect(a.contains([[40, 50], [50, 60]])).to.eql(false);
+      test('returns true if intersects the given bounds', () {
+        expect(a.intersects(new LatLngBounds.between(new LatLng(16, 20), new LatLng(50, 60))), isTrue);
+        expect(a.containsBounds(new LatLngBounds.between(new LatLng(40, 50), new LatLng(50, 60))), isFalse);
       });
     });
 

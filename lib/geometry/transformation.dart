@@ -15,7 +15,7 @@ class Transformation {
   /**
    * Returns a transformed point, optionally multiplied by the given scale.
    */
-  Point transform(Point point, num scale) {
+  Point transform(Point point, [num scale=1]) {
     final p = point.clone();
     transformPoint(p, scale);
     return p;

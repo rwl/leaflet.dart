@@ -1,6 +1,8 @@
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-
+import 'package:leaflet/layer/layer.dart' show GeoJSON;
+import 'package:leaflet/layer/marker/marker.dart' show Marker;
+import 'package:leaflet/geo/geo.dart' show LatLng;
 
 main() {
   useHtmlEnhancedConfiguration();
@@ -8,49 +10,49 @@ main() {
   group('L.GeoJSON', () {
     group('addData', () {
       var geoJSON = {
-                     type: 'Feature',
-                     properties: {},
-                     geometry: {
-                       type: 'Point',
-                       coordinates: [20, 10, 5]
+                     'type': 'Feature',
+                     'properties': {},
+                     'geometry': {
+                       'type': 'Point',
+                       'coordinates': [20, 10, 5]
                      }
       };
 
       test('sets feature property on member layers', () {
-        var layer = new L.GeoJSON();
+        var layer = new GeoJSON();
         layer.addData(geoJSON);
-        expect(layer.getLayers()[0].feature).to.eql(geoJSON);
+        expect(layer.getLayers()[0].feature, equals(geoJSON));
       });
 
       test('normalizes a geometry to a Feature', () {
-        var layer = new L.GeoJSON();
+        var layer = new GeoJSON();
         layer.addData(geoJSON.geometry);
-        expect(layer.getLayers()[0].feature).to.eql(geoJSON);
+        expect(layer.getLayers()[0].feature, equals(geoJSON));
       });
     });
   });
 
   group('L.Marker#toGeoJSON', () {
     test('returns a 2D Point object', () {
-      var marker = new L.Marker([10, 20]);
-      expect(marker.toGeoJSON().geometry).to.eql({
-        type: 'Point',
-        coordinates: [20, 10]
-      });
+      final marker = new Marker(new LatLng(10, 20));
+      expect(marker.toGeoJSON()['geometry'], equals({
+        'type': 'Point',
+        'coordinates': [20, 10]
+      }));
     });
 
     test('returns a 3D Point object', () {
-      var marker = new L.Marker([10, 20, 30]);
-      expect(marker.toGeoJSON().geometry).to.eql({
-        type: 'Point',
-        coordinates: [20, 10, 30]
-      });
+      final marker = new Marker(new LatLng(10, 20, 30));
+      expect(marker.toGeoJSON()['geometry'], equals({
+        'type': 'Point',
+        'coordinates': [20, 10, 30]
+      }));
     });
   });
 
   group('L.Circle#toGeoJSON', () {
     test('returns a 2D Point object', () {
-      var circle = new L.Circle([10, 20], 100);
+      final circle = new Circle([10, 20], 100);
       expect(circle.toGeoJSON().geometry).to.eql({
         type: 'Point',
         coordinates: [20, 10]
