@@ -13,7 +13,7 @@ class _Mercator implements Projection {
   static double R_MINOR = 6356752.314245179;
   static double R_MAJOR = 6378137.0;
 
-  geom.Point project(LatLng latlng) {
+  Point2D project(LatLng latlng) {
     final d = LatLng.DEG_TO_RAD,
         max = MAX_LATITUDE,
         lat = math.max(math.min(max, latlng.lat), -max),
@@ -30,10 +30,10 @@ class _Mercator implements Projection {
     final ts = math.tan(0.5 * ((math.PI * 0.5) - y)) / con;
     y = -r * math.log(ts);
 
-    return new geom.Point(x, y);
+    return new Point2D(x, y);
   }
 
-  LatLng unproject(geom.Point point) {
+  LatLng unproject(Point2D point) {
     final d = LatLng.RAD_TO_DEG,
         r = R_MAJOR,
         r2 = R_MINOR,

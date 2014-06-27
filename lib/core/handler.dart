@@ -5,13 +5,13 @@ part of leaflet.core;
  */
 abstract class Handler {
 
-  BaseMap _map;
+  LeafletMap _map;
 
   bool _enabled;
 
   Handler(this._map);
 
-  BaseMap get map => _map;
+  LeafletMap get map => _map;
 
   /**
    * Enables the handler.

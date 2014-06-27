@@ -46,7 +46,7 @@ String getStyle(Element el, String style) {
 /**
  * Returns the offset to the viewport for the requested element.
  */
-geom.Point getViewportOffset(Element element) {
+Point2D getViewportOffset(Element element) {
 
   int top = 0,
       left = 0;
@@ -236,7 +236,7 @@ String testProp(List<String> props) {
 /**
  * Returns a CSS transform string to move an element by the offset provided in the given point. Uses 3D translate on WebKit for hardware-accelerated transforms and 2D on other browsers.
  */
-String getTranslateString(geom.Point point) {
+String getTranslateString(Point2D point) {
   // on WebKit browsers (Chrome/Safari/iOS Safari/Android) using translate3d instead of translate
   // makes animation smoother as it ensures HW accel is used. Firefox 13 doesn't care
   // (same speed either way), Opera 12 doesn't support translate3d
@@ -251,7 +251,7 @@ String getTranslateString(geom.Point point) {
 /**
  * Returns a CSS transform string to scale an element (with the given scale origin).
  */
-String getScaleString(num scale, geom.Point origin) {
+String getScaleString(num scale, Point2D origin) {
 
   var preTranslateStr = L.DomUtil.getTranslateString(origin.add(origin.multiplyBy(-1 * scale))),
       scaleStr = ' scale(' + scale + ') ';
@@ -265,7 +265,7 @@ String getScaleString(num scale, geom.Point origin) {
  * Leaflet internally to position its layers). Forces top/left positioning
  * if disable3D is true.
  */
-void setPosition(Element el, geom.Point point, [bool disable3D=false]) {
+void setPosition(Element el, Point2D point, [bool disable3D=false]) {
 
   // jshint camelcase: false
   el._leaflet_pos = point;
@@ -281,7 +281,7 @@ void setPosition(Element el, geom.Point point, [bool disable3D=false]) {
 /**
  * Returns the coordinates of an element previously positioned with setPosition.
  */
-geom.Point getPosition(Element el) {
+Point2D getPosition(Element el) {
   // this method is only used for elements previously positioned using setPosition,
   // so it's safe to cache the position for performance
 

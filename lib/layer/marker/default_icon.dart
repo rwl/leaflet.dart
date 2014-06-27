@@ -8,10 +8,10 @@ class Default extends Icon {
   static String imagePath;
 
   static final _defaultOptions = new IconOptions("")
-    ..iconSize = new geom.Point(25, 41)
-    ..iconAnchor = new geom.Point(12, 41)
-    ..popupAnchor = new geom.Point(1, -34)
-    ..shadowSize = new geom.Point(41, 41);
+    ..iconSize = new Point2D(25, 41)
+    ..iconAnchor = new Point2D(12, 41)
+    ..popupAnchor = new Point2D(1, -34)
+    ..shadowSize = new Point2D(41, 41);
 
   Default() : super(_defaultOptions);
 

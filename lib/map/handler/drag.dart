@@ -8,12 +8,12 @@ class Drag extends Handler {
 
   dom.Draggable _draggable;
   List<DateTime> _times;
-  List<geom.Point> _positions;
+  List<Point2D> _positions;
   DateTime _lastTime;
-  geom.Point _lastPos;
+  Point2D _lastPos;
   num _initialWorldOffset, _worldWidth;
 
-  Drag(BaseMap map) : super(map);
+  Drag(LeafletMap map) : super(map);
 
   addHooks() {
     if (_draggable == null) {
@@ -114,13 +114,13 @@ class Drag extends Handler {
           ease = map.panOptions.easeLinearity,
 
           speedVector = direction * (ease / duration),
-          speed = speedVector.distanceTo(new geom.Point(0, 0)),
+          speed = speedVector.distanceTo(new Point2D(0, 0)),
 
           limitedSpeed = math.min(options.inertiaMaxSpeed, speed),
           limitedSpeedVector = speedVector * (limitedSpeed / speed),
 
           decelerationDuration = limitedSpeed / (options.inertiaDeceleration * ease);
-      geom.Point offset = (limitedSpeedVector * (-decelerationDuration / 2)).rounded();
+      Point2D offset = (limitedSpeedVector * (-decelerationDuration / 2)).rounded();
 
       if (offset.x == 0 || offset.y == 0) {
         map.fire(EventType.MOVEEND);

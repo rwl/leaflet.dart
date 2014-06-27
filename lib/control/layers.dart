@@ -57,7 +57,7 @@ class Layers extends Control {
     }
   }
 
-  Element onAdd(BaseMap map) {
+  Element onAdd(LeafletMap map) {
     _initLayout();
     _update();
 
@@ -67,7 +67,7 @@ class Layers extends Control {
     return _container;
   }
 
-  void onRemove(BaseMap map) {
+  void onRemove(LeafletMap map) {
     map.off(EventType.LAYERADD, _onLayerChange);
     map.off(EventType.LAYERREMOVE, _onLayerChange);
   }

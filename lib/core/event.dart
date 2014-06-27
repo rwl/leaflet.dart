@@ -30,13 +30,13 @@ class MouseEvent extends Event {
    * Pixel coordinates of the point where the mouse event occured relative to
    * the map layer.
    */
-  geom.Point layerPoint;
+  Point2D layerPoint;
 
   /**
    * Pixel coordinates of the point where the mouse event occured relative to
    * the map сontainer.
    */
-  geom.Point containerPoint;
+  Point2D containerPoint;
 
   /**
    * The original DOM mouse event fired by the browser.
@@ -146,12 +146,12 @@ class ResizeEvent extends Event {
   /**
    * The old size before resize event.
    */
-  geom.Point oldSize;
+  Point2D oldSize;
 
   /**
    * The new size after the resize event.
    */
-  geom.Point newSize;
+  Point2D newSize;
 
   ResizeEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
 }

@@ -1,7 +1,7 @@
 import 'dart:html' show document;
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/geo/geo.dart' show LatLng;
 import 'package:leaflet/layer/tile/tile.dart' show TileLayer;
 
@@ -12,9 +12,9 @@ main() {
     String tileUrl = '';
 
     group('#getMaxZoom, #getMinZoom', () {
-      BaseMap map;
+      LeafletMap map;
       setUp(() {
-        map = new BaseMap(document.createElement('div'));
+        map = new LeafletMap(document.createElement('div'));
       });
       group('when a tilelayer is added to a map with no other layers', () {
         test('has the same zoomlevels as the tilelayer', () {

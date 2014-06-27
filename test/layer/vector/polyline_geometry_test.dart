@@ -1,7 +1,7 @@
 import 'dart:html' show document;
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/geo/geo.dart' show LatLng;
 import 'package:leaflet/layer/vector/vector.dart' show Polyline;
 
@@ -14,7 +14,7 @@ main() {
     final c = document.createElement('div');
     c.style.width = '400px';
     c.style.height = '400px';
-    final map = new BaseMap(c);
+    final map = new LeafletMap(c);
     map.setView(new LatLng(55.8, 37.6), 6);
 
     group('#distanceTo', () {

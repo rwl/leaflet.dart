@@ -6,9 +6,9 @@ import 'dart:html' show Element, window;
 
 import 'dart:math' as math;
 import '../geo/geo.dart' show LatLng, LatLngBounds;
-import '../geometry/geometry.dart' as geom;
 import '../layer/layer.dart' show Layer, Popup;
-import '../map/map.dart' show BaseMap;
+import '../map/map.dart' show LeafletMap;
+import '../geometry/geometry.dart' show Point2D;
 
 part 'browser.dart';
 part 'event.dart';

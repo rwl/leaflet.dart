@@ -18,7 +18,7 @@ class Keyboard extends Handler {
   Map _panKeys;
   Map _zoomKeys;
 
-  Keyboard(BaseMap map) : super(map);
+  Keyboard(LeafletMap map) : super(map);
 
   initialize(map) {
     _setPanOffset(map.options.keyboardPanOffset);

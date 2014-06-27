@@ -12,7 +12,7 @@ class _EPSG3857 extends CRS {
 
   _EPSG3857([String code = 'EPSG:3857']) : super(proj.SphericalMercator, new Transformation(0.5 / math.PI, 0.5, -0.5 / math.PI, 0.5), code);
 
-  Point project(LatLng latlng) { // (LatLng) -> Point
+  Point2D project(LatLng latlng) { // (LatLng) -> Point
     final projectedPoint = this.projection.project(latlng);
     return projectedPoint.multiplyBy(earthRadius);
   }

@@ -8,7 +8,7 @@ import '../core/core.dart' show EventType, Browser, Action, stamp, Events, Event
 import '../dom/dom.dart' as dom;
 import '../map/map.dart';
 import '../geo/geo.dart';
-import '../geometry/geometry.dart' as geom;
+import '../geometry/geometry.dart' show Point2D;
 import './marker/marker.dart';
 import './vector/vector.dart' show Polygon, PathOptions, Polyline;
 
@@ -28,14 +28,14 @@ abstract class Layer {
    * to map panes where they should belong and puts listeners on relevant map
    * events. Called on map.addLayer(layer).
    */
-  onAdd(BaseMap map);
+  onAdd(LeafletMap map);
 
   /**
    * Should contain all clean up code that removes the overlay's elements from
    * the DOM and removes listeners previously added in onAdd. Called on
    * map.removeLayer(layer).
    */
-  onRemove(BaseMap map);
+  onRemove(LeafletMap map);
 
   String getAttribution() {
     return null;

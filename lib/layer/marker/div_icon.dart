@@ -4,7 +4,7 @@ class DivIconOptions extends IconOptions {
   /**
    * Size of the icon in pixels. Can be also set through CSS.
    */
-  geom.Point iconSize = new geom.Point(12, 12);
+  Point2D iconSize = new Point2D(12, 12);
 
   /**
    * The coordinates of the "tip" of the icon (relative to its top left
@@ -12,7 +12,7 @@ class DivIconOptions extends IconOptions {
    * marker's geographical location. Centered by default if size is
    * specified, also can be set in CSS with negative margins.
    */
-  geom.Point iconAnchor;
+  Point2D iconAnchor;
 
   /**
    * A custom class name to assign to the icon. 'leaflet-div-icon' by default.
@@ -24,7 +24,7 @@ class DivIconOptions extends IconOptions {
    */
   String  html;
 
-  geom.Point bgPos;
+  Point2D bgPos;
 
   DivIconOptions(String iconUrl) : super(iconUrl);
 }

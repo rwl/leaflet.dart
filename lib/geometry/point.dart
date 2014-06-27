@@ -1,35 +1,35 @@
 part of leaflet.geometry;
 
 /**
- * Point represents a point with x and y coordinates.
+ * Point2D represents a point with x and y coordinates.
  */
-class Point {
+class Point2D {
 
   num x, y, z;
 
   int _code;
 
   /**
-   * Creates a Point object with the given x and y coordinates. If optional round is set to true, rounds the x and y values.
+   * Creates a Point2D object with the given x and y coordinates. If optional round is set to true, rounds the x and y values.
    */
-  Point(num xx, num yy, [bool round = false]) {
+  Point2D(num xx, num yy, [bool round = false]) {
     x = (round ? xx.round() : xx);
     y = (round ? yy.round() : yy);
   }
 
-  factory Point.point(Point p) {
+  factory Point2D.point(Point2D p) {
     return p;
   }
 
-  factory Point.array(List<num> a) {
-    return new Point(a[0], a[1]);
+  factory Point2D.array(List<num> a) {
+    return new Point2D(a[0], a[1]);
   }
 
   /**
    * Returns a copy of the current point.
    */
-  Point clone() {
-    return new Point(x, y);
+  Point2D clone() {
+    return new Point2D(x, y);
   }
 
   /**
@@ -37,16 +37,16 @@ class Point {
    *
    * Non-destructive, returns a new point.
    */
-  Point operator +(Point point) {
+  Point2D operator +(Point2D point) {
     final c = clone();
-    c.add(new Point.point(point));
+    c.add(new Point2D.point(point));
     return c;
   }
 
   /**
    * Destructive, used directly for performance in situations where it's safe to modify existing point.
    */
-  void add(Point point) {
+  void add(Point2D point) {
     x += point.x;
     y += point.y;
   }
@@ -54,13 +54,13 @@ class Point {
   /**
    * Returns the result of subtraction of the given point from the current.
    */
-  Point operator -(Point point) {
+  Point2D operator -(Point2D point) {
     final c = clone();
-    c.subtract(new Point.point(point));
+    c.subtract(new Point2D.point(point));
     return c;
   }
 
-  void subtract(Point point) {
+  void subtract(Point2D point) {
     x -= point.x;
     y -= point.y;
   }
@@ -68,7 +68,7 @@ class Point {
   /**
    * Returns the result of division of the current point by the given number. If optional round is set to true, returns a rounded result.
    */
-  Point operator /(num x) {//, [bool round = false]) {
+  Point2D operator /(num x) {//, [bool round = false]) {
     final c = clone();
     c.divideBy(x);
     /*if (round) {
@@ -85,7 +85,7 @@ class Point {
   /**
    * Returns the result of multiplication of the current point by the given number.
    */
-  Point operator *(num x) {
+  Point2D operator *(num x) {
     final c = clone();
     c.multiplyBy(x);
     return c;
@@ -99,7 +99,7 @@ class Point {
   /**
    * Returns a copy of the current point with rounded coordinates.
    */
-  Point rounded() {
+  Point2D rounded() {
     final c = clone();
     c.round();
     return c;
@@ -113,7 +113,7 @@ class Point {
   /**
    * Returns a copy of the current point with floored coordinates (rounded down).
    */
-  Point floored() {
+  Point2D floored() {
     final c = clone();
     c.floor();
     return c;
@@ -127,8 +127,8 @@ class Point {
   /**
    * Returns the distance between the current and the given points.
    */
-  num distanceTo(Point point) {
-    point = new Point.point(point);
+  num distanceTo(Point2D point) {
+    point = new Point2D.point(point);
 
     final xx = point.x - x;
     final yy = point.y - y;
@@ -139,8 +139,8 @@ class Point {
   /**
    * Returns true if the given point has the same coordinates.
    */
-  bool operator ==(Point point) {
-    point = new Point.point(point);
+  bool operator ==(Point2D point) {
+    point = new Point2D.point(point);
 
     return point.x == x && point.y == y;
   }
@@ -148,8 +148,8 @@ class Point {
   /**
    * Returns true if the both coordinates of the given point are less than the corresponding current point coordinates (in absolute values).
    */
-  bool contains(Point point) {
-    point = new Point.point(point);
+  bool contains(Point2D point) {
+    point = new Point2D.point(point);
 
     return point.x.abs() <= x.abs() && point.y.abs() <= y.abs();
   }

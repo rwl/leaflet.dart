@@ -25,7 +25,7 @@ class Attribution extends Control {
     _attributions = {};
   }
 
-  onAdd(BaseMap map) {
+  onAdd(LeafletMap map) {
     _container = dom.create('div', 'leaflet-control-attribution');
     dom.disableClickPropagation(_container);
 
@@ -44,7 +44,7 @@ class Attribution extends Control {
     return _container;
   }
 
-  onRemove(BaseMap map) {
+  onRemove(LeafletMap map) {
     map.off(EventType.LAYERADD, _onLayerAdd);
     map.off(EventType.LAYERREMOVE, _onLayerRemove);
   }

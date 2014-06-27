@@ -4,7 +4,7 @@ import 'dart:math' as math;
 
 import '../geo.dart';
 import '../projection/projection.dart' as proj;
-import '../../geometry/geometry.dart';
+import '../../geometry/geometry.dart' show Point2D, Transformation;
 
 part 'epsg3395.dart';
 part 'epsg3857.dart';
@@ -45,7 +45,7 @@ abstract class CRS {
   /**
    * Projects geographical coordinates on a given zoom into pixel coordinates.
    */
-  Point latLngToPoint(LatLng latlng, num zoom) { // (LatLng, Number) -> Point
+  Point2D latLngToPoint(LatLng latlng, num zoom) { // (LatLng, Number) -> Point
     final projectedPoint = projection.project(latlng);
     final s = scale(zoom);
 
@@ -57,7 +57,7 @@ abstract class CRS {
    * The inverse of latLngToPoint. Projects pixel coordinates on a given zoom
    * into geographical coordinates.
    */
-  LatLng pointToLatLng(Point point, num zoom) { // (Point, Number[, Boolean]) -> LatLng
+  LatLng pointToLatLng(Point2D point, num zoom) { // (Point, Number[, Boolean]) -> LatLng
     final s = scale(zoom);
     final untransformedPoint = transformation.untransform(point, s);
 
@@ -68,7 +68,7 @@ abstract class CRS {
    * Projects geographical coordinates into coordinates in units accepted for
    * this CRS (e.g. meters for EPSG:3857, for passing it to WMS services).
    */
-  Point project(LatLng latlng) {
+  Point2D project(LatLng latlng) {
     return projection.project(latlng);
   }
 
@@ -84,8 +84,8 @@ abstract class CRS {
   /**
    * Returns the size of the world in pixels for a particular zoom.
    */
-  Point getSize(num zoom) {
+  Point2D getSize(num zoom) {
     var s = scale(zoom);
-    return new Point(s, s);
+    return new Point2D(s, s);
   }
 }

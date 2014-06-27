@@ -38,7 +38,7 @@ class Zoom extends Control {
 
   Element _zoomInButton, _zoomOutButton;
 
-  onAdd(BaseMap map) {
+  onAdd(LeafletMap map) {
     final zoomName = 'leaflet-control-zoom',
         container = dom.create('div', '$zoomName leaflet-bar');
 
@@ -58,7 +58,7 @@ class Zoom extends Control {
     return container;
   }
 
-  onRemove(BaseMap map) {
+  onRemove(LeafletMap map) {
     map.off(EventType.ZOOMEND, _updateDisabled, this);
     map.off(EventType.ZOOMLEVELSCHANGE, _updateDisabled, this);
   }

@@ -1,7 +1,7 @@
 import 'dart:html' show document, Element;
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/geo/geo.dart' show LatLng;
 import 'package:leaflet/layer/layer.dart' show Popup;
 import 'package:leaflet/layer/marker/marker.dart' show Marker;
@@ -11,13 +11,13 @@ main() {
 
   group('Popup', () {
     Element c;
-    BaseMap map;
+    LeafletMap map;
 
     setUp(() {
       c = document.createElement('div');
       c.style.width = '400px';
       c.style.height = '400px';
-      map = new BaseMap(c);
+      map = new LeafletMap(c);
       map.setView(new LatLng(55.8, 37.6), 6);
     });
 

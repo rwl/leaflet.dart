@@ -60,7 +60,7 @@ abstract class Canvas extends TileLayer {
    * tiles; canvas is the actual canvas tile on which you can draw,
    * tilePoint represents the tile numbers, and zoom is the current zoom.
    */
-  drawTile([/*Canvas*/Element tile, geom.Point tilePoint, num zoom]);
+  drawTile([/*Canvas*/Element tile, Point2D tilePoint, num zoom]);
     // override with rendering code
 
   /**

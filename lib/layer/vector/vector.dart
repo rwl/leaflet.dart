@@ -7,7 +7,7 @@ import '../../core/core.dart';
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../dom/dom.dart' as dom;
-import '../../geometry/geometry.dart' as geom;
+import '../../geometry/geometry.dart' show clipPolygon, simplify, Point2D, clipSegment;
 
 import '../layer.dart' show Popup, PopupOptions, GeoJSON, Layer, FeatureGroup;
 

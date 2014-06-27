@@ -100,13 +100,13 @@ abstract class Path extends Layer with Events {
 
   List<LatLng> _latlngs;
 
-  BaseMap _map;
+  LeafletMap _map;
   Element _container;
   var _stroke, _fill;
 
   Path(this.options);
 
-  onAdd(BaseMap map) {
+  onAdd(LeafletMap map) {
     _map = map;
 
     if (_container == null) {
@@ -130,11 +130,11 @@ abstract class Path extends Layer with Events {
   /**
    * Adds the layer to the map.
    */
-  void addTo(BaseMap map) {
+  void addTo(LeafletMap map) {
     map.addLayer(this);
   }
 
-  void onRemove(BaseMap map) {
+  void onRemove(LeafletMap map) {
     //map.pathRoot.removeChild(_container);
     _container.remove();
 

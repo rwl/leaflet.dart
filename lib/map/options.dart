@@ -193,8 +193,8 @@ class AnimationOptions {
   bool markerZoomAnimation;
 
   AnimationOptions() {
-    fadeAnimation = DomUtil.TRANSITION && !Browser.android23;
-    markerZoomAnimation = DomUtil.TRANSITION && Browser.any3d;
+    fadeAnimation = dom.TRANSITION && !Browser.android23;
+    markerZoomAnimation = dom.TRANSITION && Browser.any3d;
   }
 }
 
@@ -267,21 +267,21 @@ class ZoomPanOptions {
    * you have some control overlays on the map like a sidebar and you don't want
    * them to obscure objects you're zooming to.
    */
-  geom.Point paddingTopLeft;
+  Point2D paddingTopLeft;
 
   /**
    * The same for bottom right corner of the map.
    */
-  geom.Point paddingBottomRight = new geom.Point(0, 0);
+  Point2D paddingBottomRight = new Point2D(0, 0);
 
   /**
    * Equivalent of setting both top left and bottom right padding to the same
    * value.
    */
-  geom.Point padding = new geom.Point(0, 0);
-  /*void set padding(geom.Point point) {
+  Point2D padding = new Point2D(0, 0);
+  /*void set padding(Point2D point) {
     if (point == null) {
-      point = new geom.Point([0, 0]);
+      point = new Point2D([0, 0]);
     }
     paddingTopLeft = point;
     paddingBottomRight = point;
@@ -294,11 +294,11 @@ class ZoomPanOptions {
 
   ZoomPanOptions({this.reset: false, this.pan, this.zoom, this.paddingTopLeft: null, this.paddingBottomRight: null, this.maxZoom}) {
     if (paddingTopLeft == null) {
-      paddingTopLeft = new geom.Point(0, 0);
+      paddingTopLeft = new Point2D(0, 0);
     }
     this.paddingTopLeft = paddingTopLeft;
     if (paddingBottomRight == null) {
-      paddingBottomRight = new geom.Point(0, 0);
+      paddingBottomRight = new Point2D(0, 0);
     }
     this.paddingBottomRight = paddingBottomRight;
   }

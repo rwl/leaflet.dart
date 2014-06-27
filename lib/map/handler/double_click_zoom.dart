@@ -6,7 +6,7 @@ part of leaflet.map.handler;
  */
 class DoubleClickZoom extends Handler {
 
-  DoubleClickZoom(BaseMap map) : super(map);
+  DoubleClickZoom(LeafletMap map) : super(map);
 
   void addHooks() {
     map.on(EventType.DBLCLICK, _onDoubleClick, this);

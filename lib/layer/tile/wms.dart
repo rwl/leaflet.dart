@@ -74,7 +74,7 @@ class WMS extends TileLayer {
   CRS _crs;
   double _wmsVersion;
 
-  onAdd(BaseMap map) {
+  onAdd(LeafletMap map) {
 
     _crs = wmsOptions.crs != null ? wmsOptions.crs : map.stateOptions.crs;
 

@@ -15,14 +15,14 @@ class Transformation {
   /**
    * Returns a transformed point, optionally multiplied by the given scale.
    */
-  Point transform(Point point, [num scale=1]) {
+  Point2D transform(Point2D point, [num scale=1]) {
     final p = point.clone();
     transformPoint(p, scale);
     return p;
   }
 
   // destructive transform (faster)
-  void transformPoint(Point point, [num scale = 1]) {
+  void transformPoint(Point2D point, [num scale = 1]) {
     point.x = scale * (_a * point.x + _b);
     point.y = scale * (_c * point.y + _d);
     //return point;
@@ -31,8 +31,8 @@ class Transformation {
   /**
    * Returns the reverse transformation of the given point, optionally divided by the given scale.
    */
-  Point untransform(Point point, [num scale = 1]) {
-    return new Point(
+  Point2D untransform(Point2D point, [num scale = 1]) {
+    return new Point2D(
             (point.x / scale - _b) / _a,
             (point.y / scale - _d) / _c);
   }

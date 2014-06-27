@@ -6,11 +6,11 @@ part of leaflet.map.handler;
 class ScrollWheelZoom extends Handler {
 
   num _delta;
-  geom.Point _lastMousePos;
+  Point2D _lastMousePos;
   DateTime _startTime;
   Timer _timer;
 
-  ScrollWheelZoom(BaseMap map) : super(map);
+  ScrollWheelZoom(LeafletMap map) : super(map);
 
   addHooks() {
     dom.on(map.getContainer(), 'mousewheel', _onWheelScroll, this);

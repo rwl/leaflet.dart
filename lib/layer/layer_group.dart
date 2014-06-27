@@ -9,7 +9,7 @@ typedef LayerFunc(var layer);
 class LayerGroup extends Layer {
 
   Map<String, Layer> _layers;
-  BaseMap _map;
+  LeafletMap _map;
 
   /**
    * Create a layer group, optionally given an initial set of layers.
@@ -72,17 +72,16 @@ class LayerGroup extends Layer {
     eachLayer((layer) {
       removeLayer(layer);
     });
-    return this;
   }
 
-  void onAdd(BaseMap map) {
+  void onAdd(LeafletMap map) {
     _map = map;
     eachLayer((layer) {
       map.addLayer(layer);
     });
   }
 
-  void onRemove(BaseMap map) {
+  void onRemove(LeafletMap map) {
     eachLayer((layer) {
       map.removeLayer(layer);
     });
@@ -92,7 +91,7 @@ class LayerGroup extends Layer {
   /**
    * Adds the group of layers to the map.
    */
-  void addTo(BaseMap map) {
+  void addTo(LeafletMap map) {
     map.addLayer(this);
   }
 

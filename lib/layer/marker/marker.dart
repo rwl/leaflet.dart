@@ -5,7 +5,7 @@ import 'dart:html' show document, Element, ImageElement, DivElement, KeyboardEve
 import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
-import '../../geometry/geometry.dart' as geom;
+import '../../geometry/geometry.dart' show Point2D;
 import '../../dom/dom.dart' as dom;
 import '../layer.dart' show Layer, GeoJSON, Popup;
 
@@ -73,7 +73,7 @@ class MarkerOptions {
    */
   num riseOffset  = 250;
 
-  geom.Point offset;
+  Point2D offset;
 }
 
 
@@ -83,7 +83,7 @@ class MarkerOptions {
 class Marker extends Layer with Events {
 
   LatLng _latlng;
-  BaseMap _map;
+  LeafletMap _map;
   MarkerDrag dragging;
   var _icon, _shadow;
   var _zIndex;
@@ -109,7 +109,7 @@ class Marker extends Layer with Events {
     _latlng = new LatLng.latLng(latlng);
   }
 
-  void onAdd(BaseMap map) {
+  void onAdd(LeafletMap map) {
     _map = map;
 
     map.on(EventType.VIEWRESET, update, this);
@@ -126,11 +126,11 @@ class Marker extends Layer with Events {
   /**
    * Adds the marker to the map.
    */
-  void addTo(BaseMap map) {
+  void addTo(LeafletMap map) {
     map.addLayer(this);
   }
 
-  void onRemove(BaseMap map) {
+  void onRemove(LeafletMap map) {
     if (dragging != null) {
       dragging.disable();
     }
@@ -428,9 +428,9 @@ class Marker extends Layer with Events {
   }
 
   void bindPopup(Popup popup, MarkerOptions options) {
-    geom.Point anchor = new geom.Point(0, 0);
+    Point2D anchor = new Point2D(0, 0);
     if (options.icon.options.popupAnchor != null) {
-      anchor = new geom.Point.point(options.icon.options.popupAnchor);
+      anchor = new Point2D.point(options.icon.options.popupAnchor);
     }
 
     anchor = anchor + this.options.offset;

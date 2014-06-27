@@ -1,7 +1,7 @@
 
 import 'dart:html' show document;
 
-import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/core/core.dart' show EventType, Event, Action;
 import 'package:leaflet/control/control.dart' show Layers;
 import 'package:leaflet/layer/tile/tile.dart' show TileLayer;
@@ -16,7 +16,7 @@ main() {
   useHtmlEnhancedConfiguration();
 
   group('Control.Layers', () {
-    BaseMap map;
+    LeafletMap map;
 
     bool called;
     List<Object> objs;
@@ -28,7 +28,7 @@ main() {
     };
 
     setUp(() {
-      map = new BaseMap(document.createElement('div'));
+      map = new LeafletMap(document.createElement('div'));
       called = false;
       objs = new List<Object>();
       events = new List<Event>();

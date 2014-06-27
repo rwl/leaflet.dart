@@ -23,12 +23,12 @@ class IconOptions {
   /**
    * Size of the icon image in pixels.
    */
-  geom.Point iconSize;
+  Point2D iconSize;
 
   /**
    * The coordinates of the "tip" of the icon (relative to its top left corner). The icon will be aligned so that this point is at the marker's geographical location. Centered by default if size is specified, also can be set in CSS with negative margins.
    */
-  geom.Point iconAnchor;
+  Point2D iconAnchor;
 
   /**
    * The URL to the icon shadow image. If not specified, no shadow image will be created.
@@ -43,17 +43,17 @@ class IconOptions {
   /**
    * Size of the shadow image in pixels.
    */
-  geom.Point shadowSize;
+  Point2D shadowSize;
 
   /**
    * The coordinates of the "tip" of the shadow (relative to its top left corner) (the same as iconAnchor if not specified).
    */
-  geom.Point shadowAnchor;
+  Point2D shadowAnchor;
 
   /**
    * The coordinates of the point from which popups will "open", relative to the icon anchor.
    */
-  geom.Point popupAnchor;
+  Point2D popupAnchor;
 
   /**
    * A custom class name to assign to both icon and shadow images. Empty by default.
@@ -102,27 +102,27 @@ class Icon {
   }
 
   _setIconStyles(Element img, IconType iconType) {
-    geom.Point size;
+    Point2D size;
     switch (iconType) {
       case IconType.ICON:
-        size = new geom.Point.point(options.iconSize);
+        size = new Point2D.point(options.iconSize);
         break;
       case IconType.SHADOW:
-        size = new geom.Point.point(options.shadowSize);
+        size = new Point2D.point(options.shadowSize);
         break;
     }
 
-    geom.Point anchor = null;
+    Point2D anchor = null;
     switch (iconType) {
       case IconType.SHADOW:
         if (options.shadowAnchor != null) {
-          anchor = new geom.Point.point(options.shadowAnchor);
+          anchor = new Point2D.point(options.shadowAnchor);
         } else {
-          anchor = new geom.Point.point(options.iconAnchor);
+          anchor = new Point2D.point(options.iconAnchor);
         }
         break;
       case IconType.ICON:
-        anchor = new geom.Point.point(options.iconAnchor);
+        anchor = new Point2D.point(options.iconAnchor);
         break;
     }
 

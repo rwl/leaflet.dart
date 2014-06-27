@@ -7,9 +7,9 @@ class Tap extends Handler {
 
   bool _fireClick;
   Timer _holdTimeout;
-  geom.Point _startPos, _newPos;
+  Point2D _startPos, _newPos;
 
-  Tap(BaseMap map) : super(map);
+  Tap(LeafletMap map) : super(map);
 
   void addHooks() {
     dom.on(map.getContainer(), 'touchstart', _onDown, this);
@@ -37,7 +37,7 @@ class Tap extends Handler {
     final first = e.touches.first,
         el = first.target;
 
-    _startPos = _newPos = new geom.Point(first.client.x, first.client.y);
+    _startPos = _newPos = new Point2D(first.client.x, first.client.y);
 
     // if touching a link, highlight it
     if (el.tagName && el.tagName.toLowerCase() == 'a') {
@@ -88,7 +88,7 @@ class Tap extends Handler {
 
   _onMove(html.TouchEvent e) {
     final first = e.touches.first;
-    _newPos = new geom.Point(first.client.x, first.client.y);
+    _newPos = new Point2D(first.client.x, first.client.y);
   }
 
   _simulateEvent(type, html.TouchEvent e) {

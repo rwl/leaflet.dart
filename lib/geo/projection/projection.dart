@@ -4,7 +4,7 @@ library leaflet.geo.projection;
 import 'dart:math' as math;
 
 import '../geo.dart';
-import '../../geometry/geometry.dart' as geom;
+import '../../geometry/geometry.dart' show Point2D;
 
 part 'lon_lat.dart';
 part 'mercator.dart';
@@ -18,10 +18,10 @@ abstract class Projection {
   /**
    * Projects geographical coordinates into a 2D point.
    */
-  geom.Point project(LatLng latlng);
+  Point2D project(LatLng latlng);
 
   /**
    * The inverse of project. Projects a 2D point into geographical location.
    */
-  LatLng unproject(geom.Point point);
+  LatLng unproject(Point2D point);
 }

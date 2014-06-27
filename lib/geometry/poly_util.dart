@@ -16,7 +16,7 @@ part of leaflet.geometry;
  *
  * Sutherland-Hodgeman polygon clipping algorithm.
  */
-List<geom.Point> clipPolygon(List<geom.Point> points, Bounds bounds) {
+List<Point2D> clipPolygon(List<Point2D> points, Bounds bounds) {
   final edges = [1, 4, 2, 8];
 
   final len = points.length;

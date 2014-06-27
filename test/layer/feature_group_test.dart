@@ -2,7 +2,7 @@ import 'dart:html' show document;
 
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/core/core.dart' show stamp;
 import 'package:leaflet/geo/geo.dart' show LatLng;
 import 'package:leaflet/layer/marker/marker.dart' show Marker;
@@ -13,9 +13,9 @@ main() {
   useHtmlEnhancedConfiguration();
 
   group('FeatureGroup', () {
-    BaseMap map;
+    LeafletMap map;
     setUp(() {
-      map = new BaseMap(document.createElement('div'));
+      map = new LeafletMap(document.createElement('div'));
       map.setView(new LatLng(0, 0), 1);
     });
     group('#_propagateEvent', () {

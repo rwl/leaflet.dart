@@ -3,7 +3,7 @@ import 'dart:html' show document;
 
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show BaseMap, containerProp;
+import 'package:leaflet/map/map.dart' show LeafletMap, containerProp;
 import 'package:leaflet/geo/geo.dart' show LatLng, LatLngBounds;
 import 'package:leaflet/core/core.dart' show Event, EventType;
 import 'package:leaflet/layer/layer.dart' show Layer;
@@ -13,18 +13,18 @@ main() {
   useHtmlEnhancedConfiguration();
 
   group('Map', () {
-    BaseMap map;
+    LeafletMap map;
     bool called;
 
     setUp(() {
-      map = new BaseMap(document.createElement('div'));
+      map = new LeafletMap(document.createElement('div'));
       called = false;
     });
 
     group('#remove', () {
       test('fires an unload event if loaded', () {
         final container = document.createElement('div'),
-          map = new BaseMap(container)..setView(new LatLng(0, 0), 0);
+          map = new LeafletMap(container)..setView(new LatLng(0, 0), 0);
         map.on(EventType.UNLOAD, (Object obj, Event e) {
           called = true;
         });
@@ -34,7 +34,7 @@ main() {
 
       test('fires no unload event if not loaded', () {
         final container = document.createElement('div'),
-            map = new BaseMap(container);
+            map = new LeafletMap(container);
         map.on(EventType.UNLOAD, (Object obj, Event e) {
           called = true;
         });
@@ -45,9 +45,9 @@ main() {
       group('corner case checking', () {
         test('throws an exception upon reinitialization', () {
           final container = document.createElement('div'),
-            map = new BaseMap(container);
+            map = new LeafletMap(container);
           try {
-            new BaseMap(container);
+            new LeafletMap(container);
             fail('Exception expected');
           } catch (e) {
             expect(e.message, equals('Map container is already initialized.'));
@@ -67,14 +67,14 @@ main() {
 
       test('undefines container._leaflet', () {
         final container = document.createElement('div'),
-            map = new BaseMap(container);
+            map = new LeafletMap(container);
         map.remove();
         expect(containerProp[container], isNull);
       });
 
       test('unbinds events', () {
         final container = document.createElement('div'),
-            map = new BaseMap(container)..setView(new LatLng(0, 0), 1);
+            map = new LeafletMap(container)..setView(new LatLng(0, 0), 1);
 
         final fn = (Object obj, Event e) {
           called = true;
@@ -209,14 +209,14 @@ main() {
     group('#getMinZoom and #getMaxZoom', () {
       group('#getMinZoom', () {
         test('returns 0 if not set by Map options or TileLayer options', () {
-          final map = new BaseMap(document.createElement('div'));
+          final map = new LeafletMap(document.createElement('div'));
           expect(map.getMinZoom(), equals(0));
         });
       });
 
       test('minZoom and maxZoom options overrides any minZoom and maxZoom set on layers', () {
 
-        final map = new BaseMap(document.createElement('div'), {'minZoom': 2, 'maxZoom': 20});
+        final map = new LeafletMap(document.createElement('div'), {'minZoom': 2, 'maxZoom': 20});
 
         new TileLayer('{z}{x}{y}', {'minZoom': 4, 'maxZoom': 10}).addTo(map);
         new TileLayer('{z}{x}{y}', {'minZoom': 6, 'maxZoom': 17}).addTo(map);

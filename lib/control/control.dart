@@ -58,7 +58,7 @@ abstract class Control {
 
   ControlOptions options;
 
-  BaseMap _map;
+  LeafletMap _map;
   Element _container;
 
   Control(this.options);
@@ -97,7 +97,7 @@ abstract class Control {
   /**
    * Adds the control to the map.
    */
-  void addTo(BaseMap map) {
+  void addTo(LeafletMap map) {
     _map = map;
 
     final container = _container = onAdd(map);
@@ -116,7 +116,7 @@ abstract class Control {
   /**
    * Removes the control from the map.
    */
-  void removeFrom(BaseMap map) {
+  void removeFrom(LeafletMap map) {
     final pos = getPosition(),
         corner = map.controlCorners[pos];
 
@@ -140,7 +140,7 @@ abstract class Control {
    * containing the control. Called on map.addControl(control) or
    * control.addTo(map).
    */
-  Element onAdd(BaseMap map);
+  Element onAdd(LeafletMap map);
 
   /**
    * Optional, should contain all clean up code (e.g. removes control's event
@@ -148,5 +148,5 @@ abstract class Control {
    * control.removeFrom(map). The control's DOM container is removed
    * automatically.
    */
-  onRemove(BaseMap map);
+  onRemove(LeafletMap map);
 }

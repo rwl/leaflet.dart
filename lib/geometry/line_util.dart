@@ -13,7 +13,7 @@ part of leaflet.geometry;
  *
  * Douglas-Peucker simplification
  */
-List<geom.Point> simplify(List<geom.Point> points, num tolerance) {
+List<Point2D> simplify(List<Point2D> points, num tolerance) {
 //    if (!tolerance || !points.length) {
 //      return points.slice();
 //    }
@@ -32,21 +32,21 @@ List<geom.Point> simplify(List<geom.Point> points, num tolerance) {
 /**
  * Returns the distance between point p and segment p1 to p2.
  */
-num pointToSegmentDistance(geom.Point p, geom.Point p1, geom.Point p2) {
+num pointToSegmentDistance(Point2D p, Point2D p1, Point2D p2) {
   return math.sqrt(_sqClosestPointOnSegment(p, p1, p2, true));
 }
 
 /**
  * Returns the closest point from a point p on a segment p1 to p2.
  */
-geom.Point closestPointOnSegment(geom.Point p, geom.Point p1, geom.Point p2) {
+Point2D closestPointOnSegment(Point2D p, Point2D p1, Point2D p2) {
   return _sqClosestPointOnSegment(p, p1, p2);
 }
 
 /**
  * Douglas-Peucker simplification, see http://en.wikipedia.org/wiki/Douglas-Peucker_algorithm
  */
-List<geom.Point> _simplifyDP(List<geom.Point> points, num sqTolerance) {
+List<Point2D> _simplifyDP(List<Point2D> points, num sqTolerance) {
 
   final len = points.length,
       //ArrayConstructor = typeof Uint8Array !== undefined + '' ? Uint8Array : Array,
@@ -67,7 +67,7 @@ List<geom.Point> _simplifyDP(List<geom.Point> points, num sqTolerance) {
   return newPoints;
 }
 
-void _simplifyDPStep(List<geom.Point> points, List<bool >markers, num sqTolerance, int first, int last) {
+void _simplifyDPStep(List<Point2D> points, List<bool >markers, num sqTolerance, int first, int last) {
   num maxSqDist = 0;
   int index;
 
@@ -91,7 +91,7 @@ void _simplifyDPStep(List<geom.Point> points, List<bool >markers, num sqToleranc
 /**
  * Reduce points that are too close to each other to a single point.
  */
-List<geom.Point> _reducePoints(points, sqTolerance) {
+List<Point2D> _reducePoints(points, sqTolerance) {
   var reducedPoints = [points[0]];
 
   int prev = 0;
@@ -117,7 +117,7 @@ int _lastCode;
  *
  * Cohen-Sutherland line clipping algorithm.
  */
-clipSegment(geom.Point a, geom.Point b, Bounds bounds, [bool useLastCode=false]) {
+clipSegment(Point2D a, Point2D b, Bounds bounds, [bool useLastCode=false]) {
   int codeA = useLastCode ? _lastCode : _getBitCode(a, bounds),
       codeB = _getBitCode(b, bounds);
 
@@ -151,25 +151,25 @@ clipSegment(geom.Point a, geom.Point b, Bounds bounds, [bool useLastCode=false])
   }
 }
 
-geom.Point _getEdgeIntersection(geom.Point a, geom.Point b, int code, Bounds bounds) {
+Point2D _getEdgeIntersection(Point2D a, Point2D b, int code, Bounds bounds) {
   final dx = b.x - a.x,
       dy = b.y - a.y,
       min = bounds.min,
       max = bounds.max;
 
   if ((code & 8) != 0) { // top
-    return new Point(a.x + dx * (max.y - a.y) / dy, max.y);
+    return new Point2D(a.x + dx * (max.y - a.y) / dy, max.y);
   } else if ((code & 4) != 0) { // bottom
-    return new Point(a.x + dx * (min.y - a.y) / dy, min.y);
+    return new Point2D(a.x + dx * (min.y - a.y) / dy, min.y);
   } else if ((code & 2) != 0) { // right
-    return new Point(max.x, a.y + dy * (max.x - a.x) / dx);
+    return new Point2D(max.x, a.y + dy * (max.x - a.x) / dx);
   } else if ((code & 1) != 0) { // left
-    return new Point(min.x, a.y + dy * (min.x - a.x) / dx);
+    return new Point2D(min.x, a.y + dy * (min.x - a.x) / dx);
   }
   return null;
 }
 
-int _getBitCode(geom.Point p, Bounds bounds) {
+int _getBitCode(Point2D p, Bounds bounds) {
   var code = 0;
 
   if (p.x < bounds.min.x) { // left
@@ -189,7 +189,7 @@ int _getBitCode(geom.Point p, Bounds bounds) {
 /**
  * Square distance (to avoid unnecessary Math.sqrt calls).
  */
-num _sqDist(geom.Point p1, geom.Point p2) {
+num _sqDist(Point2D p1, Point2D p2) {
   final dx = p2.x - p1.x,
       dy = p2.y - p1.y;
   return dx * dx + dy * dy;
@@ -198,7 +198,7 @@ num _sqDist(geom.Point p1, geom.Point p2) {
 /**
  * Return closest point on segment or distance to that point.
  */
-_sqClosestPointOnSegment(geom.Point p, geom.Point p1, geom.Point p2, [bool sqDist=false]) {
+_sqClosestPointOnSegment(Point2D p, Point2D p1, Point2D p2, [bool sqDist=false]) {
   var x = p1.x,
       y = p1.y,
       dx = p2.x - x,

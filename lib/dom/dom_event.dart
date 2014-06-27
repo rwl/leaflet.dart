@@ -178,14 +178,14 @@ void stop(e) {
 /**
  * Gets normalized mouse position from a DOM event relative to the container or to the whole page if not specified.
  */
-geom.Point getMousePosition(e, Element container) {
+Point2D getMousePosition(e, Element container) {
   if (!container) {
-    return new geom.Point(e.clientX, e.clientY);
+    return new Point2D(e.clientX, e.clientY);
   }
 
   var rect = container.getBoundingClientRect();
 
-  return new geom.Point(
+  return new Point2D(
     e.clientX - rect.left - container.clientLeft,
     e.clientY - rect.top - container.clientTop);
 }

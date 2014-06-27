@@ -4,7 +4,7 @@ import 'dart:html' show document, Element;
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
 
-import 'package:leaflet/map/map.dart' show BaseMap;
+import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/control/control.dart' show Attribution;
 
 
@@ -12,12 +12,12 @@ main() {
   useHtmlEnhancedConfiguration();
 
   group('Control.Attribution', () {
-    BaseMap map;
+    LeafletMap map;
     Attribution control;
     Element container;
 
     setUp(() {
-      map = new BaseMap(document.createElement('div'));
+      map = new LeafletMap(document.createElement('div'));
       control = new Attribution({
         'prefix': 'prefix'
       })..addTo(map);

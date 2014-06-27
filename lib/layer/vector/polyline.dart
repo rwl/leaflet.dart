@@ -17,7 +17,7 @@ class PolylineOptions extends PathOptions {
  */
 class Polyline extends Path {
 
-  List<geom.Point> _originalPoints;
+  List<Point2D> _originalPoints;
   List _parts;
 
   Polyline(List<LatLng> latlngs, PolylineOptions polylineOptions) : super(polylineOptions) {
@@ -97,10 +97,10 @@ class Polyline extends Path {
       for (var i = 1; i < len; i++) {
         p1 = points[i - 1];
         p2 = points[i];
-        var sqDist = geom._sqClosestPointOnSegment(p, p1, p2, true);
+        var sqDist = _sqClosestPointOnSegment(p, p1, p2, true);
         if (sqDist < minDistance) {
           minDistance = sqDist;
-          minPoint = geom._sqClosestPointOnSegment(p, p1, p2);
+          minPoint = _sqClosestPointOnSegment(p, p1, p2);
         }
       }
     }
@@ -165,7 +165,7 @@ class Polyline extends Path {
 
     int k = 0;
     for (int i = 0; i < len - 1; i++) {
-      segment = geom.clipSegment(points[i], points[i + 1], vp, i != 0);
+      segment = clipSegment(points[i], points[i + 1], vp, i != 0);
       if (!segment) {
         continue;
       }
@@ -186,7 +186,7 @@ class Polyline extends Path {
     final parts = _parts;
 
     for (int i = 0; i < parts.length; i++) {
-      parts[i] = geom.simplify(parts[i], polylineOptions.smoothFactor);
+      parts[i] = simplify(parts[i], polylineOptions.smoothFactor);
     }
   }
 

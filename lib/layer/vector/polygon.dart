@@ -90,7 +90,7 @@ class Polygon extends Polyline {
     if (polylineOptions.noClip) { return; }
 
     for (int i = 0; i < _parts.length; i++) {
-      var clipped = geom.clipPolygon(_parts[i], _map.pathViewport);
+      var clipped = clipPolygon(_parts[i], _map.pathViewport);
       if (clipped.length) {
         newParts.add(clipped);
       }

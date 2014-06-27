@@ -5,11 +5,11 @@ part of leaflet.map.handler;
  */
 class TouchZoom extends Handler {
 
-  geom.Point _startCenter, _startDist, _centerOffset, _delta;
+  Point2D _startCenter, _startDist, _centerOffset, _delta;
   bool _moved, _zooming;
   num _scale;
 
-  TouchZoom(BaseMap map) : super(map);
+  TouchZoom(LeafletMap map) : super(map);
 
   addHooks() {
     dom.on(this.map.getContainer(), 'touchstart', this._onTouchStart, this);
@@ -111,7 +111,7 @@ class TouchZoom extends Handler {
     map.animateZoom(center, zoom, origin, scale);
   }
 
-  geom.Point _getScaleOrigin() {
+  Point2D _getScaleOrigin() {
     final centerOffset = (this._centerOffset - this._delta) / this._scale;
     return this._startCenter + centerOffset;
   }

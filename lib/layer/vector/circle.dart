@@ -12,7 +12,7 @@ class Circle extends Path {
 
   LatLng _latlng;
   var _mRadius;
-  Point _point;
+  Point2D _point;
   num _radius;
 
   Circle(LatLng latlng, num radius, [CircleOptions circleOptions=null]) : super(circleOptions) {

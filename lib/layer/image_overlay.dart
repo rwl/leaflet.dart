@@ -21,7 +21,7 @@ class ImageOverlay extends Layer with Events {
 
   String _url;
   LatLngBounds _bounds;
-  BaseMap _map;
+  LeafletMap _map;
   var _image;
 
   ImageOverlay(String url, LatLngBounds bounds, this.options) {
@@ -32,7 +32,7 @@ class ImageOverlay extends Layer with Events {
   /**
    * Adds the overlay to the map.
    */
-  void onAdd(BaseMap map) {
+  void onAdd(LeafletMap map) {
     _map = map;
 
     if (_image == null) {
@@ -50,7 +50,7 @@ class ImageOverlay extends Layer with Events {
     _reset();
   }
 
-  void onRemove(BaseMap map) {
+  void onRemove(LeafletMap map) {
     //map.panes['overlayPane'].removeChild(_image);
     _image.remove();
 
@@ -61,7 +61,7 @@ class ImageOverlay extends Layer with Events {
     }
   }
 
-  void addTo(BaseMap map) {
+  void addTo(LeafletMap map) {
     map.addLayer(this);
   }
 

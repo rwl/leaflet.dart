@@ -8,17 +8,17 @@ class Bounds {
   /**
    * The top left corner of the rectangle.
    */
-  Point min;
+  Point2D min;
 
   /**
    * The bottom right corner of the rectangle.
    */
-  Point max;
+  Point2D max;
 
   /**
    * Creates a Bounds object defined by the points it contains.
    */
-  Bounds([List<Point> points=null]) {
+  Bounds([List<Point2D> points=null]) {
     if (points == null) { return; }
 
     for (var i = 0, len = points.length; i < len; i++) {
@@ -29,7 +29,7 @@ class Bounds {
   /**
    * Creates a Bounds object from two coordinates (usually top-left and bottom-right corners).
    */
-  factory Bounds.between(Point a, Point b) {
+  factory Bounds.between(Point2D a, Point2D b) {
     return new Bounds([a, b]);
   }
 
@@ -40,8 +40,8 @@ class Bounds {
   /**
    * Extends the bounds to contain the given point.
    */
-  void extend(Point point) {
-    point = new Point.point(point);
+  void extend(Point2D point) {
+    point = new Point2D.point(point);
 
     if (min == null && max == null) {
       min = point.clone();
@@ -57,32 +57,32 @@ class Bounds {
   /**
    * Returns the center point of the bounds.
    */
-  Point getCenter([bool round = false]) {
-    return new Point(
+  Point2D getCenter([bool round = false]) {
+    return new Point2D(
             (min.x + max.x) / 2,
             (min.y + max.y) / 2, round);
   }
 
-  Point getBottomLeft() {
-    return new Point(min.x, max.y);
+  Point2D getBottomLeft() {
+    return new Point2D(min.x, max.y);
   }
 
-  Point getTopRight() {
-    return new Point(max.x, min.y);
+  Point2D getTopRight() {
+    return new Point2D(max.x, min.y);
   }
 
   /**
    * Returns the size of the given bounds.
    */
-  Point getSize() {
+  Point2D getSize() {
     return max - min;
   }
 
   /**
    * Returns true if the rectangle contains the given point.
    */
-  bool contains(Point obj) {
-    obj = new Point.point(obj);
+  bool contains(Point2D obj) {
+    obj = new Point2D.point(obj);
 
     final min = obj;
     final max = obj;

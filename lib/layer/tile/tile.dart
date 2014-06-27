@@ -11,7 +11,7 @@ import '../../geo/geo.dart';
 import '../../geo/crs/crs.dart' show CRS, EPSG4326;
 import '../../dom/dom.dart' as dom;
 import '../layer.dart';
-import '../../geometry/geometry.dart' as geom;
+import '../../geometry/geometry.dart' show Bounds, Point2D;
 
 part 'canvas.dart';
 part 'tile_layer.dart';

@@ -124,7 +124,7 @@ class TileLayerOptions {
 class TileLayer extends Object with core.Events implements Layer {
 
   String _url;
-  BaseMap _map;
+  LeafletMap _map;
   bool _animated;
   Timer _clearBgBufferTimer;
 
@@ -184,7 +184,7 @@ class TileLayer extends Object with core.Events implements Layer {
     }*/
   }
 
-  void onAdd(BaseMap map) {
+  void onAdd(LeafletMap map) {
     _map = map;
     _animated = map.zoomAnimated;
 
@@ -222,11 +222,11 @@ class TileLayer extends Object with core.Events implements Layer {
   /**
    * Adds the layer to the map.
    */
-  void addTo(BaseMap map) {
+  void addTo(LeafletMap map) {
     map.addLayer(this);
   }
 
-  void onRemove(BaseMap map) {
+  void onRemove(LeafletMap map) {
     //_container.parentNode.removeChild(_container);
     _container.remove();
 
@@ -446,7 +446,7 @@ class TileLayer extends Object with core.Events implements Layer {
       return;
     }
 
-    final tileBounds = new geom.Bounds.between(
+    final tileBounds = new Bounds.between(
             (bounds.min / tileSize).floored(),
             (bounds.max / tileSize).floored());
 
@@ -457,13 +457,13 @@ class TileLayer extends Object with core.Events implements Layer {
     }
   }
 
-  void _addTilesFromCenterOut(geom.Bounds bounds) {
-    final queue = new List<geom.Point>(),
+  void _addTilesFromCenterOut(Bounds bounds) {
+    final queue = new List<Point2D>(),
         center = bounds.getCenter();
 
     for (num j = bounds.min.y; j <= bounds.max.y; j++) {
       for (num i = bounds.min.x; i <= bounds.max.x; i++) {
-        final point = new geom.Point(i, j);
+        final point = new Point2D(i, j);
 
         if (_tileShouldBeLoaded(point)) {
           queue.add(point);
@@ -476,7 +476,7 @@ class TileLayer extends Object with core.Events implements Layer {
     if (tilesToLoad == 0) { return; }
 
     // load tiles in order of their distance to center
-    queue.sort((geom.Point a, geom.Point b) {
+    queue.sort((Point2D a, Point2D b) {
       return a.distanceTo(center) - b.distanceTo(center);
     });
 
@@ -496,7 +496,7 @@ class TileLayer extends Object with core.Events implements Layer {
     _tileContainer.append(fragment);
   }
 
-  bool _tileShouldBeLoaded(geom.Point tilePoint) {
+  bool _tileShouldBeLoaded(Point2D tilePoint) {
     if (_tiles.containsKey('${tilePoint.x}:${tilePoint.y}')) {
       return false; // already loaded
     }
@@ -514,7 +514,7 @@ class TileLayer extends Object with core.Events implements Layer {
     if (options.bounds != null) {
       final tileSize = options.tileSize,
           nwPoint = tilePoint * tileSize,
-          sePoint = nwPoint + new geom.Point(tileSize, tileSize);
+          sePoint = nwPoint + new Point2D(tileSize, tileSize);
       LatLng nw = _map.unproject(nwPoint),
           se = _map.unproject(sePoint);
 
@@ -533,7 +533,7 @@ class TileLayer extends Object with core.Events implements Layer {
     return true;
   }
 
-  void _removeOtherTiles(geom.Bounds bounds) {
+  void _removeOtherTiles(Bounds bounds) {
     for (var key in _tiles) {
       final kArr = key.split(':');
       final x = int.parse(kArr[0], radix:10);
@@ -569,7 +569,7 @@ class TileLayer extends Object with core.Events implements Layer {
     _tiles.remove(key);
   }
 
-  void _addTile(geom.Point tilePoint, Element container) {
+  void _addTile(Point2D tilePoint, Element container) {
     final tilePos = _getTilePos(tilePoint);
 
     // get unused tile - or create a new tile
@@ -603,7 +603,7 @@ class TileLayer extends Object with core.Events implements Layer {
     return options.maxNativeZoom != 0 ? math.min(zoom, options.maxNativeZoom) : zoom;
   }
 
-  geom.Point _getTilePos(geom.Point tilePoint) {
+  Point2D _getTilePos(Point2D tilePoint) {
     final origin = _map.getPixelOrigin(),
         tileSize = _getTileSize();
 
@@ -612,7 +612,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
   // image-specific code (override to implement e.g. Canvas or SVG tile layer)
 
-  String getTileUrl(geom.Point tilePoint) {
+  String getTileUrl(Point2D tilePoint) {
     return core.template(_url, extend({
       's': _getSubdomain(tilePoint),
       'z': tilePoint.z,
@@ -621,13 +621,13 @@ class TileLayer extends Object with core.Events implements Layer {
     }, options));
   }
 
-  geom.Point _getWrapTileNum() {
+  Point2D _getWrapTileNum() {
     final crs = _map.stateOptions.crs,
         size = crs.getSize(_map.getZoom());
     return size.divideBy(_getTileSize())._floor();
   }
 
-  void _adjustTilePoint(geom.Point tilePoint) {
+  void _adjustTilePoint(Point2D tilePoint) {
 
     final limit = _getWrapTileNum();
 
@@ -643,7 +643,7 @@ class TileLayer extends Object with core.Events implements Layer {
     tilePoint.z = _getZoomForUrl();
   }
 
-  String _getSubdomain(geom.Point tilePoint) {
+  String _getSubdomain(Point2D tilePoint) {
     var index = (tilePoint.x + tilePoint.y).abs() % options.subdomains.length;
     return options.subdomains[index];
   }
@@ -678,7 +678,7 @@ class TileLayer extends Object with core.Events implements Layer {
     return tile;
   }
 
-  void _loadTile(Element tile, geom.Point tilePoint) {
+  void _loadTile(Element tile, Point2D tilePoint) {
     tile._layer  = this;
     tile.onload  = _tileOnLoad;
     tile.onerror = _tileOnError;

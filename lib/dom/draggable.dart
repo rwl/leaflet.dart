@@ -27,7 +27,7 @@ class Draggable extends Object with Events {
   var _startPos, _newPos, _animRequest;
 
   bool get moved =>_moved;
-  geom.Point get newPos => _newPos;
+  Point2D get newPos => _newPos;
 
   /**
    * Creates a Draggable object for moving the given element when you start dragging the dragHandle element (equals the element itself by default).

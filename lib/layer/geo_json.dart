@@ -66,11 +66,11 @@ class GeoJSON extends FeatureGroup {
           addData(features[i]);
         }
       }
-      return this;
+      return;
     }
 
     if (options.filter != null && !options.filter(geojson)) {
-      return this;
+      return;
     }
 
     final layer = GeoJSON.geometryToLayer(geojson, options.pointToLayer, options.coordsToLatLng, options);

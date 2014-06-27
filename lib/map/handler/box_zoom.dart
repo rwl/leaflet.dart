@@ -8,9 +8,9 @@ class BoxZoom extends Handler {
 
   Element _container, _pane, _box;
   bool _moved;
-  geom.Point _startLayerPoint;
+  Point2D _startLayerPoint;
 
-  BoxZoom(BaseMap map) : super(map) {
+  BoxZoom(LeafletMap map) : super(map) {
     _container = map.getContainer();
     _pane = map.panes['overlayPane'];
     _moved = false;
@@ -62,7 +62,7 @@ class BoxZoom extends Handler {
         layerPoint = map.mouseEventToLayerPoint(e),
         offset = layerPoint.subtract(startPoint),
 
-        newPos = new geom.Point(math.min(layerPoint.x, startPoint.x), math.min(layerPoint.y, startPoint.y));
+        newPos = new Point2D(math.min(layerPoint.x, startPoint.x), math.min(layerPoint.y, startPoint.y));
 
     dom.setPosition(box, newPos);
 

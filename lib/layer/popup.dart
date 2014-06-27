@@ -34,22 +34,22 @@ class PopupOptions {
   /**
    * The offset of the popup position. Useful to control the anchor of the popup when opening it on some overlays.
    */
-  geom.Point offset  = new geom.Point(0, 6);
+  Point2D offset  = new Point2D(0, 6);
 
   /**
    * The margin between the popup and the top left corner of the map view after autopanning was performed.
    */
-  geom.Point autoPanPaddingTopLeft;
+  Point2D autoPanPaddingTopLeft;
 
   /**
    * The margin between the popup and the bottom right corner of the map view after autopanning was performed.
    */
-  geom.Point autoPanPaddingBottomRight;
+  Point2D autoPanPaddingBottomRight;
 
   /**
    * Equivalent of setting both top left and bottom right autopan padding to the same value.
    */
-  geom.Point autoPanPadding = new geom.Point(5, 5);
+  Point2D autoPanPadding = new Point2D(5, 5);
 
   /**
    * Whether to animate the popup on zoom. Disable it if you have problems with Flash content inside popups.
@@ -90,7 +90,7 @@ class Popup extends Layer with Events {
 
   Events _source;
   bool _animated, _isOpen;
-  BaseMap _map;
+  LeafletMap _map;
   var _container;
   LatLng _latlng;
   var _content;
@@ -105,7 +105,7 @@ class Popup extends Layer with Events {
     _isOpen = false;
   }
 
-  onAdd(BaseMap map) {
+  onAdd(LeafletMap map) {
     _map = map;
 
     if (_container == null) {
@@ -139,18 +139,18 @@ class Popup extends Layer with Events {
   }
 
   // Adds the popup to the map.
-  addTo(BaseMap map) {
+  addTo(LeafletMap map) {
     map.addLayer(this);
     return this;
   }
 
   // Adds the popup to the map and closes the previous one.
-  openOn(BaseMap map) {
+  openOn(LeafletMap map) {
     map.openPopup(this);
     return this;
   }
 
-  void onRemove(BaseMap map) {
+  void onRemove(LeafletMap map) {
     //map.panes['popupPane'].removeChild(_container);
     _container.remove();
 
@@ -326,7 +326,7 @@ class Popup extends Layer with Events {
 
     final pos = _map.latLngToLayerPoint(_latlng),
         animated = _animated,
-        offset = new geom.Point.point(options.offset);
+        offset = new Point2D.point(options.offset);
 
     if (animated) {
       dom.setPosition(_container, pos);
@@ -353,16 +353,16 @@ class Popup extends Layer with Events {
     var containerHeight = _container.offsetHeight,
         containerWidth = _containerWidth;
 
-    final layerPos = new geom.Point(_containerLeft, -containerHeight - _containerBottom);
+    final layerPos = new Point2D(_containerLeft, -containerHeight - _containerBottom);
 
     if (_animated) {
       layerPos.add(dom.getPosition(_container));
     }
 
     final containerPos = map.layerPointToContainerPoint(layerPos),
-        padding = new geom.Point.point(options.autoPanPadding),
-        paddingTL = new geom.Point.point(options.autoPanPaddingTopLeft != null ? options.autoPanPaddingTopLeft : padding),
-        paddingBR = new geom.Point.point(options.autoPanPaddingBottomRight != null ? options.autoPanPaddingBottomRight : padding);
+        padding = new Point2D.point(options.autoPanPadding),
+        paddingTL = new Point2D.point(options.autoPanPaddingTopLeft != null ? options.autoPanPaddingTopLeft : padding),
+        paddingBR = new Point2D.point(options.autoPanPaddingBottomRight != null ? options.autoPanPaddingBottomRight : padding);
     final size = map.getSize();
     num dx = 0,
         dy = 0;
