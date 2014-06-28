@@ -10,16 +10,16 @@ part of leaflet.dom;
 /**
  * Alias for addListener.
  */
-void on(Element obj, String type, Function fn, [Object context=null]) {
+/*void on(Element obj, String type, Function fn, [Object context=null]) {
   addListener(obj, type, fn, context);
-}
+}*/
 
 /**
  * Adds a listener fn to the element's DOM event of the specified type. this keyword inside the listener will point to context, or to the element if not specified.
  *
  * Inspired by John Resig, Dean Edwards and YUI addEvent implementations.
  */
-void addListener(Element obj, String type, Function fn, Object context) { // (HTMLElement, String, Function[, Object])
+/*void addListener(Element obj, String type, Function fn, Object context) { // (HTMLElement, String, Function[, Object])
 
   final id = stamp(fn),
       key = '_leaflet_' + type + id;
@@ -74,19 +74,19 @@ void addListener(Element obj, String type, Function fn, Object context) { // (HT
   obj[key] = handler;
 
   return;
-}
+}*/
 
 /**
  * Alias for removeListener.
  */
-void off(Element obj, String type, Function fn) {
+/*void off(Element obj, String type, Function fn) {
   removeListener(obj, type, fn);
-}
+}*/
 
 /**
  * Removes an event listener from the element.
  */
-void removeListener(Element obj, String type, Function fn) {  // (HTMLElement, String, Function)
+/*void removeListener(Element obj, String type, Function fn) {  // (HTMLElement, String, Function)
 
   var id = stamp(fn),
       key = '_leaflet_' + type + id,
@@ -117,12 +117,12 @@ void removeListener(Element obj, String type, Function fn) {  // (HTMLElement, S
   obj[key] = null;
 
   return;
-}
+}*/
 
 /**
  * Stop the given event from propagation to parent elements.
  */
-void stopPropagation(e) {
+/*void stopPropagation(e) {
 
   if (e.stopPropagation) {
     e.stopPropagation();
@@ -130,7 +130,7 @@ void stopPropagation(e) {
     e.cancelBubble = true;
   }
   L.DomEvent._skipped(e);
-}
+}*/
 
 void disableScrollPropagation(el) {
   var stop = L.DomEvent.stopPropagation;
@@ -157,70 +157,69 @@ void disableClickPropagation(Element el) {
 /**
  * Prevents the default action of the event from happening (such as following a link in the href of the a element, or doing a POST request with page reload when form is submitted).
  */
-void preventDefault(e) {
+/*void preventDefault(e) {
 
   if (e.preventDefault) {
     e.preventDefault();
   } else {
     e.returnValue = false;
   }
-}
+}*/
 
 /**
  * Does stopPropagation and preventDefault at the same time.
  */
-void stop(e) {
-  return L.DomEvent
-    .preventDefault(e)
-    .stopPropagation(e);
+void stop(html.Event e) {
+  //preventDefault(e);
+  e.preventDefault();
+  //stopPropagation(e);
+  e.stopPropagation();
 }
 
 /**
  * Gets normalized mouse position from a DOM event relative to the container or to the whole page if not specified.
  */
-Point2D getMousePosition(e, Element container) {
-  if (!container) {
-    return new Point2D(e.clientX, e.clientY);
+Point2D getMousePosition(html.MouseEvent e, [Element container=null]) {
+  if (container == null) {
+    return new Point2D(e.client.x, e.client.y);
   }
 
   var rect = container.getBoundingClientRect();
 
   return new Point2D(
-    e.clientX - rect.left - container.clientLeft,
-    e.clientY - rect.top - container.clientTop);
+    e.client.x - rect.left - container.clientLeft,
+    e.client.y - rect.top - container.clientTop);
 }
 
 /**
  * Gets normalized wheel delta from a mousewheel DOM event.
  */
-num getWheelDelta(e) {
+num getWheelDelta(html.WheelEvent e) {
 
-  var delta = 0;
+  num delta = e.deltaY / 120;
 
-  if (e.wheelDelta) {
-    delta = e.wheelDelta / 120;
-  }
-  if (e.detail) {
-    delta = -e.detail / 3;
-  }
+  delta = -e.detail / 3;
+
   return delta;
 }
 
-var _skipEvents = {};
+Map<String, bool> _skipEvents = {};
 
-void _fakeStop(e) {
-  // fakes stopPropagation by setting a special event flag, checked/reset with L.DomEvent._skipped(e)
+void fakeStop(html.MouseEvent e) {
+  // Fakes stopPropagation by setting a special event flag, checked/reset with skipped(e).
   _skipEvents[e.type] = true;
 }
 
-_skipped(e) {
-  var skipped = _skipEvents[e.type];
-  // reset when checking, as it's only used in map container and propagates outside of the map
+bool skipped(html.MouseEvent e) {
+  final skipped = _skipEvents[e.type];
+  // Reset when checking, as it's only used in map container and propagates outside of the map.
   _skipEvents[e.type] = false;
   return skipped;
 }
 
-// check if element really left/entered the event target (for mouseenter/mouseleave)
+/**
+ * Check if element really left/entered the event target (for mouseenter/mouseleave)
+ */
 bool _checkMouse(Element el, e) {
 
   var related = e.relatedTarget;
@@ -270,4 +269,15 @@ _filterClick(e, handler) {
   _lastClick = timeStamp;
 
   return handler(e);
+}
+
+final _simulated = new Expando<bool>('simulated');
+
+void simulate(html.MouseEvent e) {
+  _simulated[e] = true;
+}
+
+bool simulated(html.MouseEvent e) {
+  final s = _simulated[e];
+  return s == null ? false : s;
 }

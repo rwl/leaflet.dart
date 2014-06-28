@@ -297,9 +297,9 @@ abstract class Path extends Layer with Events {
   // Form path string here.
   getPathString();
 
-  _createElement(String name) {
+  /*_createElement(String name) {
     return document.createElementNS(SVG_NS, name);
-  }
+  }*/
 
   _initElements() {
     _map._initPathRoot();

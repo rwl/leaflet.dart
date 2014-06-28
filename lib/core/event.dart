@@ -197,3 +197,14 @@ class DragEndEvent extends Event {
 
   DragEndEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
 }
+
+class ZoomAnimEvent extends Event {
+  LatLng center;
+  num zoom;
+  Point2D origin;
+  num scale;
+  Point2D delta;
+  bool backwards;
+
+  ZoomAnimEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+}

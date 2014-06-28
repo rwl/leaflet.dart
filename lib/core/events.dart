@@ -231,14 +231,14 @@ class Events {
   /**
    * Alias to fireEvent.
    */
-  fire(EventType type, [Map data = null]) {
+  fire(EventType type, [Map<String, Object> data = null]) {
     return fireEvent(type, data);
   }
 
   /**
    * Fires an event of the specified type. You can optionally provide an data object — the first argument of the listener function will contain its properties.
    */
-  fireEvent(EventType type, [Map data = null]) { // (String[, Object])
+  fireEvent(EventType type, [Map<String, Object> data = null]) { // (String[, Object])
     if (!this.hasEventListeners(type)) {
       return this;
     }
