@@ -4,7 +4,7 @@ import 'dart:html' show Element, CanvasElement;
 import 'dart:math' as math show min, max;
 
 import '../core/core.dart' as core;
-import '../core/core.dart' show EventType, Browser, Action, stamp, Events, Event;
+import '../core/core.dart' show EventType, Browser, Action, stamp, Events, Event, LayerEvent;
 import '../dom/dom.dart' as dom;
 import '../map/map.dart';
 import '../geo/geo.dart';

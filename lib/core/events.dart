@@ -309,10 +309,11 @@ class Events {
     event['type'] = type;
     event['target'] = this;*/
     if (event == null) {
-      event = new Event();//type, this, null);
+      event = new Event(type);//type, this, null);
+    } else {
+      event.type = type;
+      //event.target = this;
     }
-    event.type = type;
-    //event.target = this;
 
     //var events = this[eventsKey],
 //    final events = _leaflet_events;

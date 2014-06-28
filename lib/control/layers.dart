@@ -1,5 +1,7 @@
 part of leaflet.control;
 
+final _layerId = new Expando<int>();
+
 class LayersOptions extends ControlOptions {
   /**
    * The position of the control (one of the map corners). See control positions.
@@ -24,11 +26,11 @@ class Layers extends Control {
 
   LayersOptions get layersOptions => options as LayersOptions;
 
-  Map _layers;
+  Map<int, LayersControlEvent> _layers;
   int _lastZIndex;
   bool _handlingClick;
-  var _form;
-  var _layersLink;
+  Element _form;
+  Element _layersLink;
   Element _baseLayersList, _overlaysList, _separator;
 
   /**
@@ -44,7 +46,7 @@ class Layers extends Control {
     if (options == null) {
       options = new LayersOptions();
     }
-    _layers = {};
+    _layers = new Map<int, Object>();
     _lastZIndex = 0;
     _handlingClick = false;
 
@@ -61,8 +63,8 @@ class Layers extends Control {
     _initLayout();
     _update();
 
-    map.on(EventType.LAYERADD, _onLayerChange, this);
-    map.on(EventType.LAYERREMOVE, _onLayerChange, this);
+    map.on(EventType.LAYERADD, _onLayerChange);
+    map.on(EventType.LAYERREMOVE, _onLayerChange);
 
     return _container;
   }
@@ -146,7 +148,7 @@ class Layers extends Control {
         });
       });
 
-      _map.on(EventType.CLICK, _collapse, this);
+      _map.on(EventType.CLICK, _collapse);
       // TODO keyboard accessibility
     } else {
       _expand();
@@ -162,11 +164,7 @@ class Layers extends Control {
   void _addLayer(Layer layer, String name, [bool overlay=false]) {
     final id = stamp(layer);
 
-    _layers[id] = {
-      'layer': layer,
-      'name': name,
-      'overlay': overlay
-    };
+    _layers[id] = new LayersControlEvent(null, layer, name, overlay);
 
     if (layersOptions.autoZIndex) {
       _lastZIndex++;
@@ -185,31 +183,31 @@ class Layers extends Control {
     bool baseLayersPresent = false,
         overlaysPresent = false;
 
-    for (var i in _layers) {
-      final obj = _layers[i];
+    _layers.forEach((int id, LayersControlEvent obj) {
       _addItem(obj);
       overlaysPresent = overlaysPresent || obj.overlay != null;
       baseLayersPresent = baseLayersPresent || !obj.overlay != null;
-    }
+    });
 
     _separator.style.display = overlaysPresent && baseLayersPresent ? '' : 'none';
   }
 
-  void _onLayerChange(Object obj, LayerEvent e) {
+  void _onLayerChange(LayerEvent e) {
     final obj = _layers[stamp(e.layer)];
 
-    if (!obj) { return; }
+    if (obj == null) { return; }
 
     if (!_handlingClick) {
       _update();
     }
 
-    final type = obj.overlay != null ?
-      (e.type == 'layeradd' ? 'overlayadd' : 'overlayremove') :
-      (e.type == 'layeradd' ? 'baselayerchange' : null);
+    EventType type = obj.overlay != null ?
+      (e.type == EventType.LAYERADD ? EventType.OVERLAYADD : EventType.OVERLAYREMOVE) :
+      (e.type == EventType.LAYERADD ? EventType.BASELAYERCHANGE : null);
 
-    if (type) {
-      _map.fire(type, obj);
+    if (type != null) {
+      obj.type = type;
+      _map.fireEvent(obj);
     }
   }
 
@@ -228,7 +226,7 @@ class Layers extends Control {
     return radioFragment.firstChild;
   }
 
-  _addItem(obj) {
+  Element _addItem(LayersControlEvent obj) {
     final label = document.createElement('label');
     InputElement input;
     final checked = _map.hasLayer(obj.layer);
@@ -242,7 +240,7 @@ class Layers extends Control {
       input = _createRadioElement('leaflet-base-layers', checked);
     }
 
-    input.layerId = stamp(obj.layer);
+    _layerId[input] = stamp(obj.layer);
 
     //dom.on(input, 'click', _onInputClick, this);
     input.onClick.listen(_onInputClick);
@@ -259,15 +257,14 @@ class Layers extends Control {
     return label;
   }
 
-  _onInputClick([html.MouseEvent e]) {
-//    var i, input, obj;
-    final inputs = _form.getElementsByTagName('input');
+  void _onInputClick([html.MouseEvent e]) {
+    final inputs = _form.querySelectorAll('input');
 
     _handlingClick = true;
 
     for (int i = 0; i < inputs.length; i++) {
-      final input = inputs[i];
-      final obj = _layers[input.layerId];
+      InputElement input = inputs[i];
+      final obj = _layers[_layerId[input]];
 
       if (input.checked && !_map.hasLayer(obj.layer)) {
         _map.addLayer(obj.layer);

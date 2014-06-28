@@ -136,8 +136,10 @@ class LayersControlEvent extends Event {
    */
   String name;
 
+  bool overlay;
+
   //LayersControlEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
-  LayersControlEvent(EventType eventType, this.layer, this.name) : super(eventType);
+  LayersControlEvent(EventType eventType, this.layer, this.name, this.overlay) : super(eventType);
 }
 
 class TileEvent extends Event {

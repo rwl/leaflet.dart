@@ -221,5 +221,5 @@ _sqClosestPointOnSegment(Point2D p, Point2D p1, Point2D p2, [bool sqDist=false])
   dx = p.x - x;
   dy = p.y - y;
 
-  return sqDist ? dx * dx + dy * dy : new Point(x, y);
+  return sqDist ? dx * dx + dy * dy : new Point2D(x, y);
 }

@@ -8,7 +8,7 @@ typedef LayerFunc(var layer);
  */
 class LayerGroup extends Layer {
 
-  Map<String, Layer> _layers;
+  Map<int, Layer> _layers;
   LeafletMap _map;
 
   /**
@@ -48,8 +48,8 @@ class LayerGroup extends Layer {
   /**
    * Removes a given layer of the given id from the group.
    */
-  void removeLayerId(String id) {
-    if (_map && _layers[id]) {
+  void removeLayerId(int id) {
+    if (_map != null && _layers[id] != null) {
       _map.removeLayer(_layers[id]);
     }
 
@@ -59,10 +59,15 @@ class LayerGroup extends Layer {
   /**
    * Returns true if the given layer is currently added to the group.
    */
-  bool hasLayer(String layer) {
+  /*bool hasLayer(String layer) {
     if (layer == null) { return false; }
 
     return (_layers.containsKey(layer) || _layers.containsKey(getLayerId(layer)));
+  }*/
+  bool hasLayer(Layer layer) {
+    if (layer == null) { return false; }
+
+    return _layers.containsKey(getLayerId(layer));
   }
 
   /**

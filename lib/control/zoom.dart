@@ -51,16 +51,16 @@ class Zoom extends Control {
             zoomOptions.zoomOutText, zoomOptions.zoomOutTitle,
             '$zoomName-out', container, _zoomOut);//, this);
 
-    _updateDisabled(null, null);
-    map.on(EventType.ZOOMEND, _updateDisabled, this);
-    map.on(EventType.ZOOMLEVELSCHANGE, _updateDisabled, this);
+    _updateDisabled();
+    map.on(EventType.ZOOMEND, _updateDisabled);
+    map.on(EventType.ZOOMLEVELSCHANGE, _updateDisabled);
 
     return container;
   }
 
   onRemove(LeafletMap map) {
-    map.off(EventType.ZOOMEND, _updateDisabled, this);
-    map.off(EventType.ZOOMLEVELSCHANGE, _updateDisabled, this);
+    map.off(EventType.ZOOMEND, _updateDisabled);
+    map.off(EventType.ZOOMLEVELSCHANGE, _updateDisabled);
   }
 
   _zoomIn(html.MouseEvent e) {
@@ -100,7 +100,7 @@ class Zoom extends Control {
     return link;
   }
 
-  _updateDisabled(Object obj, Event e) {
+  _updateDisabled() {
     final map = _map,
       className = 'leaflet-disabled';
 

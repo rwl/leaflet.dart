@@ -36,8 +36,8 @@ class Attribution extends Control {
       }
     });
 
-    map.on(EventType.LAYERADD, _onLayerAdd, this);
-    map.on(EventType.LAYERREMOVE, _onLayerRemove, this);
+    map.on(EventType.LAYERADD, _onLayerAdd);
+    map.on(EventType.LAYERREMOVE, _onLayerRemove);
 
     _update();
 
@@ -87,7 +87,7 @@ class Attribution extends Control {
     }
   }
 
-  _update() {
+  void _update() {
     if (_map == null) {
       return;
     }
@@ -105,13 +105,13 @@ class Attribution extends Control {
     _container.setInnerHtml(prefixAndAttribs.join(' | '));
   }
 
-  _onLayerAdd(Object obj, LayerEvent e) {
+  void _onLayerAdd(LayerEvent e) {
     if (e.layer.getAttribution != null) {
       addAttribution(e.layer.getAttribution());
     }
   }
 
-  _onLayerRemove(Object obj, LayerEvent e) {
+  void _onLayerRemove(LayerEvent e) {
     if (e.layer.getAttribution != null) {
       removeAttribution(e.layer.getAttribution());
     }

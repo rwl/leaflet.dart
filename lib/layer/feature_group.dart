@@ -15,12 +15,12 @@ class FeatureGroup extends LayerGroup with Events {
    */
   FeatureGroup([List<Layer> layers = null]) : super(layers);
 
-  addLayer(layer) {
+  void addLayer(Layer layer) {
     if (hasLayer(layer)) {
-      return this;
+      return;
     }
 
-    if (layer.contains('on')) {
+    if (layer is Events) {
       layer.on(FeatureGroup.EVENTS, _propagateEvent, this);
     }
 
@@ -30,14 +30,12 @@ class FeatureGroup extends LayerGroup with Events {
       layer.bindPopup(_popupContent, _popupOptions);
     }
 
-    return fire(EventType.LAYERADD, {
-      'layer': layer
-    });
+    fireEvent(new LayerEvent(EventType.LAYERADD, layer));
   }
 
-  removeLayer(layer) {
+  void removeLayer(Layer layer) {
     if (!hasLayer(layer)) {
-      return this;
+      return;
     }
     if (_layers.containsKey(layer)) {
       layer = _layers[layer];
@@ -54,9 +52,7 @@ class FeatureGroup extends LayerGroup with Events {
       });
     }
 
-    return fire(EventType.LAYERREMOVE, {
-      layer: layer
-    });
+    fireEvent(new LayerEvent(EventType.LAYERREMOVE, layer));
   }
 
   /**
@@ -115,7 +111,7 @@ class FeatureGroup extends LayerGroup with Events {
    * Returns the LatLngBounds of the Feature Group (created from bounds and coordinates of its children).
    */
   getBounds() {
-    var bounds = new LatLngBounds();
+    var bounds = new LatLngBounds.between();
 
     eachLayer((layer) {
       bounds.extend(layer is Marker ? layer.getLatLng() : layer.getBounds());
