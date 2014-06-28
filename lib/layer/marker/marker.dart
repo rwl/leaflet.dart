@@ -213,7 +213,7 @@ class Marker extends Layer with Events {
       }
     }
 
-    dom.addClass(icon, classToAdd);
+    icon.classes.add(classToAdd);
 
     if (options.keyboard) {
       icon.tabIndex = '0';
@@ -237,7 +237,7 @@ class Marker extends Layer with Events {
     }
 
     if (newShadow != null) {
-      dom.addClass(newShadow, classToAdd);
+      newShadow.classes.add(classToAdd);
     }
     _shadow = newShadow;
 
@@ -309,7 +309,7 @@ class Marker extends Layer with Events {
     final events = [EventType.DBLCLICK, EventType.MOUSEDOWN, EventType.MOUSEOVER,
                     EventType.MOUSEOUT, EventType.CONTEXTMENU];
 
-    dom.addClass(icon, 'leaflet-clickable');
+    icon.classes.add('leaflet-clickable');
     dom.on(icon, 'click', _onMouseClick, this);
     dom.on(icon, 'keypress', _onKeyPress, this);
 

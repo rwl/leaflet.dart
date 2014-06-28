@@ -105,7 +105,7 @@ abstract class Control {
     final pos = getPosition(),
         corner = map.controlCorners[pos];
 
-    dom.addClass(container, 'leaflet-control');
+    container.classes.add('leaflet-control');
 
     if (pos.toString().indexOf('bottom') != -1) {
       corner.insertBefore(container, corner.firstChild);

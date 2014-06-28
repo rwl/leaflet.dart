@@ -61,7 +61,7 @@ class TouchZoom extends Handler {
     }
 
     if (!this._moved) {
-      dom.addClass(map.mapPane, 'leaflet-touching');
+      map.mapPane.classes.add('leaflet-touching');
 
       map.fire(EventType.MOVESTART);
       map.fire(EventType.ZOOMSTART);
