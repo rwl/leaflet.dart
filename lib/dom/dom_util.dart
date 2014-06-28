@@ -10,12 +10,12 @@ final DomUtil = new _DomUtil();
 /**
  * Vendor-prefixed transition style name (e.g. 'webkitTransition' for WebKit).
  */
-String TRANSITION;
+String TRANSITION = 'transition';
 
 /**
  * Vendor-prefixed transform style name.
  */
-String TRANSFORM;
+String TRANSFORM = 'transform';
 
 /**
  * Returns an element with the given id if a string was passed, or just returns the element if it was passed directly.
@@ -23,6 +23,8 @@ String TRANSFORM;
 Element get(String id) {
   return (id is String ? document.getElementById(id) : id);
 }
+
+String px(num i) => '${i}px';
 
 /**
  * Returns the value for a certain style attribute on an element, including computed values or values set through CSS.
@@ -190,11 +192,11 @@ String getTranslateString(Point2D point) {
   // makes animation smoother as it ensures HW accel is used. Firefox 13 doesn't care
   // (same speed either way), Opera 12 doesn't support translate3d
 
-  var is3d = L.Browser.webkit3d,
+  var is3d = false, //L.Browser.webkit3d,
       open = 'translate' + (is3d ? '3d' : '') + '(',
       close = (is3d ? ',0' : '') + ')';
 
-  return open + point.x + 'px,' + point.y + 'px' + close;
+  return open + px(point.x) + ',' + px(point.y) + close;
 }
 
 /**
@@ -208,6 +210,8 @@ String getScaleString(num scale, Point2D origin) {
   return preTranslateStr + scaleStr;
 }
 
+Expando<Point2D> _leafletPos = new Expando<Point2D>();
+
 /**
  * Sets the position of an element to coordinates specified by point, using
  * CSS translate or top/left positioning depending on the browser (used by
@@ -215,28 +219,16 @@ String getScaleString(num scale, Point2D origin) {
  * if disable3D is true.
  */
 void setPosition(Element el, Point2D point, [bool disable3D=false]) {
-
-  // jshint camelcase: false
-  el._leaflet_pos = point;
-
-  if (!disable3D && L.Browser.any3d) {
-    el.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(point);
-  } else {
-    el.style.left = point.x + 'px';
-    el.style.top = point.y + 'px';
-  }
+  _leafletPos[el] = point;
+  el.style.transform = getTranslateString(point);
 }
 
 /**
  * Returns the coordinates of an element previously positioned with setPosition.
  */
-Point2D getPosition(Element el) {
-  // this method is only used for elements previously positioned using setPosition,
-  // so it's safe to cache the position for performance
-
-  // jshint camelcase: false
-  return el._leaflet_pos;
-}
+// this method is only used for elements previously positioned using setPosition,
+// so it's safe to cache the position for performance
+Point2D getPosition(Element el) => _leafletPos[el];
 
 /**
  * Makes sure text cannot be selected, for example during dragging.

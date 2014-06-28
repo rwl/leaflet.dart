@@ -43,7 +43,7 @@ class LeafletMap extends Object with Events {
   int _tileLayersNum, _tileLayersToLoad;
 
   num _zoom;
-  bool _loaded;
+  bool _loaded = false;
 
   bool _sizeChanged;
   LatLng _initialCenter;
@@ -347,7 +347,7 @@ class LeafletMap extends Object with Events {
     }
 
     // TODO looks ugly, refactor!!!
-    if (animationOptions.zoomAnimation && layer is TileLayer) {
+    if (animationOptions.zoomAnimation == true && layer is TileLayer) {
       _tileLayersNum++;
       _tileLayersToLoad++;
       layer.on(EventType.LOAD, _onTileLayerLoad);
@@ -429,7 +429,7 @@ class LeafletMap extends Object with Events {
         newCenter = (newSize / 2).rounded(),
         offset = oldCenter - newCenter;
 
-    if (!offset.x && !offset.y) { return; }
+    if (offset.x == 0 && offset.y == 0) { return; }
 
     if (animate && pan) {
       panBy(offset);
@@ -822,6 +822,7 @@ class LeafletMap extends Object with Events {
 //  _addLayers([var layers=null]) {
 //    layers = layers ? (layers is List ? layers : [layers]) : [];
   void _addLayers(List<Layer> layers) {
+    if (layers == null) return;
     for (var i = 0, len = layers.length; i < len; i++) {
       addLayer(layers[i]);
     }
@@ -831,7 +832,7 @@ class LeafletMap extends Object with Events {
   // private methods that modify map state
 
   void _resetView(LatLng center, num zoom, [bool preserveMapOffset=false, bool afterZoomAnim=false]) {
-
+    print("_resetView");
     var zoomChanged = (_zoom != zoom);
 
     if (!afterZoomAnim) {
@@ -890,7 +891,7 @@ class LeafletMap extends Object with Events {
     num maxZoom = double.NEGATIVE_INFINITY;
     final oldZoomSpan = _getZoomSpan();
 
-    for (i in _zoomBoundLayers) {
+    for (i in _zoomBoundLayers.keys) {
       var layer = _zoomBoundLayers[i];
       if (!layer.options.minZoom.isNaN) {
         minZoom = math.min(minZoom, layer.options.minZoom);
@@ -986,18 +987,16 @@ class LeafletMap extends Object with Events {
   int _resizeRequest;
 
   void _onResize(html.Event event) {
-    //cancelAnimFrame(_resizeRequest);
-    window.cancelAnimationFrame(_resizeRequest);
-    /*_resizeRequest = requestAnimFrame(() {
-      invalidateSize(debounceMoveend: true);
-    }, this, false, _container);*/
+    if (_resizeRequest != null) window.cancelAnimationFrame(_resizeRequest);
     _resizeRequest = window.requestAnimationFrame((num highResTime) {
       invalidateSize(debounceMoveend: true);
     });
   }
 
   void _onMouseClick(html.MouseEvent e) {
-    if (!_loaded || (!dom.simulated(e) && ((dragging != null && dragging.moved()) || (boxZoom != null && boxZoom.moved()))) || dom.skipped(e)) {
+    if (_loaded != true || (dom.simulated(e) != true && (
+        (dragging != null && dragging.moved() == true) ||
+        (boxZoom != null && boxZoom.moved() == true))) || dom.skipped(e) == true) {
       return;
     }
 
@@ -1006,7 +1005,7 @@ class LeafletMap extends Object with Events {
   }
 
   void _fireMouseEvent(html.Event e) {
-    if (!_loaded || dom.skipped(e)) {
+    if (_loaded != true || dom.skipped(e) == true) {
       return;
     }
 
@@ -1343,7 +1342,7 @@ class LeafletMap extends Object with Events {
    * Sets the view of the map (geographical center and zoom) with the given animation options.
    */
   void setView(LatLng center, num zoom, [ZoomPanOptions options=null, LatLngBounds maxBounds=null]) {
-
+    print("setView");
     zoom = zoom == null ? _zoom : limitZoom(zoom);
     center = _limitCenter(new LatLng.latLng(center), zoom, /*options.*/maxBounds);
     //options = options || {};
