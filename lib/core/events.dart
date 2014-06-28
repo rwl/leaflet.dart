@@ -242,8 +242,8 @@ class Events {
   /*fire(EventType type, [Map<String, Object> data = null]) {
     return fireEvent(type, data);
   }*/
-  fire(EventType type) {
-    _fireEvent(type);
+  fire(EventType type, [Event event]) {
+    _fireEvent(type, event);
   }
 
   /**

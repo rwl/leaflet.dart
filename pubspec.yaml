@@ -5,6 +5,7 @@ description: Mobile-friendly interactive maps
 homepage: https://github.com/rwl/leaflet.dart
 dependencies:
   intl: any
+  uri: '>=0.9.2 < 1.0.0'
 dev_dependencies:
   browser: any
   unittest: any

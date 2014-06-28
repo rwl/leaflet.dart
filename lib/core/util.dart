@@ -54,3 +54,5 @@ String trim(String str) {
 List<String> splitWords(String str) {
   return str.split(r'\s+');//L.Util.trim(str).split(/\s+/);
 }
+
+String template(String url, Map data) => new UriTemplate(url).expand(data);

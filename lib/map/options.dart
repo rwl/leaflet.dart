@@ -193,8 +193,8 @@ class AnimationOptions {
   bool markerZoomAnimation;
 
   AnimationOptions() {
-    fadeAnimation = dom.TRANSITION != null && !Browser.android23;
-    markerZoomAnimation = dom.TRANSITION != null && Browser.any3d;
+    fadeAnimation = true; //dom.TRANSITION != null && !Browser.android23;
+    markerZoomAnimation = true; // dom.TRANSITION != null && Browser.any3d;
   }
 }
 

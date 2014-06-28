@@ -9,6 +9,7 @@ import '../geo/geo.dart' show LatLng, LatLngBounds;
 import '../layer/layer.dart' show Layer, Popup;
 import '../map/map.dart' show LeafletMap;
 import '../geometry/geometry.dart' show Point2D;
+import 'package:uri/uri.dart';
 
 part 'browser.dart';
 part 'event.dart';

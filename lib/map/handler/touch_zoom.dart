@@ -91,7 +91,7 @@ class TouchZoom extends Handler {
     }
 
     this._zooming = false;
-    dom.removeClass(map.mapPane, 'leaflet-touching');
+    map.mapPane.classes.remove('leaflet-touching');
     cancelAnimFrame(this._animRequest);
 
     dom.off(document, 'touchmove', this._onTouchMove);

@@ -162,7 +162,8 @@ class TileLayer extends Object with core.Events implements Layer {
     }
 
     // detecting retina displays, adjusting tileSize and zoom levels
-    if (options.detectRetina && Browser.retina && options.maxZoom > 0) {
+    if (options.detectRetina == true && Browser.retina == true &&
+        options.maxZoom > 0) {
 
       options.tileSize = (options.tileSize / 2).floor();
       options.zoomOffset++;
@@ -185,6 +186,7 @@ class TileLayer extends Object with core.Events implements Layer {
   }
 
   void onAdd(LeafletMap map) {
+    print("TileLayer.onAdd");
     _map = map;
     _animated = map.zoomAnimated;
 
@@ -192,25 +194,25 @@ class TileLayer extends Object with core.Events implements Layer {
     _initContainer();
 
     // set up events
-    map.on(EventType.VIEWRESET, _animateZoom, this);
-    map.on(EventType.MOVEEND, _update, this);
+//    map.on(EventType.VIEWRESET, _animateZoom, this);
+//    map.on(EventType.MOVEEND, _update, this);
 //    map.on({
 //      'viewreset': _reset,
 //      'moveend': _update
 //    }, this);
 
-    if (_animated) {
-      map.on(EventType.ZOOMANIM, _animateZoom, this);
-      map.on(EventType.ZOOMEND, _endZoomAnim, this);
+    if (_animated == true) {
+//      map.on(EventType.ZOOMANIM, _animateZoom, this);
+//      map.on(EventType.ZOOMEND, _endZoomAnim, this);
 //      map.on({
 //        'zoomanim': _animateZoom,
 //        'zoomend': _endZoomAnim
 //      }, this);
     }
 
-    if (!options.updateWhenIdle) {
-      _limitedUpdate = limitExecByInterval(_update, 150, this);
-      map.on(EventType.MOVE, _limitedUpdate, this);
+    if (options.updateWhenIdle != true) {
+//      _limitedUpdate = limitExecByInterval(_update, 150, this);
+//      map.on(EventType.MOVE, _limitedUpdate, this);
     }
 
     _reset();
@@ -237,7 +239,7 @@ class TileLayer extends Object with core.Events implements Layer {
 //      'moveend': _update
 //    }, this);
 
-    if (_animated) {
+    if (_animated == true) {
       map.off(EventType.ZOOMANIM, _animateZoom, this);
       map.off(EventType.ZOOMEND, _endZoomAnim, this);
 //      map.off({
@@ -330,7 +332,7 @@ class TileLayer extends Object with core.Events implements Layer {
   }
 
   void _updateZIndex() {
-    if (_container && options.zIndex != null) {
+    if (_container != null && options.zIndex != null) {
       _container.style.zIndex = options.zIndex.toString();
     }
   }
@@ -378,7 +380,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
       _updateZIndex();
 
-      if (_animated) {
+      if (_animated == true) {
         final className = 'leaflet-tile-container';
 
         _bgBuffer = dom.create('div', className, _container);
@@ -400,8 +402,10 @@ class TileLayer extends Object with core.Events implements Layer {
   List _unusedTiles;
 
   void _reset([Object obj, Event e, bool hard = false]) {
-    for (var key in _tiles) {
-      fire(EventType.TILEUNLOAD, {'tile': _tiles[key]});
+    if (_tiles != null) {
+      for (var key in _tiles.keys) {
+        fire(EventType.TILEUNLOAD, {'tile': _tiles[key]});
+      }
     }
 
     _tiles = {};
@@ -413,7 +417,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
     _tileContainer.setInnerHtml('');
 
-    if (_animated && hard) {
+    if (_animated == true && hard) {
       _clearBgBuffer();
     }
 
@@ -426,7 +430,7 @@ class TileLayer extends Object with core.Events implements Layer {
         zoomN = options.maxNativeZoom;
     num tileSize = options.tileSize;
 
-    if (zoomN && zoom > zoomN) {
+    if (zoomN != null && zoom > zoomN) {
       tileSize = (map.getZoomScale(zoom) / map.getZoomScale(zoomN) * tileSize).round();
     }
 
@@ -452,7 +456,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
     _addTilesFromCenterOut(tileBounds);
 
-    if (options.unloadInvisibleTiles || options.reuseTiles) {
+    if (options.unloadInvisibleTiles == true || options.reuseTiles == true) {
       _removeOtherTiles(tileBounds);
     }
   }
@@ -569,7 +573,7 @@ class TileLayer extends Object with core.Events implements Layer {
     _tiles.remove(key);
   }
 
-  void _addTile(Point2D tilePoint, Element container) {
+  void _addTile(Point2D tilePoint, Node container) {
     final tilePos = _getTilePos(tilePoint);
 
     // get unused tile - or create a new tile
@@ -600,7 +604,9 @@ class TileLayer extends Object with core.Events implements Layer {
 
     zoom += options.zoomOffset;
 
-    return options.maxNativeZoom != 0 ? math.min(zoom, options.maxNativeZoom) : zoom;
+    return (options.maxNativeZoom != null && options.maxNativeZoom != 0)
+        ? math.min(zoom, options.maxNativeZoom)
+        : zoom;
   }
 
   Point2D _getTilePos(Point2D tilePoint) {
@@ -613,18 +619,18 @@ class TileLayer extends Object with core.Events implements Layer {
   // image-specific code (override to implement e.g. Canvas or SVG tile layer)
 
   String getTileUrl(Point2D tilePoint) {
-    return core.template(_url, extend({
-      's': _getSubdomain(tilePoint),
+    return core.template(_url, {
+      's': 'a', //_getSubdomain(tilePoint),
       'z': tilePoint.z,
       'x': tilePoint.x,
       'y': tilePoint.y
-    }, options));
+    }); //..addAll(options));
   }
 
   Point2D _getWrapTileNum() {
     final crs = _map.stateOptions.crs,
         size = crs.getSize(_map.getZoom());
-    return size.divideBy(_getTileSize())._floor();
+    return size..divideBy(_getTileSize())..floor();
   }
 
   void _adjustTilePoint(Point2D tilePoint) {
@@ -660,49 +666,57 @@ class TileLayer extends Object with core.Events implements Layer {
   // Override if data stored on a tile needs to be cleaned up before reuse
   _resetTile(tile) {}
 
+  // used to debug some style issues
+  int _tileId = 0;
+
   Element _createTile() {
     final tile = dom.create('img', 'leaflet-tile');
+    print("creating tile $_tileId");
+    tile.id = '${_tileId++}';
     tile.style.width = tile.style.height = '${_getTileSize()}px';
-    tile.galleryimg = 'no';
 
-    tile.onselectstart = tile.onmousemove = core.falseFn;
+//    tile.onSelectStart.listen(core.falseFn);
+//    tile.onMouseMove.listen(core.falseFn);
 
-    if (Browser.ielt9 && options.opacity != null) {
-      dom.setOpacity(tile, options.opacity);
-    }
+//    if (Browser.ielt9 && options.opacity != null) {
+//      dom.setOpacity(tile, options.opacity);
+//    }
+
     // without this hack, tiles disappear after zoom on Chrome for Android
     // https://github.com/Leaflet/Leaflet/issues/2078
-    if (Browser.mobileWebkit3d) {
-      tile.style.WebkitBackfaceVisibility = 'hidden';
-    }
+//    if (Browser.mobileWebkit3d == true) {
+//      tile.style.WebkitBackfaceVisibility = 'hidden';
+//    }
     return tile;
   }
 
-  void _loadTile(Element tile, Point2D tilePoint) {
-    tile._layer  = this;
-    tile.onload  = _tileOnLoad;
-    tile.onerror = _tileOnError;
+  Expando<TileLayer> _layerForImage = new Expando<TileLayer>();
+
+  void _loadTile(ImageElement tile, Point2D tilePoint) {
+    _layerForImage[tile]  = this;
+    tile.onLoad.listen(_tileOnLoad);
+    tile.onError.listen(_tileOnError);
 
     _adjustTilePoint(tilePoint);
-    tile.src     = getTileUrl(tilePoint);
+    tile.src = getTileUrl(tilePoint);
 
-    fire(EventType.TILELOADSTART, {
-      'tile': tile,
-      'url': tile.src
-    });
+//    fire(EventType.TILELOADSTART, {
+//      'tile': tile,
+//      'url': tile.src
+//    });
   }
 
   void _tileLoaded() {
     _tilesToLoad--;
 
-    if (_animated) {
+    if (_animated == true) {
       _tileContainer.classes.add('leaflet-zoom-animated');
     }
 
     if (_tilesToLoad == 0) {
       fire(EventType.LOAD);
 
-      if (_animated) {
+      if (_animated == true) {
         // clear scaled tiles after all new tiles are loaded (for performance)
         //clearTimeout(_clearBgBufferTimer);
         //_clearBgBufferTimer = setTimeout(bind(_clearBgBuffer, this), 500);
@@ -716,38 +730,39 @@ class TileLayer extends Object with core.Events implements Layer {
     }
   }
 
-  void _tileOnLoad() {
-    final layer = _layer;
+  void _tileOnLoad(e) {
+    var img = e.target;
 
     //Only if we are loading an actual image
-    if (this.src != core.emptyImageUrl) {
+    if (img.src != core.emptyImageUrl) {
       // TODO: why was leaflet adding a class to an object?
       // Was it mess with 'this'? Should tile layer be a custom element?
-      this.classes.add('leaflet-tile-loaded');
+      img.classes.add('leaflet-tile-loaded');
 
-      layer.fire(EventType.TILELOAD, {
-        'tile': this,
-        'url': this.src
-      });
+//      fire(EventType.TILELOAD, {
+//        'tile': img,
+//        'url': img.src
+//      });
     }
 
-    layer._tileLoaded();
+    _tileLoaded();
   }
 
-  void _tileOnError() {
-    final layer = _layer;
-
-    layer.fire(EventType.TILEERROR, {
-      'tile': this,
-      'url': this.src
-    });
-
-    var newUrl = layer.options.errorTileUrl;
-    if (newUrl) {
-      this.src = newUrl;
-    }
-
-    layer._tileLoaded();
+  void _tileOnError(e) {
+    print("tile load error: $e");
+//    final layer = _layer;
+//
+//    layer.fire(EventType.TILEERROR, {
+//      'tile': this,
+//      'url': this.src
+//    });
+//
+//    var newUrl = layer.options.errorTileUrl;
+//    if (newUrl) {
+//      this.src = newUrl;
+//    }
+//
+//    layer._tileLoaded();
   }
 
 
