@@ -108,34 +108,43 @@ class Layers extends Control {
       dom.disableClickPropagation(container);
       dom.disableScrollPropagation(container);
     } else {
-      dom.on(container, 'click', dom.stopPropagation);
+      //dom.on(container, 'click', dom.stopPropagation);
+      container.onClick.listen((html.MouseEvent e) {
+        e.stopPropagation();
+      });
     }
 
     final form = _form = dom.create('form', className + '-list');
 
     if (layersOptions.collapsed) {
       if (!Browser.android) {
-        dom.on(container, 'mouseover', _expand, this);
-        dom.on(container, 'mouseout', _collapse, this);
+        //dom.on(container, 'mouseover', _expand, this);
+        container.onMouseOver.listen(_expand);
+        //dom.on(container, 'mouseout', _collapse, this);
+        container.onMouseOut.listen(_collapse);
       }
       final link = _layersLink = dom.create('a', '$className-toggle', container);
       link.href = '#';
       link.title = 'Layers';
 
       if (Browser.touch) {
-        dom.on(link, 'click', dom.stop);
-        dom.on(link, 'click', _expand, this);
+        //dom.on(link, 'click', dom.stop);
+        link.onClick.listen(dom.stop);
+        //dom.on(link, 'click', _expand, this);
+        link.onClick.listen(_expand);
       }
       else {
-        dom.on(link, 'focus', _expand, this);
+        //dom.on(link, 'focus', _expand, this);
+        link.onFocus.listen(_expand);
       }
       //Work around for Firefox android issue https://github.com/Leaflet/Leaflet/issues/2033
-      dom.on(form, 'click', () {
+      //dom.on(form, 'click', () {
+      form.onClick.listen((html.MouseEvent e) {
         //setTimeout(bind(_onInputClick, this), 0);
         new Timer(const Duration(milliseconds: 0), () {
           _onInputClick();
         });
-      }, this);
+      });
 
       _map.on(EventType.CLICK, _collapse, this);
       // TODO keyboard accessibility
@@ -170,8 +179,8 @@ class Layers extends Control {
       return;
     }
 
-    _baseLayersList.innerHTML = '';
-    _overlaysList.innerHTML = '';
+    _baseLayersList.setInnerHtml('');
+    _overlaysList.setInnerHtml('');
 
     bool baseLayersPresent = false,
         overlaysPresent = false;
@@ -221,7 +230,7 @@ class Layers extends Control {
 
   _addItem(obj) {
     final label = document.createElement('label');
-    var input;
+    InputElement input;
     final checked = _map.hasLayer(obj.layer);
 
     if (obj.overlay != null) {
@@ -235,7 +244,8 @@ class Layers extends Control {
 
     input.layerId = stamp(obj.layer);
 
-    dom.on(input, 'click', _onInputClick, this);
+    //dom.on(input, 'click', _onInputClick, this);
+    input.onClick.listen(_onInputClick);
 
     final name = document.createElement('span');
     name.setInnerHtml(' ' + obj.name);
@@ -249,7 +259,7 @@ class Layers extends Control {
     return label;
   }
 
-  _onInputClick() {
+  _onInputClick([html.MouseEvent e]) {
 //    var i, input, obj;
     final inputs = _form.getElementsByTagName('input');
 
@@ -272,11 +282,11 @@ class Layers extends Control {
     _refocusOnMap();
   }
 
-  _expand() {
+  _expand([html.MouseEvent e]) {
     dom.addClass(_container, 'leaflet-control-layers-expanded');
   }
 
-  _collapse(Object obj, Event e) {
+  _collapse([html.MouseEvent e]) {
     _container.className = _container.className.replaceAll(' leaflet-control-layers-expanded', '');
   }
 }

@@ -1,7 +1,8 @@
 library leaflet.control;
 
 import 'dart:collection' show LinkedHashMap;
-import 'dart:html' show Element, document;
+import 'dart:html' show Element, document, InputElement;
+import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:async' show Timer;
 
@@ -128,7 +129,7 @@ abstract class Control {
     //}
   }
 
-  void _refocusOnMap() {
+  void _refocusOnMap([html.MouseEvent e]) {
     if (_map != null) {
       _map.getContainer().focus();
     }

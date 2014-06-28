@@ -1,6 +1,7 @@
 part of leaflet.core;
 
-typedef /*bool*/void Action(Object obj, Event event);
+//typedef /*bool*/void Action(Object obj, Event event);
+typedef /*bool*/void EventAction(Event event);
 
 class Event {
   /**
@@ -11,13 +12,18 @@ class Event {
   /**
    * The object that fired the event.
    */
-  Object target;
+  //Object target;
 
-  Object get context => target;
+  //Object get context => target;
 
-  Action action;
+  Function action;
 
-  Event(this.type, this.target, this.action);
+  Event(this.type);
+
+  factory Event._on(type, /*this.target,*/ action) {
+    return new Event(type)
+      ..action = action;
+  }
 }
 
 class MouseEvent extends Event {
@@ -43,7 +49,8 @@ class MouseEvent extends Event {
    */
   html.MouseEvent originalEvent;
 
-  MouseEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //MouseEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  MouseEvent(EventType eventType, this.latlng, this.layerPoint, this.containerPoint, this.originalEvent) : super(eventType);
 }
 
 class LocationEvent extends Event {
@@ -88,7 +95,9 @@ class LocationEvent extends Event {
    */
   num timestamp;
 
-  LocationEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //LocationEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  LocationEvent(this.latlng, this.bounds, this.accuracy, this.altitude, this.altitudeAccuracy,
+      this.heading, this.speed, this.timestamp) : super(EventType.LOCATIONFOUND);
 }
 
 class ErrorEvent extends Event {
@@ -102,7 +111,8 @@ class ErrorEvent extends Event {
    */
   num code;
 
-  ErrorEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //ErrorEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  ErrorEvent(EventType eventType, this.code, this.message) : super(eventType);
 }
 
 class LayerEvent extends Event {
@@ -111,7 +121,8 @@ class LayerEvent extends Event {
    */
   Layer layer;
 
-  LayerEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //LayerEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  LayerEvent(EventType type, this.layer) : super(type);
 }
 
 class LayersControlEvent extends Event {
@@ -125,7 +136,8 @@ class LayersControlEvent extends Event {
    */
   String name;
 
-  LayersControlEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //LayersControlEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  LayersControlEvent(EventType eventType, this.layer, this.name) : super(eventType);
 }
 
 class TileEvent extends Event {
@@ -139,7 +151,8 @@ class TileEvent extends Event {
    */
   String url;
 
-  TileEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //TileEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  TileEvent(EventType eventType, this.tile, this.url) : super(eventType);
 }
 
 class ResizeEvent extends Event {
@@ -153,7 +166,8 @@ class ResizeEvent extends Event {
    */
   Point2D newSize;
 
-  ResizeEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //ResizeEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  ResizeEvent(this.oldSize, this.newSize) : super(EventType.RESIZE);
 }
 
 class GeoJSONEvent extends Event {
@@ -177,7 +191,8 @@ class GeoJSONEvent extends Event {
    */
   String id;
 
-  GeoJSONEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //GeoJSONEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  GeoJSONEvent(EventType eventType, this.layer, this.properties, this.geometryType, this.id) : super(eventType);
 }
 
 class PopupEvent extends Event {
@@ -186,7 +201,8 @@ class PopupEvent extends Event {
    */
   Popup popup;
 
-  PopupEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //PopupEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  PopupEvent(EventType eventType, this.popup) : super(eventType);
 }
 
 class DragEndEvent extends Event {
@@ -195,10 +211,11 @@ class DragEndEvent extends Event {
    */
   num distance;
 
-  DragEndEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //DragEndEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  DragEndEvent(EventType eventType, this.distance) : super(eventType);
 }
 
-class ZoomAnimEvent extends Event {
+class ZoomEvent extends Event {
   LatLng center;
   num zoom;
   Point2D origin;
@@ -206,5 +223,11 @@ class ZoomAnimEvent extends Event {
   Point2D delta;
   bool backwards;
 
-  ZoomAnimEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  //ZoomAnimEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
+  ZoomEvent(this.center, this.zoom, this.origin, this.scale, this.delta, this.backwards) : super(EventType.ZOOMANIM);
+}
+
+class ViewEvent extends Event {
+  bool hard;
+  ViewEvent(EventType type, this.hard) : super(type);
 }

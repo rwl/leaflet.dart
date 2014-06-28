@@ -1,13 +1,13 @@
 library leaflet.map;
 
-import 'dart:html' show Element, window, document, MouseEvent, CanvasRenderingContext2D, Geoposition, PositionError, CanvasElement;
+import 'dart:html' show Element, window, document, CanvasRenderingContext2D, Geoposition, PositionError, CanvasElement;
 import 'dart:html' as html;
 import 'dart:svg' show SvgSvgElement;
 import 'dart:math' as math;
 import 'dart:async' show Timer, StreamSubscription;
 
 import '../core/core.dart' show Handler, Events, stamp, ZoomAnimEvent;
-import '../core/core.dart' show Event, EventType, Util, Browser;
+import '../core/core.dart' show Event, EventType, Util, Browser, LayerEvent, ResizeEvent, ViewEvent, MouseEvent, ZoomEvent, ErrorEvent, LocationEvent;
 import '../geo/geo.dart' show LatLng, LatLngBounds;
 import '../geo/crs/crs.dart' show CRS, EPSG3857;
 import '../geometry/geometry.dart' show Bounds, Point2D;
@@ -300,14 +300,14 @@ class LeafletMap extends Object with Events {
     stateOptions.maxBounds = bounds;
 
     if (bounds == null) {
-      return off(EventType.MOVEEND, _panInsideMaxBounds, this);
+      return off(EventType.MOVEEND, _panInsideMaxBounds);
     }
 
     if (_loaded) {
       _panInsideMaxBounds();
     }
 
-    on(EventType.MOVEEND, _panInsideMaxBounds, this);
+    on(EventType.MOVEEND, _panInsideMaxBounds);
   }
 
   /**
@@ -350,7 +350,7 @@ class LeafletMap extends Object with Events {
     if (animationOptions.zoomAnimation && layer is TileLayer) {
       _tileLayersNum++;
       _tileLayersToLoad++;
-      layer.on(EventType.LOAD, _onTileLayerLoad, this);
+      layer.on(EventType.LOAD, _onTileLayerLoad);
     }
 
     if (_loaded) {
@@ -375,7 +375,7 @@ class LeafletMap extends Object with Events {
     _layers.remove(id);
 
     if (_loaded) {
-      fire(EventType.LAYERREMOVE, {'layer': layer});
+      fireEvent(new LayerEvent(EventType.LAYERREMOVE, layer));
     }
 
     if (_zoomBoundLayers.containsKey(id)) {
@@ -387,7 +387,7 @@ class LeafletMap extends Object with Events {
     if (animationOptions.zoomAnimation && layer is TileLayer) {
       _tileLayersNum--;
       _tileLayersToLoad--;
-      layer.off(EventType.LOAD, _onTileLayerLoad, this);
+      layer.off(EventType.LOAD, _onTileLayerLoad);
     }
 
     return;
@@ -451,10 +451,7 @@ class LeafletMap extends Object with Events {
       }
     }
 
-    fire(EventType.RESIZE, {
-      'oldSize': oldSize,
-      'newSize': newSize
-    });
+    fireEvent(new ResizeEvent(oldSize, newSize));
   }
 
   // TODO handler.addTo
@@ -521,6 +518,8 @@ class LeafletMap extends Object with Events {
   num getZoom() {
     return _zoom;
   }
+
+  num get zoom => _zoom;
 
   /**
    * Returns the LatLngBounds of the current map view.
@@ -723,7 +722,7 @@ class LeafletMap extends Object with Events {
    * Returns the pixel coordinates of a mouse click (relative to the top left
    * corner of the map) given its event object.
    */
-  Point2D mouseEventToContainerPoint(MouseEvent e) {
+  Point2D mouseEventToContainerPoint(html.MouseEvent e) {
     return dom.getMousePosition(e, _container);
   }
 
@@ -731,7 +730,7 @@ class LeafletMap extends Object with Events {
    * Returns the pixel coordinates of a mouse click relative to the map layer
    * given its event object.
    */
-  Point2D mouseEventToLayerPoint(MouseEvent e) {
+  Point2D mouseEventToLayerPoint(html.MouseEvent e) {
     return containerPointToLayerPoint(mouseEventToContainerPoint(e));
   }
 
@@ -739,7 +738,7 @@ class LeafletMap extends Object with Events {
    * Returns the geographical coordinates of the point the mouse clicked on
    * given the click's event object.
    */
-  LatLng mouseEventToLatLng(MouseEvent e) {
+  LatLng mouseEventToLatLng(html.MouseEvent e) {
     return layerPointToLatLng(mouseEventToLayerPoint(e));
   }
 
@@ -764,7 +763,7 @@ class LeafletMap extends Object with Events {
     containerProp[container] = true;
   }
 
-  _initLayout() {
+  void _initLayout() {
     var container = _container;
 
     dom.addClass(container, 'leaflet-container' +
@@ -865,7 +864,7 @@ class LeafletMap extends Object with Events {
       eachLayer(_layerAdd);
     }
 
-    fire(EventType.VIEWRESET, {'hard': !preserveMapOffset});
+    fireEvent(new ViewEvent(EventType.VIEWRESET, !preserveMapOffset));
 
     fire(EventType.MOVE);
 
@@ -873,7 +872,7 @@ class LeafletMap extends Object with Events {
       fire(EventType.ZOOMEND);
     }
 
-    fire(EventType.MOVEEND, {'hard': !preserveMapOffset});
+    fireEvent(new ViewEvent(EventType.MOVEEND, !preserveMapOffset));
   }
 
   void _rawPanBy(Point2D offset) {
@@ -914,7 +913,7 @@ class LeafletMap extends Object with Events {
     }
   }
 
-  void _panInsideMaxBounds([Object obj=null, Event event=null]) {
+  void _panInsideMaxBounds() {
     panInsideBounds(stateOptions.maxBounds);
   }
 
@@ -1024,15 +1023,10 @@ class LeafletMap extends Object with Events {
         layerPoint = containerPointToLayerPoint(containerPoint),
         latlng = layerPointToLatLng(layerPoint);
 
-    fire(type, {
-      'latlng': latlng,
-      'layerPoint': layerPoint,
-      'containerPoint': containerPoint,
-      'originalEvent': e
-    });
+    fireEvent(new MouseEvent(type, latlng, layerPoint, containerPoint, e));
   }
 
-  void _onTileLayerLoad(Object obj, Event event) {
+  void _onTileLayerLoad() {
     _tileLayersToLoad--;
     if (_tileLayersNum != 0 && _tileLayersToLoad == 0) {
       fire(EventType.TILELAYERSLOAD);
@@ -1050,18 +1044,18 @@ class LeafletMap extends Object with Events {
    * zoom, or immediately if it happened already, optionally passing a
    * function context.
    */
-  void whenReady(Function callback, [Object context=null]) {
+  void whenReady(Function callback/*, [Object context=null]*/) {
     if (_loaded) {
-      callback.call(context == null ? this : context, this);
+      callback.call();//context == null ? this : context, this);
     } else {
-      on(EventType.LOAD, callback, context);
+      on(EventType.LOAD, callback);//, context);
     }
     return;
   }
 
   void _layerAdd(Layer layer) {
     layer.onAdd(this);
-    fire(EventType.LAYERADD, {'layer': layer});
+    fireEvent(new LayerEvent(EventType.LAYERADD, layer));
   }
 
 
@@ -1088,7 +1082,7 @@ class LeafletMap extends Object with Events {
 
   //internal use only
   Point2D latLngToNewLayerPoint(LatLng latlng, num newZoom, LatLng newCenter) {
-    var topLeft = _getNewTopLeftPoint(newCenter, newZoom) + _getMapPanePos();
+    final topLeft = _getNewTopLeftPoint(newCenter, newZoom) + _getMapPanePos();
     return project(latlng, newZoom) - topLeft;
   }
 
@@ -1322,14 +1316,7 @@ class LeafletMap extends Object with Events {
     dom.Draggable.disabled = true;
     //}
 
-    fire(EventType.ZOOMANIM, {
-      'center': center,
-      'zoom': zoom,
-      'origin': origin,
-      'scale': scale,
-      'delta': delta,
-      'backwards': backwards
-    });
+    fireEvent(new ZoomEvent(center, zoom, origin, scale, delta, backwards));
   }
 
   void _onZoomTransitionEnd() {
@@ -1407,8 +1394,8 @@ class LeafletMap extends Object with Events {
     if (_panAnim == null) {
       _panAnim = new dom.PosAnimation();
 
-      _panAnim.on(EventType.STEP, _onPanTransitionStep, this);
-      _panAnim.on(EventType.END, _onPanTransitionEnd, this);
+      _panAnim.on(EventType.STEP, _onPanTransitionStep);
+      _panAnim.on(EventType.END, _onPanTransitionEnd);
     }
 
     // don't fire movestart if animating inertia
@@ -1429,11 +1416,11 @@ class LeafletMap extends Object with Events {
     }
   }
 
-  void _onPanTransitionStep(Object obj, Event e) {
+  void _onPanTransitionStep() {
     fire(EventType.MOVE);
   }
 
-  void _onPanTransitionEnd(Object obj, Event e) {
+  void _onPanTransitionEnd() {
     dom.removeClass(_mapPane, 'leaflet-pan-anim');
     fire(EventType.MOVEEND);
   }
@@ -1533,10 +1520,7 @@ class LeafletMap extends Object with Events {
       fitWorld();
     }
 
-    fire(EventType.LOCATIONERROR, {
-      'code': c,
-      'message': 'Geolocation error: $message.'
-    });
+    fireEvent(new ErrorEvent(EventType.LOCATIONERROR, c, 'Geolocation error: $message.'));
   }
 
   void _handleGeolocationResponse(Geoposition pos) {
@@ -1558,20 +1542,17 @@ class LeafletMap extends Object with Events {
       setView(latlng, zoom);
     }
 
-    final data = {
-      'latlng': latlng,
-      'bounds': bounds,
-      'timestamp': pos.timestamp
-    };
+    fireEvent(new LocationEvent(latlng, bounds, pos.coords.accuracy,
+        pos.coords.altitude, pos.coords.altitudeAccuracy, pos.coords.heading,
+        pos.coords.speed, pos.timestamp));
 
     /*for (var i in pos.coords) {
       if (pos.coords[i] is num) {
         data[i] = pos.coords[i];
       }
     }*/
-    data['coords'] = pos.coords;
 
-    fire(EventType.LOCATIONFOUND, data);
+    //fire(event);
   }
 
 
@@ -1581,7 +1562,7 @@ class LeafletMap extends Object with Events {
 
   Bounds get pathViewport => _pathViewport;
 
-  void _updatePathViewport([Object obj, Event e]) {
+  void _updatePathViewport() {
     final p = Path.CLIP_PADDING,
         size = getSize(),
         panePos = dom.getPosition(_mapPane),
@@ -1622,7 +1603,7 @@ class LeafletMap extends Object with Events {
     }
   }
 
-  void _updateCanvasViewport([Object obj, Event e]) {
+  void _updateCanvasViewport() {
     // don't redraw while zooming. See _updateSvgViewport for more details
     if (_pathZooming) { return; }
     _updatePathViewport();
@@ -1663,7 +1644,7 @@ class LeafletMap extends Object with Events {
     }
   }
 
-  void _animatePathZoom(Object obj, ZoomAnimEvent e) {
+  void _animatePathZoom(ZoomEvent e) {
     final scale = getZoomScale(e.zoom),
         offset = _getCenterOffset(e.center) * (-scale) + _pathViewport.min;
 
@@ -1673,11 +1654,11 @@ class LeafletMap extends Object with Events {
     _pathZooming = true;
   }
 
-  void _endPathZoom(Object obj, Event e) {
+  void _endPathZoom() {
     _pathZooming = false;
   }
 
-  void _updateSvgViewport([Object obj, Event e]) {
+  void _updateSvgViewport() {
 
     if (_pathZooming) {
       // Do not update SVGs while a zoom animation is going on otherwise the animation will break.

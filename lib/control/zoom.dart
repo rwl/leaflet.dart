@@ -46,10 +46,10 @@ class Zoom extends Control {
 
     _zoomInButton = _createButton(
             zoomOptions.zoomInText, zoomOptions.zoomInTitle,
-            '$zoomName-in', container, _zoomIn, this);
+            '$zoomName-in', container, _zoomIn);//, this);
     _zoomOutButton = _createButton(
             zoomOptions.zoomOutText, zoomOptions.zoomOutTitle,
-            '$zoomName-out', container, _zoomOut, this);
+            '$zoomName-out', container, _zoomOut);//, this);
 
     _updateDisabled(null, null);
     map.on(EventType.ZOOMEND, _updateDisabled, this);
@@ -63,28 +63,39 @@ class Zoom extends Control {
     map.off(EventType.ZOOMLEVELSCHANGE, _updateDisabled, this);
   }
 
-  _zoomIn(e) {
+  _zoomIn(html.MouseEvent e) {
     _map.zoomIn(e.shiftKey ? 3 : 1);
   }
 
-  _zoomOut(e) {
+  _zoomOut(html.MouseEvent e) {
     _map.zoomOut(e.shiftKey ? 3 : 1);
   }
 
-  _createButton(String html, String title, String className, Element container, Function fn, var context) {
+  _createButton(String html, String title, String className, Element container, Function fn/*, var context*/) {
     final link = dom.create('a', className, container);
     link.innerHtml = html;
     link.href = '#';
     link.title = title;
 
-    final stop = dom.stopPropagation;
+    //final stop = dom.stopPropagation;
+    final stop = (html.MouseEvent e) {
+      e.stopPropagation();
+    };
 
-    dom.on(link, 'click', stop);
+    /*dom.on(link, 'click', stop);
     dom.on(link, 'mousedown', stop);
     dom.on(link, 'dblclick', stop);
     dom.on(link, 'click', dom.preventDefault);
     dom.on(link, 'click', fn, context);
-    dom.on(link, 'click', _refocusOnMap, context);
+    dom.on(link, 'click', _refocusOnMap, context);*/
+    link.onClick.listen(stop);
+    link.onMouseDown.listen(stop);
+    link.onDoubleClick.listen(stop);
+    link.onClick.listen((html.MouseEvent e) {
+      e.preventDefault();
+    });
+    link.onClick.listen(fn);
+    link.onClick.listen(_refocusOnMap);
 
     return link;
   }
@@ -96,10 +107,10 @@ class Zoom extends Control {
     dom.removeClass(_zoomInButton, className);
     dom.removeClass(_zoomOutButton, className);
 
-    if (map._zoom == map.getMinZoom()) {
+    if (map.zoom == map.getMinZoom()) {
       dom.addClass(_zoomOutButton, className);
     }
-    if (map._zoom == map.getMaxZoom()) {
+    if (map.zoom == map.getMaxZoom()) {
       dom.addClass(_zoomInButton, className);
     }
   }
