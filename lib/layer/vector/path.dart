@@ -313,7 +313,7 @@ abstract class Path extends Layer with Events {
     _path = _createElement('path');
 
     if (options.className != null) {
-      dom.addClass(_path, options.className);
+      _path.classes.add(options.className);
     }
 
     _container.append(_path);
@@ -376,7 +376,7 @@ abstract class Path extends Layer with Events {
   _initEvents() {
     if (options.clickable) {
       if (Browser.svg || !Browser.vml) {
-        dom.addClass(_path, 'leaflet-clickable');
+        _path.classes.add('leaflet-clickable');
       }
 
       dom.on(_container, 'click', _onMouseClick, this);

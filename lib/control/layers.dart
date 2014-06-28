@@ -283,7 +283,7 @@ class Layers extends Control {
   }
 
   _expand([html.MouseEvent e]) {
-    dom.addClass(_container, 'leaflet-control-layers-expanded');
+    _container.classes.add('leaflet-control-layers-expanded');
   }
 
   _collapse([html.MouseEvent e]) {

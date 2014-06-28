@@ -20,7 +20,7 @@ import './handler/handler.dart';
 
 part 'options.dart';
 
-final containerProp = new Expando<Element>('_leaflet');
+final containerProp = new Expando<bool>('_leaflet');
 
 typedef LayerFunc(Layer layer);
 
@@ -764,18 +764,17 @@ class LeafletMap extends Object with Events {
   }
 
   void _initLayout() {
-    var container = _container;
+    _container.classes.add('leaflet-container');
+    // TODO: make sure the following fields are non-null and remove the `== true`
+    if (Browser.touch == true) _container.classes.add('leaflet-touch');
+    if (Browser.retina  == true) _container.classes.add('leaflet-retina');
+    if (Browser.ielt9  == true) _container.classes.add('leaflet-oldie');
+    if (animationOptions.fadeAnimation  == true) _container.classes.add('leaflet-fade-anim');
 
-    dom.addClass(container, 'leaflet-container' +
-      (Browser.touch ? ' leaflet-touch' : '') +
-      (Browser.retina ? ' leaflet-retina' : '') +
-      (Browser.ielt9 ? ' leaflet-oldie' : '') +
-      (animationOptions.fadeAnimation ? ' leaflet-fade-anim' : ''));
-
-    final position = dom.getStyle(container, 'position');
+    final position = _container.style.getPropertyValue('position');
 
     if (position != 'absolute' && position != 'relative' && position != 'fixed') {
-      container.style.position = 'relative';
+      _container.style.position = 'relative';
     }
 
     _initPanes();
@@ -791,23 +790,23 @@ class LeafletMap extends Object with Events {
   Element get mapPane => _mapPane;
 
   void _initPanes() {
-    final panes = _panes = new Map<String, Element>();
+    _panes = new Map<String, Element>();
 
-    _mapPane = panes['mapPane'] = _createPane('leaflet-map-pane', _container);
+    _mapPane = _panes['mapPane'] = _createPane('leaflet-map-pane', _container);
 
-    _tilePane = panes['tilePane'] = _createPane('leaflet-tile-pane', _mapPane);
-    panes['objectsPane'] = _createPane('leaflet-objects-pane', _mapPane);
-    panes['shadowPane'] = _createPane('leaflet-shadow-pane');
-    panes['overlayPane'] = _createPane('leaflet-overlay-pane');
-    panes['markerPane'] = _createPane('leaflet-marker-pane');
-    panes['popupPane'] = _createPane('leaflet-popup-pane');
+    _tilePane = _panes['tilePane'] = _createPane('leaflet-tile-pane', _mapPane);
+    _panes['objectsPane'] = _createPane('leaflet-objects-pane', _mapPane);
+    _panes['shadowPane'] = _createPane('leaflet-shadow-pane');
+    _panes['overlayPane'] = _createPane('leaflet-overlay-pane');
+    _panes['markerPane'] = _createPane('leaflet-marker-pane');
+    _panes['popupPane'] = _createPane('leaflet-popup-pane');
 
     var zoomHide = ' leaflet-zoom-hide';
 
     if (!animationOptions.markerZoomAnimation) {
-      dom.addClass(panes['markerPane'], zoomHide);
-      dom.addClass(panes['shadowPane'], zoomHide);
-      dom.addClass(panes['popupPane'], zoomHide);
+      _panes['markerPane'].classes.add(zoomHide);
+      _panes['shadowPane'].classes.add(zoomHide);
+      _panes['popupPane'].classes.add(zoomHide);
     }
   }
 
@@ -1305,7 +1304,7 @@ class LeafletMap extends Object with Events {
     _animatingZoom = true;
 
     // Put transform transition on all layers with leaflet-zoom-animated class.
-    dom.addClass(_mapPane, 'leaflet-zoom-anim');
+    _mapPane.classes.add('leaflet-zoom-anim');
 
     // Remember what center/zoom to set after animation.
     _animateToCenter = center;
@@ -1323,7 +1322,7 @@ class LeafletMap extends Object with Events {
 
     _animatingZoom = false;
 
-    dom.removeClass(_mapPane, 'leaflet-zoom-anim');
+    _mapPane.classes.remove('leaflet-zoom-anim');
 
     _resetView(_animateToCenter, _animateToZoom, true, true);
 
@@ -1405,7 +1404,7 @@ class LeafletMap extends Object with Events {
 
     // animate pan unless animate: false specified
     if (options.animate != false) {
-      dom.addClass(_mapPane, 'leaflet-pan-anim');
+      _mapPane.classes.add('leaflet-pan-anim');
 
       final newPos = _getMapPanePos() - offset;
       _panAnim.run(_mapPane, newPos, options.duration != null ? options.duration : 0.25, options.easeLinearity);
@@ -1421,7 +1420,7 @@ class LeafletMap extends Object with Events {
   }
 
   void _onPanTransitionEnd() {
-    dom.removeClass(_mapPane, 'leaflet-pan-anim');
+    _mapPane.classes.remove('leaflet-pan-anim');
     fire(EventType.MOVEEND);
   }
 
@@ -1631,12 +1630,12 @@ class LeafletMap extends Object with Events {
       _panes['overlayPane'].append(_pathRoot);
 
       if (animationOptions.zoomAnimation && Browser.any3d) {
-        dom.addClass(_pathRoot, 'leaflet-zoom-animated');
+        _pathRoot.classes.add('leaflet-zoom-animated');
 
         on(EventType.ZOOMANIM, _animatePathZoom);
         on(EventType.ZOOMEND, _endPathZoom);
       } else {
-        dom.addClass(_pathRoot, 'leaflet-zoom-hide');
+        _pathRoot.classes.add('leaflet-zoom-hide');
       }
 
       on(EventType.MOVEEND, _updateSvgViewport);

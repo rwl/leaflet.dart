@@ -110,9 +110,9 @@ class ImageOverlay extends Layer with Events {
     _image = dom.create('img', 'leaflet-image-layer');
 
     if (_map.animationOptions.zoomAnimation && Browser.any3d) {
-      dom.addClass(_image, 'leaflet-zoom-animated');
+      _image.classes.add('leaflet-zoom-animated');
     } else {
-      dom.addClass(_image, 'leaflet-zoom-hide');
+      _image.classes.add('leaflet-zoom-hide');
     }
 
     _updateOpacity();

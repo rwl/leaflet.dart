@@ -313,9 +313,9 @@ class Popup extends Layer with Events {
 
     if (maxHeight && height > maxHeight) {
       style.height = '${maxHeight}px';
-      dom.addClass(container, scrolledClass);
+      container.classes.add(scrolledClass);
     } else {
-      dom.removeClass(container, scrolledClass);
+      container.classes.remove(scrolledClass);
     }
 
     _containerWidth = _container.offsetWidth;
