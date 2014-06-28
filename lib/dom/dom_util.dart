@@ -133,57 +133,6 @@ Element create(String tagName, String className, [Element container=null]) {
 }
 
 /**
- * Returns true if the element class attribute contains name.
- */
-bool hasClass(Element el, String name) {
-  if (el.classList != null) {
-    return el.classList.contains(name);
-  }
-  var className = _getClass(el);
-  return className.length > 0 && new RegExp(r'(^|\\s)' + name + '(\\s|\$)').test(className);
-}
-
-/**
- * Adds name to the element's class attribute.
- */
-void addClass(Element el, String name) {
-  if (el.classList != null) {
-    var classes = L.Util.splitWords(name);
-    for (var i = 0,
-        len = classes.length; i < len; i++) {
-      el.classList.add(classes[i]);
-    }
-  } else if (!L.DomUtil.hasClass(el, name)) {
-    var className = L.DomUtil._getClass(el);
-    L.DomUtil._setClass(el, (className ? className + ' ' : '') + name);
-  }
-}
-
-/**
- * Removes name from the element's class attribute.
- */
-void removeClass(Element el, String name) {
-  if (el.classList != null) {
-    el.classList.remove(name);
-  } else {
-    L.DomUtil._setClass(el, L.Util.trim((' ' + L.DomUtil._getClass(el) + ' ').replace(' ' + name + ' ', ' ')));
-  }
-}
-
-void _setClass(Element el, String name) {
-  if (el.className.baseVal == null) {
-    el.className = name;
-  } else {
-    // in case of SVG element
-    el.className.baseVal = name;
-  }
-}
-
-String _getClass(Element el) {
-  return el.className.baseVal == null ? el.className : el.className.baseVal;
-}
-
-/**
  * Set the opacity of an element (including old IE support). Value must be from 0 to 1.
  */
 void setOpacity(Element el, num value) {

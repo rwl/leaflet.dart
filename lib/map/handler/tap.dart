@@ -41,7 +41,7 @@ class Tap extends Handler {
 
     // if touching a link, highlight it
     if (el.tagName && el.tagName.toLowerCase() == 'a') {
-      dom.addClass(el, 'leaflet-active');
+      el.classes.add('leaflet-active');
     }
 
     // simulate long hold but setting a timeout
@@ -72,7 +72,7 @@ class Tap extends Handler {
           el = first.target;
 
       if (el && el.tagName && el.tagName.toLowerCase() == 'a') {
-        dom.removeClass(el, 'leaflet-active');
+        el.classes.remove('leaflet-active');
       }
 
       // simulate click if the touch didn't move too much

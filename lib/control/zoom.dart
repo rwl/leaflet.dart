@@ -101,17 +101,16 @@ class Zoom extends Control {
   }
 
   _updateDisabled() {
-    final map = _map,
-      className = 'leaflet-disabled';
+    final className = 'leaflet-disabled';
 
-    dom.removeClass(_zoomInButton, className);
-    dom.removeClass(_zoomOutButton, className);
+    _zoomInButton.classes.remove(className);
+    _zoomOutButton.classes.remove(className);
 
-    if (map.zoom == map.getMinZoom()) {
-      dom.addClass(_zoomOutButton, className);
+    if (_map.zoom == _map.getMinZoom()) {
+      _zoomOutButton.classes.add(className);
     }
-    if (map.zoom == map.getMaxZoom()) {
-      dom.addClass(_zoomInButton, className);
+    if (_map.zoom == _map.getMaxZoom()) {
+      _zoomInButton.classes.add(className);
     }
   }
 }

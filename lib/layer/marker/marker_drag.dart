@@ -20,7 +20,7 @@ class MarkerDrag extends Handler {
     _draggable.on(EventType.DRAG, _onDrag, this);
     _draggable.on(EventType.DRAGEND, _onDragEnd, this);
     _draggable.enable();
-    dom.addClass(_marker._icon, 'leaflet-marker-draggable');
+    _marker._icon.classes.add('leaflet-marker-draggable');
   }
 
   removeHooks() {
@@ -29,7 +29,7 @@ class MarkerDrag extends Handler {
     _draggable.off(EventType.DRAGEND, _onDragEnd, this);
 
     _draggable.disable();
-    dom.removeClass(_marker._icon, 'leaflet-marker-draggable');
+    _marker._icon.classes.remove('leaflet-marker-draggable');
   }
 
   moved() {

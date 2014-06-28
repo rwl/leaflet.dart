@@ -552,7 +552,7 @@ class TileLayer extends Object with core.Events implements Layer {
     fire(EventType.TILEUNLOAD, {'tile': tile, 'url': tile.src});
 
     if (options.reuseTiles) {
-      dom.removeClass(tile, 'leaflet-tile-loaded');
+      tile.classes.remove('leaflet-tile-loaded');
       _unusedTiles.add(tile);
 
     } else if (tile.parentNode == _tileContainer) {
@@ -696,7 +696,7 @@ class TileLayer extends Object with core.Events implements Layer {
     _tilesToLoad--;
 
     if (_animated) {
-      dom.addClass(_tileContainer, 'leaflet-zoom-animated');
+      _tileContainer.classes.add('leaflet-zoom-animated');
     }
 
     if (_tilesToLoad == 0) {
@@ -721,7 +721,9 @@ class TileLayer extends Object with core.Events implements Layer {
 
     //Only if we are loading an actual image
     if (this.src != core.emptyImageUrl) {
-      dom.addClass(this, 'leaflet-tile-loaded');
+      // TODO: why was leaflet adding a class to an object?
+      // Was it mess with 'this'? Should tile layer be a custom element?
+      this.classes.add('leaflet-tile-loaded');
 
       layer.fire(EventType.TILELOAD, {
         'tile': this,
