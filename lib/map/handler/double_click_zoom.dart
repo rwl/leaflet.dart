@@ -9,15 +9,15 @@ class DoubleClickZoom extends Handler {
   DoubleClickZoom(LeafletMap map) : super(map);
 
   void addHooks() {
-    map.on(EventType.DBLCLICK, _onDoubleClick, this);
+    map.on(EventType.DBLCLICK, _onDoubleClick);
   }
 
   void removeHooks() {
-    map.off(EventType.DBLCLICK, _onDoubleClick, this);
+    map.off(EventType.DBLCLICK, _onDoubleClick);
   }
 
-  void _onDoubleClick(Object obj, MouseEvent e) {
-    final zoom = map.getZoom() + (e.originalEvent.shiftKey ? -1 : 1);
+  void _onDoubleClick(MouseEvent e) {
+    final zoom = map.getZoom() + ((e.originalEvent as html.MouseEvent).shiftKey ? -1 : 1);
 
     if (map.interactionOptions.doubleClickZoom == 'center') {
       map.setZoom(zoom);

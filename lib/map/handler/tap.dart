@@ -9,20 +9,27 @@ class Tap extends Handler {
   Timer _holdTimeout;
   Point2D _startPos, _newPos;
 
+  StreamSubscription<html.Event> _touchStartSubscription, _touchMoveSubscription, _touchEndSubscription;
+
   Tap(LeafletMap map) : super(map);
 
   void addHooks() {
-    dom.on(map.getContainer(), 'touchstart', _onDown, this);
+    //dom.on(map.getContainer(), 'touchstart', _onDown, this);
+    _touchStartSubscription = map.getContainer().onTouchStart.listen(_onDown);
   }
 
   void removeHooks() {
-    dom.off(map.getContainer(), 'touchstart', _onDown);
+    //dom.off(map.getContainer(), 'touchstart', _onDown);
+    if (_touchStartSubscription != null) {
+      _touchStartSubscription.cancel();
+    }
   }
 
   void _onDown(html.TouchEvent e) {
     if (e.touches == null) { return; }
 
-    dom.preventDefault(e);
+    //dom.preventDefault(e);
+    e.preventDefault();
 
     _fireClick = true;
 
@@ -55,16 +62,24 @@ class Tap extends Handler {
     });
     //}, this), 1000);
 
-    dom.on(document, 'touchmove', _onMove, this);
-    dom.on(document, 'touchend', _onUp, this);
+    //dom.on(document, 'touchmove', _onMove, this);
+    //dom.on(document, 'touchend', _onUp, this);
+    _touchMoveSubscription = document.onTouchMove.listen(_onMove);
+    _touchEndSubscription = document.onTouchEnd.listen(_onUp);
   }
 
   void _onUp([e=null]) {
     //clearTimeout(_holdTimeout);
     _holdTimeout.cancel();
 
-    dom.off(document, 'touchmove', _onMove);
-    dom.off(document, 'touchend', _onUp);
+    //dom.off(document, 'touchmove', _onMove);
+    //dom.off(document, 'touchend', _onUp);
+    if (_touchMoveSubscription != null) {
+      _touchMoveSubscription.cancel();
+    }
+    if (_touchEndSubscription != null) {
+      _touchEndSubscription.cancel();
+    }
 
     if (_fireClick && e && e.changedTouches) {
 

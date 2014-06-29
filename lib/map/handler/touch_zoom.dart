@@ -5,33 +5,39 @@ part of leaflet.map.handler;
  */
 class TouchZoom extends Handler {
 
-  Point2D _startCenter, _startDist, _centerOffset, _delta;
+  Point2D _startCenter, _centerOffset, _delta;
   bool _moved, _zooming;
-  num _scale;
+  num _scale, _startDist;
 
   /**
    * For internal use.
    */
   bool get zooming => _zooming;
 
+  StreamSubscription<html.Event> _touchStartSubscription, _touchMoveSubscription, _touchEndSubscription;
+
   TouchZoom(LeafletMap map) : super(map);
 
   addHooks() {
-    dom.on(this.map.getContainer(), 'touchstart', this._onTouchStart, this);
+    //dom.on(this.map.getContainer(), 'touchstart', this._onTouchStart, this);
+    _touchStartSubscription = this.map.getContainer().onTouchStart.listen(_onTouchStart);
   }
 
   removeHooks() {
-    dom.off(this.map.getContainer(), 'touchstart', this._onTouchStart);
+    //dom.off(this.map.getContainer(), 'touchstart', this._onTouchStart);
+    if (_touchStartSubscription != null) {
+      _touchStartSubscription.cancel();
+    }
   }
 
   _onTouchStart(html.TouchEvent e) {
-    if (e.touches == null || e.touches.length != 2 || map._animatingZoom || this._zooming) { return; }
+    if (e.touches == null || e.touches.length != 2 || map.animatingZoom || this._zooming) { return; }
 
-    final p1 = map.mouseEventToLayerPoint(e.touches[0]),
-        p2 = map.mouseEventToLayerPoint(e.touches[1]),
+    final p1 = map.mouseEventToLayerPoint(e.touches.first),
+        p2 = map.mouseEventToLayerPoint(e.touches.last/*[1]*/),
         viewCenter = map._getCenterLayerPoint();
 
-    this._startCenter = p1.add(p2)._divideBy(2);
+    this._startCenter = (p1 + p2) / 2;
     this._startDist = p1.distanceTo(p2);
 
     this._moved = false;
@@ -43,17 +49,24 @@ class TouchZoom extends Handler {
       map.panAnim.stop();
     }
 
-    dom.on(document, 'touchmove', this._onTouchMove, this);
-    dom.on(document, 'touchend', this._onTouchEnd, this);
+    //dom.on(document, 'touchmove', this._onTouchMove, this);
+    //dom.on(document, 'touchend', this._onTouchEnd, this);
+    document.onTouchMove.listen(_onTouchMove);
+    document.onTouchEnd.listen(_onTouchEnd);
 
-    dom.preventDefault(e);
+    //dom.preventDefault(e);
+    e.preventDefault();
   }
 
-  _onTouchMove(e) {
-    if (e.touches == null || e.touches.length != 2 || !this._zooming) { return; }
+  int _animRequestId;
 
-    final p1 = map.mouseEventToLayerPoint(e.touches[0]),
-        p2 = map.mouseEventToLayerPoint(e.touches[1]);
+  _onTouchMove(html.TouchEvent e) {
+    if (e.touches == null || e.touches.length != 2 || !this._zooming) {
+      return;
+    }
+
+    final p1 = map.mouseEventToLayerPoint(e.touches.first),
+        p2 = map.mouseEventToLayerPoint(e.touches.last/*[1]*/);
 
     this._scale = p1.distanceTo(p2) / this._startDist;
     this._delta = ((p1 + p2) / 2) - this._startCenter;
@@ -74,14 +87,17 @@ class TouchZoom extends Handler {
       this._moved = true;
     }
 
-    cancelAnimFrame(this._animRequest);
-    this._animRequest = requestAnimFrame(
-            this._updateOnMove, this, true, this.map.getContainer());
+    //cancelAnimFrame(this._animRequest);
+    //this._animRequest = requestAnimFrame(
+    //        this._updateOnMove, this, true, this.map.getContainer());
+    window.cancelAnimationFrame(_animRequestId);
+    _animRequestId = window.requestAnimationFrame(_updateOnMove);
 
-    dom.preventDefault(e);
+    //dom.preventDefault(e);
+    e.preventDefault();
   }
 
-  _updateOnMove() {
+  void _updateOnMove(num highResTime) {
     final origin = this._getScaleOrigin(),
         center = map.layerPointToLatLng(origin),
         zoom = map.getScaleZoom(this._scale);
@@ -89,7 +105,7 @@ class TouchZoom extends Handler {
     map.animateZoom(center, zoom, this._startCenter, this._scale, this._delta);
   }
 
-  _onTouchEnd() {
+  _onTouchEnd([html.Event e]) {
     if (!this._moved || !this._zooming) {
       this._zooming = false;
       return;
@@ -97,10 +113,17 @@ class TouchZoom extends Handler {
 
     this._zooming = false;
     map.mapPane.classes.remove('leaflet-touching');
-    cancelAnimFrame(this._animRequest);
+    //cancelAnimFrame(this._animRequest);
+    window.cancelAnimationFrame(_animRequestId);
 
-    dom.off(document, 'touchmove', this._onTouchMove);
-    dom.off(document, 'touchend', this._onTouchEnd);
+    //dom.off(document, 'touchmove', this._onTouchMove);
+    //dom.off(document, 'touchend', this._onTouchEnd);
+    if (_touchMoveSubscription != null) {
+      _touchMoveSubscription.cancel();
+    }
+    if (_touchEndSubscription != null) {
+      _touchEndSubscription.cancel();
+    }
 
     final origin = this._getScaleOrigin(),
         center = map.layerPointToLatLng(origin),

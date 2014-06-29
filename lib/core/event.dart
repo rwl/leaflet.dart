@@ -233,3 +233,8 @@ class ViewEvent extends Event {
   bool hard;
   ViewEvent(EventType type, this.hard) : super(type);
 }
+
+class BoxZoomEvent extends Event {
+  LatLngBounds boxZoomBounds;
+  BoxZoomEvent(EventType type, this.boxZoomBounds) : super(type);
+}

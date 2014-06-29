@@ -10,6 +10,10 @@ class BoxZoom extends Handler {
   bool _moved;
   Point2D _startLayerPoint;
 
+  StreamSubscription<html.MouseEvent> _mouseDownSubscription, _mouseMoveSubscription,
+    _mouseUpSubscription;
+  StreamSubscription<html.KeyboardEvent> _keyDownSubscription;
+
   BoxZoom(LeafletMap map) : super(map) {
     _container = map.getContainer();
     _pane = map.panes['overlayPane'];
@@ -17,11 +21,15 @@ class BoxZoom extends Handler {
   }
 
   void addHooks() {
-    dom.on(_container, 'mousedown', _onMouseDown, this);
+    //dom.on(_container, 'mousedown', _onMouseDown, this);
+    _mouseDownSubscription = _container.onMouseDown.listen(_onMouseDown);
   }
 
   void removeHooks() {
-    dom.off(_container, 'mousedown', _onMouseDown);
+    //dom.off(_container, 'mousedown', _onMouseDown);
+    if (_mouseDownSubscription != null) {
+      _mouseDownSubscription.cancel();
+    }
     _moved = false;
   }
 
@@ -41,9 +49,12 @@ class BoxZoom extends Handler {
 
     _startLayerPoint = map.mouseEventToLayerPoint(e);
 
-    dom.on(document, 'mousemove', _onMouseMove, this);
-    dom.on(document, 'mouseup', _onMouseUp, this);
-    dom.on(document, 'keydown', _onKeyDown, this);
+    //dom.on(document, 'mousemove', _onMouseMove, this);
+    //dom.on(document, 'mouseup', _onMouseUp, this);
+    //dom.on(document, 'keydown', _onKeyDown, this);
+    _mouseMoveSubscription = document.onMouseMove.listen(_onMouseMove);
+    _mouseUpSubscription = document.onMouseUp.listen(_onMouseUp);
+    _keyDownSubscription = document.onKeyDown.listen(_onKeyDown);
   }
 
   void _onMouseMove(html.MouseEvent e) {
@@ -83,9 +94,18 @@ class BoxZoom extends Handler {
     dom.enableTextSelection();
     dom.enableImageDrag();
 
-    dom.off(document, 'mousemove', _onMouseMove);
-    dom.off(document, 'mouseup', _onMouseUp);
-    dom.off(document, 'keydown', _onKeyDown);
+    //dom.off(document, 'mousemove', _onMouseMove);
+    //dom.off(document, 'mouseup', _onMouseUp);
+    //dom.off(document, 'keydown', _onKeyDown);
+    if (_mouseMoveSubscription != null) {
+      _mouseMoveSubscription.cancel();
+    }
+    if (_mouseUpSubscription != null) {
+      _mouseUpSubscription.cancel();
+    }
+    if (_keyDownSubscription != null) {
+      _keyDownSubscription.cancel();
+    }
   }
 
   void _onMouseUp(html.MouseEvent e) {
@@ -102,12 +122,10 @@ class BoxZoom extends Handler {
 
     map.fitBounds(bounds);
 
-    map.fire(EventType.BOXZOOMEND, {
-      'boxZoomBounds': bounds
-    });
+    map.fireEvent(new BoxZoomEvent(EventType.BOXZOOMEND, bounds));
   }
 
-  _onKeyDown(html.KeyboardEvent e) {
+  void _onKeyDown(html.KeyboardEvent e) {
     if (e.keyCode == 27) {
       _finish();
     }

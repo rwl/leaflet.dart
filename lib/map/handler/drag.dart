@@ -20,15 +20,15 @@ class Drag extends Handler {
 
       _draggable = new dom.Draggable(map.mapPane, map.getContainer());
 
-      _draggable.on(EventType.DRAGSTART, _onDragStart, this);
-      _draggable.on(EventType.DRAG, _onDrag, this);
-      _draggable.on(EventType.DRAGEND, _onDragEnd, this);
+      _draggable.on(EventType.DRAGSTART, _onDragStart);
+      _draggable.on(EventType.DRAG, _onDrag);
+      _draggable.on(EventType.DRAGEND, _onDragEnd);
 
       if (map.interactionOptions.worldCopyJump) {
-        _draggable.on(EventType.PREDRAG, _onPreDrag, this);
-        map.on(EventType.VIEWRESET, _onViewReset, this);
+        _draggable.on(EventType.PREDRAG, _onPreDrag);
+        map.on(EventType.VIEWRESET, _onViewReset);
 
-        map.whenReady(_onViewReset, this);
+        map.whenReady(_onViewReset);
       }
     }
     _draggable.enable();
@@ -39,7 +39,7 @@ class Drag extends Handler {
   }
 
   moved() {
-    return _draggable && _draggable.moved;
+    return _draggable != null && _draggable.moved;
   }
 
   _onDragStart(Object obj, Event e) {
@@ -56,7 +56,7 @@ class Drag extends Handler {
     }
   }
 
-  _onDrag(Object obj, Event e) {
+  _onDrag() {
     if (map.panningInertiaOptions.inertia) {
       final time = _lastTime = /*+*/new DateTime.now(),
           pos = _lastPos = _draggable.newPos;
@@ -74,7 +74,7 @@ class Drag extends Handler {
     map.fire(EventType.DRAG);
   }
 
-  _onViewReset(Object obj, Event e) {
+  _onViewReset() {
     // TODO fix hardcoded Earth values
     final pxCenter = map.getSize() / 2,
         pxWorldCenter = map.latLngToLayerPoint(new LatLng(0, 0));
@@ -83,7 +83,7 @@ class Drag extends Handler {
     _worldWidth = map.project(new LatLng(0, 180)).x;
   }
 
-  _onPreDrag(Object obj, Event e) {
+  _onPreDrag() {
     // TODO refactor to be able to adjust map pane position after zoom
     final worldWidth = _worldWidth,
         halfWidth = (worldWidth / 2).round(),
@@ -96,7 +96,7 @@ class Drag extends Handler {
     _draggable.newPos.x = newX;
   }
 
-  _onDragEnd(Object obj, Event e) {
+  _onDragEnd(Event e) {
     final options = map.panningInertiaOptions,
         delay = /*+*/new DateTime.now().difference(_lastTime),
 
@@ -128,12 +128,13 @@ class Drag extends Handler {
       } else {
         offset = map.limitOffset(offset, map.stateOptions.maxBounds);
 
-        requestAnimFrame(() {
-          map.panBy(offset, {
-            'duration': decelerationDuration,
-            'easeLinearity': ease,
-            'noMoveStart': true
-          });
+        window.requestAnimationFrame((num highRes) {
+        //requestAnimFrame(() {
+          map.panBy(offset, new PanOptions()
+            ..duration = decelerationDuration
+            ..easeLinearity = ease
+            ..noMoveStart = true
+          );
         });
       }
     }

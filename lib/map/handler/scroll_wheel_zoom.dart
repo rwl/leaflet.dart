@@ -10,20 +10,26 @@ class ScrollWheelZoom extends Handler {
   DateTime _startTime;
   Timer _timer;
 
+  StreamSubscription<html.MouseEvent> _mouseWheelSubscription;
+
   ScrollWheelZoom(LeafletMap map) : super(map);
 
-  addHooks() {
-    dom.on(map.getContainer(), 'mousewheel', _onWheelScroll, this);
-    dom.on(map.getContainer(), 'MozMousePixelScroll', dom.preventDefault);
+  void addHooks() {
+    //dom.on(map.getContainer(), 'mousewheel', _onWheelScroll, this);
+    _mouseWheelSubscription = map.getContainer().onMouseWheel.listen(_onWheelScroll);
+    // TODO: dom.on(map.getContainer(), 'MozMousePixelScroll', dom.preventDefault);
     _delta = 0;
   }
 
-  removeHooks() {
-    dom.off(map.getContainer(), 'mousewheel', _onWheelScroll);
-    dom.off(map.getContainer(), 'MozMousePixelScroll', dom.preventDefault);
+  void removeHooks() {
+    //dom.off(map.getContainer(), 'mousewheel', _onWheelScroll);
+    if (_mouseWheelSubscription != null) {
+      _mouseWheelSubscription.cancel();
+    }
+    //dom.off(map.getContainer(), 'MozMousePixelScroll', dom.preventDefault);
   }
 
-  _onWheelScroll(html.MouseEvent e) {
+  void _onWheelScroll(html.MouseEvent e) {
     final delta = dom.getWheelDelta(e);
 
     _delta += delta;
@@ -42,11 +48,13 @@ class ScrollWheelZoom extends Handler {
       _performZoom();
     });
 
-    dom.preventDefault(e);
-    dom.stopPropagation(e);
+    //dom.preventDefault(e);
+    //dom.stopPropagation(e);
+    e.preventDefault();
+    e.stopPropagation();
   }
 
-  _performZoom() {
+  void _performZoom() {
     num delta = _delta;
     final zoom = map.getZoom();
 

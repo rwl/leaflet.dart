@@ -189,6 +189,8 @@ class Marker extends Layer with Events {
       _setPos(pos);
     }
   }
+  
+  StreamSubscription<html.MouseEvent> _mouseOverSubscription, _mouseOutSubscription;
 
   void _initIcon() {
     final map = _map;
@@ -265,8 +267,8 @@ class Marker extends Layer with Events {
     if (options.riseOnHover) {
 //      dom.off(_icon, 'mouseover', _bringToFront);
 //      dom.off(_icon, 'mouseout', _resetZIndex);
-      _icon.onMouseOver.listen(_bringToFront);
-      _icon.onMouseOut.listen(_resetZIndex);
+      _mouseOverSubscription.cancel();
+      _mouseOutSubscription.cancel();
     }
 
     //this._map.panes['markerPane'].removeChild(this._icon);
@@ -304,6 +306,10 @@ class Marker extends Layer with Events {
 
     _setPos(pos);
   }
+  
+//  StreamSubscription<html.MouseEvent> _doubleClickSubscription,
+//    _mouseDownSubscription, _mouseOverSubscription, _mouseOutSubscription,
+//    _contextMenuSubscription;
 
   void _initInteraction() {
     if (!options.clickable) { return; }
@@ -323,11 +329,11 @@ class Marker extends Layer with Events {
     /*for (int i = 0; i < events.length; i++) {
       dom.on(icon, events[i], _fireMouseEvent, this);
     }*/
-    icon.onDoubleClick.listen(_fireMouseEvent);
-    icon.onMouseDown.listen(_fireMouseEvent);
-    icon.onMouseOver.listen(_fireMouseEvent);
-    icon.onMouseOut.listen(_fireMouseEvent);
-    icon.onContextMenu.listen(_fireMouseEvent);
+    /*_doubleClickSubscription = */icon.onDoubleClick.listen(_fireMouseEvent);
+    /*_mouseDownSubscription = */icon.onMouseDown.listen(_fireMouseEvent);
+    /*_mouseOverSubscription = */icon.onMouseOver.listen(_fireMouseEvent);
+    /*_mouseOutSubscription = */icon.onMouseOut.listen(_fireMouseEvent);
+    /*_contextmenuSubscription = */icon.onContextMenu.listen(_fireMouseEvent);
 
     //if (Handler.MarkerDrag) {
     dragging = new MarkerDrag(this);

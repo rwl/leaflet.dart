@@ -25,6 +25,8 @@ class Keyboard extends Handler {
     _setZoomOffset(map.options.keyboardZoomOffset);
   }
 
+  StreamSubscription<html.Event> _focusSubscription, _blurSubscription, _mouseDownSubscription;
+
   addHooks() {
     final container = map.getContainer();
 
@@ -33,12 +35,15 @@ class Keyboard extends Handler {
       container.tabIndex = '0';
     }
 
-    dom.on(container, 'focus', _onFocus, this);
-    dom.on(container, 'blur', _onBlur, this);
-    dom.on(container, 'mousedown', _onMouseDown, this);
+    //dom.on(container, 'focus', _onFocus, this);
+    //dom.on(container, 'blur', _onBlur, this);
+    //dom.on(container, 'mousedown', _onMouseDown, this);
+    _focusSubscription = container.onFocus.listen(_onFocus);
+    _blurSubscription = container.onBlur.listen(_onBlur);
+    _mouseDownSubscription = container.onMouseDown.listen(_onMouseDown);
 
-    map.on(EventType.FOCUS, _addHooks, this);
-    map.on(EventType.BLUR, _removeHooks, this);
+    map.on(EventType.FOCUS, _addHooks);
+    map.on(EventType.BLUR, _removeHooks);
   }
 
   removeHooks() {
@@ -46,15 +51,24 @@ class Keyboard extends Handler {
 
     final container = map.getContainer();
 
-    dom.off(container, 'focus', _onFocus);
-    dom.off(container, 'blur', _onBlur);
-    dom.off(container, 'mousedown', _onMouseDown);
+    //dom.off(container, 'focus', _onFocus);
+    //dom.off(container, 'blur', _onBlur);
+    //dom.off(container, 'mousedown', _onMouseDown);
+    if (_focusSubscription != null) {
+      _focusSubscription.cancel();
+    }
+    if (_blurSubscription != null) {
+      _blurSubscription.cancel();
+    }
+    if (_mouseDownSubscription != null) {
+      _mouseDownSubscription.cancel();
+    }
 
-    map.off(EventType.FOCUS, _addHooks, this);
-    map.off(EventType.BLUR, _removeHooks, this);
+    map.off(EventType.FOCUS, _addHooks);
+    map.off(EventType.BLUR, _removeHooks);
   }
 
-  _onMouseDown() {
+  _onMouseDown([html.MouseEvent e]) {
     if (_focused) { return; }
 
     final  body = document.body,
@@ -67,12 +81,12 @@ class Keyboard extends Handler {
     window.scrollTo(left, top);
   }
 
-  _onFocus() {
+  _onFocus([html.Event e]) {
     _focused = true;
     map.fire(EventType.FOCUS);
   }
 
-  _onBlur() {
+  _onBlur([html.Event e]) {
     _focused = false;
     map.fire(EventType.BLUR);
   }
@@ -110,12 +124,18 @@ class Keyboard extends Handler {
     }
   }
 
+  StreamSubscription<html.KeyboardEvent> _keyDownSubscription;
+
   _addHooks([Object obj=null, Event e=null]) {
-    dom.on(document, 'keydown', _onKeyDown, this);
+    //dom.on(document, 'keydown', _onKeyDown, this);
+    _keyDownSubscription = document.onKeyDown.listen(_onKeyDown);
   }
 
   _removeHooks([Object obj=null, Event e=null]) {
-    dom.off(document, 'keydown', _onKeyDown);
+    //dom.off(document, 'keydown', _onKeyDown);
+    if (_keyDownSubscription != null) {
+      _keyDownSubscription.cancel();
+    }
   }
 
   _onKeyDown(html.KeyboardEvent e) {

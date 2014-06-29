@@ -1386,11 +1386,14 @@ class LeafletMap extends Object with Events {
   /**
    * Pans the map by a given number of pixels (animated).
    */
-  void panBy(offset, [options=null]) {
+  void panBy(Point2D offset, [PanOptions options=null]) {
     offset = new Point2D.point(offset).rounded();
-    options = options == null ? {} : options;
+    //options = options == null ? {} : options;
+    if (options == null) {
+      options = new PanOptions();
+    }
 
-    if (!offset.x && !offset.y) {
+    if (offset.x == 0 && offset.y == 0) {
       return;
     }
 
