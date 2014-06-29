@@ -85,7 +85,7 @@ class Marker extends Layer with Events {
   LatLng _latlng;
   LeafletMap _map;
   MarkerDrag dragging;
-  var _icon, _shadow;
+  Element _icon, _shadow;
   var _zIndex;
 
   /*final Map<String, Object> options = {
@@ -382,9 +382,9 @@ class Marker extends Layer with Events {
   }
 
   void _updateOpacity() {
-    dom.setOpacity(_icon, options.opacity);
+    _icon.style.opacity =  '${options.opacity}';
     if (_shadow != null) {
-      dom.setOpacity(_shadow, options.opacity);
+      _shadow.style.opacity = '${options.opacity}';
     }
   }
 

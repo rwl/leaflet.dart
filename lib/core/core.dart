@@ -11,7 +11,6 @@ import '../map/map.dart' show LeafletMap;
 import '../geometry/geometry.dart' show Point2D;
 import 'package:uri/uri.dart';
 
-part 'browser.dart';
 part 'event.dart';
 part 'events.dart';
 part 'event_type.dart';

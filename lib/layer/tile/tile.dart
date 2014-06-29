@@ -4,6 +4,8 @@ import 'dart:html' show Element, ImageElement, Node, ParentNode, document;
 import 'dart:math' as math;
 import 'dart:async' show Timer;
 
+import 'package:leaflet/src/core/browser.dart' as browser;
+
 import '../../core/core.dart' as core;
 import '../../core/core.dart' show Event, EventType, Browser, Util;
 import '../../map/map.dart';

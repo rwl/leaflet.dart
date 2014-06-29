@@ -6,6 +6,8 @@ import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:async' show Timer;
 
+import 'package:leaflet/src/core/browser.dart' as browser;
+
 import '../core/core.dart' show Event, EventType, LayerEvent, Util, Browser, stamp, LayersControlEvent;
 import '../map/map.dart';
 import '../dom/dom.dart' as dom;

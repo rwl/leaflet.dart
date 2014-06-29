@@ -1,47 +1,20 @@
 part of leaflet.dom;
 
-final DomUtil = new _DomUtil();
-
-/**
- * DomUtil contains various utility functions for working with DOM.
- */
-//class _DomUtil {
-
-/**
- * Vendor-prefixed transition style name (e.g. 'webkitTransition' for WebKit).
- */
-String TRANSITION = 'transition';
-
-/**
- * Vendor-prefixed transform style name.
- */
-String TRANSFORM = 'transform';
-
 /**
  * Returns an element with the given id if a string was passed, or just returns the element if it was passed directly.
  */
-Element get(String id) {
-  return (id is String ? document.getElementById(id) : id);
-}
+//Element get(String id) {
+//  return (id is String ? document.getElementById(id) : id);
+//}
 
 String px(num i) => '${i}px';
 
 /**
  * Returns the value for a certain style attribute on an element, including computed values or values set through CSS.
  */
+// TODO: no caller? delete?
 String getStyle(Element el, String style) {
-
-  var value = el.style[style];
-
-  if (!value && el.currentStyle) {
-    value = el.currentStyle[style];
-  }
-
-  if ((!value || value == 'auto') && document.defaultView) {
-    var css = document.defaultView.getComputedStyle(el, null);
-    value = css ? css[style] : null;
-  }
-
+  var value = el.getComputedStyle();
   return value == 'auto' ? null : value;
 }
 
@@ -49,74 +22,16 @@ String getStyle(Element el, String style) {
  * Returns the offset to the viewport for the requested element.
  */
 Point2D getViewportOffset(Element element) {
-
-  int top = 0,
-      left = 0;
-  final el = element,
-      docBody = document.body,
-      docEl = document.documentElement;
-
-  do {
-    top += el.offsetTop || 0;
-    left += el.offsetLeft || 0;
-
-    //add borders
-    top += parseInt(L.DomUtil.getStyle(el, 'borderTopWidth'), 10) || 0;
-    left += parseInt(L.DomUtil.getStyle(el, 'borderLeftWidth'), 10) || 0;
-
-    final pos = L.DomUtil.getStyle(el, 'position');
-
-    if (el.offsetParent == docBody && pos == 'absolute') {
-      break;
-    }
-
-    if (pos == 'fixed') {
-      top += docBody.scrollTop || docEl.scrollTop || 0;
-      left += docBody.scrollLeft || docEl.scrollLeft || 0;
-      break;
-    }
-
-    if (pos == 'relative' && !el.offsetLeft) {
-      var width = L.DomUtil.getStyle(el, 'width'),
-          maxWidth = L.DomUtil.getStyle(el, 'max-width'),
-          r = el.getBoundingClientRect();
-
-      if (width != 'none' || maxWidth != 'none') {
-        left += r.left + el.clientLeft;
-      }
-
-      //calculate full y offset since we're breaking out of the loop
-      top += r.top + (docBody.scrollTop || docEl.scrollTop || 0);
-
-      break;
-    }
-
-    el = el.offsetParent;
-
-  } while (el);
-
-  el = element;
-
-  do {
-    if (el == docBody) {
-      break;
-    }
-
-    top -= el.scrollTop || 0;
-    left -= el.scrollLeft || 0;
-
-    el = el.parentNode;
-  } while (el);
-
-  return new L.Point(left, top);
+  var bounds = element.getBoundingClientRect();
+  return new Point2D(bounds.left + document.body.scrollLeft,
+      bounds.top + document.body.scrollTop);
 }
 
+bool _isLtr;
 documentIsLtr() {
-  if (!L.DomUtil._docIsLtrCached) {
-    L.DomUtil._docIsLtrCached = true;
-    L.DomUtil._docIsLtr = L.DomUtil.getStyle(document.body, 'direction') == 'ltr';
-  }
-  return L.DomUtil._docIsLtr;
+  if (_isLtr != null) return _isLtr;
+  return _isLtr = document.body.getComputedStyle()
+      .getPropertyValue('direction') == 'ltr';
 }
 
 /**
@@ -135,43 +50,9 @@ Element create(String tagName, String className, [Element container=null]) {
 }
 
 /**
- * Set the opacity of an element (including old IE support). Value must be from 0 to 1.
- */
-void setOpacity(Element el, num value) {
-
-  if (el.style.contains('opacity')) {
-    el.style.opacity = value;
-
-  } else if (el.style.contains('filter')) {
-
-    var filter = false,
-        filterName = 'DXImageTransform.Microsoft.Alpha';
-
-    // filters collection throws an error if we try to retrieve a filter that doesn't exist
-    try {
-      filter = el.filters.item(filterName);
-    } catch (e) {
-      // don't set opacity to 1 if we haven't already set an opacity,
-      // it isn't needed and breaks transparent pngs.
-      if (value == 1) {
-        return;
-      }
-    }
-
-    value = Math.round(value * 100);
-
-    if (filter) {
-      filter.Enabled = (value != 100);
-      filter.Opacity = value;
-    } else {
-      el.style.filter += ' progid:' + filterName + '(opacity=' + value + ')';
-    }
-  }
-}
-
-/**
  * Goes through the array of style names and returns the first name that is a valid style name for an element. If no such name is found, it returns null. Useful for vendor-prefixed styles like transform.
  */
+// TODO: no uses? This isn't easily implementable in Dart. Remove?
 String testProp(List<String> props) {
 
   var style = document.documentElement.style;
@@ -187,27 +68,17 @@ String testProp(List<String> props) {
 /**
  * Returns a CSS transform string to move an element by the offset provided in the given point. Uses 3D translate on WebKit for hardware-accelerated transforms and 2D on other browsers.
  */
-String getTranslateString(Point2D point) {
-  // on WebKit browsers (Chrome/Safari/iOS Safari/Android) using translate3d instead of translate
-  // makes animation smoother as it ensures HW accel is used. Firefox 13 doesn't care
-  // (same speed either way), Opera 12 doesn't support translate3d
-
-  var is3d = false, //L.Browser.webkit3d,
-      open = 'translate' + (is3d ? '3d' : '') + '(',
-      close = (is3d ? ',0' : '') + ')';
-
-  return open + px(point.x) + ',' + px(point.y) + close;
-}
+// All browsers that support Dart support translate3d
+String getTranslateString(Point2D point) =>
+    'translate3d(${point.x}px, ${point.y}px, 0)';
 
 /**
  * Returns a CSS transform string to scale an element (with the given scale origin).
  */
 String getScaleString(num scale, Point2D origin) {
-
-  var preTranslateStr = L.DomUtil.getTranslateString(origin.add(origin.multiplyBy(-1 * scale))),
-      scaleStr = ' scale(' + scale + ') ';
-
-  return preTranslateStr + scaleStr;
+  var preTranslateStr =
+      getTranslateString(origin..add(origin..multiplyBy(-1 * scale)));
+  return '$preTranslateStr scale($scale) ';
 }
 
 Expando<Point2D> _leafletPos = new Expando<Point2D>();
@@ -218,9 +89,13 @@ Expando<Point2D> _leafletPos = new Expando<Point2D>();
  * Leaflet internally to position its layers). Forces top/left positioning
  * if disable3D is true.
  */
-void setPosition(Element el, Point2D point, [bool disable3D=false]) {
+void setPosition(Element el, Point2D point) {
   _leafletPos[el] = point;
-  el.style.transform = getTranslateString(point);
+  if (point != null) {
+    el.style.transform = getTranslateString(point);
+  } else {
+    throw 'null point';
+  }
 }
 
 /**
@@ -230,24 +105,41 @@ void setPosition(Element el, Point2D point, [bool disable3D=false]) {
 // so it's safe to cache the position for performance
 Point2D getPosition(Element el) => _leafletPos[el];
 
+var _selectSubscription;
+
 /**
  * Makes sure text cannot be selected, for example during dragging.
  */
 disableTextSelection() {
-  on(window, 'selectstart', preventDefault);
+  if (_selectSubscription == null) {
+    _selectSubscription =
+        window.document.onSelectStart.listen(preventDefault);
+  }
 }
 
 /**
  * Makes text selection possible again.
  */
 enableTextSelection() {
-  off(window, 'selectstart', preventDefault);
+  if (_selectSubscription != null) {
+    _selectSubscription.cancel();
+    _selectSubscription = null;
+  }
 }
 
+var _dragSubscription;
+
+
 disableImageDrag() {
-  on(window, 'dragstart', preventDefault);
+  if (_dragSubscription == null) {
+    _dragSubscription =
+        window.document.onDragStart.listen(preventDefault);
+  }
 }
 
 enableImageDrag() {
-  off(window, 'dragstart', preventDefault);
+  if (_dragSubscription != null) {
+    _dragSubscription.cancel();
+    _dragSubscription = null;
+  }
 }

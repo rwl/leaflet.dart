@@ -128,7 +128,7 @@ class Drag extends Handler {
       } else {
         offset = map.limitOffset(offset, map.stateOptions.maxBounds);
 
-        requestAnimFrame(() {
+        window.requestAnimationFrame((_) {
           map.panBy(offset, {
             'duration': decelerationDuration,
             'easeLinearity': ease,

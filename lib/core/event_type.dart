@@ -242,6 +242,7 @@ class EventType {
 
   static const CONTENTUPDATE = const EventType._internal('contentupdate');
 
+  static const START = const EventType._internal('start');
   static const STEP = const EventType._internal('step');
   static const END = const EventType._internal('end');
 }
