@@ -9,6 +9,11 @@ class TouchZoom extends Handler {
   bool _moved, _zooming;
   num _scale;
 
+  /**
+   * For internal use.
+   */
+  bool get zooming => _zooming;
+
   TouchZoom(LeafletMap map) : super(map);
 
   addHooks() {

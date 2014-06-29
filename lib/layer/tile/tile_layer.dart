@@ -194,16 +194,16 @@ class TileLayer extends Object with core.Events implements Layer {
     _initContainer();
 
     // set up events
-//    map.on(EventType.VIEWRESET, _animateZoom, this);
-//    map.on(EventType.MOVEEND, _update, this);
+    map.on(EventType.VIEWRESET, _animateZoom);
+    map.on(EventType.MOVEEND, _update);
 //    map.on({
 //      'viewreset': _reset,
 //      'moveend': _update
 //    }, this);
 
     if (_animated == true) {
-//      map.on(EventType.ZOOMANIM, _animateZoom, this);
-//      map.on(EventType.ZOOMEND, _endZoomAnim, this);
+      map.on(EventType.ZOOMANIM, _animateZoom);
+      map.on(EventType.ZOOMEND, _endZoomAnim);
 //      map.on({
 //        'zoomanim': _animateZoom,
 //        'zoomend': _endZoomAnim
@@ -211,8 +211,12 @@ class TileLayer extends Object with core.Events implements Layer {
     }
 
     if (options.updateWhenIdle != true) {
-//      _limitedUpdate = limitExecByInterval(_update, 150, this);
-//      map.on(EventType.MOVE, _limitedUpdate, this);
+      //_limitedUpdate = limitExecByInterval(_update, 150, this);
+      _limitedUpdate = () {
+        //new Future.delayed(const Duration(milliseconds: 150), _update);
+        new Timer(const Duration(milliseconds: 150), _update);
+      };
+      map.on(EventType.MOVE, _limitedUpdate);
     }
 
     _reset();
@@ -232,16 +236,16 @@ class TileLayer extends Object with core.Events implements Layer {
     //_container.parentNode.removeChild(_container);
     _container.remove();
 
-    map.off(EventType.VIEWRESET, _reset, this);
-    map.off(EventType.MOVEEND, _update, this);
+    map.off(EventType.VIEWRESET, _reset);
+    map.off(EventType.MOVEEND, _update);
 //    map.off({
 //      'viewreset': _reset,
 //      'moveend': _update
 //    }, this);
 
     if (_animated == true) {
-      map.off(EventType.ZOOMANIM, _animateZoom, this);
-      map.off(EventType.ZOOMEND, _endZoomAnim, this);
+      map.off(EventType.ZOOMANIM, _animateZoom);
+      map.off(EventType.ZOOMEND, _endZoomAnim);
 //      map.off({
 //        'zoomanim': _animateZoom,
 //        'zoomend': _endZoomAnim
@@ -249,7 +253,7 @@ class TileLayer extends Object with core.Events implements Layer {
     }
 
     if (!options.updateWhenIdle) {
-      map.off(EventType.MOVE, _limitedUpdate, this);
+      map.off(EventType.MOVE, _limitedUpdate);
     }
 
     _container = null;
@@ -404,7 +408,7 @@ class TileLayer extends Object with core.Events implements Layer {
   void _reset([Object obj, Event e, bool hard = false]) {
     if (_tiles != null) {
       for (var key in _tiles.keys) {
-        fire(EventType.TILEUNLOAD, {'tile': _tiles[key]});
+        fireEvent(new TileEvent(EventType.TILEUNLOAD, _tiles[key], null));
       }
     }
 
@@ -553,7 +557,7 @@ class TileLayer extends Object with core.Events implements Layer {
   void _removeTile(String key) {
     final tile = _tiles[key];
 
-    fire(EventType.TILEUNLOAD, {'tile': tile, 'url': tile.src});
+    fireEvent(new TileEvent(EventType.TILEUNLOAD, tile, tile.src));
 
     if (options.reuseTiles) {
       tile.classes.remove('leaflet-tile-loaded');
@@ -620,7 +624,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
   String getTileUrl(Point2D tilePoint) {
     return core.template(_url, {
-      's': 'a', //_getSubdomain(tilePoint),
+      's': _getSubdomain(tilePoint),
       'z': tilePoint.z,
       'x': tilePoint.x,
       'y': tilePoint.y
@@ -630,7 +634,7 @@ class TileLayer extends Object with core.Events implements Layer {
   Point2D _getWrapTileNum() {
     final crs = _map.stateOptions.crs,
         size = crs.getSize(_map.getZoom());
-    return size..divideBy(_getTileSize())..floor();
+    return (size / _getTileSize())..floored();
   }
 
   void _adjustTilePoint(Point2D tilePoint) {
@@ -666,27 +670,23 @@ class TileLayer extends Object with core.Events implements Layer {
   // Override if data stored on a tile needs to be cleaned up before reuse
   _resetTile(tile) {}
 
-  // used to debug some style issues
-  int _tileId = 0;
-
   Element _createTile() {
     final tile = dom.create('img', 'leaflet-tile');
-    print("creating tile $_tileId");
-    tile.id = '${_tileId++}';
     tile.style.width = tile.style.height = '${_getTileSize()}px';
 
-//    tile.onSelectStart.listen(core.falseFn);
-//    tile.onMouseMove.listen(core.falseFn);
+    tile.onSelectStart.listen((html.Event e) {});
+    tile.onMouseMove.listen((html.Event e) {});
 
-//    if (Browser.ielt9 && options.opacity != null) {
-//      dom.setOpacity(tile, options.opacity);
-//    }
+    if (Browser.ielt9 && options.opacity != null) {
+      dom.setOpacity(tile, options.opacity);
+    }
 
     // without this hack, tiles disappear after zoom on Chrome for Android
     // https://github.com/Leaflet/Leaflet/issues/2078
-//    if (Browser.mobileWebkit3d == true) {
-//      tile.style.WebkitBackfaceVisibility = 'hidden';
-//    }
+    if (Browser.mobileWebkit3d == true) {
+      //tile.style.WebkitBackfaceVisibility = 'hidden';
+      tile.style.backfaceVisibility = 'hidden';
+    }
     return tile;
   }
 
@@ -700,10 +700,7 @@ class TileLayer extends Object with core.Events implements Layer {
     _adjustTilePoint(tilePoint);
     tile.src = getTileUrl(tilePoint);
 
-//    fire(EventType.TILELOADSTART, {
-//      'tile': tile,
-//      'url': tile.src
-//    });
+    fireEvent(new TileEvent(EventType.TILELOADSTART, tile, tile.src));
   }
 
   void _tileLoaded() {
@@ -730,19 +727,19 @@ class TileLayer extends Object with core.Events implements Layer {
     }
   }
 
-  void _tileOnLoad(e) {
+  void _tileOnLoad(html.Event e) {
     var img = e.target;
 
-    //Only if we are loading an actual image
+    // What is this mess with 'this'? Should tile layer be a custom element?
+
+    // Only if we are loading an actual image.
+    //if (this.src != core.emptyImageUrl) {
     if (img.src != core.emptyImageUrl) {
       // TODO: why was leaflet adding a class to an object?
-      // Was it mess with 'this'? Should tile layer be a custom element?
       img.classes.add('leaflet-tile-loaded');
 
-//      fire(EventType.TILELOAD, {
-//        'tile': img,
-//        'url': img.src
-//      });
+      //fireEvent(new TileEvent(EventType.TILELOAD, this, this.src));
+      fireEvent(new TileEvent(EventType.TILELOAD, img, img.src));
     }
 
     _tileLoaded();
@@ -750,19 +747,16 @@ class TileLayer extends Object with core.Events implements Layer {
 
   void _tileOnError(e) {
     print("tile load error: $e");
-//    final layer = _layer;
-//
-//    layer.fire(EventType.TILEERROR, {
-//      'tile': this,
-//      'url': this.src
-//    });
-//
-//    var newUrl = layer.options.errorTileUrl;
-//    if (newUrl) {
-//      this.src = newUrl;
-//    }
-//
-//    layer._tileLoaded();
+    /*final layer = _layer;
+
+    layer.fireEvent(new TileEvent(EventType.TILEERROR, this, this.src));
+
+    var newUrl = layer.options.errorTileUrl;
+    if (newUrl) {
+      this.src = newUrl;
+    }
+
+    layer._tileLoaded();*/
   }
 
 
@@ -770,7 +764,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
   bool _animating;
 
-  void _animateZoom(Object obj, Event e) {
+  void _animateZoom(ZoomEvent e) {
     if (!_animating) {
       _animating = true;
       _prepareBgBuffer();
@@ -778,15 +772,15 @@ class TileLayer extends Object with core.Events implements Layer {
 
     final bg = _bgBuffer,
         transform = dom.TRANSFORM,
-        initialTransform = e.delta ? dom.getTranslateString(e.delta) : bg.style[transform],
+        initialTransform = e.delta != null ? dom.getTranslateString(e.delta) : bg.style.transform,//[transform],
         scaleStr = dom.getScaleString(e.scale, e.origin);
 
-    bg.style[transform] = e.backwards ?
-        scaleStr + ' ' + initialTransform :
-        initialTransform + ' ' + scaleStr;
+    bg.style.transform/*[transform]*/ = e.backwards ?
+        '$scaleStr $initialTransform' :
+        '$initialTransform $scaleStr';
   }
 
-  void _endZoomAnim(Object obj, e Event) {
+  void _endZoomAnim(ZoomEvent e) {
     final front = _tileContainer,
         bg = _bgBuffer;
 
@@ -794,7 +788,8 @@ class TileLayer extends Object with core.Events implements Layer {
     front.parentNode.append(front); // Bring to fore
 
     // force reflow
-    core.falseFn(bg.offsetWidth);
+    final falseFn = (var x) => false;
+    falseFn(bg.offsetWidth);
 
     _animating = false;
   }
@@ -802,9 +797,9 @@ class TileLayer extends Object with core.Events implements Layer {
   void _clearBgBuffer() {
     final map = _map;
 
-    if (map && !map._animatingZoom && !map.touchZoom._zooming) {
+    if (map != null && map.animatingZoom == false && map.touchZoom.zooming == false) {
       _bgBuffer.setInnerHtml('');
-      _bgBuffer.style[dom.TRANSFORM] = '';
+      _bgBuffer.style.transform/*[dom.TRANSFORM]*/ = '';
     }
   }
 
@@ -819,7 +814,7 @@ class TileLayer extends Object with core.Events implements Layer {
     final bgLoaded = _getLoadedTilesPercentage(bg),
         frontLoaded = _getLoadedTilesPercentage(front);
 
-    if (bg && bgLoaded > 0.5 && frontLoaded < 0.5) {
+    if (bg != null && bgLoaded > 0.5 && frontLoaded < 0.5) {
 
       front.style.visibility = 'hidden';
       _stopLoadingImages(front);
@@ -828,7 +823,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
     // prepare the buffer to become the front tile pane
     bg.style.visibility = 'hidden';
-    bg.style[dom.TRANSFORM] = '';
+    bg.style.transform/*[dom.TRANSFORM]*/ = '';
 
     // switch out the current layer to be the new bg layer (and vice-versa)
     _tileContainer = bg;
@@ -865,14 +860,15 @@ class TileLayer extends Object with core.Events implements Layer {
 
     final len = tiles.length;
     for (int i = 0; i < len; i++) {
-      final tile = tiles[i];
+      ImageElement tile = tiles[i];
 
       if (!tile.complete) {
-        tile.onload = core.falseFn;
-        tile.onerror = core.falseFn;
+        tile.onLoad.listen((html.Event e) {});
+        tile.onError.listen((html.Event e) {});
         tile.src = core.emptyImageUrl;
 
-        tile.parentNode.removeChild(tile);
+        //tile.parentNode.removeChild(tile);
+        tile.remove();
       }
     }
   }

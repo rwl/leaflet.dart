@@ -1259,6 +1259,11 @@ class LeafletMap extends Object with Events {
 
   bool get zoomAnimated => _zoomAnimated;
 
+  /**
+   * For internal use.
+   */
+  bool get animatingZoom => _animatingZoom;
+
   _catchTransitionEnd(e) {
     if (_animatingZoom && e.propertyName.indexOf('transform') >= 0) {
       _onZoomTransitionEnd();

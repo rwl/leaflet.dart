@@ -1,11 +1,12 @@
 library leaflet.layer.tile;
 
 import 'dart:html' show Element, ImageElement, Node, ParentNode, document;
+import 'dart:html' as html;
 import 'dart:math' as math;
-import 'dart:async' show Timer;
+import 'dart:async' show Timer, Future;
 
 import '../../core/core.dart' as core;
-import '../../core/core.dart' show Event, EventType, Browser, Util;
+import '../../core/core.dart' show Event, EventType, Browser, Util, TileEvent, ZoomEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geo/crs/crs.dart' show CRS, EPSG4326;
