@@ -129,7 +129,6 @@ class Drag extends Handler {
         offset = map.limitOffset(offset, map.stateOptions.maxBounds);
 
         window.requestAnimationFrame((num highRes) {
-        //requestAnimFrame(() {
           map.panBy(offset, new PanOptions()
             ..duration = decelerationDuration
             ..easeLinearity = ease

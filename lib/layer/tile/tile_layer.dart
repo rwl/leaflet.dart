@@ -162,7 +162,7 @@ class TileLayer extends Object with core.Events implements Layer {
     }
 
     // detecting retina displays, adjusting tileSize and zoom levels
-    if (options.detectRetina == true && Browser.retina == true &&
+    if (options.detectRetina == true && browser.retina == true &&
         options.maxZoom > 0) {
 
       options.tileSize = (options.tileSize / 2).floor();
@@ -363,15 +363,7 @@ class TileLayer extends Object with core.Events implements Layer {
   }
 
   void _updateOpacity() {
-    final tiles = _tiles;
-
-    if (Browser.ielt9) {
-      for (var i in tiles) {
-        dom.setOpacity(tiles[i], options.opacity);
-      }
-    } else {
-      dom.setOpacity(_container, options.opacity);
-    }
+    _container.style.opacity = '$options.opacity';
   }
 
   Element _bgBuffer, _tileContainer;
@@ -568,12 +560,6 @@ class TileLayer extends Object with core.Events implements Layer {
       tile.remove();
     }
 
-    // for https://github.com/CloudMade/Leaflet/issues/137
-    if (!Browser.android) {
-      tile.onload = null;
-      tile.src = core.emptyImageUrl;
-    }
-
     _tiles.remove(key);
   }
 
@@ -588,7 +574,7 @@ class TileLayer extends Object with core.Events implements Layer {
     Android 4 browser has display issues with top/left and requires transform instead
     (other browsers don't currently care) - see debug/hacks/jitter.html for an example
     */
-    dom.setPosition(tile, tilePos, Browser.chrome);
+    dom.setPosition(tile, tilePos);
 
     _tiles['${tilePoint.x}:${tilePoint.y}'] = tile;
 
@@ -677,10 +663,6 @@ class TileLayer extends Object with core.Events implements Layer {
     tile.onSelectStart.listen((html.Event e) {});
     tile.onMouseMove.listen((html.Event e) {});
 
-    if (Browser.ielt9 && options.opacity != null) {
-      dom.setOpacity(tile, options.opacity);
-    }
-
     // without this hack, tiles disappear after zoom on Chrome for Android
     // https://github.com/Leaflet/Leaflet/issues/2078
     if (Browser.mobileWebkit3d == true) {
@@ -704,6 +686,7 @@ class TileLayer extends Object with core.Events implements Layer {
   }
 
   void _tileLoaded() {
+    print("_tileLoaded");
     _tilesToLoad--;
 
     if (_animated == true) {

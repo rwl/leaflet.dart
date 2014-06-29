@@ -91,7 +91,7 @@ class Popup extends Layer with Events {
   Events _source;
   bool _animated, _isOpen;
   LeafletMap _map;
-  var _container;
+  Element _container;
   LatLng _latlng;
   var _content;
   var _closeButton;
@@ -115,7 +115,7 @@ class Popup extends Layer with Events {
     final bool animFade = map.animationOptions.fadeAnimation;
 
     if (animFade) {
-      dom.setOpacity(_container, 0);
+      _container.style.opacity= '0';
     }
     map.panes['popupPane'].append(_container);
 
@@ -126,7 +126,7 @@ class Popup extends Layer with Events {
     update();
 
     if (animFade) {
-      dom.setOpacity(_container, 1);
+      _container.style.opacity = '1';
     }
 
     fire(EventType.OPEN);
@@ -162,7 +162,7 @@ class Popup extends Layer with Events {
     });
 
     if (map.animationOptions.fadeAnimation) {
-      dom.setOpacity(_container, 0);
+      _container.style.opacity = '0';
     }
 
     _map = null;

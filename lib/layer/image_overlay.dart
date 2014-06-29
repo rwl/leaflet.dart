@@ -22,7 +22,7 @@ class ImageOverlay extends Layer with Events {
   String _url;
   LatLngBounds _bounds;
   LeafletMap _map;
-  var _image;
+  ImageElement _image;
 
   ImageOverlay(String url, LatLngBounds bounds, this.options) {
     _url = url;
@@ -157,6 +157,6 @@ class ImageOverlay extends Layer with Events {
   }
 
   void _updateOpacity() {
-    dom.setOpacity(_image, options.opacity);
+    _image.style.opacity = '${options.opacity}';
   }
 }

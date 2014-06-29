@@ -1,10 +1,8 @@
 library leaflet.layer;
 
-import 'dart:html' show Element, CanvasElement;
-import 'dart:html' as html;
+import 'dart:html' as html show Element, CanvasElement, ImageElement;
 import 'dart:math' as math show min, max;
 
-import '../core/core.dart' as core;
 import '../core/core.dart' show EventType, Browser, Action, stamp, Events, Event, LayerEvent, ZoomEvent, PopupEvent;
 import '../dom/dom.dart' as dom;
 import '../map/map.dart';
