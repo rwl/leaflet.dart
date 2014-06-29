@@ -122,49 +122,37 @@ part of leaflet.dom;
 /**
  * Stop the given event from propagation to parent elements.
  */
-/*void stopPropagation(e) {
+void stopPropagation(Event e) {
+  e.stopPropagation();
+//  _skipped(e);
+}
 
-  if (e.stopPropagation) {
-    e.stopPropagation();
-  } else {
-    e.cancelBubble = true;
-  }
-  L.DomEvent._skipped(e);
-}*/
-
-void disableScrollPropagation(el) {
-  var stop = L.DomEvent.stopPropagation;
-
-  on(el, 'mousewheel', stop);
-  on(el, 'MozMousePixelScroll', stop);
+void disableScrollPropagation(Element el) {
+  el.onMouseWheel.listen(stop);
+  // TODO: is this necessary? dart:html might cover this already.
+  el.on['MozMousePixelScroll'].listen(stop);
 }
 
 /**
  * Adds stopPropagation to the element's 'click', 'doubleclick', 'mousedown' and 'touchstart' events.
  */
 void disableClickPropagation(Element el) {
-  var stop = L.DomEvent.stopPropagation;
+  var stop = stopPropagation;
 
-  for (var i = L.Draggable.START.length - 1; i >= 0; i--) {
-    L.DomEvent.on(el, L.Draggable.START[i], stop);
+  for (var event in  Draggable.START.reversed) {
+    el.addEventListener(event, stop);
   }
 
-  return L.DomEvent
-    .on(el, 'click', L.DomEvent._fakeStop)
-    .on(el, 'dblclick', stop);
+  el.onClick.listen(_fakeStop);
+  el.onDoubleClick.listen(stop);
 }
 
 /**
  * Prevents the default action of the event from happening (such as following a link in the href of the a element, or doing a POST request with page reload when form is submitted).
  */
-/*void preventDefault(e) {
-
-  if (e.preventDefault) {
-    e.preventDefault();
-  } else {
-    e.returnValue = false;
-  }
-}*/
+void preventDefault(e) {
+  e.preventDefault();
+}
 
 /**
  * Does stopPropagation and preventDefault at the same time.

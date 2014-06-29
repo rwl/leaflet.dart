@@ -1,10 +1,14 @@
 library leaflet.map;
 
-import 'dart:html' show Element, window, document, CanvasRenderingContext2D, Geoposition, PositionError, CanvasElement;
+import 'dart:html' show Element, querySelector, window, document,
+    CanvasRenderingContext2D, Geoposition, PositionError, CanvasElement;
 import 'dart:html' as html;
 import 'dart:svg' show SvgSvgElement;
 import 'dart:math' as math;
 import 'dart:async' show Timer, StreamSubscription;
+
+import 'package:leaflet/src/core/browser.dart' as browser;
+import 'package:quiver/core.dart' show firstNonNull;
 
 import '../core/core.dart' show Handler, Events, stamp, ZoomAnimEvent;
 import '../core/core.dart' show Event, EventType, Util, Browser, LayerEvent, ResizeEvent, ViewEvent, MouseEvent, ZoomEvent, ErrorEvent, LocationEvent;
@@ -746,7 +750,7 @@ class LeafletMap extends Object with Events {
   /* Map initialization methods */
 
   void _initContainerID(String id) {
-    final container = dom.get(id);
+    final container = querySelector('#id');
     if (container == null) {
       throw new Exception('Map container not found.');
     }
@@ -766,9 +770,8 @@ class LeafletMap extends Object with Events {
   void _initLayout() {
     _container.classes.add('leaflet-container');
     // TODO: make sure the following fields are non-null and remove the `== true`
-    if (Browser.touch == true) _container.classes.add('leaflet-touch');
-    if (Browser.retina  == true) _container.classes.add('leaflet-retina');
-    if (Browser.ielt9  == true) _container.classes.add('leaflet-oldie');
+    if (browser.touch == true) _container.classes.add('leaflet-touch');
+    if (browser.retina  == true) _container.classes.add('leaflet-retina');
     if (animationOptions.fadeAnimation  == true) _container.classes.add('leaflet-fade-anim');
 
     final position = _container.style.getPropertyValue('position');
@@ -1405,7 +1408,7 @@ class LeafletMap extends Object with Events {
     }
 
     // don't fire movestart if animating inertia
-    if (!options.noMoveStart) {
+    if (options.noMoveStart != true) {
       fire(EventType.MOVESTART);
     }
 
@@ -1414,7 +1417,7 @@ class LeafletMap extends Object with Events {
       _mapPane.classes.add('leaflet-pan-anim');
 
       final newPos = _getMapPanePos() - offset;
-      _panAnim.run(_mapPane, newPos, options.duration != null ? options.duration : 0.25, options.easeLinearity);
+      _panAnim.run(_mapPane, newPos, firstNonNull(options.duration, 0.25), options.easeLinearity);
     } else {
       _rawPanBy(offset);
       fire(EventType.MOVE);
@@ -1636,14 +1639,10 @@ class LeafletMap extends Object with Events {
       _pathRoot = new SvgSvgElement();//Path.prototype._createElement('svg');
       _panes['overlayPane'].append(_pathRoot);
 
-      if (animationOptions.zoomAnimation && Browser.any3d) {
         _pathRoot.classes.add('leaflet-zoom-animated');
 
-        on(EventType.ZOOMANIM, _animatePathZoom);
-        on(EventType.ZOOMEND, _endPathZoom);
-      } else {
-        _pathRoot.classes.add('leaflet-zoom-hide');
-      }
+      on(EventType.ZOOMANIM, _animatePathZoom);
+      on(EventType.ZOOMEND, _endPathZoom);
 
       on(EventType.MOVEEND, _updateSvgViewport);
       _updateSvgViewport();
@@ -1684,7 +1683,7 @@ class LeafletMap extends Object with Events {
         pane = _panes['overlayPane'];
 
     // Hack to make flicker on drag end on mobile webkit less irritating
-    if (Browser.mobileWebkit) {
+    if (browser.mobileWebkit) {
       //pane.removeChild(root);
       root.remove();
     }
@@ -1694,7 +1693,7 @@ class LeafletMap extends Object with Events {
     root.setAttribute('height', height.toString());
     root.setAttribute('viewBox', [min.x, min.y, width, height].join(' '));
 
-    if (Browser.mobileWebkit) {
+    if (browser.mobileWebkit) {
       pane.append(root);
     }
   }

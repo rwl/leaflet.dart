@@ -214,7 +214,7 @@ class DragEndEvent extends Event {
   num distance;
 
   //DragEndEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
-  DragEndEvent(EventType eventType, this.distance) : super(eventType);
+  DragEndEvent(this.distance) : super(EventType.DRAGEND);
 }
 
 class ZoomEvent extends Event {

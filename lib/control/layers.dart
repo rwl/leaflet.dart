@@ -106,7 +106,7 @@ class Layers extends Control {
     //Makes this work on IE10 Touch devices by stopping it from firing a mouseout event when the touch is released
     container.setAttribute('aria-haspopup', 'true');
 
-    if (!Browser.touch) {
+    if (!browser.touch) {
       dom.disableClickPropagation(container);
       dom.disableScrollPropagation(container);
     } else {
@@ -119,17 +119,11 @@ class Layers extends Control {
     final form = _form = dom.create('form', className + '-list');
 
     if (layersOptions.collapsed) {
-      if (!Browser.android) {
-        //dom.on(container, 'mouseover', _expand, this);
-        container.onMouseOver.listen(_expand);
-        //dom.on(container, 'mouseout', _collapse, this);
-        container.onMouseOut.listen(_collapse);
-      }
       final link = _layersLink = dom.create('a', '$className-toggle', container);
       link.href = '#';
       link.title = 'Layers';
 
-      if (Browser.touch) {
+      if (browser.touch) {
         //dom.on(link, 'click', dom.stop);
         link.onClick.listen(dom.stop);
         //dom.on(link, 'click', _expand, this);

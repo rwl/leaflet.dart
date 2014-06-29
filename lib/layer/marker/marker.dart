@@ -189,7 +189,7 @@ class Marker extends Layer with Events {
       _setPos(pos);
     }
   }
-  
+
   StreamSubscription<html.MouseEvent> _mouseOverSubscription, _mouseOutSubscription;
 
   void _initIcon() {
@@ -306,7 +306,7 @@ class Marker extends Layer with Events {
 
     _setPos(pos);
   }
-  
+
 //  StreamSubscription<html.MouseEvent> _doubleClickSubscription,
 //    _mouseDownSubscription, _mouseOverSubscription, _mouseOutSubscription,
 //    _contextMenuSubscription;
@@ -396,9 +396,9 @@ class Marker extends Layer with Events {
   }
 
   void _updateOpacity() {
-    dom.setOpacity(_icon, options.opacity);
+    _icon.style.opacity =  '${options.opacity}';
     if (_shadow != null) {
-      dom.setOpacity(_shadow, options.opacity);
+      _shadow.style.opacity = '${options.opacity}';
     }
   }
 

@@ -5,6 +5,8 @@ import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:async' show Timer, Future;
 
+import 'package:leaflet/src/core/browser.dart' as browser;
+
 import '../../core/core.dart' as core;
 import '../../core/core.dart' show Event, EventType, Browser, Util, TileEvent, ZoomEvent;
 import '../../map/map.dart';
