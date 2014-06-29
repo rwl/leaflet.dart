@@ -72,15 +72,15 @@ class Icon {
 
   Icon(this.options);
 
-  createIcon(Element oldIcon) {
+  ImageElement createIcon(Element oldIcon) {
     return _createIcon(IconType.ICON, oldIcon);
   }
 
-  createShadow(Element oldIcon) {
+  ImageElement createShadow(Element oldIcon) {
     return _createIcon(IconType.SHADOW, oldIcon);
   }
 
-  _createIcon(IconType iconType, Element oldIcon) {
+  ImageElement _createIcon(IconType iconType, Element oldIcon) {
     final src = _getIconUrl(iconType);
 
     if (src == null) {
@@ -90,7 +90,7 @@ class Icon {
       return null;
     }
 
-    Element img;
+    ImageElement img;
     if (oldIcon == null || oldIcon.tagName.toUpperCase() != 'IMG') {
       img = _createImg(src);
     } else {
@@ -101,7 +101,7 @@ class Icon {
     return img;
   }
 
-  _setIconStyles(Element img, IconType iconType) {
+  void _setIconStyles(Element img, IconType iconType) {
     Point2D size;
     switch (iconType) {
       case IconType.ICON:
@@ -143,11 +143,11 @@ class Icon {
     }
   }
 
-  Element _createImg(String src, [Element el=null]) {
+  ImageElement _createImg(String src, [ImageElement el=null]) {
     if (el == null) {
       el = new ImageElement();
     }
-    el.attributes["src"] = src;
+    el.src = src;
     return el;
   }
 

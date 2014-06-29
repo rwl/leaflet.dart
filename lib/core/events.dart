@@ -45,8 +45,8 @@ class Events {
   /**
    * Alias to addEventListener.
    */
-  on(EventType types, Function fn/*, [Object context=null]*/) {
-    return addEventListener(types, fn/*, context*/);
+  void on(EventType types, Function fn/*, [Object context=null]*/) {
+    addEventListener(types, fn/*, context*/);
   }
 
   /**
@@ -54,7 +54,7 @@ class Events {
    * You can optionally specify the context of the listener (object the this
    * keyword will point to).
    */
-  addEventListener(EventType types, Function fn/*, [Object context=null]*/) { // (String, Function[, Object]) or (Object[, Object])
+  void addEventListener(EventType types, Function fn/*, [Object context=null]*/) { // (String, Function[, Object]) or (Object[, Object])
 
     // types can be a map of types/handlers
 //    if (L.Util.invokeEach(types, this.addEventListener, this, fn, context)) { return this; }
@@ -126,8 +126,6 @@ class Events {
         _events[type].add(event);
       //}
     }
-
-    return this;
   }
 
   bool hasEventListeners(EventType type) {
@@ -147,7 +145,7 @@ class Events {
    * Alias to removeEventListener.
    */
   void off([EventType types = null, Function fn = null/*, Object context = null*/]) {
-    return removeEventListener(types, fn/*, context*/);
+    removeEventListener(types, fn/*, context*/);
   }
 
   /**
@@ -227,13 +225,12 @@ class Events {
   /**
    * Removes all listeners to all events on the object.
    */
-  clearAllEventListeners() {
+  void clearAllEventListeners() {
     //this.remove(eventsKey);
 //    _leaflet_events = null;
     _events = null;
     //_contextEvents = null;
     //_numContextEvents = null;
-    return this;
   }
 
   /**
@@ -242,7 +239,7 @@ class Events {
   /*fire(EventType type, [Map<String, Object> data = null]) {
     return fireEvent(type, data);
   }*/
-  fire(EventType type, [Event event]) {
+  void fire(EventType type, [Event event]) {
     _fireEvent(type, event);
   }
 

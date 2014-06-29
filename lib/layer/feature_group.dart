@@ -21,7 +21,7 @@ class FeatureGroup extends LayerGroup with Events {
     }
 
     if (layer is Events) {
-      layer.on(FeatureGroup.EVENTS, _propagateEvent, this);
+      layer.on(FeatureGroup.EVENTS, _propagateEvent);
     }
 
     super.addLayer(layer);
@@ -41,7 +41,7 @@ class FeatureGroup extends LayerGroup with Events {
       layer = _layers[layer];
     }
 
-    layer.off(FeatureGroup.EVENTS, _propagateEvent, this);
+    layer.off(FeatureGroup.EVENTS, _propagateEvent);
 
     super.removeLayer(layer);
 

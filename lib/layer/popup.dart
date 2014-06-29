@@ -119,8 +119,8 @@ class Popup extends Layer with Events {
     }
     map.panes['popupPane'].append(_container);
 
-    _getEvents().forEach((EventType et, Action a) {
-      map.on(et, a, this);
+    _getEvents().forEach((EventType et, Function a) {
+      map.on(et, a);
     });
 
     update();
@@ -131,10 +131,10 @@ class Popup extends Layer with Events {
 
     fire(EventType.OPEN);
 
-    map.fire(EventType.POPUPOPEN, {'popup': this});
+    map.fireEvent(new PopupEvent(EventType.POPUPOPEN, this));
 
     if (_source != null) {
-      _source.fire(EventType.POPUPOPEN, {'popup': this});
+      _source.fireEvent(new PopupEvent(EventType.POPUPOPEN, this));
     }
   }
 
@@ -154,10 +154,11 @@ class Popup extends Layer with Events {
     //map.panes['popupPane'].removeChild(_container);
     _container.remove();
 
-    core.falseFn(_container.offsetWidth); // force reflow
+    final fn = (var x) => false;
+    fn(_container.offsetWidth); // force reflow
 
-    _getEvents().forEach((EventType et, Action a) {
-      map.off(et, a, this);
+    _getEvents().forEach((EventType et, Function a) {
+      map.off(et, a);
     });
 
     if (map.animationOptions.fadeAnimation) {
@@ -168,10 +169,10 @@ class Popup extends Layer with Events {
 
     fire(EventType.CLOSE);
 
-    map.fire(EventType.POPUPCLOSE, {'popup': this});
+    map.fireEvent(new PopupEvent(EventType.POPUPCLOSE, this));
 
     if (_source != null) {
-      _source.fire(EventType.POPUPCLOSE, {'popup': this});
+      _source.fireEvent(new PopupEvent(EventType.POPUPCLOSE, this));
     }
   }
 
@@ -216,7 +217,7 @@ class Popup extends Layer with Events {
     _adjustPan();
   }
 
-  Map<EventType, Action>_getEvents() {
+  Map<EventType, Function>_getEvents() {
     final events = {
       EventType.VIEWRESET: _updatePosition
     };
@@ -260,7 +261,8 @@ class Popup extends Layer with Events {
       closeButton.setInnerHtml('&#215;');
       dom.disableClickPropagation(closeButton);
 
-      dom.on(closeButton, 'click', _onCloseButtonClick, this);
+      //dom.on(closeButton, 'click', _onCloseButtonClick, this);
+      closeButton.onClick.listen(_onCloseButtonClick);
     }
 
     final wrapper = _wrapper =
@@ -270,7 +272,8 @@ class Popup extends Layer with Events {
     _contentNode = dom.create('div', prefix + '-content', wrapper);
 
     dom.disableScrollPropagation(_contentNode);
-    dom.on(wrapper, 'contextmenu', dom.stopPropagation);
+    //dom.on(wrapper, 'contextmenu', dom.stopPropagation);
+    wrapper.onContextMenu.listen((html.Event e) { e.stopPropagation(); });
 
     _tipContainer = dom.create('div', prefix + '-tip-container', container);
     _tip = dom.create('div', prefix + '-tip', _tipContainer);
@@ -380,14 +383,13 @@ class Popup extends Layer with Events {
       dy = containerPos.y - paddingTL.y;
     }
 
-    if (dx || dy) {
-      map
-          .fire(EventType.AUTOPANSTART)
-          .panBy([dx, dy]);
+    if (dx != 0 || dy != 0) {
+      map.fire(EventType.AUTOPANSTART);
+      map.panBy([dx, dy]);
     }
   }
 
-  void _onCloseButtonClick(core.Event e) {
+  void _onCloseButtonClick(html.MouseEvent e) {
     _close();
     dom.stop(e);
   }

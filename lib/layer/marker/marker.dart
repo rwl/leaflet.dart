@@ -1,8 +1,9 @@
 library leaflet.layer.marker;
 
-import 'dart:html' show document, Element, ImageElement, DivElement, KeyboardEvent;
+import 'dart:html' show document, Element, ImageElement, DivElement;
+import 'dart:html' as html;
 
-import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent;
+import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent, MouseEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geometry/geometry.dart' show Point2D;
@@ -85,8 +86,8 @@ class Marker extends Layer with Events {
   LatLng _latlng;
   LeafletMap _map;
   MarkerDrag dragging;
-  var _icon, _shadow;
-  var _zIndex;
+  ImageElement _icon, _shadow;
+  int _zIndex;
 
   /*final Map<String, Object> options = {
     'icon': new Icon.Default(),
@@ -112,14 +113,14 @@ class Marker extends Layer with Events {
   void onAdd(LeafletMap map) {
     _map = map;
 
-    map.on(EventType.VIEWRESET, update, this);
+    map.on(EventType.VIEWRESET, update);
 
     _initIcon();
     update();
     fire(EventType.ADD);
 
     if (map.animationOptions.zoomAnimation && map.animationOptions.markerZoomAnimation) {
-      map.on(EventType.ZOOMANIM, _animateZoom, this);
+      map.on(EventType.ZOOMANIM, _animateZoom);
     }
   }
 
@@ -140,8 +141,8 @@ class Marker extends Layer with Events {
 
     fire(EventType.REMOVE);
 
-    map.off(EventType.VIEWRESET, update, this);
-    map.off(EventType.ZOOMANIM, _animateZoom, this);
+    map.off(EventType.VIEWRESET, update);
+    map.off(EventType.ZOOMANIM, _animateZoom);
 
     _map = null;
   }
@@ -157,7 +158,7 @@ class Marker extends Layer with Events {
 
     update();
 
-    fire(EventType.MOVE, { 'latlng': _latlng });
+    fireEvent(new MouseEvent(EventType.MOVE, _latlng, null, null, null));
   }
 
   // Changes the zIndex offset of the marker.
@@ -199,7 +200,7 @@ class Marker extends Layer with Events {
 
     // if we're not reusing the icon, remove the old one and init new one
     if (icon != _icon) {
-      if (_icon) {
+      if (_icon != null) {
         _removeIcon();
       }
       addIcon = true;
@@ -224,8 +225,10 @@ class Marker extends Layer with Events {
     _initInteraction();
 
     if (options.riseOnHover) {
-      dom.on(icon, 'mouseover', _bringToFront, this);
-      dom.on(icon, 'mouseout', _resetZIndex, this);
+      //dom.on(icon, 'mouseover', _bringToFront);
+      //dom.on(icon, 'mouseout', _resetZIndex);
+      icon.onMouseOver.listen(_bringToFront);
+      icon.onMouseOut.listen(_resetZIndex);
     }
 
     final newShadow = options.icon.createShadow(_shadow);
@@ -260,8 +263,10 @@ class Marker extends Layer with Events {
 
   void _removeIcon() {
     if (options.riseOnHover) {
-      dom.off(_icon, 'mouseover', _bringToFront);
-      dom.off(_icon, 'mouseout', _resetZIndex);
+//      dom.off(_icon, 'mouseover', _bringToFront);
+//      dom.off(_icon, 'mouseout', _resetZIndex);
+      _icon.onMouseOver.listen(_bringToFront);
+      _icon.onMouseOut.listen(_resetZIndex);
     }
 
     //this._map.panes['markerPane'].removeChild(this._icon);
@@ -290,8 +295,8 @@ class Marker extends Layer with Events {
     _resetZIndex();
   }
 
-  void _updateZIndex(num offset) {
-    _icon.style.zIndex = _zIndex + offset;
+  void _updateZIndex(int offset) {
+    _icon.style.zIndex = (_zIndex + offset).toString();
   }
 
   _animateZoom(num zoom, LatLng center) {
@@ -306,16 +311,23 @@ class Marker extends Layer with Events {
     // TODO refactor into something shared with Map/Path/etc. to DRY it up
 
     final icon = _icon;
-    final events = [EventType.DBLCLICK, EventType.MOUSEDOWN, EventType.MOUSEOVER,
-                    EventType.MOUSEOUT, EventType.CONTEXTMENU];
+    //final events = [EventType.DBLCLICK, EventType.MOUSEDOWN, EventType.MOUSEOVER,
+    //                EventType.MOUSEOUT, EventType.CONTEXTMENU];
 
     icon.classes.add('leaflet-clickable');
-    dom.on(icon, 'click', _onMouseClick, this);
-    dom.on(icon, 'keypress', _onKeyPress, this);
+//    dom.on(icon, 'click', _onMouseClick, this);
+//    dom.on(icon, 'keypress', _onKeyPress, this);
+    icon.onClick.listen(_onMouseClick);
+    icon.onKeyPress.listen(_onKeyPress);
 
-    for (int i = 0; i < events.length; i++) {
+    /*for (int i = 0; i < events.length; i++) {
       dom.on(icon, events[i], _fireMouseEvent, this);
-    }
+    }*/
+    icon.onDoubleClick.listen(_fireMouseEvent);
+    icon.onMouseDown.listen(_fireMouseEvent);
+    icon.onMouseOver.listen(_fireMouseEvent);
+    icon.onMouseOut.listen(_fireMouseEvent);
+    icon.onContextMenu.listen(_fireMouseEvent);
 
     //if (Handler.MarkerDrag) {
     dragging = new MarkerDrag(this);
@@ -326,11 +338,13 @@ class Marker extends Layer with Events {
     //}
   }
 
-  void _onMouseClick(Event e) {
+  void _onMouseClick(html.MouseEvent e) {
     final wasDragged = dragging != null && dragging.moved();
 
-    if (hasEventListeners(e.type) || wasDragged) {
-      dom.stopPropagation(e);
+    final type = new EventType.from(e.type);
+    if (hasEventListeners(type) || wasDragged) {
+      //dom.stopPropagation(e);
+      e.stopPropagation();
     }
 
     if (wasDragged) { return; }
@@ -339,37 +353,31 @@ class Marker extends Layer with Events {
       return;
     }
 
-    fire(e.type, {
-      'originalEvent': e,
-      'latlng': _latlng
-    });
+    fireEvent(new MouseEvent(type, _latlng, null, null, e));
   }
 
-  void _onKeyPress(KeyboardEvent e) {
+  void _onKeyPress(html.KeyboardEvent e) {
     if (e.keyCode == 13) {
-      fire(EventType.CLICK, {
-        'originalEvent': e,
-        'latlng': _latlng
-      });
+      fireEvent(new MouseEvent(EventType.CLICK, _latlng, null, null, e));
     }
   }
 
-  void _fireMouseEvent(Event e) {
-
-    fire(e.type, {
-      'originalEvent': e,
-      'latlng': _latlng
-    });
+  void _fireMouseEvent(html.Event e) {
+    final type = new EventType.from(e.type);
+    fireEvent(new MouseEvent(type, _latlng, null, null, e));
 
     // TODO proper custom event propagation
     // this line will always be called if marker is in a FeatureGroup
-    if (e.type == 'contextmenu' && hasEventListeners(e.type)) {
-      dom.preventDefault(e);
+    if (type == EventType.CONTEXTMENU && hasEventListeners(type)) {
+      //dom.preventDefault(e);
+      e.preventDefault();
     }
-    if (e.type != 'mousedown') {
-      dom.stopPropagation(e);
+    if (type != EventType.MOUSEDOWN) {
+      //dom.stopPropagation(e);
+      e.stopPropagation();
     } else {
-      dom.preventDefault(e);
+      //dom.preventDefault(e);
+      e.preventDefault();
     }
   }
 
@@ -388,11 +396,11 @@ class Marker extends Layer with Events {
     }
   }
 
-  void _bringToFront() {
+  void _bringToFront([html.MouseEvent e]) {
     _updateZIndex(options.riseOffset);
   }
 
-  void _resetZIndex() {
+  void _resetZIndex([html.MouseEvent e]) {
     _updateZIndex(0);
   }
 
@@ -443,9 +451,9 @@ class Marker extends Layer with Events {
     options.offset = anchor;
 
     if (!_popupHandlersAdded) {
-      this.on(EventType.CLICK, togglePopup, this);
-      this.on(EventType.REMOVE, closePopup, this);
-      this.on(EventType.MOVE, _movePopup, this);
+      on(EventType.CLICK, togglePopup);
+      on(EventType.REMOVE, closePopup);
+      on(EventType.MOVE, _movePopup);
       _popupHandlersAdded = true;
     }
 
@@ -467,9 +475,9 @@ class Marker extends Layer with Events {
   void unbindPopup() {
     if (_popup != null) {
       _popup = null;
-      this.off(EventType.CLICK, togglePopup, this);
-      this.off(EventType.REMOVE, closePopup, this);
-      this.off(EventType.MOVE, _movePopup, this);
+      off(EventType.CLICK, togglePopup);
+      off(EventType.REMOVE, closePopup);
+      off(EventType.MOVE, _movePopup);
       _popupHandlersAdded = false;
     }
   }

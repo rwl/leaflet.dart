@@ -127,7 +127,7 @@ class GeoJSON extends FeatureGroup {
         latlng, latlngs, i, len;
     List layers = [];
 
-    coordsToLatLng = coordsToLatLng || coordsToLatLng;
+    coordsToLatLng = coordsToLatLng == null ? GeoJSON.coordsToLatLng : coordsToLatLng;
 
     switch (geometry.type) {
     case 'Point':

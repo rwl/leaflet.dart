@@ -41,10 +41,10 @@ class ImageOverlay extends Layer with Events {
 
     map.panes['overlayPane'].append(_image);
 
-    map.on(EventType.VIEWRESET, _reset, this);
+    map.on(EventType.VIEWRESET, _reset);
 
     if (map.animationOptions.zoomAnimation && Browser.any3d) {
-      map.on(EventType.ZOOMANIM, _animateZoom, this);
+      map.on(EventType.ZOOMANIM, _animateZoom);
     }
 
     _reset();
@@ -54,10 +54,10 @@ class ImageOverlay extends Layer with Events {
     //map.panes['overlayPane'].removeChild(_image);
     _image.remove();
 
-    map.off(EventType.VIEWRESET, _reset, this);
+    map.off(EventType.VIEWRESET, _reset);
 
     if (map.animationOptions.zoomAnimation) {
-      map.off(EventType.ZOOMANIM, _animateZoom, this);
+      map.off(EventType.ZOOMANIM, _animateZoom);
     }
   }
 
@@ -127,7 +127,7 @@ class ImageOverlay extends Layer with Events {
 //    });
   }
 
-  void _animateZoom(Object obj, Event e) {
+  void _animateZoom(ZoomEvent e) {
     final map = _map,
         image = _image,
         scale = map.getZoomScale(e.zoom),
@@ -141,7 +141,7 @@ class ImageOverlay extends Layer with Events {
     image.style[dom.TRANSFORM] = dom.getTranslateString(origin) + ' scale($scale) ';
   }
 
-  void _reset([Object obj, Event e]) {
+  void _reset() {
     final image = _image,
         topLeft = _map.latLngToLayerPoint(_bounds.getNorthWest()),
         size = _map.latLngToLayerPoint(_bounds.getSouthEast()) - topLeft;

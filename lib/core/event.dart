@@ -47,7 +47,7 @@ class MouseEvent extends Event {
   /**
    * The original DOM mouse event fired by the browser.
    */
-  html.MouseEvent originalEvent;
+  html./*Mouse*/Event originalEvent;
 
   //MouseEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
   MouseEvent(EventType eventType, this.latlng, this.layerPoint, this.containerPoint, this.originalEvent) : super(eventType);
