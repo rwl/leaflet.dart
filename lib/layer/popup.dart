@@ -112,7 +112,7 @@ class Popup extends Layer with Events {
       _initLayout();
     }
 
-    final bool animFade = map.animationOptions.fadeAnimation;
+    final bool animFade = map.options.fadeAnimation;
 
     if (animFade) {
       _container.style.opacity= '0';
@@ -161,7 +161,7 @@ class Popup extends Layer with Events {
       map.off(et, a);
     });
 
-    if (map.animationOptions.fadeAnimation) {
+    if (map.options.fadeAnimation) {
       _container.style.opacity = '0';
     }
 
@@ -225,7 +225,7 @@ class Popup extends Layer with Events {
     if (_animated) {
       events[EventType.ZOOMANIM] = _zoomAnimation;
     }
-    if (options.closeOnClick != null ? options.closeOnClick : _map.interactionOptions.closePopupOnClick) {
+    if (options.closeOnClick != null ? options.closeOnClick : _map.options.closePopupOnClick) {
       events[EventType.PRECLICK] = _close;
     }
     if (options.keepInView) {

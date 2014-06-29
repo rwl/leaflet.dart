@@ -618,7 +618,7 @@ class TileLayer extends Object with core.Events implements Layer {
   }
 
   Point2D _getWrapTileNum() {
-    final crs = _map.stateOptions.crs,
+    final crs = _map.options.crs,
         size = crs.getSize(_map.getZoom());
     return (size / _getTileSize())..floored();
   }

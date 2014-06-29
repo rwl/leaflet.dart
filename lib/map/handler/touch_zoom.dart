@@ -73,7 +73,7 @@ class TouchZoom extends Handler {
 
     if (this._scale == 1) { return; }
 
-    if (map.interactionOptions.bounceAtZoomLimits = null) {
+    if (map.options.bounceAtZoomLimits = null) {
       if ((map.getZoom() == map.getMinZoom() && this._scale < 1) ||
           (map.getZoom() == map.getMaxZoom() && this._scale > 1)) { return; }
     }

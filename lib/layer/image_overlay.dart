@@ -43,7 +43,7 @@ class ImageOverlay extends Layer with Events {
 
     map.on(EventType.VIEWRESET, _reset);
 
-    if (map.animationOptions.zoomAnimation && Browser.any3d) {
+    if (map.options.zoomAnimation && Browser.any3d) {
       map.on(EventType.ZOOMANIM, _animateZoom);
     }
 
@@ -56,7 +56,7 @@ class ImageOverlay extends Layer with Events {
 
     map.off(EventType.VIEWRESET, _reset);
 
-    if (map.animationOptions.zoomAnimation) {
+    if (map.options.zoomAnimation) {
       map.off(EventType.ZOOMANIM, _animateZoom);
     }
   }
@@ -109,7 +109,7 @@ class ImageOverlay extends Layer with Events {
   void _initImage() {
     _image = dom.create('img', 'leaflet-image-layer');
 
-    if (_map.animationOptions.zoomAnimation && Browser.any3d) {
+    if (_map.options.zoomAnimation && Browser.any3d) {
       _image.classes.add('leaflet-zoom-animated');
     } else {
       _image.classes.add('leaflet-zoom-hide');

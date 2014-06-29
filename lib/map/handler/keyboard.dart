@@ -147,8 +147,8 @@ class Keyboard extends Handler {
 
       map.panBy(_panKeys[key]);
 
-      if (map.stateOptions.maxBounds != null) {
-        map.panInsideBounds(map.stateOptions.maxBounds);
+      if (map.options.maxBounds != null) {
+        map.panInsideBounds(map.options.maxBounds);
       }
 
     } else if (_zoomKeys.containsKey(key)) {

@@ -1,6 +1,12 @@
 part of leaflet.map;
 
 
+class MapOptions extends Object with MapStateOptions, InteractionOptions,
+  KeyboardNavigationOptions, PanningInertiaOptions, ControlOptions,
+  AnimationOptions, LocateOptions, ZoomPanOptions {
+
+}
+
 class MapStateOptions {
   /**
    * Initial geographical center of the map.
@@ -172,13 +178,13 @@ class AnimationOptions {
    * Whether the tile fade animation is enabled. By default it's enabled in
    * all browsers that support CSS3 Transitions except Android.
    */
-  bool fadeAnimation;
+  bool fadeAnimation = true;
 
   /**
    * Whether the tile zoom animation is enabled. By default it's enabled in
    * all browsers that support CSS3 Transitions except Android.
    */
-  bool zoomAnimation;
+  bool zoomAnimation = true;
 
   /**
    * Won't animate zoom if the zoom difference exceeds this value.
@@ -190,12 +196,12 @@ class AnimationOptions {
    * they will disappear for the length of the animation. By default it's
    * enabled in all browsers that support CSS3 Transitions except Android.
    */
-  bool markerZoomAnimation;
+  bool markerZoomAnimation = true;
 
-  AnimationOptions() {
+  /*AnimationOptions() {
     fadeAnimation = true; //dom.TRANSITION != null && !Browser.android23;
     markerZoomAnimation = true; // dom.TRANSITION != null && Browser.any3d;
-  }
+  }*/
 }
 
 class LocateOptions {
@@ -245,12 +251,12 @@ class ZoomPanOptions {
   /**
    * Sets the options for the panning (without the zoom change) if it occurs.
    */
-  PanOptions pan;
+  PanOptions panOptions;
 
   /**
    * Sets the options for the zoom change if it occurs.
    */
-  ZoomOptions zoom;
+  ZoomOptions zoomOptions;
 
   /**
    * An equivalent of passing animate to both zoom and pan options (see below).
@@ -292,7 +298,7 @@ class ZoomPanOptions {
    */
   num maxZoom;
 
-  ZoomPanOptions({this.reset: false, this.pan, this.zoom, this.paddingTopLeft: null, this.paddingBottomRight: null, this.maxZoom}) {
+  /*ZoomPanOptions({this.reset: false, this.pan, this.zoom, this.paddingTopLeft: null, this.paddingBottomRight: null, this.maxZoom}) {
     if (paddingTopLeft == null) {
       paddingTopLeft = new Point2D(0, 0);
     }
@@ -301,7 +307,7 @@ class ZoomPanOptions {
       paddingBottomRight = new Point2D(0, 0);
     }
     this.paddingBottomRight = paddingBottomRight;
-  }
+  }*/
 }
 
 class PanOptions {

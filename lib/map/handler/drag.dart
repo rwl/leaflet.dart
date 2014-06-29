@@ -24,7 +24,7 @@ class Drag extends Handler {
       _draggable.on(EventType.DRAG, _onDrag);
       _draggable.on(EventType.DRAGEND, _onDragEnd);
 
-      if (map.interactionOptions.worldCopyJump) {
+      if (map.options.worldCopyJump) {
         _draggable.on(EventType.PREDRAG, _onPreDrag);
         map.on(EventType.VIEWRESET, _onViewReset);
 
@@ -50,14 +50,14 @@ class Drag extends Handler {
     map.fire(EventType.MOVESTART);
     map.fire(EventType.DRAGSTART);
 
-    if (map.panningInertiaOptions.inertia) {
+    if (map.options.inertia) {
       _positions = [];
       _times = [];
     }
   }
 
   _onDrag() {
-    if (map.panningInertiaOptions.inertia) {
+    if (map.options.inertia) {
       final time = _lastTime = /*+*/new DateTime.now(),
           pos = _lastPos = _draggable.newPos;
 
@@ -97,7 +97,7 @@ class Drag extends Handler {
   }
 
   _onDragEnd(Event e) {
-    final options = map.panningInertiaOptions,
+    final options = map.options,
         delay = /*+*/new DateTime.now().difference(_lastTime),
 
         noInertia = !options.inertia || delay > options.inertiaThreshold || _positions.length == 0;
@@ -111,7 +111,7 @@ class Drag extends Handler {
 
       final direction = _lastPos - _positions[0],
           duration = (_lastTime.add(delay).difference(_times[0])),// / 1000,
-          ease = map.panOptions.easeLinearity,
+          ease = map.options.panOptions.easeLinearity,
 
           speedVector = direction * (ease / duration),
           speed = speedVector.distanceTo(new Point2D(0, 0)),
@@ -126,7 +126,7 @@ class Drag extends Handler {
         map.fire(EventType.MOVEEND);
 
       } else {
-        offset = map.limitOffset(offset, map.stateOptions.maxBounds);
+        offset = map.limitOffset(offset, map.options.maxBounds);
 
         window.requestAnimationFrame((num highRes) {
           map.panBy(offset, new PanOptions()

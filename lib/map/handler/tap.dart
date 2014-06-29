@@ -98,7 +98,7 @@ class Tap extends Handler {
   }
 
   bool _isTapValid() {
-    return _newPos.distanceTo(_startPos) <= map.interactionOptions.tapTolerance;
+    return _newPos.distanceTo(_startPos) <= map.options.tapTolerance;
   }
 
   _onMove(html.TouchEvent e) {

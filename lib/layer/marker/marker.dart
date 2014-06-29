@@ -119,7 +119,7 @@ class Marker extends Layer with Events {
     update();
     fire(EventType.ADD);
 
-    if (map.animationOptions.zoomAnimation && map.animationOptions.markerZoomAnimation) {
+    if (map.options.zoomAnimation && map.options.markerZoomAnimation) {
       map.on(EventType.ZOOMANIM, _animateZoom);
     }
   }
@@ -194,7 +194,7 @@ class Marker extends Layer with Events {
 
   void _initIcon() {
     final map = _map;
-    final animation = (map.animationOptions.zoomAnimation && map.animationOptions.markerZoomAnimation);
+    final animation = (map.options.zoomAnimation && map.options.markerZoomAnimation);
     final classToAdd = animation ? 'leaflet-zoom-animated' : 'leaflet-zoom-hide';
 
     final icon = options.icon.createIcon(_icon);

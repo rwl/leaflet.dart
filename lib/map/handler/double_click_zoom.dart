@@ -19,7 +19,7 @@ class DoubleClickZoom extends Handler {
   void _onDoubleClick(MouseEvent e) {
     final zoom = map.getZoom() + ((e.originalEvent as html.MouseEvent).shiftKey ? -1 : 1);
 
-    if (map.interactionOptions.doubleClickZoom == 'center') {
+    if (map.options.doubleClickZoom == 'center') {
       map.setZoom(zoom);
     } else {
       map.setZoomAround(e.containerPoint, zoom);

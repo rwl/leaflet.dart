@@ -69,7 +69,7 @@ class ScrollWheelZoom extends Handler {
       return;
     }
 
-    if (map.interactionOptions.scrollWheelZoom == 'center') {
+    if (map.options.scrollWheelZoom == 'center') {
       map.setZoom(zoom + delta);
     } else {
       map.setZoomAround(_lastMousePos, zoom + delta);
