@@ -65,7 +65,7 @@ class Events {
 //    }
 //    final events = _leaflet_events;
     if (_events == null) {
-      _events = {};
+      _events = <EventType, List<Event>>{};
     }
     /*if (_contextEvents == null) {
       _contextEvents = {};

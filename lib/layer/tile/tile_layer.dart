@@ -194,7 +194,8 @@ class TileLayer extends Object with core.Events implements Layer {
     _initContainer();
 
     // set up events
-    map.on(EventType.VIEWRESET, _animateZoom);
+    // this is the wrong handler type
+    map.on(EventType.VIEWRESET, _reset);
     map.on(EventType.MOVEEND, _update);
 //    map.on({
 //      'viewreset': _reset,
@@ -611,9 +612,10 @@ class TileLayer extends Object with core.Events implements Layer {
   String getTileUrl(Point2D tilePoint) {
     return core.template(_url, {
       's': _getSubdomain(tilePoint),
-      'z': tilePoint.z,
-      'x': tilePoint.x,
-      'y': tilePoint.y
+      // TODO: type these as int in Point2D?
+      'z': tilePoint.z.toInt(),
+      'x': tilePoint.x.toInt(),
+      'y': tilePoint.y.toInt()
     }); //..addAll(options));
   }
 

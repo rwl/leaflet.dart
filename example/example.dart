@@ -6,6 +6,6 @@ import 'package:leaflet/geo/geo.dart';
 void main() {
   var map = new LeafletMap(querySelector('#map'),
       new MapOptions()
-          ..layers=[new TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')])
+          ..layers=[new TileLayer('http://a.tile.openstreetmap.org/{z}/{x}/{y}.png')])
       ..setView(new LatLng(51.505, -0.09), 13);
 }

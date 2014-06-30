@@ -4,11 +4,12 @@ import 'dart:html' as html show Event;
 
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show LeafletMap, ZoomPanOptions, containerProp;
+import 'package:leaflet/map/map.dart' show LeafletMap, MapOptions,
+    ZoomPanOptions, containerProp;
 import 'package:leaflet/geo/geo.dart' show LatLng, LatLngBounds;
 import 'package:leaflet/core/core.dart' show Event, EventType;
 import 'package:leaflet/layer/layer.dart' show Layer;
-
+import 'package:leaflet/layer/tile/tile.dart' show TileLayer, TileLayerOptions;
 
 main() {
   useHtmlEnhancedConfiguration();
@@ -103,7 +104,8 @@ main() {
         expect(() => map.getCenter(), throwsException);
       });
 
-      test('returns a precise center when zoomed in after being set (#426)', () {
+      test('returns a precise center when zoomed in after being set '
+          '(#426)', () {
         final center = new LatLng(10, 10);
         map.setView(center, 1);
         map.setZoom(19);
@@ -146,18 +148,21 @@ main() {
       test('sets the view of the map', () {
         expect(map..setView(new LatLng(51.505, -0.09), 13), equals(map));
         expect(map.getZoom(), equals(13));
-        expect(map.getCenter().distanceTo(new LatLng(51.505, -0.09)), lessThan(5));
+        expect(map.getCenter().distanceTo(new LatLng(51.505, -0.09)),
+            lessThan(5));
       });
       test('can be passed without a zoom specified', () {
         map.setZoom(13);
         expect(map..setView(new LatLng(51.605, -0.11), null), equals(map));
         expect(map.getZoom(), equals(13));
-        expect(map.getCenter().distanceTo(new LatLng(51.605, -0.11)), lessThan(5));
+        expect(map.getCenter().distanceTo(new LatLng(51.605, -0.11)),
+            lessThan(5));
       });
     });
 
     group('#getBounds', () {
-      test('is safe to call from within a moveend callback during initial load (#1027)', () {
+      test('is safe to call from within a moveend callback during initial '
+          'load (#1027)', () {
         map.on(EventType.MOVEEND, (Object obj, Event e) {
           map.getBounds();
         });
@@ -167,13 +172,15 @@ main() {
     });
 
     group('#setMaxBounds', () {
-      test('aligns pixel-wise map view center with maxBounds center if it cannot move view bounds inside maxBounds (#1908)', () {
+      test('aligns pixel-wise map view center with maxBounds center if it '
+          'cannot move view bounds inside maxBounds (#1908)', () {
         final container = map.getContainer();
         // Large view, cannot fit within maxBounds.
         container.style.width = container.style.height = '1000px';
         document.body.append(container);
         // maxBounds
-        final bounds = new LatLngBounds.between(new LatLng(51.5, -0.05), new LatLng(51.55, 0.05));
+        final bounds = new LatLngBounds.between(
+            new LatLng(51.5, -0.05), new LatLng(51.55, 0.05));
         map.setMaxBounds(bounds/*, {'animate': false}*/);
         // Set view outside.
         map.setView(new LatLng(53.0, 0.15), 12/*, {'animate': false}*/);
@@ -189,7 +196,8 @@ main() {
         container.style.width = container.style.height = '200px';
         document.body.append(container);
         // maxBounds
-        final bounds = new LatLngBounds.between(new LatLng(51, -0.2), new LatLng(52, 0.2));
+        final bounds =
+            new LatLngBounds.between(new LatLng(51, -0.2), new LatLng(52, 0.2));
         map.setMaxBounds(bounds/*, {'animate': false}*/);
         // Set view outside maxBounds on one direction only
         // leaves untouched the other coordinate (that is not already centered).
@@ -215,13 +223,18 @@ main() {
         });
       });
 
-      test('minZoom and maxZoom options overrides any minZoom and maxZoom set on layers', () {
+      test('minZoom and maxZoom options overrides any minZoom and maxZoom set '
+          'on layers', () {
 
-        final map = new LeafletMap(document.createElement('div'), {'minZoom': 2, 'maxZoom': 20});
+        final map = new LeafletMap(document.createElement('div'),
+            new MapOptions()..minZoom=2..maxZoom=20);
 
-        new TileLayer('{z}{x}{y}', {'minZoom': 4, 'maxZoom': 10}).addTo(map);
-        new TileLayer('{z}{x}{y}', {'minZoom': 6, 'maxZoom': 17}).addTo(map);
-        new TileLayer('{z}{x}{y}', {'minZoom': 0, 'maxZoom': 22}).addTo(map);
+        new TileLayer('{z}{x}{y}',
+            new TileLayerOptions()..minZoom = 4..maxZoom = 10).addTo(map);
+        new TileLayer('{z}{x}{y}',
+            new TileLayerOptions()..minZoom = 6..maxZoom = 17).addTo(map);
+        new TileLayer('{z}{x}{y}',
+            new TileLayerOptions()..minZoom = 0..maxZoom = 22).addTo(map);
 
         expect(map.getMinZoom(), equals(2));
         expect(map.getMaxZoom(), equals(20));
