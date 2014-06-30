@@ -1260,10 +1260,10 @@ class LeafletMap extends Object with Events {
 
   /* Extends Map to handle zoom animations */
 
-  bool _animatingZoom;
-  var _zoomAnimated;
-  var _animateToCenter;
-  var _animateToZoom;
+  bool _animatingZoom = false;
+  bool _zoomAnimated = false;
+  LatLng _animateToCenter;
+  num _animateToZoom;
 
   bool get zoomAnimated => _zoomAnimated;
 
