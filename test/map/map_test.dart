@@ -99,7 +99,7 @@ main() {
 
     group('#getCenter', () {
       test('throws if not set before', () {
-        expect(map.getCenter(), throwsException);
+        expect(() => map.getCenter(), throwsException);
       });
 
       test('returns a precise center when zoomed in after being set (#426)', () {
