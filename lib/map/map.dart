@@ -45,7 +45,8 @@ class LeafletMap extends Object with Events {
   Map<String, Layer> _layers;
 
   Map _zoomBoundLayers;
-  int _tileLayersNum, _tileLayersToLoad;
+  int _tileLayersNum = 0;
+  int _tileLayersToLoad = 0;
 
   num _zoom;
   bool _loaded = false;
