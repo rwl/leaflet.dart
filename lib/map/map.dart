@@ -1444,7 +1444,7 @@ class LeafletMap extends Object with Events {
     final offset = _getCenterOffset(center).floored();
 
     // Don't animate too far unless animate=true specified in options.
-    if ((options && options.animate) != true && !getSize().contains(offset)) {
+    if ((options != null && options.animate) != true && !getSize().contains(offset)) {
       return false;
     }
 
