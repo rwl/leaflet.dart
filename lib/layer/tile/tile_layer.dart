@@ -640,7 +640,8 @@ class TileLayer extends Object with core.Events implements Layer {
   }
 
   String _getSubdomain(Point2D tilePoint) {
-    var index = (tilePoint.x + tilePoint.y).abs() % options.subdomains.length;
+    int index = (tilePoint.x + tilePoint.y).abs().toInt() %
+        options.subdomains.length;
     return options.subdomains[index];
   }
 
@@ -665,7 +666,7 @@ class TileLayer extends Object with core.Events implements Layer {
 
     // without this hack, tiles disappear after zoom on Chrome for Android
     // https://github.com/Leaflet/Leaflet/issues/2078
-    if (Browser.mobileWebkit3d == true) {
+    if (false) { //browser.mobileWebkit3d == true) {
       //tile.style.WebkitBackfaceVisibility = 'hidden';
       tile.style.backfaceVisibility = 'hidden';
     }
@@ -754,11 +755,10 @@ class TileLayer extends Object with core.Events implements Layer {
     }
 
     final bg = _bgBuffer,
-        transform = dom.TRANSFORM,
-        initialTransform = e.delta != null ? dom.getTranslateString(e.delta) : bg.style.transform,//[transform],
+        initialTransform = e.delta != null ? dom.getTranslateString(e.delta) : bg.style.transform,
         scaleStr = dom.getScaleString(e.scale, e.origin);
 
-    bg.style.transform/*[transform]*/ = e.backwards ?
+    bg.style.transform = e.backwards ?
         '$scaleStr $initialTransform' :
         '$initialTransform $scaleStr';
   }
