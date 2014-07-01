@@ -10,7 +10,7 @@ import 'package:unittest/html_enhanced_config.dart';
 
 main() {
   useHtmlEnhancedConfiguration();
-  group('Control.Scale', () {
+  group('control.Scale', () {
     test('can be added to an unloaded map', () {
       final map = new LeafletMap(document.createElement('div'));
       new Scale()..addTo(map);

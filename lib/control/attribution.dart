@@ -22,7 +22,7 @@ class Attribution extends Control {
   Map<String, int> _attributions;
 
   Attribution(AttributionOptions options) : super(options) {
-    _attributions = {};
+    _attributions = <String, int>{};
   }
 
   onAdd(LeafletMap map) {

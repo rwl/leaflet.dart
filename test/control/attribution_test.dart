@@ -5,7 +5,7 @@ import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
 
 import 'package:leaflet/map/map.dart' show LeafletMap;
-import 'package:leaflet/control/control.dart' show Attribution;
+import 'package:leaflet/control/control.dart' show Attribution, AttributionOptions;
 
 
 main() {
@@ -18,9 +18,8 @@ main() {
 
     setUp(() {
       map = new LeafletMap(document.createElement('div'));
-      control = new Attribution({
-        'prefix': 'prefix'
-      })..addTo(map);
+      control = new Attribution(new AttributionOptions()
+        ..prefix = 'prefix')..addTo(map);
       container = control.getContainer();
     });
 
@@ -43,7 +42,7 @@ main() {
       test('adds several attributions listed with comma', () {
         control.addAttribution('foo');
         control.addAttribution('bar');
-        expect(container.innerHTML, equals('prefix | foo, bar'));
+        expect(container.getinnerHTML, equals('prefix | foo, bar'));
       });
     });
 
@@ -72,11 +71,11 @@ main() {
       });
     });
 
-    group('control.attribution factory', () {
+    /*group('control.attribution factory', () {
       test('creates control.Attribution instance', () {
         var options = {'prefix': 'prefix'};
         expect(new attribution(options), equals(new Attribution(options)));
       });
-    });
+    });*/
   });
 }

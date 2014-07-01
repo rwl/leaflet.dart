@@ -4,23 +4,27 @@ final _layerId = new Expando<int>();
 
 class LayersOptions extends ControlOptions {
   /**
-   * The position of the control (one of the map corners). See control positions.
+   * The position of the control (one of the map corners). See control
+   * positions.
    */
   ControlPosition position  = ControlPosition.TOPRIGHT;
 
   /**
-   * If true, the control will be collapsed into an icon and expanded on mouse hover or touch.
+   * If true, the control will be collapsed into an icon and expanded on
+   * mouse hover or touch.
    */
   bool collapsed = true;
 
   /**
-   * If true, the control will assign zIndexes in increasing order to all of its layers so that the order is preserved when switching them on/off.
+   * If true, the control will assign zIndexes in increasing order to all of
+   * its layers so that the order is preserved when switching them on/off.
    */
   bool autoZIndex  = true;
 }
 
 /**
- * Layers is a control to allow users to switch between different layers on the map.
+ * Layers is a control to allow users to switch between different layers on
+ * the map.
  */
 class Layers extends Control {
 
@@ -40,9 +44,12 @@ class Layers extends Control {
   Element get overlaysList => _overlaysList;
 
   /**
-   * Creates an attribution control with the given layers. Base layers will be switched with radio buttons, while overlays will be switched with checkboxes. Note that all base layers should be passed in the base layers object, but only one should be added to the map during map instantiation.
+   * Creates an attribution control with the given layers. Base layers will be
+   * switched with radio buttons, while overlays will be switched with
+   * checkboxes. Note that all base layers should be passed in the base layers
+   * object, but only one should be added to the map during map instantiation.
    */
-  Layers(LinkedHashMap<String, Layer> baseLayers, LinkedHashMap<String, Layer> overlays, [LayersOptions options=null]) : super(options) {
+  Layers(LinkedHashMap<String, Layer> baseLayers, [LinkedHashMap<String, Layer> overlays=null, LayersOptions options=null]) : super(options) {
     if (options == null) {
       options = new LayersOptions();
     }
@@ -54,14 +61,16 @@ class Layers extends Control {
       _addLayer(baseLayers[i], i);
     }
 
-    for (String name in overlays) {
-      _addLayer(overlays[name], name, true);
+    if (overlays != null) {
+      for (String name in overlays) {
+        _addLayer(overlays[name], name, true);
+      }
     }
   }
 
   Element onAdd(LeafletMap map) {
     _initLayout();
-    _update();
+    update();
 
     map.on(EventType.LAYERADD, _onLayerChange);
     map.on(EventType.LAYERREMOVE, _onLayerChange);
@@ -79,7 +88,7 @@ class Layers extends Control {
    */
   void addBaseLayer(Layer layer, String name) {
     _addLayer(layer, name);
-    _update();
+    update();
   }
 
   /**
@@ -87,7 +96,7 @@ class Layers extends Control {
    */
   void addOverlay(layer, String name) {
     _addLayer(layer, name, true);
-    _update();
+    update();
   }
 
   /**
@@ -96,7 +105,7 @@ class Layers extends Control {
   void removeLayer(layer) {
     final id = stamp(layer);
     _layers.remove(id);
-    _update();
+    update();
   }
 
   _initLayout() {
@@ -166,7 +175,10 @@ class Layers extends Control {
     }
   }
 
-  void _update() {
+  /**
+   * For internal use.
+   */
+  void update() {
     if (_container == null) {
       return;
     }
@@ -192,7 +204,7 @@ class Layers extends Control {
     if (obj == null) { return; }
 
     if (!_handlingClick) {
-      _update();
+      update();
     }
 
     EventType type = obj.overlay != null ?

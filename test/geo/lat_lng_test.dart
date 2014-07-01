@@ -20,8 +20,8 @@ main() {
 
       test('throws an error if invalid lat or lng', () {
         expect(() {
-          var a = new LatLng(double.NAN, double.NAN);
-        }).to.throwError();
+          final a = new LatLng(double.NAN, double.NAN);
+        }, throwsException);
       });
 
       test('does not set altitude if undefined', () {
@@ -113,9 +113,9 @@ main() {
         expect(new LatLng.latLng(a), equals(a));
       });
 
-      test('accepts an array of coordinates', () {
+      /*test('accepts an array of coordinates', () {
         expect(new LatLng([50, 30]), equals(new LatLng(50, 30)));
-      });
+      });*/
 
       test('passes null or undefined as is', () {
         expect(new LatLng.latLng(null), isNull);
@@ -126,13 +126,13 @@ main() {
         expect(new LatLng(50, 30), equals(new LatLng(50, 30)));
       });
 
-      test('accepts an object with lat/lng', () {
+      /*test('accepts an object with lat/lng', () {
         expect(new LatLng.map({'lat': 50, 'lng': 30}), equals(new LatLng(50, 30)));
       });
 
       test('accepts an object with lat/lon', () {
         expect(new LatLng.map({'lat': 50, 'lon': 30}), equals(new LatLng(50, 30)));
-      });
+      });*/
     });
   });
 }

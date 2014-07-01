@@ -1,6 +1,6 @@
 part of leaflet.core;
 
-typedef /*bool*/void Action(Object obj, Event event);
+typedef /*bool*/void Action(Event event);
 typedef /*bool*/void EventAction(Event event);
 
 class Event {

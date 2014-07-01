@@ -4,6 +4,7 @@ import 'package:unittest/html_enhanced_config.dart';
 import 'package:leaflet/geo/geo.dart' show LatLng;
 import 'package:leaflet/geo/projection/projection.dart' show Mercator;
 import 'package:leaflet/geometry/geometry.dart' show Point2D;
+import 'package:leaflet/test/test.dart';
 
 main() {
   useHtmlEnhancedConfiguration();

@@ -3,6 +3,7 @@ import 'package:unittest/html_enhanced_config.dart';
 import 'package:leaflet/geo/crs/crs.dart' show EPSG3395, EPSG3857;
 import 'package:leaflet/geo/geo.dart' show LatLng;
 import 'package:leaflet/geometry/geometry.dart' show Point2D;
+import 'package:leaflet/test/test.dart';
 
 
 main() {
@@ -56,18 +57,4 @@ main() {
     });
   });
 
-}
-
-near(expected, [delta=1]) {
-  expect(obj.x).to
-    .be.within(expected.x - delta, expected.x + delta);
-  expect(obj.y).to
-    .be.within(expected.y - delta, expected.y + delta);
-}
-
-nearLatLng(expected, [delta=1e-4]) {
-  expect(obj.lat).to
-    .be.within(expected.lat - delta, expected.lat + delta);
-  expect(obj.lng).to
-    .be.within(expected.lng - delta, expected.lng + delta);
 }

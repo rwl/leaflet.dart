@@ -325,7 +325,7 @@ class Events {
       for (int i = 0; i < len; i++) {
         var action = listeners[i].action;
         if (action is Action) {
-          action(null/*listeners[i].context*/, event);
+          action(/*listeners[i].context*/ event);
         } else if (action is EventAction) {
           action(event);
         } else {
