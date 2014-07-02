@@ -113,10 +113,9 @@ class Circle extends Path {
            p.x + r < vp.min.x || p.y + r < vp.min.y;
   }
 
-  toGeoJSON() {
-    return GeoJSON.getFeature(this, {
-      'type': 'Point',
-      'coordinates': GeoJSON.latLngToCoords(getLatLng())
-    });
+  sfs.Feature toGeoJSON() {
+    final ll = getLatLng();
+    final point = new sfs.Point(ll.lat, ll.lng, z: ll.alt);
+    return new sfs.Feature(point);
   }
 }

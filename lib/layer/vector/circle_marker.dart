@@ -47,10 +47,9 @@ class CircleMarker extends Circle {
     return this._radius;
   }
 
-  toGeoJSON() {
-    return GeoJSON.getFeature(this, {
-      'type': 'Point',
-      'coordinates': GeoJSON.latLngToCoords(getLatLng())
-    });
+  sfs.Feature toGeoJSON() {
+    final ll = getLatLng();
+    final point = new sfs.Point(ll.lat, ll.lng, z: ll.alt);
+    return new sfs.Feature(point);
   }
 }

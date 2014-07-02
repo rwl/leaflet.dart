@@ -3,6 +3,8 @@ library leaflet.layer.vector;
 import 'dart:html' show window, document, Element;
 import 'dart:math' as math;
 
+import 'package:simple_features/simple_features.dart' as sfs;
+
 import '../../core/core.dart';
 import '../../map/map.dart';
 import '../../geo/geo.dart';
