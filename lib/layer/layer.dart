@@ -10,6 +10,7 @@ import '../geo/geo.dart';
 import '../geometry/geometry.dart' show Point2D;
 import './marker/marker.dart';
 import './vector/vector.dart' show Polygon, PathOptions, Polyline;
+import 'package:quiver/collection.dart';
 
 part 'feature_group.dart';
 part 'geo_json.dart';

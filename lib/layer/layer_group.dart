@@ -2,26 +2,40 @@ part of leaflet.layer;
 
 typedef LayerFunc(var layer);
 
+class _LayerList extends DelegatingList<Layer> {
+  final LayerGroup _group;
+  final List<Layer> _list = <Layer>[];
+
+  _LayerList(this._group);
+
+  List get delegate => _list;
+
+  @override
+  add(Layer value) {
+    super.add(value);
+    if (_group._map != null) {
+      _group._map.addLayer(value);
+    }
+  }
+}
+
 /**
  * LayerGroup is a class to combine several layers into one so that
  * you can manipulate the group (e.g. add/remove it) as one layer.
  */
 class LayerGroup extends Layer {
 
-  Map<int, Layer> _layers;
+//  Map<int, Layer> _layers;
+  _LayerList _layers;
+  List<Layer> get layers => _layers;
   LeafletMap _map;
 
   /**
    * Create a layer group, optionally given an initial set of layers.
    */
-  LayerGroup([List<Layer> layers=null]) {
-    _layers = {};
-
-    if (layers != null) {
-      for (int i = 0; i < layers.length; i++) {
-        addLayer(layers[i]);
-      }
-    }
+  LayerGroup([List<Layer> layers]) {
+    _layers = new _LayerList(this);
+    if (layers != null) _layers.addAll(layers);
   }
 
   /**
@@ -32,9 +46,6 @@ class LayerGroup extends Layer {
 
     _layers[id] = layer;
 
-    if (_map != null) {
-      _map.addLayer(layer);
-    }
   }
 
   /**
@@ -67,7 +78,8 @@ class LayerGroup extends Layer {
   bool hasLayer(Layer layer) {
     if (layer == null) { return false; }
 
-    return _layers.containsKey(getLayerId(layer));
+    return _layers.contains(layer);
+//    return _layers.containsKey(getLayerId(layer));
   }
 
   /**

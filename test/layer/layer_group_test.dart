@@ -13,9 +13,9 @@ main() {
         final lg = new LayerGroup(),
             marker = new Marker(new LatLng(0, 0));
 
-        expect(lg.addLayer(marker), equals(lg));
+        lg.layers.add(marker);
 
-        expect(lg.hasLayer(marker), isTrue);
+        expect(lg.layers.contains(marker), isTrue);
       });
     });
     group('#removeLayer', () {
@@ -23,10 +23,10 @@ main() {
         final lg = new LayerGroup(),
             marker = new Marker(new LatLng(0, 0));
 
-        lg.addLayer(marker);
-        expect(lg.removeLayer(marker), equals(lg));
+        lg.layers.add(marker);
+        lg.layers.remove(marker);
 
-        expect(lg.hasLayer(marker), isFalse);
+        expect(lg.layers.contains(marker), isFalse);
       });
     });
     group('#clearLayers', () {
@@ -34,10 +34,10 @@ main() {
         final lg = new LayerGroup(),
             marker = new Marker(new LatLng(0, 0));
 
-        lg.addLayer(marker);
-        expect(lg.clearLayers(), equals(lg));
+        lg.layers.add(marker);
+        lg.layers.clear();
 
-        expect(lg.hasLayer(marker), isFalse);
+        expect(lg.layers.contains(marker), isFalse);
       });
     });
     group('#getLayers', () {
@@ -45,9 +45,9 @@ main() {
         final lg = new LayerGroup(),
             marker = new Marker(new LatLng(0, 0));
 
-        lg.addLayer(marker);
+        lg.layers.add(marker);
 
-        expect(lg.getLayers(), equals([marker]));
+        expect(lg.layers, equals([marker]));
       });
     });
     group('#eachLayer', () {
@@ -56,12 +56,12 @@ main() {
             marker = new Marker(new LatLng(0, 0)),
             ctx = { 'foo': 'bar' };
 
-        lg.addLayer(marker);
+        lg.layers.add(marker);
 
-        lg.eachLayer((layer) {
+        lg.layers.forEach((layer) {
           expect(layer, equals(marker));
           //expect(this).to.eql(ctx);
-        }, ctx);
+        });
       });
     });
   });
