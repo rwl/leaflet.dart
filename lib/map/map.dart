@@ -169,6 +169,10 @@ class LeafletMap extends Object with Events {
     _addLayers(options.layers);
   }
 
+  factory LeafletMap.query(String selectors, [MapOptions options=null]) {
+    final container = document.querySelector(selectors);
+    return new LeafletMap(container, options);
+  }
 
   /* Public methods that modify map state */
 

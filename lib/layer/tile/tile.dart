@@ -1,6 +1,6 @@
 library leaflet.layer.tile;
 
-import 'dart:html' show Element, ImageElement, Node, ParentNode, document;
+import 'dart:html' show Element, ImageElement, Node, ParentNode, document, CanvasElement;
 import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:async' show Timer, Future;

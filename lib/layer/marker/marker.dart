@@ -441,9 +441,17 @@ class Marker extends Layer with Events {
     }
   }
 
-  void bindPopup(Popup popup, MarkerOptions options) {
+  void bindPopupContent(String content, [MarkerOptions options=null]) {
+    final popup = new Popup(options, this);
+    bindPopup(popup, options);
+  }
+
+  void bindPopup(Popup popup, [MarkerOptions options=null]) {
+    /*if (options == null) {
+      options = new MarkerOptions();
+    }*/
     Point2D anchor = new Point2D(0, 0);
-    if (options.icon.options.popupAnchor != null) {
+    if (options != null && options.icon.options.popupAnchor != null) {
       anchor = new Point2D.point(options.icon.options.popupAnchor);
     }
 

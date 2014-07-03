@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet Canvas</title>
+
+  <link rel="stylesheet" href="../css/screen.css" />
+  <link rel="stylesheet" href="packages/leaflet/leaflet.css">
+</head>
+<body>
+
+	<div id="map" style="width: 600px; height: 600px; border: 1px solid #ccc"></div>
+
+	<script async type="application/dart">
+	  import 'dart:html';
+    import 'package:leaflet/map/map.dart';
+    import 'package:leaflet/layer/tile/tile.dart';
+    import 'package:leaflet/geometry/geometry.dart';
+    import 'package:leaflet/geo/geo.dart';
+
+    class ExampleCanvas extends Canvas {
+      drawTile([CanvasElement canvas, Point2D tile, num zoom]) {
+        final ctx = canvas.context2D;
+
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 255, 255);
+
+
+        ctx.fillStyle = 'black';
+        ctx.fillText('x: ${tile.x}, y: ${tile.y}, zoom: $zoom', 20, 20);
+
+
+        ctx.strokeStyle = 'red';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(255, 0);
+        ctx.lineTo(255, 255);
+        ctx.lineTo(0, 255);
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+
+    main() {
+  		final tiles = new ExampleCanvas();
+
+		  new LeafletMap.query('map', new MapOptions()
+		    ..center = new LatLng(50.5, 30.51)
+		    ..zoom = 15
+		    ..layers = [tiles]);
+    }
+
+	</script>
+
+  <script async src="packages/browser/dart.js"></script>
+</body>
+</html>

@@ -19,7 +19,11 @@ abstract class Canvas extends TileLayer {
     'async': false
   };*/
 
-  Canvas(CanvasOptions options) : super("", options);
+  Canvas([CanvasOptions options=null]) : super("", options) {
+    if (options == null) {
+      options = new CanvasOptions();
+    }
+  }
 
   redraw() {
     if (_map != null) {
@@ -60,7 +64,7 @@ abstract class Canvas extends TileLayer {
    * tiles; canvas is the actual canvas tile on which you can draw,
    * tilePoint represents the tile numbers, and zoom is the current zoom.
    */
-  drawTile([/*Canvas*/Element tile, Point2D tilePoint, num zoom]);
+  drawTile([CanvasElement tile, Point2D tilePoint, num zoom]);
     // override with rendering code
 
   /**
