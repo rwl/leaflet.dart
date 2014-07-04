@@ -70,7 +70,7 @@ class PathOptions {
 /**
  * Path is a base class for rendering vector paths on a map. Inherited by Polyline, Circle, etc.
  */
-abstract class Path extends Layer with Events {
+abstract class Path extends Layer {
 
   // how much to extend the clip area around the map view
   // (relative to its size, e.g. 0.5 is half the screen in each direction)
@@ -417,4 +417,28 @@ abstract class Path extends Layer with Events {
       dom.stopPropagation(e);
     }
   }
+
+  StreamController<MouseEvent> _clickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _dblClickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseDownController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOverController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOutController = new StreamController.broadcast();
+  StreamController<MouseEvent> _contextMenuController = new StreamController.broadcast();
+  StreamController<MouseEvent> _moveController = new StreamController.broadcast();
+  StreamController<Event> _addController = new StreamController.broadcast();
+  StreamController<Event> _removeController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupOpenController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupCloseController = new StreamController.broadcast();
+
+  Stream<MouseEvent> get onClick => _clickController.stream;
+  Stream<MouseEvent> get onDblClick => _dblClickController.stream;
+  Stream<MouseEvent> get onMouseDown => _mouseDownController.stream;
+  Stream<MouseEvent> get onMouseOver => _mouseOverController.stream;
+  Stream<MouseEvent> get onMouseOut => _mouseOutController.stream;
+  Stream<MouseEvent> get onContextMenu => _contextMenuController.stream;
+  Stream<MouseEvent> get onMove => _moveController.stream;
+  Stream<Event> get onAddMarker => _addController.stream;
+  Stream<Event> get onRemoveMarker => _removeController.stream;
+  Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
+  Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
 }

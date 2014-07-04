@@ -2,6 +2,7 @@ library leaflet.layer.vector;
 
 import 'dart:html' show window, document, Element;
 import 'dart:math' as math;
+import 'dart:async' show Stream, StreamController;
 
 import 'package:simple_features/simple_features.dart' as sfs;
 

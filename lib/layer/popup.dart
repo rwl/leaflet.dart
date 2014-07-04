@@ -70,7 +70,7 @@ class PopupOptions {
 /**
  * Popup is used for displaying popups on the map.
  */
-class Popup extends Layer with Events {
+class Popup extends Layer {//with Events {
 
   /*Map<String, Object> options = {
     'minWidth': 50,

@@ -15,7 +15,7 @@ class ImageOverlayOptions {
 /**
  * ImageOverlay is used to overlay images over the map (to specific geographical bounds).
  */
-class ImageOverlay extends Layer with Events {
+class ImageOverlay extends Layer {//with Events {
 
   ImageOverlayOptions options;
 

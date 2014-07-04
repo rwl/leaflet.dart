@@ -21,6 +21,8 @@ class Attribution extends Control {
 
   Map<String, int> _attributions;
 
+  StreamSubscription<LayerEvent> _layerAddSubscription, _layerRemoveSubscription;
+
   Attribution(AttributionOptions options) : super(options) {
     _attributions = <String, int>{};
   }
@@ -36,8 +38,10 @@ class Attribution extends Control {
       }
     });
 
-    map.on(EventType.LAYERADD, _onLayerAdd);
-    map.on(EventType.LAYERREMOVE, _onLayerRemove);
+    //map.on(EventType.LAYERADD, _onLayerAdd);
+    //map.on(EventType.LAYERREMOVE, _onLayerRemove);
+    _layerAddSubscription = map.onLayerAdd.listen(_onLayerAdd);
+    _layerRemoveSubscription = map.onLayerRemove.listen(_onLayerRemove);
 
     _update();
 
@@ -45,8 +49,10 @@ class Attribution extends Control {
   }
 
   onRemove(LeafletMap map) {
-    map.off(EventType.LAYERADD, _onLayerAdd);
-    map.off(EventType.LAYERREMOVE, _onLayerRemove);
+    _layerAddSubscription.cancel();
+    _layerRemoveSubscription.cancel();
+    //map.off(EventType.LAYERADD, _onLayerAdd);
+    //map.off(EventType.LAYERREMOVE, _onLayerRemove);
   }
 
   /**

@@ -3,7 +3,7 @@ part of leaflet.dom;
 /**
  * Draggable allows you to add dragging capabilities to any element. Supports mobile devices too.
  */
-class Draggable extends Object with Events {
+class Draggable {
 
   static bool disabled = false;// TODO implement global drag disable
 
@@ -87,7 +87,7 @@ class Draggable extends Object with Events {
         ..addEventListener(Draggable.END[e.type], _onUp);
   }
 
-  _onMove(Event e) {
+  _onMove(html.Event e) {
     Element target = e.target;
 
     if (e is TouchEvent && e.touches.length > 1) {
@@ -149,4 +149,14 @@ class Draggable extends Object with Events {
 
     this._moving = false;
   }
+
+  StreamController<Event> _dragStartController = new StreamController.broadcast();
+  StreamController<Event> _preDragController = new StreamController.broadcast();
+  StreamController<Event> _dragController = new StreamController.broadcast();
+  StreamController<Event> _dragEndController = new StreamController.broadcast();
+
+  Stream<Event> get onDragStart => _dragStartController.stream;
+  Stream<Event> get onPreDrag => _preDragController.stream;
+  Stream<Event> get onDrag => _dragController.stream;
+  Stream<Event> get onDragEnd => _dragEndController.stream;
 }

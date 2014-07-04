@@ -5,7 +5,7 @@ import 'dart:html' show Element, querySelector, window, document,
 import 'dart:html' as html;
 import 'dart:svg' show SvgSvgElement;
 import 'dart:math' as math;
-import 'dart:async' show Timer, StreamSubscription;
+import 'dart:async' show Timer, StreamSubscription, Stream, StreamController;
 
 import 'package:leaflet/src/core/browser.dart' as browser;
 import 'package:quiver/core.dart' show firstNonNull;
@@ -28,7 +28,7 @@ final containerProp = new Expando<bool>('_leaflet');
 
 typedef LayerFunc(Layer layer);
 
-class LeafletMap extends Object with Events {
+class LeafletMap extends Object {
 
   /*MapStateOptions options;
   InteractionOptions options;
@@ -1706,5 +1706,90 @@ class LeafletMap extends Object with Events {
       pane.append(root);
     }
   }
+
+  /* Events */
+
+  void fire(EventType eventType) {
+    final event = new Event(eventType);
+    fireEvent(event);
+  }
+
+  void fireEvent(Event event) {
+    if (event is MouseEvent) {
+      if (event.type == EventType.CLICK) {
+        _clickController.add(event);
+      }
+    }
+  }
+
+  StreamController<MouseEvent> _clickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _dblClickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseDownController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseUpController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOverController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOutController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseMoveController = new StreamController.broadcast();
+  StreamController<MouseEvent> _contextMenuController = new StreamController.broadcast();
+  StreamController<Event> _focusController = new StreamController.broadcast();
+  StreamController<Event> _blurController = new StreamController.broadcast();
+  StreamController<MouseEvent> _preClickController = new StreamController.broadcast();
+  StreamController<Event> _loadController = new StreamController.broadcast();
+  StreamController<Event> _unloadController = new StreamController.broadcast();
+  StreamController<Event> _viewResetController = new StreamController.broadcast();
+  StreamController<Event> _moveStartController = new StreamController.broadcast();
+  StreamController<Event> _moveController = new StreamController.broadcast();
+  StreamController<Event> _moveEndController = new StreamController.broadcast();
+  StreamController<Event> _dragStartController = new StreamController.broadcast();
+  StreamController<Event> _dragController = new StreamController.broadcast();
+  StreamController<DragEndEvent> _dragEndController = new StreamController.broadcast();
+  StreamController<Event> _zoomStartController = new StreamController.broadcast();
+  StreamController<Event> _zoomEndController = new StreamController.broadcast();
+  StreamController<Event> _zoomLevelsChangeController = new StreamController.broadcast();
+  StreamController<ResizeEvent> _resizeController = new StreamController.broadcast();
+  StreamController<Event> _autoPanStartController = new StreamController.broadcast();
+  StreamController<LayerEvent> _layerAddController = new StreamController.broadcast();
+  StreamController<LayerEvent> _layerRemoveController = new StreamController.broadcast();
+  StreamController<LayersControlEvent> _baseLayerChangeController = new StreamController.broadcast();
+  StreamController<LayersControlEvent> _overlayAddController = new StreamController.broadcast();
+  StreamController<LayersControlEvent> _overlayRemoveController = new StreamController.broadcast();
+  StreamController<LocationEvent> _locationFoundController = new StreamController.broadcast();
+  StreamController<ErrorEvent> _locationErrorController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupOpenController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupCloseController = new StreamController.broadcast();
+
+  Stream<MouseEvent> get onClick => _clickController.stream;
+  Stream<MouseEvent> get onDblClick => _dblClickController.stream;
+  Stream<MouseEvent> get onMouseDown => _mouseDownController.stream;
+  Stream<MouseEvent> get onMouseUp => _mouseUpController.stream;
+  Stream<MouseEvent> get onMouseOver => _mouseOverController.stream;
+  Stream<MouseEvent> get onMouseOut => _mouseOutController.stream;
+  Stream<MouseEvent> get onMouseMove => _mouseMoveController.stream;
+  Stream<MouseEvent> get onContextMenu => _contextMenuController.stream;
+  Stream<Event> get onFocus => _focusController.stream;
+  Stream<Event> get onBlur => _blurController.stream;
+  Stream<MouseEvent> get onPreClick => _preClickController.stream;
+  Stream<Event> get onLoad => _loadController.stream;
+  Stream<Event> get onUnload => _unloadController.stream;
+  Stream<Event> get onViewReset => _viewResetController.stream;
+  Stream<Event> get onMoveStart => _moveStartController.stream;
+  Stream<Event> get onMove => _moveController.stream;
+  Stream<Event> get onMoveEnd => _moveEndController.stream;
+  Stream<Event> get onDragStart => _dragStartController.stream;
+  Stream<Event> get onDrag => _dragController.stream;
+  Stream<DragEndEvent> get onDragEnd => _dragEndController.stream;
+  Stream<Event> get onZoomStart => _zoomStartController.stream;
+  Stream<Event> get onZoomEnd => _zoomEndController.stream;
+  Stream<Event> get onZoomLevelsChange => _zoomLevelsChangeController.stream;
+  Stream<ResizeEvent> get onResize => _resizeController.stream;
+  Stream<Event> get onAutoPanStart => _autoPanStartController.stream;
+  Stream<LayerEvent> get onLayerAdd => _layerAddController.stream;
+  Stream<LayerEvent> get onLayerRemove => _layerRemoveController.stream;
+  Stream<LayerControlEvent> get onBaseLayerChange => _baseLayerChangeController.stream;
+  Stream<LayerControlEvent> get onOverlayAdd => _overlayAddController.stream;
+  Stream<LayerControlEvent> get onOverlayRemove => _overlayRemoveController.stream;
+  Stream<LocationEvent> get onLocationFound => _locationFoundController.stream;
+  Stream<ErrorEvent> get onLocationError => _locationErrorController.stream;
+  Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
+  Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
 
 }

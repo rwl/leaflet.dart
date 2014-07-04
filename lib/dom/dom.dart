@@ -1,14 +1,14 @@
 library leaflet.dom;
 
 //import 'dart:js';
-import 'dart:html' show Element, Event, document, window, TouchEvent;
+import 'dart:html' show Element, document, window, TouchEvent;
 import 'dart:html' as html;
 import 'dart:math' as math;
 
 import 'package:leaflet/src/core/browser.dart' as browser;
 import 'package:quiver/core.dart' show firstNonNull;
 
-import '../core/core.dart' show Browser, DragEndEvent, EventType, Events, stamp;
+import '../core/core.dart' show Browser, DragEndEvent, EventType, Events, stamp, Event;
 import '../geometry/geometry.dart' show Point2D;
 import 'dart:async';
 //import '../map/map.dart';

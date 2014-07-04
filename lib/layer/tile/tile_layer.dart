@@ -121,7 +121,7 @@ class TileLayerOptions {
 /**
  * TileLayer is used for standard xyz-numbered tile layers.
  */
-class TileLayer extends Object with core.Events implements Layer {
+class TileLayer implements Layer {
 
   String _url;
   LeafletMap _map;
@@ -857,4 +857,16 @@ class TileLayer extends Object with core.Events implements Layer {
       }
     }
   }
+
+  StreamController<Event> _loadingController = new StreamController.broadcast();
+  StreamController<Event> _loadController = new StreamController.broadcast();
+  StreamController<TileEvent> _tileLoadStartController = new StreamController.broadcast();
+  StreamController<TileEvent> _tileLoadController = new StreamController.broadcast();
+  StreamController<TileEvent> _tileUnloadController = new StreamController.broadcast();
+
+  Stream<Event> get onLoading => _loadingController.stream;
+  Stream<Event> get onLoad => _loadController.stream;
+  Stream<TileEvent> get onTileLoadStart => _tileLoadStartController.stream;
+  Stream<TileEvent> get onTileLoad => _tileLoadController.stream;
+  Stream<TileEvent> get onUnload => _tileUnloadController.stream;
 }
