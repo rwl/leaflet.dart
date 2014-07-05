@@ -11,7 +11,7 @@ import 'package:leaflet/src/core/browser.dart' as browser;
 import 'package:quiver/core.dart' show firstNonNull;
 
 import '../core/core.dart' show Handler, Events, stamp, ZoomAnimEvent;
-import '../core/core.dart' show Event, EventType, Util, Browser, LayerEvent, ResizeEvent, ViewEvent, MouseEvent, ZoomEvent, ErrorEvent, LocationEvent;
+import '../core/core.dart' show Event, EventType, Util, Browser, LayerEvent, ResizeEvent, ViewEvent, MouseEvent, ZoomEvent, ErrorEvent, LocationEvent, TileEvent, LayersControlEvent, DragEndEvent, PopupEvent;
 import '../geo/geo.dart' show LatLng, LatLngBounds;
 import '../geo/crs/crs.dart' show CRS, EPSG3857;
 import '../geometry/geometry.dart' show Bounds, Point2D;
@@ -304,6 +304,8 @@ class LeafletMap extends Object {
     fire(EventType.MOVEEND);
   }*/
 
+  StreamSubscription<Event> _panInsideMaxBoundsSubscription;
+
   /**
    * Restricts the map view to the given bounds (see map maxBounds option).
    */
@@ -313,14 +315,17 @@ class LeafletMap extends Object {
     options.maxBounds = bounds;
 
     if (bounds == null) {
-      return off(EventType.MOVEEND, _panInsideMaxBounds);
+      //off(EventType.MOVEEND, _panInsideMaxBounds);
+      _panInsideMaxBoundsSubscription.cancel();
+      return;
     }
 
     if (_loaded) {
       _panInsideMaxBounds();
     }
 
-    on(EventType.MOVEEND, _panInsideMaxBounds);
+    //on(EventType.MOVEEND, _panInsideMaxBounds);
+    _panInsideMaxBoundsSubscription = onMoveEnd.listen(_panInsideMaxBounds);
   }
 
   /**
@@ -336,6 +341,8 @@ class LeafletMap extends Object {
 
     panTo(newCenter, options);
   }
+
+  StreamSubscription<TileEvent> _onTileLayerLoadSubscription;
 
   /**
    * Adds the given layer to the map. If optional insertAtTheBottom is set to
@@ -363,7 +370,8 @@ class LeafletMap extends Object {
     if (options.zoomAnimation == true && layer is TileLayer) {
       _tileLayersNum++;
       _tileLayersToLoad++;
-      layer.on(EventType.LOAD, _onTileLayerLoad);
+      //layer.on(EventType.LOAD, _onTileLayerLoad);
+      _onTileLayerLoadSubscription = layer.onLoad.listen(_onTileLayerLoad);
     }
 
     if (_loaded) {
@@ -400,7 +408,8 @@ class LeafletMap extends Object {
     if (options.zoomAnimation && layer is TileLayer) {
       _tileLayersNum--;
       _tileLayersToLoad--;
-      layer.off(EventType.LOAD, _onTileLayerLoad);
+      //layer.off(EventType.LOAD, _onTileLayerLoad);
+      _onTileLayerLoadSubscription.cancel();
     }
 
     return;
@@ -925,7 +934,7 @@ class LeafletMap extends Object {
     }
   }
 
-  void _panInsideMaxBounds() {
+  void _panInsideMaxBounds([_]) {
     panInsideBounds(options.maxBounds);
   }
 
@@ -1036,7 +1045,7 @@ class LeafletMap extends Object {
     fireEvent(new MouseEvent(type, latlng, layerPoint, containerPoint, e));
   }
 
-  void _onTileLayerLoad() {
+  void _onTileLayerLoad(_) {
     _tileLayersToLoad--;
     if (_tileLayersNum != 0 && _tileLayersToLoad == 0) {
       fire(EventType.TILELAYERSLOAD);
@@ -1058,7 +1067,8 @@ class LeafletMap extends Object {
     if (_loaded) {
       callback.call();//context == null ? this : context, this);
     } else {
-      on(EventType.LOAD, callback);//, context);
+      //on(EventType.LOAD, callback);//, context);
+      onLoad.listen(callback);
     }
     return;
   }
@@ -1412,8 +1422,10 @@ class LeafletMap extends Object {
     if (_panAnim == null) {
       _panAnim = new dom.PosAnimation();
 
-      _panAnim.on(EventType.STEP, _onPanTransitionStep);
-      _panAnim.on(EventType.END, _onPanTransitionEnd);
+      //_panAnim.on(EventType.STEP, _onPanTransitionStep);
+      //_panAnim.on(EventType.END, _onPanTransitionEnd);
+      _panAnim.onStep.listen(_onPanTransitionStep);
+      _panAnim.onEnd.listen(_onPanTransitionEnd);
     }
 
     // don't fire movestart if animating inertia
@@ -1434,11 +1446,11 @@ class LeafletMap extends Object {
     }
   }
 
-  void _onPanTransitionStep() {
+  void _onPanTransitionStep(_) {
     fire(EventType.MOVE);
   }
 
-  void _onPanTransitionEnd() {
+  void _onPanTransitionEnd(_) {
     _mapPane.classes.remove('leaflet-pan-anim');
     fire(EventType.MOVEEND);
   }
@@ -1613,15 +1625,18 @@ class LeafletMap extends Object {
 
       if (options.zoomAnimation) {
         _pathRoot.className = 'leaflet-zoom-animated';
-        on(EventType.ZOOMANIM, _animatePathZoom);
-        on(EventType.ZOOMEND, _endPathZoom);
+        //on(EventType.ZOOMANIM, _animatePathZoom);
+        //on(EventType.ZOOMEND, _endPathZoom);
+        onZoomStart.listen(_animatePathZoom);
+        onZoomEnd.listen(_endPathZoom);
       }
-      on(EventType.MOVEEND, _updateCanvasViewport);
+      //on(EventType.MOVEEND, _updateCanvasViewport);
+      onMoveEnd.listen(_updateCanvasViewport);
       _updateCanvasViewport();
     }
   }
 
-  void _updateCanvasViewport() {
+  void _updateCanvasViewport([_]) {
     // don't redraw while zooming. See _updateSvgViewport for more details
     if (_pathZooming) { return; }
     _updatePathViewport();
@@ -1650,10 +1665,13 @@ class LeafletMap extends Object {
 
         _pathRoot.classes.add('leaflet-zoom-animated');
 
-      on(EventType.ZOOMANIM, _animatePathZoom);
-      on(EventType.ZOOMEND, _endPathZoom);
+      //on(EventType.ZOOMANIM, _animatePathZoom);
+      //on(EventType.ZOOMEND, _endPathZoom);
+      onZoomStart.listen(_animatePathZoom);
+      onZoomEnd.listen(_endPathZoom);
 
-      on(EventType.MOVEEND, _updateSvgViewport);
+      //on(EventType.MOVEEND, _updateSvgViewport);
+      onMoveEnd.listen(_updateSvgViewport);
       _updateSvgViewport();
     }
   }
@@ -1668,11 +1686,11 @@ class LeafletMap extends Object {
     _pathZooming = true;
   }
 
-  void _endPathZoom() {
+  void _endPathZoom(_) {
     _pathZooming = false;
   }
 
-  void _updateSvgViewport() {
+  void _updateSvgViewport([_]) {
 
     if (_pathZooming) {
       // Do not update SVGs while a zoom animation is going on otherwise the animation will break.
@@ -1784,9 +1802,9 @@ class LeafletMap extends Object {
   Stream<Event> get onAutoPanStart => _autoPanStartController.stream;
   Stream<LayerEvent> get onLayerAdd => _layerAddController.stream;
   Stream<LayerEvent> get onLayerRemove => _layerRemoveController.stream;
-  Stream<LayerControlEvent> get onBaseLayerChange => _baseLayerChangeController.stream;
-  Stream<LayerControlEvent> get onOverlayAdd => _overlayAddController.stream;
-  Stream<LayerControlEvent> get onOverlayRemove => _overlayRemoveController.stream;
+  Stream<LayersControlEvent> get onBaseLayerChange => _baseLayerChangeController.stream;
+  Stream<LayersControlEvent> get onOverlayAdd => _overlayAddController.stream;
+  Stream<LayersControlEvent> get onOverlayRemove => _overlayRemoveController.stream;
   Stream<LocationEvent> get onLocationFound => _locationFoundController.stream;
   Stream<ErrorEvent> get onLocationError => _locationErrorController.stream;
   Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;

@@ -4,7 +4,7 @@ import 'dart:html' show document, Element, ImageElement, DivElement;
 import 'dart:html' as html;
 import 'dart:async' show Stream, StreamController, StreamSubscription;
 
-import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent, MouseEvent, DragEndEvent;
+import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geometry/geometry.dart' show Point2D;
@@ -126,7 +126,7 @@ class Marker extends Layer {
 
     if (map.options.zoomAnimation && map.options.markerZoomAnimation) {
       //map.on(EventType.ZOOMANIM, _animateZoom);
-      _zoomAnimSubscription = map.onZoomAnim.listen(_animateZoom);
+      _zoomAnimSubscription = map.onZoomStart.listen(_animateZoom);
     }
   }
 
@@ -576,8 +576,8 @@ class Marker extends Layer {
   StreamController<Event> _moveController = new StreamController.broadcast();
   StreamController<Event> _addController = new StreamController.broadcast();
   StreamController<Event> _removeController = new StreamController.broadcast();
-  StreamController<MouseEvent> _popupOpenController = new StreamController.broadcast();
-  StreamController<MouseEvent> _popupCloseController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupOpenController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupCloseController = new StreamController.broadcast();
 
   Stream<MouseEvent> get onClick => _clickController.stream;
   Stream<MouseEvent> get onDblClick => _dblClickController.stream;
@@ -593,5 +593,21 @@ class Marker extends Layer {
   Stream<Event> get onRemoveMarker => _removeController.stream;
   Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
   Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
+
+  /**
+   * For internal use.
+   */
+  //StreamController<PopupEvent> get popupOpenController;
+  //StreamController<PopupEvent> get popupCloseController;
+  void fire(PopupEvent event) {
+    switch (event.type) {
+      case EventType.POPUPOPEN:
+        _popupOpenController.add(event);
+        break;
+      case EventType.POPUPCLOSE:
+        _popupCloseController.add(event);
+        break;
+    }
+  }
 
 }

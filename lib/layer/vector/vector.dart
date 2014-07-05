@@ -1,8 +1,9 @@
 library leaflet.layer.vector;
 
 import 'dart:html' show window, document, Element;
+import 'dart:html' as html;
 import 'dart:math' as math;
-import 'dart:async' show Stream, StreamController;
+import 'dart:async' show Stream, StreamController, StreamSubscription;
 
 import 'package:simple_features/simple_features.dart' as sfs;
 

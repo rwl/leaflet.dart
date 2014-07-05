@@ -6,7 +6,9 @@ part of leaflet.layer;
  */
 class FeatureGroup extends LayerGroup {
 
-  static final EVENTS = [EventType.CLICK, EventType.DBLCLICK, EventType.MOUSEOVER, EventType.MOUSEOUT, EventType.MOUSEMOVE, EventType.CONTEXTMENU, EventType.POPUPOPEN, EventType.POPUPCLOSE];
+  static final EVENTS = [EventType.CLICK, EventType.DBLCLICK,
+    EventType.MOUSEOVER, EventType.MOUSEOUT, EventType.MOUSEMOVE,
+    EventType.CONTEXTMENU, EventType.POPUPOPEN, EventType.POPUPCLOSE];
 
   var _popupContent, _popupOptions;
 
@@ -30,7 +32,8 @@ class FeatureGroup extends LayerGroup {
       layer.bindPopup(_popupContent, _popupOptions);
     }
 
-    fireEvent(new LayerEvent(EventType.LAYERADD, layer));
+    //fireEvent(new LayerEvent(EventType.LAYERADD, layer));
+    _layerAddController.add(new LayerEvent(EventType.LAYERADD, layer));
   }
 
   void removeLayer(Layer layer) {
@@ -52,7 +55,8 @@ class FeatureGroup extends LayerGroup {
       });
     }
 
-    fireEvent(new LayerEvent(EventType.LAYERREMOVE, layer));
+    //fireEvent(new LayerEvent(EventType.LAYERREMOVE, layer));
+    _layerRemoveController.add(new LayerEvent(EventType.LAYERREMOVE, layer));
   }
 
   /**

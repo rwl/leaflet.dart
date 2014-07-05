@@ -23,6 +23,7 @@ class ImageOverlay extends Layer {//with Events {
   LatLngBounds _bounds;
   LeafletMap _map;
   ImageElement _image;
+  StreamSubscription<Event> _viewResetSubscription, _zoomAnimSubscription;
 
   ImageOverlay(String url, LatLngBounds bounds, this.options) {
     _url = url;
@@ -41,10 +42,12 @@ class ImageOverlay extends Layer {//with Events {
 
     map.panes['overlayPane'].append(_image);
 
-    map.on(EventType.VIEWRESET, _reset);
+    //map.on(EventType.VIEWRESET, _reset);
+    _viewResetSubscription = map.onViewReset.listen(_reset);
 
     if (map.options.zoomAnimation && Browser.any3d) {
-      map.on(EventType.ZOOMANIM, _animateZoom);
+      //map.on(EventType.ZOOMANIM, _animateZoom);
+      _zoomAnimSubscription = map.onZoomStart.listen(_animateZoom);
     }
 
     _reset();
@@ -54,10 +57,12 @@ class ImageOverlay extends Layer {//with Events {
     //map.panes['overlayPane'].removeChild(_image);
     _image.remove();
 
-    map.off(EventType.VIEWRESET, _reset);
+    //map.off(EventType.VIEWRESET, _reset);
+    _viewResetSubscription.cancel();
 
     if (map.options.zoomAnimation) {
-      map.off(EventType.ZOOMANIM, _animateZoom);
+      //map.off(EventType.ZOOMANIM, _animateZoom);
+      _zoomAnimSubscription.cancel();
     }
   }
 
@@ -141,7 +146,7 @@ class ImageOverlay extends Layer {//with Events {
     image.style[dom.TRANSFORM] = dom.getTranslateString(origin) + ' scale($scale) ';
   }
 
-  void _reset() {
+  void _reset([_]) {
     final image = _image,
         topLeft = _map.latLngToLayerPoint(_bounds.getNorthWest()),
         size = _map.latLngToLayerPoint(_bounds.getSouthEast()) - topLeft;
@@ -152,9 +157,9 @@ class ImageOverlay extends Layer {//with Events {
     image.style.height = '${size.y}px';
   }
 
-  void _onImageLoad() {
+  /*void _onImageLoad() {
     fire(EventType.LOAD);
-  }
+  }*/
 
   void _updateOpacity() {
     _image.style.opacity = '${options.opacity}';

@@ -88,7 +88,7 @@ class Popup extends Layer {//with Events {
   };*/
   final PopupOptions options;
 
-  Events _source;
+  Layer _source;
   bool _animated, _isOpen;
   LeafletMap _map;
   Element _container;
@@ -119,9 +119,10 @@ class Popup extends Layer {//with Events {
     }
     map.panes['popupPane'].append(_container);
 
-    _getEvents().forEach((EventType et, Function a) {
+    /*_getEvents().forEach((EventType et, Function a) {
       map.on(et, a);
-    });
+    });*/
+    _listen();
 
     update();
 
@@ -129,12 +130,19 @@ class Popup extends Layer {//with Events {
       _container.style.opacity = '1';
     }
 
-    fire(EventType.OPEN);
+    //fire(EventType.OPEN);
+    _openController.add(new Event(EventType.OPEN));
 
     map.fireEvent(new PopupEvent(EventType.POPUPOPEN, this));
 
-    if (_source != null) {
+    /*if (_source != null) {
       _source.fireEvent(new PopupEvent(EventType.POPUPOPEN, this));
+    }*/
+    var source = _source;
+    if (source is Path) {
+      source.fire(new PopupEvent(EventType.POPUPOPEN, this));
+    } else if (source is Marker) {
+      source.fire(new PopupEvent(EventType.POPUPOPEN, this));
     }
   }
 
@@ -157,9 +165,10 @@ class Popup extends Layer {//with Events {
     final fn = (var x) => false;
     fn(_container.offsetWidth); // force reflow
 
-    _getEvents().forEach((EventType et, Function a) {
+    /*_getEvents().forEach((EventType et, Function a) {
       map.off(et, a);
-    });
+    });*/
+    _cancel();
 
     if (map.options.fadeAnimation) {
       _container.style.opacity = '0';
@@ -167,12 +176,19 @@ class Popup extends Layer {//with Events {
 
     _map = null;
 
-    fire(EventType.CLOSE);
+    //fire(EventType.CLOSE);
+    _closeController.add(new Event(EventType.CLOSE));
 
     map.fireEvent(new PopupEvent(EventType.POPUPCLOSE, this));
 
-    if (_source != null) {
+    /*if (_source != null) {
       _source.fireEvent(new PopupEvent(EventType.POPUPCLOSE, this));
+    }*/
+    var source = _source;
+    if (source is Path) {
+      source.fire(new PopupEvent(EventType.POPUPCLOSE, this));
+    } else if (source is Marker) {
+      source.fire(new PopupEvent(EventType.POPUPCLOSE, this));
     }
   }
 
@@ -217,7 +233,37 @@ class Popup extends Layer {//with Events {
     _adjustPan();
   }
 
-  Map<EventType, Function>_getEvents() {
+  StreamSubscription<Event> _viewResetSubscription, _zoomAnimSubscription,
+    _preClickSubscription, _moveEndSubscription;
+
+  void _listen() {
+    _viewResetSubscription = _map.onViewReset.listen(_updatePosition);
+
+    if (_animated) {
+      _zoomAnimSubscription = _map.onZoomStart.listen(_zoomAnimation);
+    }
+    if (options.closeOnClick != null ? options.closeOnClick : _map.options.closePopupOnClick) {
+      _preClickSubscription = _map.onPreClick.listen(_close);
+    }
+    if (options.keepInView) {
+      _moveEndSubscription = _map.onMoveEnd.listen(_adjustPan);
+    }
+  }
+
+  void _cancel() {
+    _viewResetSubscription.cancel();
+    if (_zoomAnimSubscription != null) {
+      _zoomAnimSubscription.cancel();
+    }
+    if (_preClickSubscription != null) {
+      _preClickSubscription.cancel();
+    }
+    if (_moveEndSubscription != null) {
+      _moveEndSubscription.cancel();
+    }
+  }
+
+  /*Map<EventType, Function>_getEvents() {
     final events = {
       EventType.VIEWRESET: _updatePosition
     };
@@ -233,7 +279,7 @@ class Popup extends Layer {//with Events {
     }
 
     return events;
-  }
+  }*/
 
   /**
    * For internal use.
@@ -242,7 +288,7 @@ class Popup extends Layer {//with Events {
     _close();
   }
 
-  void _close() {
+  void _close([_]) {
     if (_map != null) {
       _map.closePopup(this);
     }
@@ -291,7 +337,8 @@ class Popup extends Layer {//with Events {
       }
       _contentNode.append(_content);
     }
-    fire(EventType.CONTENTUPDATE);
+    //fire(EventType.CONTENTUPDATE);
+    _contentUpdateController.add(new Event(EventType.CONTENTUPDATE));
   }
 
   void _updateLayout() {
@@ -301,11 +348,11 @@ class Popup extends Layer {//with Events {
     style.width = '';
     style.whiteSpace = 'nowrap';
 
-    var width = container.offsetWidth;
+    num width = container.offsetWidth;
     width = math.min(width, options.maxWidth);
     width = math.max(width, options.minWidth);
 
-    style.width = (width + 1) + 'px';
+    style.width = '${width + 1}px';
     style.whiteSpace = '';
 
     style.height = '';
@@ -324,7 +371,7 @@ class Popup extends Layer {//with Events {
     _containerWidth = _container.offsetWidth;
   }
 
-  void _updatePosition() {
+  void _updatePosition([_]) {
     if (_map == null) { return; }
 
     final pos = _map.latLngToLayerPoint(_latlng),
@@ -349,7 +396,7 @@ class Popup extends Layer {//with Events {
     dom.setPosition(_container, pos);
   }
 
-  void _adjustPan() {
+  void _adjustPan([_]) {
     if (!options.autoPan) { return; }
 
     final map = _map;
@@ -405,4 +452,12 @@ class Popup extends Layer {//with Events {
   void set open(bool isOpen) {
     _isOpen = isOpen;
   }
+
+  StreamController<Event> _openController = new StreamController.broadcast();
+  StreamController<Event> _closeController = new StreamController.broadcast();
+  StreamController<Event> _contentUpdateController = new StreamController.broadcast();
+
+  Stream<Event> get onOpen => _openController.stream;
+  Stream<Event> get onClose => _closeController.stream;
+  Stream<Event> get onContentUpdate => _contentUpdateController.stream;
 }
