@@ -4,9 +4,11 @@ part of leaflet.layer;
  * FeatureGroup extends LayerGroup by introducing mouse events and additional methods
  * shared between a group of interactive layers (like vectors or markers).
  */
-class FeatureGroup extends LayerGroup with Events {
+class FeatureGroup extends LayerGroup {
 
-  static final EVENTS = [EventType.CLICK, EventType.DBLCLICK, EventType.MOUSEOVER, EventType.MOUSEOUT, EventType.MOUSEMOVE, EventType.CONTEXTMENU, EventType.POPUPOPEN, EventType.POPUPCLOSE];
+  static final EVENTS = [EventType.CLICK, EventType.DBLCLICK,
+    EventType.MOUSEOVER, EventType.MOUSEOUT, EventType.MOUSEMOVE,
+    EventType.CONTEXTMENU, EventType.POPUPOPEN, EventType.POPUPCLOSE];
 
   var _popupContent, _popupOptions;
 
@@ -30,7 +32,8 @@ class FeatureGroup extends LayerGroup with Events {
       layer.bindPopup(_popupContent, _popupOptions);
     }
 
-    fireEvent(new LayerEvent(EventType.LAYERADD, layer));
+    //fireEvent(new LayerEvent(EventType.LAYERADD, layer));
+    _layerAddController.add(new LayerEvent(EventType.LAYERADD, layer));
   }
 
   void removeLayer(Layer layer) {
@@ -52,7 +55,8 @@ class FeatureGroup extends LayerGroup with Events {
       });
     }
 
-    fireEvent(new LayerEvent(EventType.LAYERREMOVE, layer));
+    //fireEvent(new LayerEvent(EventType.LAYERREMOVE, layer));
+    _layerRemoveController.add(new LayerEvent(EventType.LAYERREMOVE, layer));
   }
 
   /**
@@ -129,4 +133,22 @@ class FeatureGroup extends LayerGroup with Events {
     ee.target = this;
     fire(ee.type, ee);
   }
+
+  StreamController<MouseEvent> _clickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _dblClickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseMoveController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOverController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOutController = new StreamController.broadcast();
+  StreamController<MouseEvent> _contextMenuController = new StreamController.broadcast();
+  StreamController<LayerEvent> _layerAddController = new StreamController.broadcast();
+  StreamController<LayerEvent> _layerRemoveController = new StreamController.broadcast();
+
+  Stream<MouseEvent> get onClick => _clickController.stream;
+  Stream<MouseEvent> get onDblClick => _dblClickController.stream;
+  Stream<MouseEvent> get onMouseMove => _mouseMoveController.stream;
+  Stream<MouseEvent> get onMouseOver => _mouseOverController.stream;
+  Stream<MouseEvent> get onMouseOut => _mouseOutController.stream;
+  Stream<MouseEvent> get onContextMenu => _contextMenuController.stream;
+  Stream<LayerEvent> get onLayerAdd => _layerAddController.stream;
+  Stream<LayerEvent> get onLayerRemove => _layerRemoveController.stream;
 }

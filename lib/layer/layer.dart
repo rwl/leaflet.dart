@@ -2,16 +2,17 @@ library leaflet.layer;
 
 import 'dart:html' as html show Element, CanvasElement, ImageElement;
 import 'dart:math' as math show min, max;
+import 'dart:async' show Stream, StreamController, StreamSubscription;
 
 import 'package:simple_features/simple_features.dart' as sfs;
 
-import '../core/core.dart' show EventType, Browser, Action, stamp, Events, Event, LayerEvent, ZoomEvent, PopupEvent;
+import '../core/core.dart' show EventType, Browser, Action, stamp, Events, Event, LayerEvent, ZoomEvent, PopupEvent, MouseEvent;
 import '../dom/dom.dart' as dom;
 import '../map/map.dart';
 import '../geo/geo.dart';
 import '../geometry/geometry.dart' show Point2D;
 import './marker/marker.dart';
-import './vector/vector.dart' show Polygon, PathOptions, Polyline, MultiPolyline, MultiPolygon;
+import './vector/vector.dart' show Polygon, PathOptions, Polyline, MultiPolyline, MultiPolygon, Path;
 
 part 'feature_group.dart';
 part 'geo_json.dart';

@@ -33,7 +33,7 @@ class Polyline extends Path {
     'noClip': false
   };*/
 
-  projectLatlngs([Object obj, Event e]) {
+  projectLatlngs() {
     _originalPoints = [];
 
     final len = _latlngs.length;

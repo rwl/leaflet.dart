@@ -20,13 +20,18 @@ class Drag extends Handler {
 
       _draggable = new dom.Draggable(map.mapPane, map.getContainer());
 
-      _draggable.on(EventType.DRAGSTART, _onDragStart);
-      _draggable.on(EventType.DRAG, _onDrag);
-      _draggable.on(EventType.DRAGEND, _onDragEnd);
+      //_draggable.on(EventType.DRAGSTART, _onDragStart);
+      //_draggable.on(EventType.DRAG, _onDrag);
+      //_draggable.on(EventType.DRAGEND, _onDragEnd);
+      _draggable.onDragStart.listen(_onDragStart);
+      _draggable.onDrag.listen(_onDrag);
+      _draggable.onDragEnd.listen(_onDragEnd);
 
       if (map.options.worldCopyJump) {
-        _draggable.on(EventType.PREDRAG, _onPreDrag);
-        map.on(EventType.VIEWRESET, _onViewReset);
+        //_draggable.on(EventType.PREDRAG, _onPreDrag);
+        _draggable.onPreDrag.listen(_onPreDrag);
+        //map.on(EventType.VIEWRESET, _onViewReset);
+        map.onViewReset.listen(_onViewReset);
 
         map.whenReady(_onViewReset);
       }
@@ -42,7 +47,7 @@ class Drag extends Handler {
     return _draggable != null && _draggable.moved;
   }
 
-  _onDragStart(Object obj, Event e) {
+  _onDragStart(_) {
     if (map.panAnim != null) {
       map.panAnim.stop();
     }
@@ -56,7 +61,7 @@ class Drag extends Handler {
     }
   }
 
-  _onDrag() {
+  _onDrag(_) {
     if (map.options.inertia) {
       final time = _lastTime = /*+*/new DateTime.now(),
           pos = _lastPos = _draggable.newPos;
@@ -74,7 +79,7 @@ class Drag extends Handler {
     map.fire(EventType.DRAG);
   }
 
-  _onViewReset() {
+  _onViewReset(_) {
     // TODO fix hardcoded Earth values
     final pxCenter = map.getSize() / 2,
         pxWorldCenter = map.latLngToLayerPoint(new LatLng(0, 0));
@@ -83,7 +88,7 @@ class Drag extends Handler {
     _worldWidth = map.project(new LatLng(0, 180)).x;
   }
 
-  _onPreDrag() {
+  _onPreDrag(_) {
     // TODO refactor to be able to adjust map pane position after zoom
     final worldWidth = _worldWidth,
         halfWidth = (worldWidth / 2).round(),
@@ -102,7 +107,7 @@ class Drag extends Handler {
 
         noInertia = !options.inertia || delay > options.inertiaThreshold || _positions.length == 0;
 
-    map.fire(EventType.DRAGEND, e);
+    map.fireEvent(/*EventType.DRAGEND, */e);
 
     if (noInertia) {
       map.fire(EventType.MOVEEND);

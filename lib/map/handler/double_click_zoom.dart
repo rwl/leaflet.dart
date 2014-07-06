@@ -6,14 +6,18 @@ part of leaflet.map.handler;
  */
 class DoubleClickZoom extends Handler {
 
+  StreamSubscription<MouseEvent> _doubleClickSubscription;
+
   DoubleClickZoom(LeafletMap map) : super(map);
 
   void addHooks() {
-    map.on(EventType.DBLCLICK, _onDoubleClick);
+    //map.on(EventType.DBLCLICK, _onDoubleClick);
+    _doubleClickSubscription = map.onDblClick.listen(_onDoubleClick);
   }
 
   void removeHooks() {
-    map.off(EventType.DBLCLICK, _onDoubleClick);
+    //map.off(EventType.DBLCLICK, _onDoubleClick);
+    _doubleClickSubscription.cancel();
   }
 
   void _onDoubleClick(MouseEvent e) {

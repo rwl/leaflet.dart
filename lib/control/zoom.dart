@@ -38,6 +38,8 @@ class Zoom extends Control {
 
   Element _zoomInButton, _zoomOutButton;
 
+  StreamSubscription<LayerEvent> _zoomLevelsChangeSubscription, _zoomEndSubscription;
+
   onAdd(LeafletMap map) {
     final zoomName = 'leaflet-control-zoom',
         container = dom.create('div', '$zoomName leaflet-bar');
@@ -52,15 +54,19 @@ class Zoom extends Control {
             '$zoomName-out', container, _zoomOut);//, this);
 
     _updateDisabled();
-    map.on(EventType.ZOOMEND, _updateDisabled);
-    map.on(EventType.ZOOMLEVELSCHANGE, _updateDisabled);
+    //map.on(EventType.ZOOMEND, _updateDisabled);
+    //map.on(EventType.ZOOMLEVELSCHANGE, _updateDisabled);
+    _zoomEndSubscription = map.onZoomEnd.listen(_updateDisabled);
+    _zoomLevelsChangeSubscription = map.onZoomLevelsChange.listen(_updateDisabled);
 
     return container;
   }
 
   onRemove(LeafletMap map) {
-    map.off(EventType.ZOOMEND, _updateDisabled);
-    map.off(EventType.ZOOMLEVELSCHANGE, _updateDisabled);
+    //map.off(EventType.ZOOMEND, _updateDisabled);
+    //map.off(EventType.ZOOMLEVELSCHANGE, _updateDisabled);
+    _zoomEndSubscription.cancel();
+    _zoomLevelsChangeSubscription.cancel();
   }
 
   _zoomIn(html.MouseEvent e) {
@@ -100,7 +106,7 @@ class Zoom extends Control {
     return link;
   }
 
-  _updateDisabled() {
+  _updateDisabled([_]) {
     final className = 'leaflet-disabled';
 
     _zoomInButton.classes.remove(className);

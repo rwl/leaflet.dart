@@ -26,6 +26,7 @@ class Keyboard extends Handler {
   }
 
   StreamSubscription<html.Event> _focusSubscription, _blurSubscription, _mouseDownSubscription;
+  StreamSubscription<Event> _mapFocusSubscription, _mapBlurSubscription;
 
   addHooks() {
     final container = map.getContainer();
@@ -42,8 +43,10 @@ class Keyboard extends Handler {
     _blurSubscription = container.onBlur.listen(_onBlur);
     _mouseDownSubscription = container.onMouseDown.listen(_onMouseDown);
 
-    map.on(EventType.FOCUS, _addHooks);
-    map.on(EventType.BLUR, _removeHooks);
+    //map.on(EventType.FOCUS, _addHooks);
+    //map.on(EventType.BLUR, _removeHooks);
+    _mapFocusSubscription = map.onFocus.listen(_addHooks);
+    _mapBlurSubscription = map.onBlur.listen(_removeHooks);
   }
 
   removeHooks() {
@@ -64,8 +67,10 @@ class Keyboard extends Handler {
       _mouseDownSubscription.cancel();
     }
 
-    map.off(EventType.FOCUS, _addHooks);
-    map.off(EventType.BLUR, _removeHooks);
+    //map.off(EventType.FOCUS, _addHooks);
+    //map.off(EventType.BLUR, _removeHooks);
+    _mapFocusSubscription.cancel();
+    _mapBlurSubscription.cancel();
   }
 
   _onMouseDown([html.MouseEvent e]) {
@@ -126,12 +131,12 @@ class Keyboard extends Handler {
 
   StreamSubscription<html.KeyboardEvent> _keyDownSubscription;
 
-  _addHooks([Object obj=null, Event e=null]) {
+  _addHooks(_) {
     //dom.on(document, 'keydown', _onKeyDown, this);
     _keyDownSubscription = document.onKeyDown.listen(_onKeyDown);
   }
 
-  _removeHooks([Object obj=null, Event e=null]) {
+  _removeHooks([_]) {
     //dom.off(document, 'keydown', _onKeyDown);
     if (_keyDownSubscription != null) {
       _keyDownSubscription.cancel();

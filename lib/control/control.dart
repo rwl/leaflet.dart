@@ -4,7 +4,7 @@ import 'dart:collection' show LinkedHashMap;
 import 'dart:html' show Element, document, InputElement;
 import 'dart:html' as html;
 import 'dart:math' as math;
-import 'dart:async' show Timer;
+import 'dart:async' show Timer, StreamSubscription;
 
 import 'package:leaflet/src/core/browser.dart' as browser;
 

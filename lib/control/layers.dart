@@ -43,6 +43,8 @@ class Layers extends Control {
   Element get baseLayersList => _baseLayersList;
   Element get overlaysList => _overlaysList;
 
+  StreamSubscription<LayerEvent> _layerAddSubscription, _layerRemoveSubscription;
+
   /**
    * Creates an attribution control with the given layers. Base layers will be
    * switched with radio buttons, while overlays will be switched with
@@ -72,15 +74,19 @@ class Layers extends Control {
     _initLayout();
     update();
 
-    map.on(EventType.LAYERADD, _onLayerChange);
-    map.on(EventType.LAYERREMOVE, _onLayerChange);
+    //map.on(EventType.LAYERADD, _onLayerChange);
+    //map.on(EventType.LAYERREMOVE, _onLayerChange);
+    _layerAddSubscription = map.onLayerAdd.listen(_onLayerChange);
+    _layerRemoveSubscription = map.onLayerRemove.listen(_onLayerChange);
 
     return _container;
   }
 
   void onRemove(LeafletMap map) {
-    map.off(EventType.LAYERADD, _onLayerChange);
-    map.off(EventType.LAYERREMOVE, _onLayerChange);
+    _layerAddSubscription.cancel();
+    _layerRemoveSubscription.cancel();
+    //map.off(EventType.LAYERADD, _onLayerChange);
+    //map.off(EventType.LAYERREMOVE, _onLayerChange);
   }
 
   /**
@@ -151,7 +157,8 @@ class Layers extends Control {
         });
       });
 
-      _map.on(EventType.CLICK, _collapse);
+      //_map.on(EventType.CLICK, _collapse);
+      _map.onClick.listen(_collapse);
       // TODO keyboard accessibility
     } else {
       _expand();
@@ -285,11 +292,11 @@ class Layers extends Control {
     _refocusOnMap();
   }
 
-  _expand([html.MouseEvent e]) {
+  _expand([_]) {
     _container.classes.add('leaflet-control-layers-expanded');
   }
 
-  _collapse([html.MouseEvent e]) {
+  _collapse(_) {
     _container.className = _container.className.replaceAll(' leaflet-control-layers-expanded', '');
   }
 }

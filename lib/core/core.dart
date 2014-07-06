@@ -12,7 +12,6 @@ import '../geometry/geometry.dart' show Point2D;
 import 'package:uri/uri.dart';
 
 part 'event.dart';
-part 'events.dart';
 part 'event_type.dart';
 part 'handler.dart';
 part 'util.dart';

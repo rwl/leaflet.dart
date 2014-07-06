@@ -2,8 +2,9 @@ library leaflet.layer.marker;
 
 import 'dart:html' show document, Element, ImageElement, DivElement;
 import 'dart:html' as html;
+import 'dart:async' show Stream, StreamController, StreamSubscription;
 
-import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent, MouseEvent;
+import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geometry/geometry.dart' show Point2D;
@@ -81,7 +82,7 @@ class MarkerOptions {
 /**
  * Marker is used to display clickable/draggable icons on the map.
  */
-class Marker extends Layer with Events {
+class Marker extends Layer {
 
   LatLng _latlng;
   LeafletMap _map;
@@ -103,6 +104,8 @@ class Marker extends Layer with Events {
   };*/
   MarkerOptions options;
 
+  StreamSubscription<Event> _viewResetSubscription, _zoomAnimSubscription;
+
   Marker(LatLng latlng, [this.options=null]) {
     if (options == null) {
       options = new MarkerOptions();
@@ -113,14 +116,17 @@ class Marker extends Layer with Events {
   void onAdd(LeafletMap map) {
     _map = map;
 
-    map.on(EventType.VIEWRESET, update);
+    //map.on(EventType.VIEWRESET, update);
+    _viewResetSubscription = map.onViewReset.listen(update);
 
     _initIcon();
     update();
-    fire(EventType.ADD);
+    //fire(EventType.ADD);
+    _addController.add(new Event(EventType.ADD));
 
     if (map.options.zoomAnimation && map.options.markerZoomAnimation) {
-      map.on(EventType.ZOOMANIM, _animateZoom);
+      //map.on(EventType.ZOOMANIM, _animateZoom);
+      _zoomAnimSubscription = map.onZoomStart.listen(_animateZoom);
     }
   }
 
@@ -139,10 +145,15 @@ class Marker extends Layer with Events {
     _removeIcon();
     _removeShadow();
 
-    fire(EventType.REMOVE);
+    //fire(EventType.REMOVE);
+    _removeController.add(new Event(EventType.REMOVE));
 
-    map.off(EventType.VIEWRESET, update);
-    map.off(EventType.ZOOMANIM, _animateZoom);
+    //map.off(EventType.VIEWRESET, update);
+    //map.off(EventType.ZOOMANIM, _animateZoom);
+    _viewResetSubscription.cancel();
+    if (_zoomAnimSubscription != null) {
+      _zoomAnimSubscription.cancel();
+    }
 
     _map = null;
   }
@@ -158,7 +169,8 @@ class Marker extends Layer with Events {
 
     update();
 
-    fireEvent(new MouseEvent(EventType.MOVE, _latlng, null, null, null));
+    //fireEvent(new MouseEvent(EventType.MOVE, _latlng, null, null, null));
+    _moveController.add(new MouseEvent(EventType.MOVE, _latlng, null, null, null));
   }
 
   // Changes the zIndex offset of the marker.
@@ -329,11 +341,11 @@ class Marker extends Layer with Events {
     /*for (int i = 0; i < events.length; i++) {
       dom.on(icon, events[i], _fireMouseEvent, this);
     }*/
-    /*_doubleClickSubscription = */icon.onDoubleClick.listen(_fireMouseEvent);
-    /*_mouseDownSubscription = */icon.onMouseDown.listen(_fireMouseEvent);
-    /*_mouseOverSubscription = */icon.onMouseOver.listen(_fireMouseEvent);
-    /*_mouseOutSubscription = */icon.onMouseOut.listen(_fireMouseEvent);
-    /*_contextmenuSubscription = */icon.onContextMenu.listen(_fireMouseEvent);
+    /*_doubleClickSubscription = */icon.onDoubleClick.listen(_fireDoubleClickEvent);
+    /*_mouseDownSubscription = */icon.onMouseDown.listen(_fireMouseDownEvent);
+    /*_mouseOverSubscription = */icon.onMouseOver.listen(_fireMouseOverEvent);
+    /*_mouseOutSubscription = */icon.onMouseOut.listen(_fireMouseOutEvent);
+    /*_contextmenuSubscription = */icon.onContextMenu.listen(_fireContextMenuEvent);
 
     //if (Handler.MarkerDrag) {
     dragging = new MarkerDrag(this);
@@ -347,8 +359,9 @@ class Marker extends Layer with Events {
   void _onMouseClick(html.MouseEvent e) {
     final wasDragged = dragging != null && dragging.moved();
 
-    final type = new EventType.from(e.type);
-    if (hasEventListeners(type) || wasDragged) {
+    final type = EventType.CLICK;//new EventType.from(e.type);
+    //if (hasEventListeners(type) || wasDragged) {
+    if (_clickController.hasListener || wasDragged) {
       //dom.stopPropagation(e);
       e.stopPropagation();
     }
@@ -359,17 +372,47 @@ class Marker extends Layer with Events {
       return;
     }
 
-    fireEvent(new MouseEvent(type, _latlng, null, null, e));
+    //fireEvent(new MouseEvent(type, _latlng, null, null, e));
+    _clickController.add(new MouseEvent(type, _latlng, null, null, e));
   }
 
   void _onKeyPress(html.KeyboardEvent e) {
     if (e.keyCode == 13) {
-      fireEvent(new MouseEvent(EventType.CLICK, _latlng, null, null, e));
+      //fireEvent(new MouseEvent(EventType.CLICK, _latlng, null, null, e));
+      _clickController.add(new MouseEvent(EventType.CLICK, _latlng, null, null, e));
     }
   }
 
-  void _fireMouseEvent(html.Event e) {
-    final type = new EventType.from(e.type);
+  void _fireDoubleClickEvent(html.Event e) {
+    _dblClickController.add(new MouseEvent(EventType.DBLCLICK, _latlng, null, null, e));
+    e.stopPropagation();
+  }
+
+  void _fireMouseDownEvent(html.Event e) {
+    _mouseDownController.add(new MouseEvent(EventType.MOUSEDOWN, _latlng, null, null, e));
+    e.preventDefault();
+  }
+
+  void _fireMouseOverEvent(html.Event e) {
+    _mouseOverController.add(new MouseEvent(EventType.MOUSEOVER, _latlng, null, null, e));
+    e.stopPropagation();
+  }
+
+  void _fireMouseOutEvent(html.Event e) {
+    _mouseOutController.add(new MouseEvent(EventType.MOUSEOUT, _latlng, null, null, e));
+    e.stopPropagation();
+  }
+
+  void _fireContextMenuEvent(html.Event e) {
+    _contextMenuController.add(new MouseEvent(EventType.CONTEXTMENU, _latlng, null, null, e));
+    if (_contextMenuController.hasListener) {
+      e.preventDefault();
+    }
+    e.stopPropagation();
+  }
+
+  /*void _fireMouseEvent(html.Event e, EventType type) {
+    //final type = new EventType.from(e.type);
     fireEvent(new MouseEvent(type, _latlng, null, null, e));
 
     // TODO proper custom event propagation
@@ -385,7 +428,7 @@ class Marker extends Layer with Events {
       //dom.preventDefault(e);
       e.preventDefault();
     }
-  }
+  }*/
 
   // Changes the opacity of the marker.
   void setOpacity(num opacity) {
@@ -425,13 +468,13 @@ class Marker extends Layer with Events {
     return this;
   }
 
-  void closePopup([Object obj=null, Event e=null]) {
+  void closePopup([_]) {
     if (_popup != null) {
       _popup.close();
     }
   }
 
-  void togglePopup(Object obj, Event e) {
+  void togglePopup(_) {
     if (_popup != null) {
       if (_popup.open) {
         closePopup();
@@ -440,6 +483,9 @@ class Marker extends Layer with Events {
       }
     }
   }
+
+  StreamSubscription<MouseEvent> _popupClickSubscription;
+  StreamSubscription<Event> _popupRemoveSubscription, _popupMoveSubscription;
 
   void bindPopupContent(String content, [MarkerOptions options=null]) {
     final popup = new Popup(options, this);
@@ -465,9 +511,12 @@ class Marker extends Layer with Events {
     options.offset = anchor;
 
     if (!_popupHandlersAdded) {
-      on(EventType.CLICK, togglePopup);
-      on(EventType.REMOVE, closePopup);
-      on(EventType.MOVE, _movePopup);
+      //on(EventType.CLICK, togglePopup);
+      //on(EventType.REMOVE, closePopup);
+      //on(EventType.MOVE, _movePopup);
+      _popupClickSubscription = onClick.listen(togglePopup);
+      _popupRemoveSubscription = onRemoveMarker.listen(closePopup);
+      _popupMoveSubscription = onMove.listen(_movePopup);
       _popupHandlersAdded = true;
     }
 
@@ -489,9 +538,12 @@ class Marker extends Layer with Events {
   void unbindPopup() {
     if (_popup != null) {
       _popup = null;
-      off(EventType.CLICK, togglePopup);
-      off(EventType.REMOVE, closePopup);
-      off(EventType.MOVE, _movePopup);
+      //off(EventType.CLICK, togglePopup);
+      //off(EventType.REMOVE, closePopup);
+      //off(EventType.MOVE, _movePopup);
+      _popupClickSubscription.cancel();
+      _popupRemoveSubscription.cancel();
+      _popupMoveSubscription.cancel();
       _popupHandlersAdded = false;
     }
   }
@@ -500,7 +552,7 @@ class Marker extends Layer with Events {
     return _popup;
   }
 
-  void _movePopup(Object obj, LocationEvent e) {
+  void _movePopup(LocationEvent e) {
     _popup.setLatLng(e.latlng);
   }
 
@@ -511,4 +563,51 @@ class Marker extends Layer with Events {
       'coordinates': GeoJSON.latLngToCoords(getLatLng())
     });
   }
+
+  StreamController<MouseEvent> _clickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _dblClickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseDownController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOverController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOutController = new StreamController.broadcast();
+  StreamController<MouseEvent> _contextMenuController = new StreamController.broadcast();
+  StreamController<Event> _dragStartController = new StreamController.broadcast();
+  StreamController<Event> _dragController = new StreamController.broadcast();
+  StreamController<DragEndEvent> _dragEndController = new StreamController.broadcast();
+  StreamController<Event> _moveController = new StreamController.broadcast();
+  StreamController<Event> _addController = new StreamController.broadcast();
+  StreamController<Event> _removeController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupOpenController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupCloseController = new StreamController.broadcast();
+
+  Stream<MouseEvent> get onClick => _clickController.stream;
+  Stream<MouseEvent> get onDblClick => _dblClickController.stream;
+  Stream<MouseEvent> get onMouseDown => _mouseDownController.stream;
+  Stream<MouseEvent> get onMouseOver => _mouseOverController.stream;
+  Stream<MouseEvent> get onMouseOut => _mouseOutController.stream;
+  Stream<MouseEvent> get onContextMenu => _contextMenuController.stream;
+  Stream<Event> get onDragStart => _dragStartController.stream;
+  Stream<Event> get onDrag => _dragController.stream;
+  Stream<DragEndEvent> get onDragEnd => _dragEndController.stream;
+  Stream<Event> get onMove => _moveController.stream;
+  Stream<Event> get onAddMarker => _addController.stream;
+  Stream<Event> get onRemoveMarker => _removeController.stream;
+  Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
+  Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
+
+  /**
+   * For internal use.
+   */
+  //StreamController<PopupEvent> get popupOpenController;
+  //StreamController<PopupEvent> get popupCloseController;
+  void fire(PopupEvent event) {
+    switch (event.type) {
+      case EventType.POPUPOPEN:
+        _popupOpenController.add(event);
+        break;
+      case EventType.POPUPCLOSE:
+        _popupCloseController.add(event);
+        break;
+    }
+  }
+
 }

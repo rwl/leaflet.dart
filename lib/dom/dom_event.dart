@@ -122,7 +122,7 @@ part of leaflet.dom;
 /**
  * Stop the given event from propagation to parent elements.
  */
-void stopPropagation(Event e) {
+void stopPropagation(html.Event e) {
   e.stopPropagation();
 //  _skipped(e);
 }

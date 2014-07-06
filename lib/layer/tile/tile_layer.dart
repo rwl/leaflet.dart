@@ -121,12 +121,15 @@ class TileLayerOptions {
 /**
  * TileLayer is used for standard xyz-numbered tile layers.
  */
-class TileLayer extends Object with core.Events implements Layer {
+class TileLayer implements Layer {
 
   String _url;
   LeafletMap _map;
   bool _animated;
   Timer _clearBgBufferTimer;
+
+  StreamSubscription<Event> _viewResetSubscription, _moveEndSubscription, _moveSubscription;
+  StreamSubscription<Event> _zoomAnimSubscription, _zoomEndSubscription;
 
 //  final Map<String, Object> options = {
 //    'minZoom': 0,
@@ -195,16 +198,20 @@ class TileLayer extends Object with core.Events implements Layer {
 
     // set up events
     // this is the wrong handler type
-    map.on(EventType.VIEWRESET, _reset);
-    map.on(EventType.MOVEEND, _update);
+    //map.on(EventType.VIEWRESET, _reset);
+    //map.on(EventType.MOVEEND, _update);
+    _viewResetSubscription = map.onViewReset.listen(_reset);
+    _moveEndSubscription = map.onMoveEnd.listen(_update);
 //    map.on({
 //      'viewreset': _reset,
 //      'moveend': _update
 //    }, this);
 
     if (_animated == true) {
-      map.on(EventType.ZOOMANIM, _animateZoom);
-      map.on(EventType.ZOOMEND, _endZoomAnim);
+      //map.on(EventType.ZOOMANIM, _animateZoom);
+      //map.on(EventType.ZOOMEND, _endZoomAnim);
+      _zoomAnimSubscription = map.onZoomStart.listen(_animateZoom);
+      _zoomEndSubscription = map.onZoomEnd.listen(_endZoomAnim);
 //      map.on({
 //        'zoomanim': _animateZoom,
 //        'zoomend': _endZoomAnim
@@ -217,10 +224,11 @@ class TileLayer extends Object with core.Events implements Layer {
         //new Future.delayed(const Duration(milliseconds: 150), _update);
         new Timer(const Duration(milliseconds: 150), _update);
       };
-      map.on(EventType.MOVE, _limitedUpdate);
+      //map.on(EventType.MOVE, _limitedUpdate);
+      _moveSubscription = map.onMove.listen(_limitedUpdate);
     }
 
-    _reset();
+    _resetLayer();
     _update();
   }
 
@@ -237,16 +245,20 @@ class TileLayer extends Object with core.Events implements Layer {
     //_container.parentNode.removeChild(_container);
     _container.remove();
 
-    map.off(EventType.VIEWRESET, _reset);
-    map.off(EventType.MOVEEND, _update);
+    //map.off(EventType.VIEWRESET, _reset);
+    //map.off(EventType.MOVEEND, _update);
+    _viewResetSubscription.cancel();
+    _moveEndSubscription.cancel();
 //    map.off({
 //      'viewreset': _reset,
 //      'moveend': _update
 //    }, this);
 
     if (_animated == true) {
-      map.off(EventType.ZOOMANIM, _animateZoom);
-      map.off(EventType.ZOOMEND, _endZoomAnim);
+      //map.off(EventType.ZOOMANIM, _animateZoom);
+      //map.off(EventType.ZOOMEND, _endZoomAnim);
+      _zoomAnimSubscription.cancel();
+      _zoomEndSubscription.cancel();
 //      map.off({
 //        'zoomanim': _animateZoom,
 //        'zoomend': _endZoomAnim
@@ -254,7 +266,8 @@ class TileLayer extends Object with core.Events implements Layer {
     }
 
     if (!options.updateWhenIdle) {
-      map.off(EventType.MOVE, _limitedUpdate);
+      //map.off(EventType.MOVE, _limitedUpdate);
+      _moveSubscription.cancel();
     }
 
     _container = null;
@@ -398,10 +411,15 @@ class TileLayer extends Object with core.Events implements Layer {
   int _tilesToLoad;
   List _unusedTiles;
 
-  void _reset([Object obj, Event e, bool hard = false]) {
+  void _reset(_) {
+    _resetLayer();
+  }
+
+  void _resetLayer([bool hard = false]) {
     if (_tiles != null) {
       for (var key in _tiles.keys) {
-        fireEvent(new TileEvent(EventType.TILEUNLOAD, _tiles[key], null));
+        //fireEvent(new TileEvent(EventType.TILEUNLOAD, _tiles[key], null));
+        _tileUnloadController.add(new TileEvent(EventType.TILEUNLOAD, _tiles[key], null));
       }
     }
 
@@ -485,7 +503,8 @@ class TileLayer extends Object with core.Events implements Layer {
 
     // if its the first batch of tiles to load
     if (_tilesToLoad == 0) {
-      fire(EventType.LOADING);
+      //fire(EventType.LOADING);
+      _loadingController.add(new Event(EventType.LOADING));
     }
 
     _tilesToLoad += tilesToLoad;
@@ -550,7 +569,8 @@ class TileLayer extends Object with core.Events implements Layer {
   void _removeTile(String key) {
     final tile = _tiles[key];
 
-    fireEvent(new TileEvent(EventType.TILEUNLOAD, tile, tile.src));
+    //fireEvent(new TileEvent(EventType.TILEUNLOAD, tile, tile.src));
+    _tileUnloadController.add(new TileEvent(EventType.TILEUNLOAD, tile, tile.src));
 
     if (options.reuseTiles) {
       tile.classes.remove('leaflet-tile-loaded');
@@ -685,7 +705,8 @@ class TileLayer extends Object with core.Events implements Layer {
     _adjustTilePoint(tilePoint);
     tile.src = getTileUrl(tilePoint);
 
-    fireEvent(new TileEvent(EventType.TILELOADSTART, tile, tile.src));
+    //fireEvent(new TileEvent(EventType.TILELOADSTART, tile, tile.src));
+    _tileLoadStartController.add(new TileEvent(EventType.TILELOADSTART, tile, tile.src));
   }
 
   void _tileLoaded() {
@@ -697,7 +718,8 @@ class TileLayer extends Object with core.Events implements Layer {
     }
 
     if (_tilesToLoad == 0) {
-      fire(EventType.LOAD);
+      //fire(EventType.LOAD);
+      _loadController.add(new Event(EventType.LOAD));
 
       if (_animated == true) {
         // clear scaled tiles after all new tiles are loaded (for performance)
@@ -725,7 +747,8 @@ class TileLayer extends Object with core.Events implements Layer {
       img.classes.add('leaflet-tile-loaded');
 
       //fireEvent(new TileEvent(EventType.TILELOAD, this, this.src));
-      fireEvent(new TileEvent(EventType.TILELOAD, img, img.src));
+      //fireEvent(new TileEvent(EventType.TILELOAD, img, img.src));
+      _tileLoadController.add(new TileEvent(EventType.TILELOAD, img, img.src));
     }
 
     _tileLoaded();
@@ -857,4 +880,16 @@ class TileLayer extends Object with core.Events implements Layer {
       }
     }
   }
+
+  StreamController<Event> _loadingController = new StreamController.broadcast();
+  StreamController<Event> _loadController = new StreamController.broadcast();
+  StreamController<TileEvent> _tileLoadStartController = new StreamController.broadcast();
+  StreamController<TileEvent> _tileLoadController = new StreamController.broadcast();
+  StreamController<TileEvent> _tileUnloadController = new StreamController.broadcast();
+
+  Stream<Event> get onLoading => _loadingController.stream;
+  Stream<Event> get onLoad => _loadController.stream;
+  Stream<TileEvent> get onTileLoadStart => _tileLoadStartController.stream;
+  Stream<TileEvent> get onTileLoad => _tileLoadController.stream;
+  Stream<TileEvent> get onUnload => _tileUnloadController.stream;
 }

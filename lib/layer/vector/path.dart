@@ -70,7 +70,7 @@ class PathOptions {
 /**
  * Path is a base class for rendering vector paths on a map. Inherited by Polyline, Circle, etc.
  */
-abstract class Path extends Layer with Events {
+abstract class Path extends Layer {
 
   // how much to extend the clip area around the map view
   // (relative to its size, e.g. 0.5 is half the screen in each direction)
@@ -104,6 +104,8 @@ abstract class Path extends Layer with Events {
   Element _container;
   var _stroke, _fill;
 
+  StreamSubscription<Event> _viewResetSubscription, _moveEndSubscription;
+
   Path(this.options);
 
   onAdd(LeafletMap map) {
@@ -121,10 +123,13 @@ abstract class Path extends Layer with Events {
       _map.pathRoot.append(_container);
     }
 
-    fire(EventType.ADD);
+    //fire(EventType.ADD);
+    _addController.add(new Event(EventType.ADD));
 
-    map.on(EventType.VIEWRESET, projectLatlngs, this);
-    map.on(EventType.MOVEEND, this._updatePath, this);
+    //map.on(EventType.VIEWRESET, projectLatlngs, this);
+    //map.on(EventType.MOVEEND, this._updatePath, this);
+    _viewResetSubscription = map.onViewReset.listen(projectLatlngs);
+    _moveEndSubscription = map.onMoveEnd.listen(_updatePath);
   }
 
   /**
@@ -139,7 +144,8 @@ abstract class Path extends Layer with Events {
     _container.remove();
 
     // Need to fire remove event before we set _map to null as the event hooks might need the object
-    fire(EventType.REMOVE);
+    //fire(EventType.REMOVE);
+    _removeController.add(new Event(EventType.REMOVE));
     _map = null;
 
     if (Browser.vml) {
@@ -148,14 +154,16 @@ abstract class Path extends Layer with Events {
       _fill = null;
     }
 
-    map.off(EventType.VIEWRESET, projectLatlngs, this);
-    map.off(EventType.MOVEEND, this._updatePath, this);
+    //map.off(EventType.VIEWRESET, projectLatlngs, this);
+    //map.off(EventType.MOVEEND, this._updatePath, this);
+    _viewResetSubscription.cancel();
+    _moveEndSubscription.cancel();
   }
 
   /**
    * Do all projection stuff here.
    */
-  void projectLatlngs([Object obj=null, Event e=null]);
+  void projectLatlngs();
 
   /**
    * Changes the appearance of a Path based on the options in the Path options object.
@@ -199,6 +207,8 @@ abstract class Path extends Layer with Events {
     _popup.setContent(elem);
   }
 
+  StreamSubscription<Event> _popupClickSubscription, _popupRemoveSubscription;
+
   /**
    * Binds a given popup object to the path.
    */
@@ -206,8 +216,10 @@ abstract class Path extends Layer with Events {
     _popup = popup;
 
     if (!_popupHandlersAdded) {
-      on(EventType.CLICK, _openPopup, this);
-      on(EventType.REMOVE, closePopup, this);
+      //on(EventType.CLICK, _openPopup, this);
+      //on(EventType.REMOVE, closePopup, this);
+      _popupClickSubscription = onClick.listen(_openPopup);
+      _popupRemoveSubscription = onRemoveMarker.listen(closePopup);
 
       _popupHandlersAdded = true;
     }
@@ -219,8 +231,10 @@ abstract class Path extends Layer with Events {
   void unbindPopup() {
     if (_popup != null) {
       _popup = null;
-      off(EventType.CLICK, _openPopup);
-      off(EventType.REMOVE, closePopup);
+      //off(EventType.CLICK, _openPopup);
+      //off(EventType.REMOVE, closePopup);
+      _popupClickSubscription.cancel();
+      _popupRemoveSubscription.cancel();
 
       _popupHandlersAdded = false;
     }
@@ -237,20 +251,20 @@ abstract class Path extends Layer with Events {
         latlng = _latlngs[(_latlngs.length / 2).floor()];
       }
 
-      _openPopup(null, new LocationEvent()..latlng = latlng);
+      _openPopup(new LocationEvent()..latlng = latlng);
     }
   }
 
   /**
    * Closes the path's bound popup if it is opened.
    */
-  void closePopup(Object obj, Event e) {
+  void closePopup(_) {
     if (_popup != null) {
       _popup.close();
     }
   }
 
-  void _openPopup(Object obj, LocationEvent e) {
+  void _openPopup(LocationEvent e) {
     _popup.setLatLng(e.latlng);
     _map.openPopup(_popup);
   }
@@ -379,26 +393,131 @@ abstract class Path extends Layer with Events {
         _path.classes.add('leaflet-clickable');
       }
 
-      dom.on(_container, 'click', _onMouseClick, this);
+      //dom.on(_container, 'click', _onMouseClick, this);
+      _container.onClick.listen(_onMouseClick);
 
-      var events = ['dblclick', 'mousedown', 'mouseover',
+      /*var events = ['dblclick', 'mousedown', 'mouseover',
                     'mouseout', 'mousemove', 'contextmenu'];
       for (var i = 0; i < events.length; i++) {
         dom.on(_container, events[i], _fireMouseEvent, this);
-      }
+      }*/
+      _container.onDoubleClick.listen(_fireDoubleClickEvent);
+      _container.onMouseDown.listen(_fireMouseDownEvent);
+      _container.onMouseOver.listen(_fireMouseOverEvent);
+      _container.onMouseOut.listen(_fireMouseOutEvent);
+      _container.onMouseMove.listen(_fireMouseMoveEvent);
+      _container.onContextMenu.listen(_fireContextMenuEvent);
     }
   }
 
-  _onMouseClick(e) {
-    if (_map.dragging && _map.dragging.moved()) { return; }
+  _onMouseClick(html.MouseEvent e) {
+    if (_map.dragging != null && _map.dragging.moved()) {
+      return;
+    }
 
-    _fireMouseEvent(e);
+    _fireClickEvent(e);
   }
 
-  _fireMouseEvent(e) {
+  _fireClickEvent(html.MouseEvent e) {
+    if (!_clickController.hasListener) {
+      return;
+    }
+
+    final containerPoint = _map.mouseEventToContainerPoint(e),
+        layerPoint = _map.containerPointToLayerPoint(containerPoint),
+        latlng = _map.layerPointToLatLng(layerPoint);
+
+    _clickController.add(new MouseEvent(EventType.CLICK, latlng, layerPoint, containerPoint, e));
+
+    e.stopPropagation();
+  }
+
+  _fireDoubleClickEvent(html.MouseEvent e) {
+    if (!_dblClickController.hasListener) {
+      return;
+    }
+
+    final containerPoint = _map.mouseEventToContainerPoint(e),
+        layerPoint = _map.containerPointToLayerPoint(containerPoint),
+        latlng = _map.layerPointToLatLng(layerPoint);
+
+    _dblClickController.add(new MouseEvent(EventType.DBLCLICK, latlng, layerPoint, containerPoint, e));
+
+    e.stopPropagation();
+  }
+
+  _fireMouseDownEvent(html.MouseEvent e) {
+    if (!_mouseDownController.hasListener) {
+      return;
+    }
+
+    final containerPoint = _map.mouseEventToContainerPoint(e),
+        layerPoint = _map.containerPointToLayerPoint(containerPoint),
+        latlng = _map.layerPointToLatLng(layerPoint);
+
+    _mouseDownController.add(new MouseEvent(EventType.MOUSEDOWN, latlng, layerPoint, containerPoint, e));
+
+    e.stopPropagation();
+  }
+
+  _fireMouseOverEvent(html.MouseEvent e) {
+    if (!_mouseOverController.hasListener) {
+      return;
+    }
+
+    final containerPoint = _map.mouseEventToContainerPoint(e),
+        layerPoint = _map.containerPointToLayerPoint(containerPoint),
+        latlng = _map.layerPointToLatLng(layerPoint);
+
+    _mouseOverController.add(new MouseEvent(EventType.MOUSEOVER, latlng, layerPoint, containerPoint, e));
+
+    e.stopPropagation();
+  }
+
+  _fireMouseOutEvent(html.MouseEvent e) {
+    if (!_mouseOutController.hasListener) {
+      return;
+    }
+
+    final containerPoint = _map.mouseEventToContainerPoint(e),
+        layerPoint = _map.containerPointToLayerPoint(containerPoint),
+        latlng = _map.layerPointToLatLng(layerPoint);
+
+    _mouseOutController.add(new MouseEvent(EventType.MOUSEOUT, latlng, layerPoint, containerPoint, e));
+
+    e.stopPropagation();
+  }
+
+  _fireMouseMoveEvent(html.MouseEvent e) {
+    if (!_moveController.hasListener) {
+      return;
+    }
+
+    final containerPoint = _map.mouseEventToContainerPoint(e),
+        layerPoint = _map.containerPointToLayerPoint(containerPoint),
+        latlng = _map.layerPointToLatLng(layerPoint);
+
+    _moveController.add(new MouseEvent(EventType.MOUSEMOVE, latlng, layerPoint, containerPoint, e));
+  }
+
+  _fireContextMenuEvent(html.MouseEvent e) {
+    if (!_contextMenuController.hasListener) {
+      return;
+    }
+
+    final containerPoint = _map.mouseEventToContainerPoint(e),
+        layerPoint = _map.containerPointToLayerPoint(containerPoint),
+        latlng = _map.layerPointToLatLng(layerPoint);
+
+    _contextMenuController.add(new MouseEvent(EventType.CONTEXTMENU, latlng, layerPoint, containerPoint, e));
+
+    e.preventDefault();
+  }
+
+  /*_fireMouseEvent(html.MouseEvent e) {
     if (!hasEventListeners(e.type)) { return; }
 
-    var map = _map,
+    final map = _map,
         containerPoint = map.mouseEventToContainerPoint(e),
         layerPoint = map.containerPointToLayerPoint(containerPoint),
         latlng = map.layerPointToLatLng(layerPoint);
@@ -415,6 +534,46 @@ abstract class Path extends Layer with Events {
     }
     if (e.type != 'mousemove') {
       dom.stopPropagation(e);
+    }
+  }*/
+
+  StreamController<MouseEvent> _clickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _dblClickController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseDownController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOverController = new StreamController.broadcast();
+  StreamController<MouseEvent> _mouseOutController = new StreamController.broadcast();
+  StreamController<MouseEvent> _contextMenuController = new StreamController.broadcast();
+  StreamController<MouseEvent> _moveController = new StreamController.broadcast();
+  StreamController<Event> _addController = new StreamController.broadcast();
+  StreamController<Event> _removeController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupOpenController = new StreamController.broadcast();
+  StreamController<PopupEvent> _popupCloseController = new StreamController.broadcast();
+
+  Stream<MouseEvent> get onClick => _clickController.stream;
+  Stream<MouseEvent> get onDblClick => _dblClickController.stream;
+  Stream<MouseEvent> get onMouseDown => _mouseDownController.stream;
+  Stream<MouseEvent> get onMouseOver => _mouseOverController.stream;
+  Stream<MouseEvent> get onMouseOut => _mouseOutController.stream;
+  Stream<MouseEvent> get onContextMenu => _contextMenuController.stream;
+  Stream<MouseEvent> get onMove => _moveController.stream;
+  Stream<Event> get onAddMarker => _addController.stream;
+  Stream<Event> get onRemoveMarker => _removeController.stream;
+  Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
+  Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
+
+  /**
+   * For internal use.
+   */
+  //StreamController<PopupEvent> get popupOpenController;
+  //StreamController<PopupEvent> get popupCloseController;
+  void fire(PopupEvent event) {
+    switch (event.type) {
+      case EventType.POPUPOPEN:
+        _popupOpenController.add(event);
+        break;
+      case EventType.POPUPCLOSE:
+        _popupCloseController.add(event);
+        break;
     }
   }
 }

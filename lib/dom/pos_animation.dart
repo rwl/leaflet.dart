@@ -3,7 +3,7 @@ part of leaflet.dom;
 /**
  * PosAnimation is used by Leaflet internally for pan animations.
  */
-class PosAnimation extends Object with Events {
+class PosAnimation {
 
   Element _el;
   bool _inProgress;
@@ -81,7 +81,7 @@ class PosAnimation extends Object with Events {
     return new Point2D(left, top, true);
   }
 
-  _onTransitionEnd([Event e]) {
+  _onTransitionEnd([_]) {
     // because we use .first when subscribing
 //    DomEvent.off(this._el, DomUtil.TRANSITION_END, this._onTransitionEnd, this);
 
@@ -100,4 +100,12 @@ class PosAnimation extends Object with Events {
     fire(EventType.STEP);
     fire(EventType.END);
   }
+
+  StreamController<Event> _startController = new StreamController.broadcast();
+  StreamController<Event> _stepController = new StreamController.broadcast();
+  StreamController<Event> _endController = new StreamController.broadcast();
+
+  Stream<Event> get onStart => _startController.stream;
+  Stream<Event> get onStep => _stepController.stream;
+  Stream<Event> get onEnd => _endController.stream;
 }
