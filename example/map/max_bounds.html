@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Leaflet debug page</title>
+  <title>Leaflet debug page</title>
 
-	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 
   <link rel="stylesheet" href="packages/leaflet/leaflet.css">
 
-	<link rel="stylesheet" href="../css/mobile.css" />
+  <link rel="stylesheet" href="../css/mobile.css" />
 
 </head>
 <body>
-	<div id="map"></div>
+  <div id="map"></div>
 
   <script async type="application/dart">
     import 'package:leaflet/leaflet.dart';
@@ -36,6 +35,6 @@
   		latlngs.add(latlngs[0]);
   		new Polyline(latlngs).addTo(map);
     }
-	</script>
+  </script>
 </body>
 </html>

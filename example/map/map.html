@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Leaflet Map</title>
+  <title>Leaflet Map</title>
 
   <link rel="stylesheet" href="packages/leaflet/leaflet.css">
 
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<link rel="stylesheet" href="../css/screen.css" />
+  <link rel="stylesheet" href="../css/screen.css" />
 </head>
 <body>
 
-	<div id="map"></div>
-	<button id="populate">Populate with 10 markers</button>
+  <div id="map"></div>
+  <button id="populate">Populate with 10 markers</button>
 
   <script async type="application/dart">
     import 'dart:html' show document;
@@ -55,6 +55,6 @@
   		map.onZoomStart.listen(logEvent);
   		map.onZoomEnd.listen(logEvent);*/
     }
-	</script>
+  </script>
 </body>
 </html>

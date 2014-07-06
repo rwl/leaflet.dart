@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Leaflet Canvas</title>
+  <title>Leaflet Canvas</title>
 
   <link rel="stylesheet" href="../css/screen.css" />
   <link rel="stylesheet" href="packages/leaflet/leaflet.css">
 </head>
 <body>
 
-	<div id="map" style="width: 600px; height: 600px; border: 1px solid #ccc"></div>
+  <div id="map" style="width: 600px; height: 600px; border: 1px solid #ccc"></div>
 
-	<script async type="application/dart">
-	  import 'dart:html';
+  <script async type="application/dart">
+    import 'dart:html';
     import 'package:leaflet/leaflet.dart';
 
     class ExampleCanvas extends Canvas {
@@ -45,8 +45,7 @@
 		    ..zoom = 15
 		    ..layers = [tiles]);
     }
-
-	</script>
+  </script>
 
   <script async src="packages/browser/dart.js"></script>
 </body>
