@@ -122,7 +122,7 @@ part of leaflet.dom;
 /**
  * Stop the given event from propagation to parent elements.
  */
-void stopPropagation(html.Event e) {
+void stopPropagation(Event e) {
   e.stopPropagation();
 //  _skipped(e);
 }
@@ -157,7 +157,7 @@ void preventDefault(e) {
 /**
  * Does stopPropagation and preventDefault at the same time.
  */
-void stop(html.Event e) {
+void stop(Event e) {
   //preventDefault(e);
   e.preventDefault();
   //stopPropagation(e);
@@ -231,7 +231,7 @@ _getEvent() { // evil magic for IE
     var caller = arguments.callee.caller;
     while (caller) {
       e = caller['arguments'][0];
-      if (e && window.Event == e.constructor) {
+      if (e && window.MapEvent == e.constructor) {
         break;
       }
       caller = caller.caller;

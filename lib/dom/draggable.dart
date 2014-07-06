@@ -87,7 +87,7 @@ class Draggable {
         ..addEventListener(Draggable.END[e.type], _onUp);
   }
 
-  _onMove(html.Event e) {
+  _onMove(Event e) {
     Element target = e.target;
 
     if (e is TouchEvent && e.touches.length > 1) {
@@ -150,13 +150,13 @@ class Draggable {
     this._moving = false;
   }
 
-  StreamController<Event> _dragStartController = new StreamController.broadcast();
-  StreamController<Event> _preDragController = new StreamController.broadcast();
-  StreamController<Event> _dragController = new StreamController.broadcast();
-  StreamController<Event> _dragEndController = new StreamController.broadcast();
+  StreamController<MapEvent> _dragStartController = new StreamController.broadcast();
+  StreamController<MapEvent> _preDragController = new StreamController.broadcast();
+  StreamController<MapEvent> _dragController = new StreamController.broadcast();
+  StreamController<MapEvent> _dragEndController = new StreamController.broadcast();
 
-  Stream<Event> get onDragStart => _dragStartController.stream;
-  Stream<Event> get onPreDrag => _preDragController.stream;
-  Stream<Event> get onDrag => _dragController.stream;
-  Stream<Event> get onDragEnd => _dragEndController.stream;
+  Stream<MapEvent> get onDragStart => _dragStartController.stream;
+  Stream<MapEvent> get onPreDrag => _preDragController.stream;
+  Stream<MapEvent> get onDrag => _dragController.stream;
+  Stream<MapEvent> get onDragEnd => _dragEndController.stream;
 }

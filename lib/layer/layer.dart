@@ -1,12 +1,13 @@
 library leaflet.layer;
 
-import 'dart:html' as html show Element, CanvasElement, ImageElement;
+import 'dart:html' show Element, CanvasElement, ImageElement, Event;
+import 'dart:html' as html;
 import 'dart:math' as math show min, max;
 import 'dart:async' show Stream, StreamController, StreamSubscription;
 
 import 'package:simple_features/simple_features.dart' as sfs;
 
-import '../core/core.dart' show EventType, Browser, Action, stamp, Events, Event, LayerEvent, ZoomEvent, PopupEvent, MouseEvent;
+import '../core/core.dart' show EventType, Browser, Action, stamp, Events, MapEvent, LayerEvent, ZoomEvent, PopupEvent, MouseEvent;
 import '../dom/dom.dart' as dom;
 import '../map/map.dart';
 import '../geo/geo.dart';

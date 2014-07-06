@@ -131,7 +131,7 @@ class Popup extends Layer {//with Events {
     }
 
     //fire(EventType.OPEN);
-    _openController.add(new Event(EventType.OPEN));
+    _openController.add(new MapEvent(EventType.OPEN));
 
     map.fireEvent(new PopupEvent(EventType.POPUPOPEN, this));
 
@@ -177,7 +177,7 @@ class Popup extends Layer {//with Events {
     _map = null;
 
     //fire(EventType.CLOSE);
-    _closeController.add(new Event(EventType.CLOSE));
+    _closeController.add(new MapEvent(EventType.CLOSE));
 
     map.fireEvent(new PopupEvent(EventType.POPUPCLOSE, this));
 
@@ -233,7 +233,7 @@ class Popup extends Layer {//with Events {
     _adjustPan();
   }
 
-  StreamSubscription<Event> _viewResetSubscription, _zoomAnimSubscription,
+  StreamSubscription<MapEvent> _viewResetSubscription, _zoomAnimSubscription,
     _preClickSubscription, _moveEndSubscription;
 
   void _listen() {
@@ -319,7 +319,7 @@ class Popup extends Layer {//with Events {
 
     dom.disableScrollPropagation(_contentNode);
     //dom.on(wrapper, 'contextmenu', dom.stopPropagation);
-    wrapper.onContextMenu.listen((html.Event e) { e.stopPropagation(); });
+    wrapper.onContextMenu.listen((Event e) { e.stopPropagation(); });
 
     _tipContainer = dom.create('div', prefix + '-tip-container', container);
     _tip = dom.create('div', prefix + '-tip', _tipContainer);
@@ -338,7 +338,7 @@ class Popup extends Layer {//with Events {
       _contentNode.append(_content);
     }
     //fire(EventType.CONTENTUPDATE);
-    _contentUpdateController.add(new Event(EventType.CONTENTUPDATE));
+    _contentUpdateController.add(new MapEvent(EventType.CONTENTUPDATE));
   }
 
   void _updateLayout() {
@@ -453,11 +453,11 @@ class Popup extends Layer {//with Events {
     _isOpen = isOpen;
   }
 
-  StreamController<Event> _openController = new StreamController.broadcast();
-  StreamController<Event> _closeController = new StreamController.broadcast();
-  StreamController<Event> _contentUpdateController = new StreamController.broadcast();
+  StreamController<MapEvent> _openController = new StreamController.broadcast();
+  StreamController<MapEvent> _closeController = new StreamController.broadcast();
+  StreamController<MapEvent> _contentUpdateController = new StreamController.broadcast();
 
-  Stream<Event> get onOpen => _openController.stream;
-  Stream<Event> get onClose => _closeController.stream;
-  Stream<Event> get onContentUpdate => _contentUpdateController.stream;
+  Stream<MapEvent> get onOpen => _openController.stream;
+  Stream<MapEvent> get onClose => _closeController.stream;
+  Stream<MapEvent> get onContentUpdate => _contentUpdateController.stream;
 }

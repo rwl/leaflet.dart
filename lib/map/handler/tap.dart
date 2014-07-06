@@ -9,7 +9,7 @@ class Tap extends Handler {
   Timer _holdTimeout;
   Point2D _startPos, _newPos;
 
-  StreamSubscription<html.Event> _touchStartSubscription, _touchMoveSubscription, _touchEndSubscription;
+  StreamSubscription<Event> _touchStartSubscription, _touchMoveSubscription, _touchEndSubscription;
 
   Tap(LeafletMap map) : super(map);
 

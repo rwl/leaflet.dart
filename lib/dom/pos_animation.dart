@@ -101,11 +101,11 @@ class PosAnimation {
     fire(EventType.END);
   }
 
-  StreamController<Event> _startController = new StreamController.broadcast();
-  StreamController<Event> _stepController = new StreamController.broadcast();
-  StreamController<Event> _endController = new StreamController.broadcast();
+  StreamController<MapEvent> _startController = new StreamController.broadcast();
+  StreamController<MapEvent> _stepController = new StreamController.broadcast();
+  StreamController<MapEvent> _endController = new StreamController.broadcast();
 
-  Stream<Event> get onStart => _startController.stream;
-  Stream<Event> get onStep => _stepController.stream;
-  Stream<Event> get onEnd => _endController.stream;
+  Stream<MapEvent> get onStart => _startController.stream;
+  Stream<MapEvent> get onStep => _stepController.stream;
+  Stream<MapEvent> get onEnd => _endController.stream;
 }

@@ -1,9 +1,9 @@
 part of leaflet.core;
 
-typedef /*bool*/void Action(Event event);
-typedef /*bool*/void EventAction(Event event);
+typedef /*bool*/void Action(MapEvent event);
+typedef /*bool*/void EventAction(MapEvent event);
 
-class Event {
+class MapEvent {
   /**
    * The event type (e.g. 'click').
    */
@@ -18,15 +18,15 @@ class Event {
 
   Function action;
 
-  Event(this.type);
+  MapEvent(this.type);
 
-  factory Event._on(type, /*this.target,*/ action) {
-    return new Event(type)
+  factory MapEvent._on(type, /*this.target,*/ action) {
+    return new MapEvent(type)
       ..action = action;
   }
 }
 
-class MouseEvent extends Event {
+class MouseEvent extends MapEvent {
   /**
    * The geographical point where the mouse event occured.
    */
@@ -53,7 +53,7 @@ class MouseEvent extends Event {
   MouseEvent(EventType eventType, this.latlng, this.layerPoint, this.containerPoint, this.originalEvent) : super(eventType);
 }
 
-class LocationEvent extends Event {
+class LocationEvent extends MapEvent {
   /**
    * Detected geographical location of the user.
    */
@@ -100,7 +100,7 @@ class LocationEvent extends Event {
       this.heading, this.speed, this.timestamp) : super(EventType.LOCATIONFOUND);
 }
 
-class ErrorEvent extends Event {
+class ErrorEvent extends MapEvent {
   /**
    * Error message.
    */
@@ -115,7 +115,7 @@ class ErrorEvent extends Event {
   ErrorEvent(EventType eventType, this.code, this.message) : super(eventType);
 }
 
-class LayerEvent extends Event {
+class LayerEvent extends MapEvent {
   /**
    * The layer that was added or removed.
    */
@@ -125,7 +125,7 @@ class LayerEvent extends Event {
   LayerEvent(EventType type, this.layer) : super(type);
 }
 
-class LayersControlEvent extends Event {
+class LayersControlEvent extends MapEvent {
   /**
    * The layer that was added or removed.
    */
@@ -142,7 +142,7 @@ class LayersControlEvent extends Event {
   LayersControlEvent(EventType eventType, this.layer, this.name, this.overlay) : super(eventType);
 }
 
-class TileEvent extends Event {
+class TileEvent extends MapEvent {
   /**
    * The tile element (image).
    */
@@ -157,7 +157,7 @@ class TileEvent extends Event {
   TileEvent(EventType eventType, this.tile, this.url) : super(eventType);
 }
 
-class ResizeEvent extends Event {
+class ResizeEvent extends MapEvent {
   /**
    * The old size before resize event.
    */
@@ -172,7 +172,7 @@ class ResizeEvent extends Event {
   ResizeEvent(this.oldSize, this.newSize) : super(EventType.RESIZE);
 }
 
-class GeoJSONEvent extends Event {
+class GeoJSONEvent extends MapEvent {
   /**
    * The layer for the GeoJSON feature that is being added to the map.
    */
@@ -197,7 +197,7 @@ class GeoJSONEvent extends Event {
   GeoJSONEvent(EventType eventType, this.layer, this.properties, this.geometryType, this.id) : super(eventType);
 }
 
-class PopupEvent extends Event {
+class PopupEvent extends MapEvent {
   /**
    * The popup that was opened or closed.
    */
@@ -207,7 +207,7 @@ class PopupEvent extends Event {
   PopupEvent(EventType eventType, this.popup) : super(eventType);
 }
 
-class DragEndEvent extends Event {
+class DragEndEvent extends MapEvent {
   /**
    * The distance in pixels the draggable element was moved by.
    */
@@ -217,7 +217,7 @@ class DragEndEvent extends Event {
   DragEndEvent(this.distance) : super(EventType.DRAGEND);
 }
 
-class ZoomEvent extends Event {
+class ZoomEvent extends MapEvent {
   LatLng center;
   num zoom;
   Point2D origin;
@@ -229,12 +229,12 @@ class ZoomEvent extends Event {
   ZoomEvent(this.center, this.zoom, this.origin, this.scale, this.delta, this.backwards) : super(EventType.ZOOMANIM);
 }
 
-class ViewEvent extends Event {
+class ViewEvent extends MapEvent {
   bool hard;
   ViewEvent(EventType type, this.hard) : super(type);
 }
 
-class BoxZoomEvent extends Event {
+class BoxZoomEvent extends MapEvent {
   LatLngBounds boxZoomBounds;
   BoxZoomEvent(EventType type, this.boxZoomBounds) : super(type);
 }

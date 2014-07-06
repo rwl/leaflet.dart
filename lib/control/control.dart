@@ -1,14 +1,14 @@
 library leaflet.control;
 
 import 'dart:collection' show LinkedHashMap;
-import 'dart:html' show Element, document, InputElement;
+import 'dart:html' show Element, document, InputElement, Event;
 import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:async' show Timer, StreamSubscription;
 
 import 'package:leaflet/src/core/browser.dart' as browser;
 
-import '../core/core.dart' show Event, EventType, LayerEvent, Util, Browser, stamp, LayersControlEvent;
+import '../core/core.dart' show MapEvent, EventType, LayerEvent, Util, Browser, stamp, LayersControlEvent;
 import '../map/map.dart';
 import '../dom/dom.dart' as dom;
 import '../layer/layer.dart' show Layer;

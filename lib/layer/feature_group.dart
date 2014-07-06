@@ -127,7 +127,7 @@ class FeatureGroup extends LayerGroup {
     return bounds;
   }
 
-  _propagateEvent(Event e) {
+  _propagateEvent(MapEvent e) {
     final ee = e.copy();
     ee.layer = e.target;
     ee.target = this;

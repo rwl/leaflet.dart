@@ -1,7 +1,7 @@
 library leaflet.map;
 
 import 'dart:html' show Element, querySelector, window, document,
-    CanvasRenderingContext2D, Geoposition, PositionError, CanvasElement;
+    CanvasRenderingContext2D, Geoposition, PositionError, CanvasElement, Event;
 import 'dart:html' as html;
 import 'dart:svg' show SvgSvgElement;
 import 'dart:math' as math;
@@ -11,7 +11,7 @@ import 'package:leaflet/src/core/browser.dart' as browser;
 import 'package:quiver/core.dart' show firstNonNull;
 
 import '../core/core.dart' show Handler, Events, stamp, ZoomAnimEvent;
-import '../core/core.dart' show Event, EventType, Util, Browser, LayerEvent, ResizeEvent, ViewEvent, MouseEvent, ZoomEvent, ErrorEvent, LocationEvent, TileEvent, LayersControlEvent, DragEndEvent, PopupEvent;
+import '../core/core.dart' show MapEvent, EventType, Util, Browser, LayerEvent, ResizeEvent, ViewEvent, MouseEvent, ZoomEvent, ErrorEvent, LocationEvent, TileEvent, LayersControlEvent, DragEndEvent, PopupEvent;
 import '../geo/geo.dart' show LatLng, LatLngBounds;
 import '../geo/crs/crs.dart' show CRS, EPSG3857;
 import '../geometry/geometry.dart' show Bounds, Point2D;
@@ -304,7 +304,7 @@ class LeafletMap extends Object {
     fire(EventType.MOVEEND);
   }*/
 
-  StreamSubscription<Event> _panInsideMaxBoundsSubscription;
+  StreamSubscription<MapEvent> _panInsideMaxBoundsSubscription;
 
   /**
    * Restricts the map view to the given bounds (see map maxBounds option).
@@ -946,7 +946,7 @@ class LeafletMap extends Object {
 
   // map events
 
-  StreamSubscription<html.Event> onResizeSubscription;
+  StreamSubscription<Event> onResizeSubscription;
   StreamSubscription<html.MouseEvent> onClickSubscription;
   List<StreamSubscription> eventSubscriptions;
 
@@ -1007,7 +1007,7 @@ class LeafletMap extends Object {
 
   int _resizeRequest;
 
-  void _onResize(html.Event event) {
+  void _onResize(Event event) {
     if (_resizeRequest != null) window.cancelAnimationFrame(_resizeRequest);
     _resizeRequest = window.requestAnimationFrame((num highResTime) {
       invalidateSize(debounceMoveend: true);
@@ -1025,7 +1025,7 @@ class LeafletMap extends Object {
     _fireMouseEvent(e);
   }
 
-  void _fireMouseEvent(html.Event e) {
+  void _fireMouseEvent(Event e) {
     if (_loaded != true || dom.skipped(e) == true) {
       return;
     }
@@ -1728,11 +1728,11 @@ class LeafletMap extends Object {
   /* Events */
 
   void fire(EventType eventType) {
-    final event = new Event(eventType);
+    final event = new MapEvent(eventType);
     fireEvent(event);
   }
 
-  void fireEvent(Event event) {
+  void fireEvent(MapEvent event) {
     if (event is MouseEvent) {
       if (event.type == EventType.CLICK) {
         _clickController.add(event);
@@ -1748,23 +1748,23 @@ class LeafletMap extends Object {
   StreamController<MouseEvent> _mouseOutController = new StreamController.broadcast();
   StreamController<MouseEvent> _mouseMoveController = new StreamController.broadcast();
   StreamController<MouseEvent> _contextMenuController = new StreamController.broadcast();
-  StreamController<Event> _focusController = new StreamController.broadcast();
-  StreamController<Event> _blurController = new StreamController.broadcast();
+  StreamController<MapEvent> _focusController = new StreamController.broadcast();
+  StreamController<MapEvent> _blurController = new StreamController.broadcast();
   StreamController<MouseEvent> _preClickController = new StreamController.broadcast();
-  StreamController<Event> _loadController = new StreamController.broadcast();
-  StreamController<Event> _unloadController = new StreamController.broadcast();
-  StreamController<Event> _viewResetController = new StreamController.broadcast();
-  StreamController<Event> _moveStartController = new StreamController.broadcast();
-  StreamController<Event> _moveController = new StreamController.broadcast();
-  StreamController<Event> _moveEndController = new StreamController.broadcast();
-  StreamController<Event> _dragStartController = new StreamController.broadcast();
-  StreamController<Event> _dragController = new StreamController.broadcast();
+  StreamController<MapEvent> _loadController = new StreamController.broadcast();
+  StreamController<MapEvent> _unloadController = new StreamController.broadcast();
+  StreamController<MapEvent> _viewResetController = new StreamController.broadcast();
+  StreamController<MapEvent> _moveStartController = new StreamController.broadcast();
+  StreamController<MapEvent> _moveController = new StreamController.broadcast();
+  StreamController<MapEvent> _moveEndController = new StreamController.broadcast();
+  StreamController<MapEvent> _dragStartController = new StreamController.broadcast();
+  StreamController<MapEvent> _dragController = new StreamController.broadcast();
   StreamController<DragEndEvent> _dragEndController = new StreamController.broadcast();
-  StreamController<Event> _zoomStartController = new StreamController.broadcast();
-  StreamController<Event> _zoomEndController = new StreamController.broadcast();
-  StreamController<Event> _zoomLevelsChangeController = new StreamController.broadcast();
+  StreamController<MapEvent> _zoomStartController = new StreamController.broadcast();
+  StreamController<MapEvent> _zoomEndController = new StreamController.broadcast();
+  StreamController<MapEvent> _zoomLevelsChangeController = new StreamController.broadcast();
   StreamController<ResizeEvent> _resizeController = new StreamController.broadcast();
-  StreamController<Event> _autoPanStartController = new StreamController.broadcast();
+  StreamController<MapEvent> _autoPanStartController = new StreamController.broadcast();
   StreamController<LayerEvent> _layerAddController = new StreamController.broadcast();
   StreamController<LayerEvent> _layerRemoveController = new StreamController.broadcast();
   StreamController<LayersControlEvent> _baseLayerChangeController = new StreamController.broadcast();
@@ -1783,23 +1783,23 @@ class LeafletMap extends Object {
   Stream<MouseEvent> get onMouseOut => _mouseOutController.stream;
   Stream<MouseEvent> get onMouseMove => _mouseMoveController.stream;
   Stream<MouseEvent> get onContextMenu => _contextMenuController.stream;
-  Stream<Event> get onFocus => _focusController.stream;
-  Stream<Event> get onBlur => _blurController.stream;
+  Stream<MapEvent> get onFocus => _focusController.stream;
+  Stream<MapEvent> get onBlur => _blurController.stream;
   Stream<MouseEvent> get onPreClick => _preClickController.stream;
-  Stream<Event> get onLoad => _loadController.stream;
-  Stream<Event> get onUnload => _unloadController.stream;
-  Stream<Event> get onViewReset => _viewResetController.stream;
-  Stream<Event> get onMoveStart => _moveStartController.stream;
-  Stream<Event> get onMove => _moveController.stream;
-  Stream<Event> get onMoveEnd => _moveEndController.stream;
-  Stream<Event> get onDragStart => _dragStartController.stream;
-  Stream<Event> get onDrag => _dragController.stream;
+  Stream<MapEvent> get onLoad => _loadController.stream;
+  Stream<MapEvent> get onUnload => _unloadController.stream;
+  Stream<MapEvent> get onViewReset => _viewResetController.stream;
+  Stream<MapEvent> get onMoveStart => _moveStartController.stream;
+  Stream<MapEvent> get onMove => _moveController.stream;
+  Stream<MapEvent> get onMoveEnd => _moveEndController.stream;
+  Stream<MapEvent> get onDragStart => _dragStartController.stream;
+  Stream<MapEvent> get onDrag => _dragController.stream;
   Stream<DragEndEvent> get onDragEnd => _dragEndController.stream;
-  Stream<Event> get onZoomStart => _zoomStartController.stream;
-  Stream<Event> get onZoomEnd => _zoomEndController.stream;
-  Stream<Event> get onZoomLevelsChange => _zoomLevelsChangeController.stream;
+  Stream<MapEvent> get onZoomStart => _zoomStartController.stream;
+  Stream<MapEvent> get onZoomEnd => _zoomEndController.stream;
+  Stream<MapEvent> get onZoomLevelsChange => _zoomLevelsChangeController.stream;
   Stream<ResizeEvent> get onResize => _resizeController.stream;
-  Stream<Event> get onAutoPanStart => _autoPanStartController.stream;
+  Stream<MapEvent> get onAutoPanStart => _autoPanStartController.stream;
   Stream<LayerEvent> get onLayerAdd => _layerAddController.stream;
   Stream<LayerEvent> get onLayerRemove => _layerRemoveController.stream;
   Stream<LayersControlEvent> get onBaseLayerChange => _baseLayerChangeController.stream;

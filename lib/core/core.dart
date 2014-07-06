@@ -1,7 +1,7 @@
 library leaflet.core;
 
 import 'dart:html' as html;
-import 'dart:html' show Element, window;
+import 'dart:html' show Element, window, Event;
 //import 'dart:js';
 
 import 'dart:math' as math;

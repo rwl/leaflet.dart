@@ -1,14 +1,13 @@
 library leaflet.layer.tile;
 
-import 'dart:html' show Element, ImageElement, Node, ParentNode, document, CanvasElement;
-import 'dart:html' as html;
+import 'dart:html' show Element, ImageElement, Node, ParentNode, document, CanvasElement, Event;
 import 'dart:math' as math;
 import 'dart:async' show Timer, Future, Stream, StreamController, StreamSubscription;
 
 import 'package:leaflet/src/core/browser.dart' as browser;
 
 import '../../core/core.dart' as core;
-import '../../core/core.dart' show Event, EventType, Browser, Util, TileEvent, ZoomEvent;
+import '../../core/core.dart' show MapEvent, EventType, Browser, Util, TileEvent, ZoomEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geo/crs/crs.dart' show CRS, EPSG4326;

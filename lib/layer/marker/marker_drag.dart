@@ -8,7 +8,7 @@ class MarkerDrag extends Handler {
   Marker _marker;
   dom.Draggable _draggable;
 
-  StreamSubscription<Event> _dragStartSubscription, _dragSubscription;
+  StreamSubscription<MapEvent> _dragStartSubscription, _dragSubscription;
   StreamSubscription<DragEndEvent> _dragEndSubscription;
 
   MarkerDrag(this._marker) : super(null);
@@ -49,8 +49,8 @@ class MarkerDrag extends Handler {
     _marker.closePopup();
     //_marker.fire(EventType.MOVESTART);
     //_marker.fire(EventType.DRAGSTART);
-    _marker._moveController.add(new Event(EventType.MOVESTART));
-    _marker._dragStartController.add(new Event(EventType.DRAGSTART));
+    _marker._moveController.add(new MapEvent(EventType.MOVESTART));
+    _marker._dragStartController.add(new MapEvent(EventType.DRAGSTART));
   }
 
   void _onDrag(_) {
@@ -69,13 +69,13 @@ class MarkerDrag extends Handler {
     //marker.fireEvent(new MouseEvent(EventType.MOVE, latlng, null, null, null));
     marker._moveController.add(new MouseEvent(EventType.MOVE, latlng, null, null, null));
     //marker.fire(EventType.DRAG);
-    marker._dragController.add(new Event(EventType.DRAG));
+    marker._dragController.add(new MapEvent(EventType.DRAG));
   }
 
   void _onDragEnd(DragEndEvent e) {
     //_marker.fire(EventType.MOVEEND);
     //_marker.fire(EventType.DRAGEND, e);
-    _marker._moveController.add(new Event(EventType.MOVEEND));
+    _marker._moveController.add(new MapEvent(EventType.MOVEEND));
     _marker._dragEndController.add(new DragEndEvent(EventType.DRAGEND));
   }
 }

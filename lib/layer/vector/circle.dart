@@ -41,7 +41,7 @@ class Circle extends Path {
     redraw();
   }
 
-  void projectLatlngs([Object obj=null, Event e=null]) {
+  void projectLatlngs([Object obj=null, MapEvent e=null]) {
     final lngRadius = _getLngRadius(),
         latlng = _latlng,
         pointLeft = _map.latLngToLayerPoint(new LatLng(latlng.lat, latlng.lng - lngRadius));

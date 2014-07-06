@@ -16,7 +16,7 @@ class CircleMarker extends Circle {
     this._radius = options.radius;
   }
 
-  void projectLatlngs([Object obj=null, Event e=null]) {
+  void projectLatlngs([Object obj=null, MapEvent e=null]) {
     this._point = this._map.latLngToLayerPoint(this._latlng);
   }
 

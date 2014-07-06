@@ -190,7 +190,7 @@ class Polyline extends Path {
     }
   }
 
-  _updatePath([Object obj, Event e]) {
+  _updatePath([Object obj, MapEvent e]) {
     if (_map == null) { return; }
 
     _clipPoints();

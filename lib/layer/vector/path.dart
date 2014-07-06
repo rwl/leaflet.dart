@@ -104,7 +104,7 @@ abstract class Path extends Layer {
   Element _container;
   var _stroke, _fill;
 
-  StreamSubscription<Event> _viewResetSubscription, _moveEndSubscription;
+  StreamSubscription<MapEvent> _viewResetSubscription, _moveEndSubscription;
 
   Path(this.options);
 
@@ -124,7 +124,7 @@ abstract class Path extends Layer {
     }
 
     //fire(EventType.ADD);
-    _addController.add(new Event(EventType.ADD));
+    _addController.add(new MapEvent(EventType.ADD));
 
     //map.on(EventType.VIEWRESET, projectLatlngs, this);
     //map.on(EventType.MOVEEND, this._updatePath, this);
@@ -145,7 +145,7 @@ abstract class Path extends Layer {
 
     // Need to fire remove event before we set _map to null as the event hooks might need the object
     //fire(EventType.REMOVE);
-    _removeController.add(new Event(EventType.REMOVE));
+    _removeController.add(new MapEvent(EventType.REMOVE));
     _map = null;
 
     if (Browser.vml) {
@@ -207,7 +207,7 @@ abstract class Path extends Layer {
     _popup.setContent(elem);
   }
 
-  StreamSubscription<Event> _popupClickSubscription, _popupRemoveSubscription;
+  StreamSubscription<MapEvent> _popupClickSubscription, _popupRemoveSubscription;
 
   /**
    * Binds a given popup object to the path.
@@ -377,7 +377,7 @@ abstract class Path extends Layer {
     }
   }
 
-  _updatePath([Object obj, Event e]) {
+  _updatePath([Object obj, MapEvent e]) {
     var str = getPathString();
     if (!str) {
       // fix webkit empty string parsing bug
@@ -544,8 +544,8 @@ abstract class Path extends Layer {
   StreamController<MouseEvent> _mouseOutController = new StreamController.broadcast();
   StreamController<MouseEvent> _contextMenuController = new StreamController.broadcast();
   StreamController<MouseEvent> _moveController = new StreamController.broadcast();
-  StreamController<Event> _addController = new StreamController.broadcast();
-  StreamController<Event> _removeController = new StreamController.broadcast();
+  StreamController<MapEvent> _addController = new StreamController.broadcast();
+  StreamController<MapEvent> _removeController = new StreamController.broadcast();
   StreamController<PopupEvent> _popupOpenController = new StreamController.broadcast();
   StreamController<PopupEvent> _popupCloseController = new StreamController.broadcast();
 
@@ -556,8 +556,8 @@ abstract class Path extends Layer {
   Stream<MouseEvent> get onMouseOut => _mouseOutController.stream;
   Stream<MouseEvent> get onContextMenu => _contextMenuController.stream;
   Stream<MouseEvent> get onMove => _moveController.stream;
-  Stream<Event> get onAddMarker => _addController.stream;
-  Stream<Event> get onRemoveMarker => _removeController.stream;
+  Stream<MapEvent> get onAddMarker => _addController.stream;
+  Stream<MapEvent> get onRemoveMarker => _removeController.stream;
   Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
   Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
 

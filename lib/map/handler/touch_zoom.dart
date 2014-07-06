@@ -14,7 +14,7 @@ class TouchZoom extends Handler {
    */
   bool get zooming => _zooming;
 
-  StreamSubscription<html.Event> _touchStartSubscription, _touchMoveSubscription, _touchEndSubscription;
+  StreamSubscription<Event> _touchStartSubscription, _touchMoveSubscription, _touchEndSubscription;
 
   TouchZoom(LeafletMap map) : super(map);
 
@@ -105,7 +105,7 @@ class TouchZoom extends Handler {
     map.animateZoom(center, zoom, this._startCenter, this._scale, this._delta);
   }
 
-  _onTouchEnd([html.Event e]) {
+  _onTouchEnd([Event e]) {
     if (!this._moved || !this._zooming) {
       this._zooming = false;
       return;

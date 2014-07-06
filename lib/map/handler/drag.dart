@@ -101,7 +101,7 @@ class Drag extends Handler {
     _draggable.newPos.x = newX;
   }
 
-  _onDragEnd(Event e) {
+  _onDragEnd(MapEvent e) {
     final options = map.options,
         delay = /*+*/new DateTime.now().difference(_lastTime),
 

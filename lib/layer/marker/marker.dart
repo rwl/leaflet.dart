@@ -1,10 +1,10 @@
 library leaflet.layer.marker;
 
-import 'dart:html' show document, Element, ImageElement, DivElement;
+import 'dart:html' show document, Element, ImageElement, DivElement, Event;
 import 'dart:html' as html;
 import 'dart:async' show Stream, StreamController, StreamSubscription;
 
-import '../../core/core.dart' show Browser, EventType, Event, Events, Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent;
+import '../../core/core.dart' show Browser, EventType, MapEvent, Events, Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geometry/geometry.dart' show Point2D;
@@ -104,7 +104,7 @@ class Marker extends Layer {
   };*/
   MarkerOptions options;
 
-  StreamSubscription<Event> _viewResetSubscription, _zoomAnimSubscription;
+  StreamSubscription<MapEvent> _viewResetSubscription, _zoomAnimSubscription;
 
   Marker(LatLng latlng, [this.options=null]) {
     if (options == null) {
@@ -122,7 +122,7 @@ class Marker extends Layer {
     _initIcon();
     update();
     //fire(EventType.ADD);
-    _addController.add(new Event(EventType.ADD));
+    _addController.add(new MapEvent(EventType.ADD));
 
     if (map.options.zoomAnimation && map.options.markerZoomAnimation) {
       //map.on(EventType.ZOOMANIM, _animateZoom);
@@ -146,7 +146,7 @@ class Marker extends Layer {
     _removeShadow();
 
     //fire(EventType.REMOVE);
-    _removeController.add(new Event(EventType.REMOVE));
+    _removeController.add(new MapEvent(EventType.REMOVE));
 
     //map.off(EventType.VIEWRESET, update);
     //map.off(EventType.ZOOMANIM, _animateZoom);
@@ -195,7 +195,7 @@ class Marker extends Layer {
 
   // Updates the marker position, useful if coordinates of its latLng object
   // were changed directly.
-  void update([Object obj=null, Event e=null]) {
+  void update([Object obj=null, MapEvent e=null]) {
     if (_icon != null) {
       final pos = _map.latLngToLayerPoint(_latlng).rounded();
       _setPos(pos);
@@ -383,27 +383,27 @@ class Marker extends Layer {
     }
   }
 
-  void _fireDoubleClickEvent(html.Event e) {
+  void _fireDoubleClickEvent(Event e) {
     _dblClickController.add(new MouseEvent(EventType.DBLCLICK, _latlng, null, null, e));
     e.stopPropagation();
   }
 
-  void _fireMouseDownEvent(html.Event e) {
+  void _fireMouseDownEvent(Event e) {
     _mouseDownController.add(new MouseEvent(EventType.MOUSEDOWN, _latlng, null, null, e));
     e.preventDefault();
   }
 
-  void _fireMouseOverEvent(html.Event e) {
+  void _fireMouseOverEvent(Event e) {
     _mouseOverController.add(new MouseEvent(EventType.MOUSEOVER, _latlng, null, null, e));
     e.stopPropagation();
   }
 
-  void _fireMouseOutEvent(html.Event e) {
+  void _fireMouseOutEvent(Event e) {
     _mouseOutController.add(new MouseEvent(EventType.MOUSEOUT, _latlng, null, null, e));
     e.stopPropagation();
   }
 
-  void _fireContextMenuEvent(html.Event e) {
+  void _fireContextMenuEvent(Event e) {
     _contextMenuController.add(new MouseEvent(EventType.CONTEXTMENU, _latlng, null, null, e));
     if (_contextMenuController.hasListener) {
       e.preventDefault();
@@ -411,7 +411,7 @@ class Marker extends Layer {
     e.stopPropagation();
   }
 
-  /*void _fireMouseEvent(html.Event e, EventType type) {
+  /*void _fireMouseEvent(Event e, EventType type) {
     //final type = new EventType.from(e.type);
     fireEvent(new MouseEvent(type, _latlng, null, null, e));
 
@@ -485,7 +485,7 @@ class Marker extends Layer {
   }
 
   StreamSubscription<MouseEvent> _popupClickSubscription;
-  StreamSubscription<Event> _popupRemoveSubscription, _popupMoveSubscription;
+  StreamSubscription<MapEvent> _popupRemoveSubscription, _popupMoveSubscription;
 
   void bindPopupContent(String content, [MarkerOptions options=null]) {
     final popup = new Popup(options, this);
@@ -570,12 +570,12 @@ class Marker extends Layer {
   StreamController<MouseEvent> _mouseOverController = new StreamController.broadcast();
   StreamController<MouseEvent> _mouseOutController = new StreamController.broadcast();
   StreamController<MouseEvent> _contextMenuController = new StreamController.broadcast();
-  StreamController<Event> _dragStartController = new StreamController.broadcast();
-  StreamController<Event> _dragController = new StreamController.broadcast();
+  StreamController<MapEvent> _dragStartController = new StreamController.broadcast();
+  StreamController<MapEvent> _dragController = new StreamController.broadcast();
   StreamController<DragEndEvent> _dragEndController = new StreamController.broadcast();
-  StreamController<Event> _moveController = new StreamController.broadcast();
-  StreamController<Event> _addController = new StreamController.broadcast();
-  StreamController<Event> _removeController = new StreamController.broadcast();
+  StreamController<MapEvent> _moveController = new StreamController.broadcast();
+  StreamController<MapEvent> _addController = new StreamController.broadcast();
+  StreamController<MapEvent> _removeController = new StreamController.broadcast();
   StreamController<PopupEvent> _popupOpenController = new StreamController.broadcast();
   StreamController<PopupEvent> _popupCloseController = new StreamController.broadcast();
 
@@ -585,12 +585,12 @@ class Marker extends Layer {
   Stream<MouseEvent> get onMouseOver => _mouseOverController.stream;
   Stream<MouseEvent> get onMouseOut => _mouseOutController.stream;
   Stream<MouseEvent> get onContextMenu => _contextMenuController.stream;
-  Stream<Event> get onDragStart => _dragStartController.stream;
-  Stream<Event> get onDrag => _dragController.stream;
+  Stream<MapEvent> get onDragStart => _dragStartController.stream;
+  Stream<MapEvent> get onDrag => _dragController.stream;
   Stream<DragEndEvent> get onDragEnd => _dragEndController.stream;
-  Stream<Event> get onMove => _moveController.stream;
-  Stream<Event> get onAddMarker => _addController.stream;
-  Stream<Event> get onRemoveMarker => _removeController.stream;
+  Stream<MapEvent> get onMove => _moveController.stream;
+  Stream<MapEvent> get onAddMarker => _addController.stream;
+  Stream<MapEvent> get onRemoveMarker => _removeController.stream;
   Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
   Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
 

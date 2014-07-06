@@ -128,8 +128,8 @@ class TileLayer implements Layer {
   bool _animated;
   Timer _clearBgBufferTimer;
 
-  StreamSubscription<Event> _viewResetSubscription, _moveEndSubscription, _moveSubscription;
-  StreamSubscription<Event> _zoomAnimSubscription, _zoomEndSubscription;
+  StreamSubscription<MapEvent> _viewResetSubscription, _moveEndSubscription, _moveSubscription;
+  StreamSubscription<MapEvent> _zoomAnimSubscription, _zoomEndSubscription;
 
 //  final Map<String, Object> options = {
 //    'minZoom': 0,
@@ -452,7 +452,7 @@ class TileLayer implements Layer {
     return tileSize;
   }
 
-  void _update([Object obj=null, Event e=null]) {
+  void _update([Object obj=null, MapEvent e=null]) {
 
     if (_map == null) { return; }
 
@@ -504,7 +504,7 @@ class TileLayer implements Layer {
     // if its the first batch of tiles to load
     if (_tilesToLoad == 0) {
       //fire(EventType.LOADING);
-      _loadingController.add(new Event(EventType.LOADING));
+      _loadingController.add(new MapEvent(EventType.LOADING));
     }
 
     _tilesToLoad += tilesToLoad;
@@ -683,8 +683,8 @@ class TileLayer implements Layer {
     final tile = dom.create('img', 'leaflet-tile');
     tile.style.width = tile.style.height = '${_getTileSize()}px';
 
-    tile.onSelectStart.listen((html.Event e) {});
-    tile.onMouseMove.listen((html.Event e) {});
+    tile.onSelectStart.listen((Event e) {});
+    tile.onMouseMove.listen((Event e) {});
 
     // without this hack, tiles disappear after zoom on Chrome for Android
     // https://github.com/Leaflet/Leaflet/issues/2078
@@ -719,7 +719,7 @@ class TileLayer implements Layer {
 
     if (_tilesToLoad == 0) {
       //fire(EventType.LOAD);
-      _loadController.add(new Event(EventType.LOAD));
+      _loadController.add(new MapEvent(EventType.LOAD));
 
       if (_animated == true) {
         // clear scaled tiles after all new tiles are loaded (for performance)
@@ -735,7 +735,7 @@ class TileLayer implements Layer {
     }
   }
 
-  void _tileOnLoad(html.Event e) {
+  void _tileOnLoad(Event e) {
     var img = e.target;
 
     // What is this mess with 'this'? Should tile layer be a custom element?
@@ -871,8 +871,8 @@ class TileLayer implements Layer {
       ImageElement tile = tiles[i];
 
       if (!tile.complete) {
-        tile.onLoad.listen((html.Event e) {});
-        tile.onError.listen((html.Event e) {});
+        tile.onLoad.listen((Event e) {});
+        tile.onError.listen((Event e) {});
         tile.src = core.emptyImageUrl;
 
         //tile.parentNode.removeChild(tile);
@@ -881,14 +881,14 @@ class TileLayer implements Layer {
     }
   }
 
-  StreamController<Event> _loadingController = new StreamController.broadcast();
-  StreamController<Event> _loadController = new StreamController.broadcast();
+  StreamController<MapEvent> _loadingController = new StreamController.broadcast();
+  StreamController<MapEvent> _loadController = new StreamController.broadcast();
   StreamController<TileEvent> _tileLoadStartController = new StreamController.broadcast();
   StreamController<TileEvent> _tileLoadController = new StreamController.broadcast();
   StreamController<TileEvent> _tileUnloadController = new StreamController.broadcast();
 
-  Stream<Event> get onLoading => _loadingController.stream;
-  Stream<Event> get onLoad => _loadController.stream;
+  Stream<MapEvent> get onLoading => _loadingController.stream;
+  Stream<MapEvent> get onLoad => _loadController.stream;
   Stream<TileEvent> get onTileLoadStart => _tileLoadStartController.stream;
   Stream<TileEvent> get onTileLoad => _tileLoadController.stream;
   Stream<TileEvent> get onUnload => _tileUnloadController.stream;
