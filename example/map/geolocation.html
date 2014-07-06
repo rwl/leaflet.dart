@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet geolocation</title>
+
+  <link rel="stylesheet" href="packages/leaflet/leaflet.css">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="../css/screen.css" />
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <script async type="application/dart">
+    import 'package:leaflet/leaflet.dart';
+
+    main() {
+      final cloudmadeUrl = 'http://{s}.tile.cloudmade.com/d4fc77ea4a63471cab2423e66626cbb6/997/256/{z}/{x}/{y}.png',
+        cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
+        cloudmade = new TileLayer(cloudmadeUrl, new TileLayerOptions()
+          ..maxZoom = 18
+          ..attribution = cloudmadeAttribution);
+
+      final map = new LeafletMap.query('map', new MapOptions()
+        ..zoom = 15
+        ..layers = [cloudmade]);
+
+      logEvent(Event e) {
+        print(e.type);
+      }
+      map.onLocationError.listen(logEvent);
+      map.onLocationFound.listen(logEvent);
+
+      map.locate(new LocateOptions()
+        ..setView = true);
+    }
+  </script>
+</body>
+</html>

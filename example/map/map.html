@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet Map</title>
+
+  <link rel="stylesheet" href="packages/leaflet/leaflet.css">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="../css/screen.css" />
+</head>
+<body>
+
+	<div id="map"></div>
+	<button id="populate">Populate with 10 markers</button>
+
+  <script async type="application/dart">
+    import 'dart:html' show document;
+    import 'package:leaflet/leaflet.dart';
+    import '../utils.dart';
+
+    main() {
+  		final cloudmade = new TileLayer('http://{s}.tile.cloudmade.com/{key}/997/256/{z}/{x}/{y}.png', new TileLayerOptions()
+  			..maxZoom = 18
+  			..attribution = 'Map data &copy; 2011 <a href="#">OpenStreetMap</a> contributors, Imagery &copy; 2011 <a href="#">CloudMade</a>'
+  			..key = 'd4fc77ea4a63471cab2423e66626cbb6'
+  		);
+
+  		final map = new LeafletMap.query('map')
+  				..setView([50.5, 30.51], 15)
+  				..addLayer(cloudmade);
+
+  		final markers = new FeatureGroup();
+
+  		populate() {
+  			for (var i = 0; i < 10; i++) {
+  				markers.addLayer(new Marker(getRandomLatLng(map)));
+  			}
+  			return false;
+  		}
+
+  		markers.bindPopup("<p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec odio. Quisque volutpat mattis eros. Nullam malesuada erat ut turpis. Suspendisse urna nibh, viverra non, semper suscipit, posuere a, pede.</p><p>Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque.</p>");
+
+  		map.addLayer(markers);
+
+  		populate();
+  		document.querySelector('populate').onClick.listen(populate);
+
+  		/*logEvent(Event e) { print(e.type); }
+
+  		map.onMoveStart.listen(logEvent);
+  		map.onMove.listen(logEvent);
+  		map.onMoveEnd.listen(logEvent);
+
+  		map.onZoomStart.listen(logEvent);
+  		map.onZoomEnd.listen(logEvent);*/
+    }
+	</script>
+</body>
+</html>

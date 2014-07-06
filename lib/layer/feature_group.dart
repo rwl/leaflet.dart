@@ -58,7 +58,10 @@ class FeatureGroup extends LayerGroup with Events {
   /**
    * Binds a popup with a particular HTML content to a click on any layer from the group that has a bindPopup method.
    */
-  bindPopup(String content, PopupOptions options) {
+  bindPopup(String content, [PopupOptions options=null]) {
+    if (options == null) {
+      options = new PopupOptions();
+    }
     _popupContent = content;
     _popupOptions = options;
     //return invoke('bindPopup', content, options);

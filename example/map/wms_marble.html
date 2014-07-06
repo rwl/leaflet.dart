@@ -12,12 +12,11 @@
   <div id="map" style="width: 1024px; height: 440px; border: 1px solid #ccc"></div>
 
   <script async type="application/dart">
-    import 'package:leaflet/map/map.dart';
-    import 'package:leaflet/geo/crs/crs.dart';
-    import 'package:leaflet/layer/tile/tile.dart';
+    import 'package:leaflet/leaflet.dart';
 
     main() {
-      final map = new LeafletMap.query('map', new MapOptions()..crs = EPSG4326);
+      final map = new LeafletMap.query('map', new MapOptions()
+        ..crs = EPSG4326);
 
       final bluemarble = new WMS("http://maps.opengeo.org/geowebcache/service/wms", new WMSOptions()
         ..layers = 'bluemarble'
