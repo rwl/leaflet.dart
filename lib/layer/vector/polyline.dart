@@ -20,7 +20,10 @@ class Polyline extends Path {
   List<Point2D> _originalPoints;
   List _parts;
 
-  Polyline(List<LatLng> latlngs, PolylineOptions polylineOptions) : super(polylineOptions) {
+  Polyline(List<LatLng> latlngs, [PolylineOptions polylineOptions=null]) : super(polylineOptions) {
+    if (options == null) {
+      options = new PolylineOptions();
+    }
     _latlngs = latlngs;//_convertLatLngs(latlngs);
     //polylineOptions = polylineOptions;
   }

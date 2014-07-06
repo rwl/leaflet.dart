@@ -25,7 +25,10 @@ class ImageOverlay extends Layer {//with Events {
   ImageElement _image;
   StreamSubscription<MapEvent> _viewResetSubscription, _zoomAnimSubscription;
 
-  ImageOverlay(String url, LatLngBounds bounds, this.options) {
+  ImageOverlay(String url, LatLngBounds bounds, [this.options=null]) {
+    if (options == null) {
+      options = new ImageOverlayOptions();
+    }
     _url = url;
     _bounds = new LatLngBounds.latLngBounds(bounds);
   }

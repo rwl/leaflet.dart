@@ -5,7 +5,7 @@ part of leaflet.layer.vector;
  */
 class Rectangle extends Polygon {
 
-  Rectangle(LatLngBounds latLngBounds, PolygonOptions options) : super(_boundsToLatLngs(latLngBounds), options);
+  Rectangle(LatLngBounds latLngBounds, [PolygonOptions options=null]) : super(_boundsToLatLngs(latLngBounds), options);
 
   /**
    * Redraws the rectangle with the passed bounds.
