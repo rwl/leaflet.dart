@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet Fullscreen</title>
+
+  <link rel="stylesheet" href="../css/screen.css" />
+  <link rel="stylesheet" href="packages/leaflet/leaflet.css">
+  <link rel="stylesheet" href="packages/leaflet/fullscreen.css">
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <script async type="application/dart">
+    import 'dart:html';
+    import 'package:leaflet/leaflet.dart';
+
+    main() {
+  		final map = new LeafletMap.query('map');
+  		map.addControl(new Fullscreen());
+    }
+  </script>
+
+  <script async src="packages/browser/dart.js"></script>
+</body>
+</html>

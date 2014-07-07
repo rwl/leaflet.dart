@@ -1,7 +1,6 @@
 library leaflet.map;
 
-import 'dart:html' show Element, querySelector, window, document,
-    CanvasRenderingContext2D, Geoposition, PositionError, CanvasElement, Event;
+import 'dart:html' show Element, querySelector, window, document, CanvasRenderingContext2D, Geoposition, PositionError, CanvasElement, Event;
 import 'dart:html' as html;
 import 'dart:svg' show SvgSvgElement;
 import 'dart:math' as math;
@@ -101,7 +100,7 @@ class LeafletMap extends Object {
    */
   Attribution attributionControl;
 
-  LeafletMap(Element container, [this.options=null]/*{MapStateOptions options: null, InteractionOptions options: null,
+  LeafletMap(Element container, [this.options = null]/*{MapStateOptions options: null, InteractionOptions options: null,
       KeyboardNavigationOptions options: null, PanningInertiaOptions options: null,
       ControlOptions options: null, AnimationOptions options: null, LocateOptions options: null,
       ZoomPanOptions options: null}*/) {
@@ -169,7 +168,7 @@ class LeafletMap extends Object {
     _addLayers(options.layers);
   }
 
-  factory LeafletMap.query(String selectors, [MapOptions options=null]) {
+  factory LeafletMap.query(String selectors, [MapOptions options = null]) {
     final container = document.querySelector(selectors);
     return new LeafletMap(container, options);
   }
@@ -190,7 +189,7 @@ class LeafletMap extends Object {
   /**
    * Sets the zoom of the map.
    */
-  void setZoom(num zoom, [ZoomOptions options=null]) {
+  void setZoom(num zoom, [ZoomOptions options = null]) {
     if (!_loaded) {
       _zoom = limitZoom(zoom);
       return;
@@ -335,9 +334,11 @@ class LeafletMap extends Object {
    */
   void panInsideBounds(LatLngBounds bounds, [PanOptions options = null]) {
     var center = getCenter(),
-      newCenter = _limitCenter(center, _zoom, bounds);
+        newCenter = _limitCenter(center, _zoom, bounds);
 
-    if (center == newCenter) { return; }
+    if (center == newCenter) {
+      return;
+    }
 
     panTo(newCenter, options);
   }
@@ -354,7 +355,9 @@ class LeafletMap extends Object {
 
     final id = stamp(layer);
 
-    if (_layers.containsKey(id)) { return; }
+    if (_layers.containsKey(id)) {
+      return;
+    }
 
     _layers[id] = layer;
 
@@ -387,7 +390,9 @@ class LeafletMap extends Object {
   void removeLayer(Layer layer) {
     final id = stamp(layer);
 
-    if (!_layers.containsKey(id)) { return; }
+    if (!_layers.containsKey(id)) {
+      return;
+    }
 
     if (_loaded) {
       layer.onRemove(this);
@@ -419,7 +424,9 @@ class LeafletMap extends Object {
    * Returns true if the given layer is currently added to the map.
    */
   bool hasLayer(Layer layer) {
-    if (layer == null) { return false; }
+    if (layer == null) {
+      return false;
+    }
 
     return _layers.containsKey(stamp(layer));
   }
@@ -440,7 +447,9 @@ class LeafletMap extends Object {
    * doesn't happen often even if the method is called many times in a row.
    */
   void invalidateSize({bool animate: true, bool pan: true, bool debounceMoveend: false}) {
-    if (!_loaded) { return; }
+    if (!_loaded) {
+      return;
+    }
 
     final oldSize = getSize();
     _sizeChanged = true;
@@ -451,7 +460,9 @@ class LeafletMap extends Object {
         newCenter = (newSize / 2).rounded(),
         offset = oldCenter - newCenter;
 
-    if (offset.x == 0 && offset.y == 0) { return; }
+    if (offset.x == 0 && offset.y == 0) {
+      return;
+    }
 
     if (animate && pan) {
       panBy(offset);
@@ -558,18 +569,14 @@ class LeafletMap extends Object {
    * Returns the minimum zoom level of the map.
    */
   num getMinZoom() {
-    return options.minZoom == null ?
-      (_layersMinZoom == null ? 0 : _layersMinZoom) :
-      options.minZoom;
+    return options.minZoom == null ? (_layersMinZoom == null ? 0 : _layersMinZoom) : options.minZoom;
   }
 
   /**
    * Returns the maximum zoom level of the map.
    */
   num getMaxZoom() {
-    return options.maxZoom == null ?
-      (_layersMaxZoom == null ? double.INFINITY : _layersMaxZoom) :
-      options.maxZoom;
+    return options.maxZoom == null ? (_layersMaxZoom == null ? double.INFINITY : _layersMaxZoom) : options.maxZoom;
   }
 
   /**
@@ -617,9 +624,7 @@ class LeafletMap extends Object {
    */
   Point2D getSize() {
     if (_size == null || _sizeChanged) {
-      _size = new Point2D(
-        _container.clientWidth,
-        _container.clientHeight);
+      _size = new Point2D(_container.clientWidth, _container.clientHeight);
 
       _sizeChanged = false;
     }
@@ -789,8 +794,8 @@ class LeafletMap extends Object {
     _container.classes.add('leaflet-container');
     // TODO: make sure the following fields are non-null and remove the `== true`
     if (browser.touch == true) _container.classes.add('leaflet-touch');
-    if (browser.retina  == true) _container.classes.add('leaflet-retina');
-    if (options.fadeAnimation  == true) _container.classes.add('leaflet-fade-anim');
+    if (browser.retina == true) _container.classes.add('leaflet-retina');
+    if (options.fadeAnimation == true) _container.classes.add('leaflet-fade-anim');
 
     final position = _container.style.getPropertyValue('position');
 
@@ -831,20 +836,21 @@ class LeafletMap extends Object {
     }
   }
 
-  Element _createPane(String className, [Element container=null]) {
+  Element _createPane(String className, [Element container = null]) {
     return dom.create('div', className, container != null ? container : _panes['objectsPane']);
   }
 
   void _clearPanes() {
-//    _container.removeChild(_mapPane);
+    //    _container.removeChild(_mapPane);
     _mapPane.remove();
   }
 
-//  _addLayers([var layers=null]) {
-//    layers = layers ? (layers is List ? layers : [layers]) : [];
+  //  _addLayers([var layers=null]) {
+  //    layers = layers ? (layers is List ? layers : [layers]) : [];
   void _addLayers(List<Layer> layers) {
     if (layers == null) return;
-    for (var i = 0, len = layers.length; i < len; i++) {
+    for (var i = 0,
+        len = layers.length; i < len; i++) {
       addLayer(layers[i]);
     }
   }
@@ -852,7 +858,7 @@ class LeafletMap extends Object {
 
   // private methods that modify map state
 
-  void _resetView(LatLng center, num zoom, [bool preserveMapOffset=false, bool afterZoomAnim=false]) {
+  void _resetView(LatLng center, num zoom, [bool preserveMapOffset = false, bool afterZoomAnim = false]) {
     print("_resetView");
     var zoomChanged = (_zoom != zoom);
 
@@ -975,15 +981,7 @@ class LeafletMap extends Object {
       }
     }*/
     if (on) {
-      eventSubscriptions = [
-        _container.onDoubleClick.listen(_fireMouseEvent),
-        _container.onMouseDown.listen(_fireMouseEvent),
-        _container.onMouseUp.listen(_fireMouseEvent),
-        _container.onMouseEnter.listen(_fireMouseEvent),
-        _container.onMouseLeave.listen(_fireMouseEvent),
-        _container.onMouseMove.listen(_fireMouseEvent),
-        _container.onContextMenu.listen(_fireMouseEvent)
-      ];
+      eventSubscriptions = [_container.onDoubleClick.listen(_fireMouseEvent), _container.onMouseDown.listen(_fireMouseEvent), _container.onMouseUp.listen(_fireMouseEvent), _container.onMouseEnter.listen(_fireMouseEvent), _container.onMouseLeave.listen(_fireMouseEvent), _container.onMouseMove.listen(_fireMouseEvent), _container.onContextMenu.listen(_fireMouseEvent)];
     } else {
       if (eventSubscriptions != null) {
         eventSubscriptions.forEach((StreamSubscription subscription) {
@@ -1015,9 +1013,7 @@ class LeafletMap extends Object {
   }
 
   void _onMouseClick(html.MouseEvent e) {
-    if (_loaded != true || (dom.simulated(e) != true && (
-        (dragging != null && dragging.moved() == true) ||
-        (boxZoom != null && boxZoom.moved() == true))) || dom.skipped(e) == true) {
+    if (_loaded != true || (dom.simulated(e) != true && ((dragging != null && dragging.moved() == true) || (boxZoom != null && boxZoom.moved() == true))) || dom.skipped(e) == true) {
       return;
     }
 
@@ -1032,7 +1028,9 @@ class LeafletMap extends Object {
 
     final type = (e.type == 'mouseenter' ? EventType.MOUSEOVER : (e.type == 'mouseleave' ? EventType.MOUSEOUT : new EventType.from(e.type)));
 
-    if (!hasEventListeners(type)) { return; }
+    if (!hasEventListeners(type)) {
+      return;
+    }
 
     if (type == EventType.CONTEXTMENU) {
       e.preventDefault();
@@ -1123,9 +1121,11 @@ class LeafletMap extends Object {
   /**
    * Adjust center for view to get inside bounds.
    */
-  LatLng _limitCenter(LatLng center, num zoom, [LatLngBounds bounds=null]) {
+  LatLng _limitCenter(LatLng center, num zoom, [LatLngBounds bounds = null]) {
 
-    if (bounds == null) { return center; }
+    if (bounds == null) {
+      return center;
+    }
 
     final centerPoint = project(center, zoom),
         viewHalf = getSize() / 2,
@@ -1139,7 +1139,9 @@ class LeafletMap extends Object {
    * Adjust offset for view to get inside bounds.
    */
   Point2D /*_*/limitOffset(Point2D offset, LatLngBounds bounds) {
-    if (bounds == null) { return offset; }
+    if (bounds == null) {
+      return offset;
+    }
 
     var viewBounds = getPixelBounds(),
         newBounds = new Bounds.between(viewBounds.min + offset, viewBounds.max + offset);
@@ -1151,7 +1153,7 @@ class LeafletMap extends Object {
    * Returns offset needed for pxBounds to get inside maxBounds at a specified
    * zoom.
    */
-  Point2D _getBoundsOffset(Bounds pxBounds, LatLngBounds maxBounds, [num zoom=null]) {
+  Point2D _getBoundsOffset(Bounds pxBounds, LatLngBounds maxBounds, [num zoom = null]) {
     final nwOffset = project(maxBounds.getNorthWest(), zoom) - pxBounds.min,
         seOffset = project(maxBounds.getSouthEast(), zoom) - pxBounds.max,
 
@@ -1162,9 +1164,7 @@ class LeafletMap extends Object {
   }
 
   num _rebound(num left, num right) {
-    return left + right > 0 ?
-      (left - right).round() / 2 :
-      math.max(0, left.ceil()) - math.max(0, right.floor());
+    return left + right > 0 ? (left - right).round() / 2 : math.max(0, left.ceil()) - math.max(0, right.floor());
   }
 
   /**
@@ -1204,8 +1204,7 @@ class LeafletMap extends Object {
   _initControlPos() {
     final corners = _controlCorners = {};
     String l = 'leaflet-';
-    final container = _controlContainer =
-                dom.create('div', l + 'control-container', _container);
+    final container = _controlContainer = dom.create('div', l + 'control-container', _container);
 
     createCorner(String vSide, String hSide) {
       var className = l + vSide + ' ' + l + hSide;
@@ -1234,14 +1233,14 @@ class LeafletMap extends Object {
    */
   openPopupString(String content, LatLng latlng, PopupOptions options) {
     final popup = new Popup(options)
-              ..setLatLng(latlng)
-              ..setContent(content);
+        ..setLatLng(latlng)
+        ..setContent(content);
     openPopup(popup);
   }
   openPopupElement(Element content, LatLng latlng, PopupOptions options) {
     final popup = new Popup(options)
-              ..setLatLng(latlng)
-              ..setContent(content);
+        ..setLatLng(latlng)
+        ..setContent(content);
     openPopup(popup);
   }
 
@@ -1260,7 +1259,7 @@ class LeafletMap extends Object {
   /**
    * Closes the popup previously opened with openPopup (or the given one).
    */
-  closePopup([Popup popup=null]) {
+  closePopup([Popup popup = null]) {
     if (popup == null || popup == _popup) {
       popup = _popup;
       _popup = null;
@@ -1296,23 +1295,28 @@ class LeafletMap extends Object {
     return _container.querySelectorAll('.leaflet-zoom-animated').length == 0;
   }
 
-  bool _tryAnimatedZoom(LatLng center, num zoom, [options=null]) {
+  bool _tryAnimatedZoom(LatLng center, num zoom, [options = null]) {
 
-    if (_animatingZoom) { return true; }
+    if (_animatingZoom) {
+      return true;
+    }
 
     options = options == null ? {} : options;
 
     // don't animate if disabled, not supported or zoom difference is too large
-    if (!_zoomAnimated || options.animate == false || _nothingToAnimate() ||
-            (zoom - _zoom).abs() > options.zoomAnimationThreshold) { return false; }
+    if (!_zoomAnimated || options.animate == false || _nothingToAnimate() || (zoom - _zoom).abs() > options.zoomAnimationThreshold) {
+      return false;
+    }
 
     // offset is the pixel coords of the zoom origin relative to the current center
     final scale = getZoomScale(zoom),
         offset = _getCenterOffset(center) / (1 - 1 / scale),
-      origin = _getCenterLayerPoint() + offset;
+        origin = _getCenterLayerPoint() + offset;
 
     // don't animate if the zoom origin isn't within one screen from the current center, unless forced
-    if (options.animate != true && !getSize().contains(offset)) { return false; }
+    if (options.animate != true && !getSize().contains(offset)) {
+      return false;
+    }
 
     fire(EventType.MOVESTART);
     fire(EventType.ZOOMSTART);
@@ -1325,7 +1329,7 @@ class LeafletMap extends Object {
   /**
    * For internal use.
    */
-  void animateZoom(LatLng center, num zoom, Point2D origin, num scale, [Point2D delta=null, bool backwards=false]) {
+  void animateZoom(LatLng center, num zoom, Point2D origin, num scale, [Point2D delta = null, bool backwards = false]) {
 
     _animatingZoom = true;
 
@@ -1368,7 +1372,7 @@ class LeafletMap extends Object {
   /**
    * Sets the view of the map (geographical center and zoom) with the given animation options.
    */
-  void setView(LatLng center, num zoom, [ZoomPanOptions options=null, LatLngBounds maxBounds=null]) {
+  void setView(LatLng center, num zoom, [ZoomPanOptions options = null, LatLngBounds maxBounds = null]) {
     print("setView");
     zoom = zoom == null ? _zoom : limitZoom(zoom);
     center = _limitCenter(new LatLng.latLng(center), zoom, /*options.*/maxBounds);
@@ -1389,9 +1393,7 @@ class LeafletMap extends Object {
       }
 
       // try animating pan or zoom
-      var animated = (_zoom != zoom) ?
-        /*_tryAnimatedZoom &&*/ _tryAnimatedZoom(center, zoom, options.zoomOptions) :
-        _tryAnimatedPan(center, options.panOptions);
+      var animated = (_zoom != zoom) ? /*_tryAnimatedZoom &&*/ _tryAnimatedZoom(center, zoom, options.zoomOptions) : _tryAnimatedPan(center, options.panOptions);
 
       if (animated) {
         // prevent resize handler call, the view will refresh after animation anyway
@@ -1408,7 +1410,7 @@ class LeafletMap extends Object {
   /**
    * Pans the map by a given number of pixels (animated).
    */
-  void panBy(Point2D offset, [PanOptions options=null]) {
+  void panBy(Point2D offset, [PanOptions options = null]) {
     offset = new Point2D.point(offset).rounded();
     //options = options == null ? {} : options;
     if (options == null) {
@@ -1492,7 +1494,7 @@ class LeafletMap extends Object {
    * and optionally sets the map view to the user's location with respect to
    * detection accuracy (or to the world view if geolocation failed).
    */
-  void locate([LocateOptions options=null]) {
+  void locate([LocateOptions options = null]) {
     if (options == null) {
       options = new LocateOptions();
     }
@@ -1504,20 +1506,13 @@ class LeafletMap extends Object {
       return;
     }
 
-//    var onResponse = L.bind(_handleGeolocationResponse, this),
-//      onError = L.bind(_handleGeolocationError, this);
+    //    var onResponse = L.bind(_handleGeolocationResponse, this),
+    //      onError = L.bind(_handleGeolocationError, this);
 
     if (options.watch) {
-      _locationWatchSubscription =
-              window.navigator.geolocation.watchPosition(enableHighAccuracy: options.enableHighAccuracy,
-                  maximumAge: new Duration(milliseconds: options.maximumAge),
-                  timeout: new Duration(milliseconds: options.timeout)).listen(_handleGeolocationResponse,
-                      onError: _handlePositionError);
+      _locationWatchSubscription = window.navigator.geolocation.watchPosition(enableHighAccuracy: options.enableHighAccuracy, maximumAge: new Duration(milliseconds: options.maximumAge), timeout: new Duration(milliseconds: options.timeout)).listen(_handleGeolocationResponse, onError: _handlePositionError);
     } else {
-      window.navigator.geolocation.getCurrentPosition(enableHighAccuracy: options.enableHighAccuracy,
-          maximumAge: new Duration(milliseconds: options.maximumAge),
-          timeout: new Duration(milliseconds: options.timeout)).then(_handleGeolocationResponse,
-              onError: _handlePositionError);
+      window.navigator.geolocation.getCurrentPosition(enableHighAccuracy: options.enableHighAccuracy, maximumAge: new Duration(milliseconds: options.maximumAge), timeout: new Duration(milliseconds: options.timeout)).then(_handleGeolocationResponse, onError: _handlePositionError);
     }
   }
 
@@ -1542,8 +1537,7 @@ class LeafletMap extends Object {
 
   void _handleGeolocationError(int c, String message) {
     if (message == null) {
-      message = (c == 1 ? 'permission denied' :
-                (c == 2 ? 'position unavailable' : 'timeout'));
+      message = (c == 1 ? 'permission denied' : (c == 2 ? 'position unavailable' : 'timeout'));
     }
 
     if (_options.setView && !_loaded) {
@@ -1561,9 +1555,7 @@ class LeafletMap extends Object {
         latAccuracy = 180 * pos.coords.accuracy / 40075017,
         lngAccuracy = latAccuracy / math.cos(LatLng.DEG_TO_RAD * lat),
 
-        bounds = new LatLngBounds.between(
-                new LatLng(lat - latAccuracy, lng - lngAccuracy),
-                new LatLng(lat + latAccuracy, lng + lngAccuracy)),
+        bounds = new LatLngBounds.between(new LatLng(lat - latAccuracy, lng - lngAccuracy), new LatLng(lat + latAccuracy, lng + lngAccuracy)),
 
         options = _options;
 
@@ -1572,9 +1564,7 @@ class LeafletMap extends Object {
       setView(latlng, zoom);
     }
 
-    fireEvent(new LocationEvent(latlng, bounds, pos.coords.accuracy,
-        pos.coords.altitude, pos.coords.altitudeAccuracy, pos.coords.heading,
-        pos.coords.speed, pos.timestamp));
+    fireEvent(new LocationEvent(latlng, bounds, pos.coords.accuracy, pos.coords.altitude, pos.coords.altitudeAccuracy, pos.coords.heading, pos.coords.speed, pos.timestamp));
 
     /*for (var i in pos.coords) {
       if (pos.coords[i] is num) {
@@ -1638,7 +1628,9 @@ class LeafletMap extends Object {
 
   void _updateCanvasViewport([_]) {
     // don't redraw while zooming. See _updateSvgViewport for more details
-    if (_pathZooming) { return; }
+    if (_pathZooming) {
+      return;
+    }
     _updatePathViewport();
 
     var vp = _pathViewport,
@@ -1663,7 +1655,7 @@ class LeafletMap extends Object {
       _pathRoot = new SvgSvgElement();//Path.prototype._createElement('svg');
       _panes['overlayPane'].append(_pathRoot);
 
-        _pathRoot.classes.add('leaflet-zoom-animated');
+      _pathRoot.classes.add('leaflet-zoom-animated');
 
       //on(EventType.ZOOMANIM, _animatePathZoom);
       //on(EventType.ZOOMEND, _endPathZoom);
@@ -1681,7 +1673,7 @@ class LeafletMap extends Object {
         offset = _getCenterOffset(e.center) * (-scale) + _pathViewport.min;
 
     _pathRoot.style.transform = //[dom.TRANSFORM] =
-            '${dom.getTranslateString(offset)} scale($scale) ';
+    '${dom.getTranslateString(offset)} scale($scale) ';
 
     _pathZooming = true;
   }
@@ -1775,6 +1767,8 @@ class LeafletMap extends Object {
   StreamController<PopupEvent> _popupOpenController = new StreamController.broadcast();
   StreamController<PopupEvent> _popupCloseController = new StreamController.broadcast();
 
+  StreamController<MapEvent> _fullscreenController = new StreamController.broadcast();
+
   Stream<MouseEvent> get onClick => _clickController.stream;
   Stream<MouseEvent> get onDblClick => _dblClickController.stream;
   Stream<MouseEvent> get onMouseDown => _mouseDownController.stream;
@@ -1810,4 +1804,64 @@ class LeafletMap extends Object {
   Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
   Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
 
+  Stream<MapEvent> get onFullscreenChange => _fullscreenController.stream;
+
+  /* Fullscreen */
+
+  bool _isFullscreen;
+  bool get isFullscreen => _isFullscreen;
+
+  void toggleFullscreen() {
+    final container = getContainer();
+    if (isFullscreen) {
+      if (document.fullscreenEnabled) {
+        document.exitFullscreen();
+      } else {
+        container.classes.remove('leaflet-pseudo-fullscreen');
+        _toggleFullscreenClass();
+        invalidateSize();
+        _isFullscreen = false;
+
+        _fullscreenController.add(new MapEvent(EventType.FULLSCREEN_CHANGE));
+      }
+    } else {
+      if (document.fullscreenEnabled) {
+        container.requestFullscreen();
+      } else {
+        container.classes.remove('leaflet-pseudo-fullscreen');
+        _toggleFullscreenClass();
+        invalidateSize();
+        _isFullscreen = true;
+
+        _fullscreenController.add(new MapEvent(EventType.FULLSCREEN_CHANGE));
+      }
+    }
+  }
+
+  void _toggleFullscreenClass() {
+    final container = getContainer();
+    if (isFullscreen) {
+      container.classes.remove('leaflet-fullscreen-on');
+    } else {
+      container.classes.remove('leaflet-fullscreen-on');
+    }
+  }
+
+  void _onFullscreenChange(Event e) {
+    final container = getContainer();
+    if (e.target != container) {
+      return;
+    }
+
+    final fullscreenElement = document.fullscreenElement;
+
+    _toggleFullscreenClass();
+    if (fullscreenElement == container) {
+      _isFullscreen = true;
+      _fullscreenController.add(new MapEvent(EventType.FULLSCREEN_CHANGE));
+    } else if (_isFullscreen) {
+      _isFullscreen = false;
+      _fullscreenController.add(new MapEvent(EventType.FULLSCREEN_CHANGE));
+    }
+  }
 }

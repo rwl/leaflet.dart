@@ -1,7 +1,7 @@
 library leaflet.control;
 
 import 'dart:collection' show LinkedHashMap;
-import 'dart:html' show Element, document, InputElement, Event;
+import 'dart:html' show Element, document, InputElement, Event, AnchorElement;
 import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:async' show Timer, StreamSubscription;
@@ -17,6 +17,8 @@ part 'attribution.dart';
 part 'layers.dart';
 part 'scale.dart';
 part 'zoom.dart';
+
+part 'fullscreen.dart';
 
 class ControlPosition {
   final _value;

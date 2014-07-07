@@ -245,4 +245,6 @@ class EventType {
   static const START = const EventType._internal('start');
   static const STEP = const EventType._internal('step');
   static const END = const EventType._internal('end');
+
+  static const FULLSCREEN_CHANGE = const EventType._internal('fullscreeenchange');
 }
