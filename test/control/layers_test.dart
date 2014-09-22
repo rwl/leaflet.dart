@@ -1,25 +1,7 @@
-import 'dart:async';
-import 'dart:html' as html;
-import 'dart:html' show document;
+part of leaflet.control.test;
 
-import 'dart:collection' show LinkedHashMap;
-
-import 'package:leaflet/map/map.dart' show LeafletMap;
-import 'package:leaflet/core/core.dart' show EventType, Event, Action, LayersControlEvent;
-import 'package:leaflet/control/control.dart' show Layers, LayersOptions;
-import 'package:leaflet/layer/tile/tile.dart' show TileLayer;
-import 'package:leaflet/layer/marker/marker.dart' show Marker, DefaultIcon;
-import 'package:leaflet/layer/layer.dart' show Layer;
-import 'package:leaflet/geo/geo.dart' show LatLng;
-
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-
-
-main() {
-  useHtmlEnhancedConfiguration();
-
-  group('Control.Layers', () {
+layersTest() {
+  group('Layers', () {
     LeafletMap map;
 
     bool called;
