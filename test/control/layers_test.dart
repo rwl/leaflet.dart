@@ -1,4 +1,4 @@
-
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:html' show document;
 
@@ -8,7 +8,7 @@ import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/core/core.dart' show EventType, Event, Action, LayersControlEvent;
 import 'package:leaflet/control/control.dart' show Layers, LayersOptions;
 import 'package:leaflet/layer/tile/tile.dart' show TileLayer;
-import 'package:leaflet/layer/marker/marker.dart' show Marker;
+import 'package:leaflet/layer/marker/marker.dart' show Marker, DefaultIcon;
 import 'package:leaflet/layer/layer.dart' show Layer;
 import 'package:leaflet/geo/geo.dart' show LatLng;
 
@@ -25,7 +25,7 @@ main() {
     bool called;
     //List<Object> objs;
     List<LayersControlEvent> events;
-    Action action = (Event e) {
+    Action action = (LayersControlEvent e) {
       called = true;
       //objs.add(obj);
       events.add(e);
@@ -35,7 +35,9 @@ main() {
       map = new LeafletMap(document.createElement('div'));
       called = false;
       //objs = new List<Object>();
-      events = new List<Event>();
+      events = new List<LayersControlEvent>();
+
+      DefaultIcon.imagePath = '../lib/images';
     });
 
     group('baselayerchange event', () {
@@ -45,10 +47,10 @@ main() {
           //spy = sinon.spy();
 
 
-        map.on(EventType.BASELAYERCHANGE, action);
-        map.whenReady(() {
+        map.onBaseLayerChange.listen(action);
+        map.whenReady((_) {
 //            happen.click(layers.baseLayersList.querySelectorAll('input')[0]);
-          layers.baseLayersList.querySelectorAll('input')[0].dispatchEvent(new html.Event('click'));
+          layers.baseLayersList.querySelectorAll('input')[0].dispatchEvent(new html.MouseEvent('click'));
 
           expect(called, isTrue);
           expect(events[0].layer, equals(baseLayers['Layer 1']));
@@ -61,8 +63,8 @@ main() {
         final layers = new Layers({}, overlays)..addTo(map);
           //spy = sinon.spy();
 
-        map.on(EventType.BASELAYERCHANGE, action);
-        layers.overlaysList.querySelectorAll('input')[0].dispatchEvent(new html.Event('click'));
+        map.onBaseLayerChange.listen(action);
+        layers.overlaysList.querySelectorAll('input')[0].dispatchEvent(new html.MouseEvent('click'));
 
         expect(called, isFalse);
       });
@@ -83,8 +85,10 @@ main() {
         map.addLayer(overlay);
         map.removeLayer(overlay);
 
-        expect(layers.called, isTrue);
-        expect(layers.callCount, equals(2));
+        expect(new Future.delayed(const Duration(seconds: 1), () {
+          expect(layers.called, isTrue);
+          expect(layers.callCount, equals(2));
+        }), completes);
       });
 
       test('not when a non-included layer is added or removed', () {
@@ -97,7 +101,9 @@ main() {
         map.addLayer(overlay);
         map.removeLayer(overlay);
 
-        expect(layers.called, isFalse);
+        expect(new Future.delayed(const Duration(seconds: 1), () {
+          expect(layers.called, isFalse);
+        }), completes);
       });
     });
   });
@@ -107,7 +113,8 @@ class TestLayers extends Layers {
   bool called = false;
   int callCount = 0;
 
-  TestLayers(LinkedHashMap<String, Layer> baseLayers, [LinkedHashMap<String, Layer> overlays=null, LayersOptions options=null]) : super(baseLayers, overlays, options);
+  TestLayers(LinkedHashMap<String, Layer> baseLayers, [LinkedHashMap<String, Layer> overlays=null,
+      LayersOptions options=null]) : super(baseLayers, overlays, options);
 
   void update() {
     called = true;

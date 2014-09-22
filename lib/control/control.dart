@@ -45,7 +45,7 @@ class ControlPosition {
 
   static Map<String, ControlPosition> _names = {
     TOPLEFT.toString(): TOPLEFT,
-    TOPRIGHT.toString: TOPRIGHT,
+    TOPRIGHT.toString(): TOPRIGHT,
     BOTTOMLEFT.toString(): BOTTOMLEFT,
     BOTTOMRIGHT.toString(): BOTTOMRIGHT
   };

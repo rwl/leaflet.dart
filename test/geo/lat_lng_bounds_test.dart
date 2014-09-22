@@ -27,7 +27,7 @@ main() {
       });
     });
 
-    group('#extend', () {
+    group('extend', () {
       test('extends the bounds by a given point', () {
         a.extend(new LatLng(20, 50));
         expect(a.getNorthEast(), equals(new LatLng(30, 50)));
@@ -49,13 +49,13 @@ main() {
       });*/
     });
 
-    group('#getCenter', () {
+    group('getCenter', () {
       test('returns the bounds center', () {
         expect(a.getCenter(), equals(new LatLng(22, 26)));
       });
     });
 
-    group('#pad', () {
+    group('pad', () {
       test('pads the bounds by a given ratio', () {
         var b = a.pad(0.5);
 
@@ -63,7 +63,7 @@ main() {
       });
     });
 
-    group('#equals', () {
+    group('equals', () {
       test('returns true if bounds equal', () {
         expect(a == new LatLngBounds([new LatLng(14, 12), new LatLng(30, 40)]), isTrue);
         expect(a == new LatLngBounds([new LatLng(14, 13), new LatLng(30, 40)]), isFalse);
@@ -71,7 +71,7 @@ main() {
       });
     });
 
-    group('#isValid', () {
+    group('isValid', () {
       test('returns true if properly set up', () {
         expect(a.isValid(), isTrue);
       });
@@ -84,49 +84,49 @@ main() {
       });
     });
 
-    group('#getWest', () {
+    group('getWest', () {
       test('returns a proper bbox west value', () {
         expect(a.getWest(), equals(12));
       });
     });
 
-    group('#getSouth', () {
+    group('getSouth', () {
       test('returns a proper bbox south value', () {
         expect(a.getSouth(), equals(14));
       });
     });
 
-    group('#getEast', () {
+    group('getEast', () {
       test('returns a proper bbox east value', () {
         expect(a.getEast(), equals(40));
       });
     });
 
-    group('#getNorth', () {
+    group('getNorth', () {
       test('returns a proper bbox north value', () {
         expect(a.getNorth(), equals(30));
       });
     });
 
-    group('#toBBoxString', () {
+    group('toBBoxString', () {
       test('returns a proper left,bottom,right,top bbox', () {
         expect(a.toBBoxString(), equals('12,14,40,30'));
       });
     });
 
-    group('#getNorthWest', () {
+    group('getNorthWest', () {
       test('returns a proper north-west LatLng', () {
         expect(a.getNorthWest(), equals(new LatLng(a.getNorth(), a.getWest())));
       });
     });
 
-    group('#getSouthEast', () {
+    group('getSouthEast', () {
       test('returns a proper south-east LatLng', () {
         expect(a.getSouthEast(), equals(new LatLng(a.getSouth(), a.getEast())));
       });
     });
 
-    group('#contains', () {
+    group('contains', () {
       test('returns true if contains latlng point', () {
         expect(a.contains(new LatLng(16, 20)), isTrue);
         expect(new LatLngBounds.latLngBounds(a).contains(new LatLng(5, 20)), isFalse);
@@ -138,7 +138,7 @@ main() {
       });
     });
 
-    group('#intersects', () {
+    group('intersects', () {
       test('returns true if intersects the given bounds', () {
         expect(a.intersects(new LatLngBounds.between(new LatLng(16, 20), new LatLng(50, 60))), isTrue);
         expect(a.containsBounds(new LatLngBounds.between(new LatLng(40, 50), new LatLng(50, 60))), isFalse);

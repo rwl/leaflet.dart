@@ -53,18 +53,18 @@ class Layers extends Control {
    */
   Layers(LinkedHashMap<String, Layer> baseLayers, [LinkedHashMap<String, Layer> overlays=null, LayersOptions options=null]) : super(options) {
     if (options == null) {
-      options = new LayersOptions();
+      this.options = new LayersOptions();
     }
-    _layers = new Map<int, Object>();
+    _layers = new Map<int, LayersControlEvent>();
     _lastZIndex = 0;
     _handlingClick = false;
 
-    for (String i in baseLayers) {
+    for (String i in baseLayers.keys) {
       _addLayer(baseLayers[i], i);
     }
 
     if (overlays != null) {
-      for (String name in overlays) {
+      for (String name in overlays.keys) {
         _addLayer(overlays[name], name, true);
       }
     }

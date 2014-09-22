@@ -9,10 +9,10 @@ import 'package:leaflet/test/test.dart';
 main() {
   useHtmlEnhancedConfiguration();
 
-  group('Projection.Mercator', () {
+  group('Mercator', () {
     final p = Mercator;
 
-    group('#project', () {
+    group('project', () {
       test('projects a center point', () {
         //edge cases
         expect(p.project(new LatLng(0, 0)), near(new Point2D(0, 0)));
@@ -35,7 +35,7 @@ main() {
       });
     });
 
-    group('#unproject', () {
+    group('unproject', () {
       final pr = (Point2D point) {
         return p.project(p.unproject(point));
       };

@@ -4,7 +4,8 @@ import 'dart:html' show document, Element, ImageElement, DivElement, Event;
 import 'dart:html' as html;
 import 'dart:async' show Stream, StreamController, StreamSubscription;
 
-import '../../core/core.dart' show Browser, EventType, MapEvent, Events, Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent;
+import '../../core/core.dart' show Browser, EventType, MapEvent, Events,
+  Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent, ZoomEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geometry/geometry.dart' show Point2D;
@@ -22,7 +23,7 @@ class MarkerOptions {
    * details on how to customize the marker icon. Set to new Icon.Default()
    * by default.
    */
-  Icon icon;
+  Icon icon = new DefaultIcon();
 
   /**
    * If false, the marker will not emit mouse events and will act as a part
@@ -231,7 +232,7 @@ class Marker extends Layer {
     icon.classes.add(classToAdd);
 
     if (options.keyboard) {
-      icon.tabIndex = '0';
+      icon.tabIndex = 0;
     }
 
     _icon = icon;
@@ -313,8 +314,12 @@ class Marker extends Layer {
     _icon.style.zIndex = (_zIndex + offset).toString();
   }
 
-  _animateZoom(num zoom, LatLng center) {
-    final pos = _map.latLngToNewLayerPoint(_latlng, zoom, center).rounded();
+//  _animateZoom(num zoom, LatLng center) {
+//    final pos = _map.latLngToNewLayerPoint(_latlng, zoom, center).rounded();
+
+  _animateZoom(MapEvent e) {
+    final zoomEvent = e as ZoomEvent;
+    final pos = _map.latLngToNewLayerPoint(_latlng, zoomEvent.zoom, zoomEvent.center).rounded();
 
     _setPos(pos);
   }

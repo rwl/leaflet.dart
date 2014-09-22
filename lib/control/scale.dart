@@ -36,13 +36,15 @@ class Scale extends Control {
 
   Scale([ScaleOptions options=null]) : super(options) {
     if (options == null) {
-      options = new ScaleOptions();
+      this.options = new ScaleOptions();
     }
   }
 
   Element _mScale, _iScale;
 
-  onAdd(map) {
+  StreamSubscription<MapEvent> _subscription;
+
+  onAdd(LeafletMap map) {
     _map = map;
 
     final className = 'leaflet-control-scale',
@@ -50,26 +52,32 @@ class Scale extends Control {
 
     _addScales(options, className, container);
 
-    map.on(scaleOptions.updateWhenIdle ? 'moveend' : 'move', _update, this);
-    map.whenReady(_update, this);
+    if (scaleOptions.updateWhenIdle) {
+      _subscription = map.onMoveEnd.listen(_update);
+    } else {
+      _subscription = map.onMove.listen(_update);
+    }
+    map.whenReady(_update);
 
     return container;
   }
 
-  onRemove(map) {
-    map.off(scaleOptions.updateWhenIdle ? 'moveend' : 'move', _update, this);
+  onRemove(LeafletMap map) {
+    if (_subscription != null) {
+      _subscription.cancel();
+    }
   }
 
-  _addScales(options, className, container) {
-    if (options['metric']) {
+  _addScales(ScaleOptions options, String className, Element container) {
+    if (options.metric) {
       _mScale = dom.create('div', className + '-line', container);
     }
-    if (options['imperial']) {
+    if (options.imperial) {
       _iScale = dom.create('div', className + '-line', container);
     }
   }
 
-  _update() {
+  _update(_) {
     final bounds = _map.getBounds(),
         centerLat = bounds.getCenter().lat,
         halfWorldMeters = 6378137 * math.PI * math.cos(centerLat * math.PI / 180),

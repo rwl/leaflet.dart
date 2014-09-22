@@ -1,13 +1,13 @@
 part of leaflet.geo.projection;
 
-final Mercator = new _Mercator();
+final Mercator = new MercatorProjection();
 
 /**
  * Mercator projection that takes into account that the Earth is not a perfect sphere.
  *
  * Less popular than spherical mercator; used by projections like EPSG:3395.
  */
-class _Mercator implements Projection {
+class MercatorProjection implements Projection {
   static double MAX_LATITUDE = 85.0840591556;
 
   static double R_MINOR = 6356752.314245179;

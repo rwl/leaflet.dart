@@ -6,7 +6,7 @@ import 'package:unittest/html_enhanced_config.dart';
 
 import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/geo/geo.dart' show LatLng;
-import 'package:leaflet/layer/marker/marker.dart' show Marker, Default, DivIcon;
+import 'package:leaflet/layer/marker/marker.dart' show Marker, DefaultIcon, DivIcon;
 
 
 main() {
@@ -18,8 +18,8 @@ main() {
 
     setUp(() {
       map = new LeafletMap(document.createElement('div'))..setView(new LatLng(0, 0), 0);
-      icon1 = new Default();
-      icon2 = new Default({
+      icon1 = new DefaultIcon();
+      icon2 = new DefaultIcon({
         'iconUrl': icon1._getIconUrl('icon') + '?2',
         'shadowUrl': icon1._getIconUrl('shadow') + '?2'
       });

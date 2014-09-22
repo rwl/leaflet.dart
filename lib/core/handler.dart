@@ -27,7 +27,7 @@ abstract class Handler {
    * Disables the handler.
    */
   void disable() {
-    if (!_enabled) { return; }
+    if (_enabled == null || _enabled == false) { return; }
 
     _enabled = false;
     removeHooks();

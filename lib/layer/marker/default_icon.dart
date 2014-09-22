@@ -3,7 +3,7 @@ part of leaflet.layer.marker;
 /**
  * Default is the blue marker icon used by default in Leaflet.
  */
-class Default extends Icon {
+class DefaultIcon extends Icon {
 
   static String imagePath;
 
@@ -13,7 +13,7 @@ class Default extends Icon {
     ..popupAnchor = new Point2D(1, -34)
     ..shadowSize = new Point2D(41, 41);
 
-  Default() : super(_defaultOptions);
+  DefaultIcon() : super(_defaultOptions);
 
   String _getIconUrl(IconType iconType) {
 
@@ -32,11 +32,11 @@ class Default extends Icon {
 
     String name = iconType.toString();
 
-    if (Browser.retina && name == 'icon') {
-      name += '-2x';
-    }
+//    if (Browser.retina && name == 'icon') { TODO: retina
+//      name += '-2x';
+//    }
 
-    final path = Default.imagePath;
+    final path = DefaultIcon.imagePath;
 
     if (path == null) {
       throw new Exception('Couldn\'t autodetect Default.imagePath, set it manually.');

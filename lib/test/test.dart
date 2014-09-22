@@ -29,8 +29,8 @@ Matcher nearLatLng(LatLng expected, [num delta=1e-4]) => new _NearLatLng(expecte
 class _NearLatLng extends Matcher {
   final delta, expected;
   _NearLatLng(this.expected, this.delta);
-  bool matches(item, Map matchState) {
-    if (item.lat < expected.lat - delta || item.x > expected.lat + delta) {
+  bool matches(LatLng item, Map matchState) {
+    if (item.lat < expected.lat - delta || item.lat > expected.lat + delta) {
       return false;
     } else if (item.lng < expected.lng - delta || item.lng > expected.lng + delta) {
       return false;

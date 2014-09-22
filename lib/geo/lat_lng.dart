@@ -104,10 +104,11 @@ class LatLng {
   }
 
   /**
-   * Returns a new LatLng object with the longitude wrapped around left and right boundaries (-180 to 180 by default).
+   * Returns a new LatLng object with the longitude wrapped around left and
+   * right boundaries (-180 to 180 by default).
    */
   LatLng wrap([num a = -180, num b = 180]) {
-    final l = (lng + b) % (b - a) + (lng < a || lng == b ? b : a);
+    final l = (lng + b).remainder(b - a) + (lng < a || lng == b ? b : a);
 
     return new LatLng(lat, l);
   }

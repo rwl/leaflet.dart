@@ -9,10 +9,10 @@ import 'package:leaflet/test/test.dart';
 main() {
   useHtmlEnhancedConfiguration();
 
-  group('CRS.EPSG3395', () {
+  group('EPSG3395', () {
     final crs = EPSG3395;
 
-    group('#latLngToPoint', () {
+    group('latLngToPoint', () {
       test('projects a center point', () {
         expect(crs.latLngToPoint(new LatLng(0, 0), 0), near(new Point2D(128, 128), 0.01));
       });
@@ -22,7 +22,7 @@ main() {
       });
     });
 
-    group('#pointToLatLng', () {
+    group('pointToLatLng', () {
       test('reprojects a center point', () {
         expect(crs.pointToLatLng(new Point2D(128, 128), 0), nearLatLng(new LatLng(0, 0), 0.01));
       });
@@ -33,10 +33,10 @@ main() {
     });
   });
 
-  group('CRS.EPSG3857', () {
+  group('EPSG3857', () {
     final crs = EPSG3857;
 
-    group('#latLngToPoint', () {
+    group('latLngToPoint', () {
       test('projects a center point', () {
         expect(crs.latLngToPoint(new LatLng(0, 0), 0), near(new Point2D(128, 128), 0.01));
       });
@@ -46,7 +46,7 @@ main() {
       });
     });
 
-    group('#pointToLatLng', () {
+    group('pointToLatLng', () {
       test('reprojects a center point', () {
         expect(crs.pointToLatLng(new Point2D(128, 128), 0), nearLatLng(new LatLng(0, 0), 0.01));
       });

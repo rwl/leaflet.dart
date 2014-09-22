@@ -38,7 +38,7 @@ main() {
       });
     });
 
-    group('#equals', () {
+    group('equals', () {
       test('returns true if compared objects are equal within a certain margin', () {
         final a = new LatLng(10, 20);
         final b = new LatLng(10 + 1.0E-10, 20 - 1.0E-10);
@@ -57,7 +57,7 @@ main() {
       });
     });
 
-    group('#wrap', () {
+    group('wrap', () {
       test('wraps longitude to lie between -180 and 180 by default', () {
         final a = new LatLng(0, 190).wrap().lng;
         expect(a, equals(-170));
@@ -90,14 +90,14 @@ main() {
       });
     });
 
-    group('#toString', () {
+    group('toString', () {
       test('formats a string', () {
         final a = new LatLng(10.333333333, 20.2222222);
         expect(a.toString(3), equals('LatLng(10.333, 20.222)'));
       });
     });
 
-    group('#distanceTo', () {
+    group('distanceTo', () {
       test('calculates distance in meters', () {
         final a = new LatLng(50.5, 30.5);
         final b = new LatLng(50, 1);
@@ -106,7 +106,7 @@ main() {
       });
     });
 
-    group('L.latLng factory', () {
+    group('LatLng.latLng factory', () {
       test('returns LatLng instance as is', () {
         final a = new LatLng(50, 30);
 
