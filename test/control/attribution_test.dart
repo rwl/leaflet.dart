@@ -11,7 +11,7 @@ import 'package:leaflet/control/control.dart' show Attribution, AttributionOptio
 main() {
   useHtmlEnhancedConfiguration();
 
-  group('Control.Attribution', () {
+  group('Attribution', () {
     LeafletMap map;
     Attribution control;
     Element container;
@@ -24,34 +24,34 @@ main() {
     });
 
     test('contains just prefix if no attributions added', () {
-      expect(container.innerHTML, equals('prefix'));
+      expect(container.text, equals('prefix'));
     });
 
-    group('#addAttribution', () {
+    group('addAttribution', () {
       test('adds one attribution correctly', () {
         control.addAttribution('foo');
-        expect(container.innerHTML, equals('prefix | foo'));
+        expect(container.text, equals('prefix | foo'));
       });
 
       test('adds no duplicate attributions', () {
         control.addAttribution('foo');
         control.addAttribution('foo');
-        expect(container.innerHTML, equals('prefix | foo'));
+        expect(container.text, equals('prefix | foo'));
       });
 
       test('adds several attributions listed with comma', () {
         control.addAttribution('foo');
         control.addAttribution('bar');
-        expect(container.getinnerHTML, equals('prefix | foo, bar'));
+        expect(container.text, equals('prefix | foo, bar'));
       });
     });
 
-    group('#removeAttribution', () {
+    group('removeAttribution', () {
       test('removes attribution correctly', () {
         control.addAttribution('foo');
         control.addAttribution('bar');
         control.removeAttribution('foo');
-        expect(container.innerHTML, equals('prefix | bar'));
+        expect(container.text, equals('prefix | bar'));
       });
       test('does nothing if removing attribution that was not present', () {
         control.addAttribution('foo');
@@ -60,14 +60,14 @@ main() {
         control.removeAttribution('baz');
         control.removeAttribution('baz');
         control.removeAttribution('');
-        expect(container.innerHTML, equals('prefix | foo'));
+        expect(container.text, equals('prefix | foo'));
       });
     });
 
-    group('#setPrefix', () {
+    group('setPrefix', () {
       test('changes prefix', () {
         control.setPrefix('bla');
-        expect(container.innerHTML, equals('bla'));
+        expect(container.text, equals('bla'));
       });
     });
 

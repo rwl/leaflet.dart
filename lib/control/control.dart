@@ -42,6 +42,17 @@ class ControlPosition {
    * Bottom right of the map.
    */
   static const BOTTOMRIGHT = const ControlPosition._internal('bottomright');
+
+  static Map<String, ControlPosition> _names = {
+    TOPLEFT.toString(): TOPLEFT,
+    TOPRIGHT.toString: TOPRIGHT,
+    BOTTOMLEFT.toString(): BOTTOMLEFT,
+    BOTTOMRIGHT.toString(): BOTTOMRIGHT
+  };
+
+  factory ControlPosition.fromString(String s) {
+    return _names[s];
+  }
 }
 
 class ControlOptions {
@@ -123,7 +134,8 @@ abstract class Control {
     final pos = getPosition(),
         corner = map.controlCorners[pos];
 
-    corner.removeChild(_container);
+//    corner.removeChild(_container);
+    _container.remove();
     _map = null;
 
     //if (onRemove != null) {

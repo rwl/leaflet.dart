@@ -143,7 +143,7 @@ void disableClickPropagation(Element el) {
     el.addEventListener(event, stop);
   }
 
-  el.onClick.listen(_fakeStop);
+  el.onClick.listen(fakeStop);
   el.onDoubleClick.listen(stop);
 }
 

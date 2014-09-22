@@ -15,7 +15,7 @@ import '../core/core.dart' show MapEvent, EventType, Util, Browser, LayerEvent, 
 import '../geo/geo.dart' show LatLng, LatLngBounds;
 import '../geo/crs/crs.dart' show CRS, EPSG3857;
 import '../geometry/geometry.dart' show Bounds, Point2D;
-import '../control/control.dart' show Control, Zoom, Attribution;
+import '../control/control.dart' show Control, Zoom, Attribution, ControlPosition;
 import '../dom/dom.dart' as dom;
 import '../layer/layer.dart' show Layer, Popup, PopupOptions;
 import '../layer/vector/vector.dart' show Path;
@@ -1179,9 +1179,9 @@ class LeafletMap extends Object {
 
   /* Control extensions */
 
-  Map _controlCorners;
+  Map<ControlPosition, Element> _controlCorners;
 
-  Map get controlCorners => _controlCorners;
+  Map<ControlPosition, Element> get controlCorners => _controlCorners;
 
   Element _controlContainer;
 
@@ -1210,7 +1210,8 @@ class LeafletMap extends Object {
     createCorner(String vSide, String hSide) {
       var className = l + vSide + ' ' + l + hSide;
 
-      corners[vSide + hSide] = dom.create('div', className, container);
+      final pos = new ControlPosition.fromString(vSide + hSide);
+      corners[pos] = dom.create('div', className, container);
     }
 
     createCorner('top', 'left');

@@ -98,13 +98,18 @@ class Attribution extends Control {
       return;
     }
 
-    final attribs = _attributions.values;
+    final attribs = [];//_attributions.values;
+    _attributions.forEach((String text, int i) {
+      if (i > 0) {
+        attribs.add(text);
+      }
+    });
     final prefixAndAttribs = [];
 
     if (attributionOptions.prefix != null) {
       prefixAndAttribs.add(attributionOptions.prefix);
     }
-    if (attribs.length) {
+    if (attribs.length != 0) {
       prefixAndAttribs.add(attribs.join(', '));
     }
 
