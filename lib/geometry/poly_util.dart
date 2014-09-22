@@ -46,7 +46,7 @@ List<Point2D> clipPolygon(List<Point2D> points, Bounds bounds) {
         clippedPoints.add(a);
 
         // else if b is inside the clip window (a->b enters the screen)
-      } else if (!(b._code & edge)) {
+      } else if ((b._code & edge) == 0) {
         final p = _getEdgeIntersection(b, a, edge, bounds);
         p._code = _getBitCode(p, bounds);
         clippedPoints.add(p);

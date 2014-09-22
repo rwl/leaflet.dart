@@ -77,7 +77,8 @@ class LatLng {
    * Returns a string representation of the point (for debugging purposes).
    */
   String toString([num precision = 5]) {
-    return 'LatLng(${formatNum(lat, precision)}, ${formatNum(lng, precision)})';
+//    return 'LatLng(${formatNum(lat, precision)}, ${formatNum(lng, precision)})';
+    return 'LatLng($lat, $lng)';
   }
 
   /**

@@ -158,6 +158,7 @@ class Point2D {
    * Returns a string representation of the point for debugging purposes.
    */
   String toString() {
-    return 'Point(${formatNum(x)}, ${formatNum(y)})';
+//    return 'Point(${formatNum(x)}, ${formatNum(y)})';
+    return 'Point($x, $y)';
   }
 }

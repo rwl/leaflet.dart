@@ -1,10 +1,9 @@
-import 'package:unittest/unittest.dart';
-import 'package:leaflet/geometry/geometry.dart' show Bounds, clipPolygon, Point2D;
+part of leaflet.geometry.test;
 
-main() {
+polyUtilTest() {
   group('PolyUtil', () {
 
-    group('#clipPolygon', () {
+    group('clipPolygon', () {
       test('clips polygon by bounds', () {
         final bounds = new Bounds.between(new Point2D(0, 0), new Point2D(10, 10));
 
@@ -16,9 +15,9 @@ main() {
 
         final clipped = clipPolygon(points, bounds);
 
-        for (int i = 0, len = clipped.length; i < len; i++) {
-          delete(clipped[i]._code);
-        }
+//        for (int i = 0, len = clipped.length; i < len; i++) {
+//          delete(clipped[i]._code);
+//        }
 
         expect(clipped, equals([
                                 new Point2D(7.5, 10),

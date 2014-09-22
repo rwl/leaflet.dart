@@ -52,14 +52,14 @@ List<Point2D> _simplifyDP(List<Point2D> points, num sqTolerance) {
       //ArrayConstructor = typeof Uint8Array !== undefined + '' ? Uint8Array : Array,
       markers = new List<bool>(len);
 
-  markers[0] = markers[len - 1] = 1;
+  markers[0] = markers[len - 1] = true;
 
   _simplifyDPStep(points, markers, sqTolerance, 0, len - 1);
 
   final newPoints = [];
 
   for (int i = 0; i < len; i++) {
-    if (markers[i]) {
+    if (markers[i] != null && markers[i]) {
       newPoints.add(points[i]);
     }
   }

@@ -1,11 +1,9 @@
-import 'dart:math' as Math;
-import 'package:unittest/unittest.dart';
-import 'package:leaflet/geometry/geometry.dart' show Bounds, Point2D, simplify, clipSegment, pointToSegmentDistance, closestPointOnSegment;
+part of leaflet.geometry.test;
 
-main() {
+lineUtilTest() {
   group('LineUtil', () {
 
-    group('#clipSegment', () {
+    group('clipSegment', () {
 
       Bounds bounds;
 
@@ -40,7 +38,7 @@ main() {
       });
     });
 
-    group('#pointToSegmentDistance & #closestPointOnSegment', () {
+    group('pointToSegmentDistance & closestPointOnSegment', () {
 
       final p1 = new Point2D(0, 10);
       final p2 = new Point2D(10, 0);
@@ -55,7 +53,7 @@ main() {
       });
     });
 
-    group('#simplify', () {
+    group('simplify', () {
       test('simplifies polylines according to tolerance', () {
         final points = [
                       new Point2D(0, 0),

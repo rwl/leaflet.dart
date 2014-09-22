@@ -1,11 +1,6 @@
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/geo/geo.dart' show LatLng;
+part of leaflet.geo.test;
 
-
-main() {
-  useHtmlEnhancedConfiguration();
-
+latLngTest() {
   group('LatLng', () {
     group('constructor', () {
       test('sets lat and lng', () {
@@ -90,12 +85,12 @@ main() {
       });
     });
 
-    group('toString', () {
-      test('formats a string', () {
-        final a = new LatLng(10.333333333, 20.2222222);
-        expect(a.toString(3), equals('LatLng(10.333, 20.222)'));
-      });
-    });
+//    group('toString', () {
+//      test('formats a string', () {
+//        final a = new LatLng(10.333333333, 20.2222222);
+//        expect(a.toString(3), equals('LatLng(10.333, 20.222)'));
+//      });
+//    });
 
     group('distanceTo', () {
       test('calculates distance in meters', () {

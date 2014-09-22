@@ -1,11 +1,6 @@
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/geo/geo.dart' show LatLngBounds, LatLng;
+part of leaflet.geo.test;
 
-
-main() {
-  useHtmlEnhancedConfiguration();
-
+latLngBoundsTest() {
   group('LatLngBounds', () {
     LatLngBounds a, c;
 

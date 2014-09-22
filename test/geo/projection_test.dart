@@ -1,14 +1,6 @@
-import 'dart:math' as Math;
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/geo/geo.dart' show LatLng;
-import 'package:leaflet/geo/projection/projection.dart' show Mercator;
-import 'package:leaflet/geometry/geometry.dart' show Point2D;
-import 'package:leaflet/test/test.dart';
+part of leaflet.geo.test;
 
-main() {
-  useHtmlEnhancedConfiguration();
-
+projectionTest() {
   group('Mercator', () {
     final p = Mercator;
 

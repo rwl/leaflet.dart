@@ -1,8 +1,6 @@
-import 'package:unittest/unittest.dart';
-import 'package:leaflet/geometry/geometry.dart' show Point2D;
-import 'package:leaflet/geometry/geometry.dart' show Transformation;
+part of leaflet.geometry.test;
 
-main() {
+transformationTest() {
   group("Transformation", () {
     Transformation t;
     Point2D p;
@@ -12,7 +10,7 @@ main() {
       p = new Point2D(10, 20);
     });
 
-    group('#transform', () {
+    group('transform', () {
       test("performs a transformation", () {
         final p2 = t.transform(p, 2);
         expect(p2, equals(new Point2D(24, 128)));
@@ -23,7 +21,7 @@ main() {
       });
     });
 
-    group('#untransform', () {
+    group('untransform', () {
       test("performs a reverse transformation", () {
         final p2 = t.transform(p, 2);
         final p3 = t.untransform(p2, 2);

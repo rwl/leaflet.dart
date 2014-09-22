@@ -1,14 +1,6 @@
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/geo/crs/crs.dart' show EPSG3395, EPSG3857;
-import 'package:leaflet/geo/geo.dart' show LatLng;
-import 'package:leaflet/geometry/geometry.dart' show Point2D;
-import 'package:leaflet/test/test.dart';
+part of leaflet.geo.test;
 
-
-main() {
-  useHtmlEnhancedConfiguration();
-
+crsTest() {
   group('EPSG3395', () {
     final crs = EPSG3395;
 

@@ -1,8 +1,6 @@
-import 'package:unittest/unittest.dart';
-import 'package:leaflet/geometry/geometry.dart' show Bounds, Point2D;
+part of leaflet.geometry.test;
 
-
-main() {
+boundsTest() {
   group('Bounds', () {
     Bounds a, b, c;
 
@@ -11,10 +9,10 @@ main() {
           new Point2D(14, 12),
           new Point2D(30, 40));
       b = new Bounds([
-                        new Point2D(20, 12),
-                        new Point2D(14, 20),
-                        new Point2D(30, 40)
-                        ]);
+        new Point2D(20, 12),
+        new Point2D(14, 20),
+        new Point2D(30, 40)
+      ]);
       c = new Bounds();
     });
 
@@ -29,7 +27,7 @@ main() {
       });
     });
 
-    group('#extend', () {
+    group('extend', () {
       test('extends the bounds to contain the given point', () {
         a.extend(new Point2D(50, 20));
         expect(a.min, equals(new Point2D(14, 12)));
@@ -41,13 +39,13 @@ main() {
       });
     });
 
-    group('#getCenter', () {
+    group('getCenter', () {
       test('returns the center point', () {
         expect(a.getCenter(), equals(new Point2D(22, 26)));
       });
     });
 
-    group('#contains', () {
+    group('contains', () {
       test('contains other bounds or point', () {
         a.extend(new Point2D(50, 10));
         expect(a.containsBounds(b), isTrue);
@@ -57,7 +55,7 @@ main() {
       });
     });
 
-    group('#isValid', () {
+    group('isValid', () {
       test('returns true if properly set up', () {
         expect(a.isValid(), isTrue);
       });
@@ -70,13 +68,13 @@ main() {
       });
     });
 
-    group('#getSize', () {
+    group('getSize', () {
       test('returns the size of the bounds as point', () {
         expect(a.getSize(), equals(new Point2D(16, 28)));
       });
     });
 
-    group('#intersects', () {
+    group('intersects', () {
       test('returns true if bounds intersect', () {
         expect(a.intersects(b), isTrue);
         expect(a.intersects(new Bounds.between(new Point2D(100, 100),
@@ -84,12 +82,14 @@ main() {
       });
     });
 
-    group('L.bounds factory', () {
+    group('Bounds.bounds factory', () {
       test('creates bounds from array of number arrays', () {
         //final bounds = new Bounds.bounds([[14, 12], [30, 40]]);
         final bounds = new Bounds.bounds(new Bounds
             .between(new Point2D(14, 12), new Point2D(30, 40)));
-        expect(bounds, equals(a));
+//        expect(bounds, equals(a));
+        expect(bounds.min, equals(a.min));
+        expect(bounds.max, equals(a.max));
       });
     });
   });
