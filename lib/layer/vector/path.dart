@@ -576,4 +576,9 @@ abstract class Path extends Layer {
         break;
     }
   }
+
+  /**
+   * For internal use.
+   */
+  List<LatLng> get latlngs => _latlngs;
 }

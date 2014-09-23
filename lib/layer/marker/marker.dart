@@ -615,4 +615,10 @@ class Marker extends Layer {
     }
   }
 
+  /**
+   * For internal use.
+   */
+  ImageElement get icon => _icon;
+  ImageElement get shadow => _shadow;
+
 }

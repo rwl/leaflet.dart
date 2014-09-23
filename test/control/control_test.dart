@@ -23,9 +23,13 @@ part 'attribution_test.dart';
 part 'layers_test.dart';
 part 'scale_test.dart';
 
-main() {
-  useHtmlEnhancedConfiguration();
+controlTest() {
   attributionTest();
   layersTest();
   scaleTest();
+}
+
+main() {
+  useHtmlEnhancedConfiguration();
+  controlTest();
 }

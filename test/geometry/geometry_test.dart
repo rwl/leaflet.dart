@@ -14,10 +14,12 @@ part 'point_test.dart';
 part 'poly_util_test.dart';
 part 'transformation_test.dart';
 
-main() {
+geometryTest() {
   boundsTest();
   lineUtilTest();
   pointTest();
   polyUtilTest();
   transformationTest();
 }
+
+main() => geometryTest();

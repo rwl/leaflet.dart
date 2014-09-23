@@ -1,14 +1,6 @@
-import 'dart:html' show document, Element;
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show LeafletMap;
-import 'package:leaflet/geo/geo.dart' show LatLng;
-import 'package:leaflet/layer/layer.dart' show Popup;
-import 'package:leaflet/layer/marker/marker.dart' show Marker;
+part of leaflet.layer.test;
 
-main() {
-  useHtmlEnhancedConfiguration();
-
+popupTest() {
   group('Popup', () {
     Element c;
     LeafletMap map;

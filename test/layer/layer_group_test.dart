@@ -1,12 +1,6 @@
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/layer/layer.dart' show LayerGroup;
-import 'package:leaflet/layer/marker/marker.dart' show Marker;
-import 'package:leaflet/geo/geo.dart' show LatLng;
+part of leaflet.layer.test;
 
-main() {
-  useHtmlEnhancedConfiguration();
-
+layerGroupTest() {
   group('LayerGroup', () {
     group('#addLayer', () {
       test('adds a layer', () {

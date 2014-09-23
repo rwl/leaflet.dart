@@ -1,17 +1,6 @@
-import 'dart:html' show document;
+part of leaflet.layer.test;
 
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show LeafletMap;
-import 'package:leaflet/core/core.dart' show stamp;
-import 'package:leaflet/geo/geo.dart' show LatLng;
-import 'package:leaflet/layer/marker/marker.dart' show Marker;
-import 'package:leaflet/layer/layer.dart' show FeatureGroup, LayerGroup;
-import 'package:leaflet/core/core.dart' show Event, EventType;
-
-main() {
-  useHtmlEnhancedConfiguration();
-
+featureGroupTest() {
   group('FeatureGroup', () {
     LeafletMap map;
     setUp(() {

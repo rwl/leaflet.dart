@@ -1,3 +1,4 @@
+library leaflet.map.test;
 
 import 'dart:html' show document;
 import 'dart:html' as html show Event;
@@ -11,9 +12,7 @@ import 'package:leaflet/core/core.dart' show Event, EventType;
 import 'package:leaflet/layer/layer.dart' show Layer;
 import 'package:leaflet/layer/tile/tile.dart' show TileLayer, TileLayerOptions;
 
-main() {
-  useHtmlEnhancedConfiguration();
-
+mapTest() {
   group('Map', () {
     LeafletMap map;
     bool called;
@@ -577,4 +576,9 @@ main() {
       });
     });
   });
+}
+
+main() {
+  useHtmlEnhancedConfiguration();
+  mapTest();
 }

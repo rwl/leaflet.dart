@@ -1,10 +1,8 @@
-import 'package:unittest/unittest.dart';
-import 'package:leaflet/layer/vector/vector.dart' show Circle;
-import 'package:leaflet/geo/geo.dart' show LatLng;
+part of leaflet.layer.vector.test;
 
-main() {
+circleTest() {
   group('Circle', () {
-    group('#getBounds', () {
+    group('getBounds', () {
       Circle circle;
 
       setUp(() {

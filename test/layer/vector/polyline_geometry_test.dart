@@ -1,14 +1,6 @@
-import 'dart:html' show document;
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show LeafletMap;
-import 'package:leaflet/geo/geo.dart' show LatLng;
-import 'package:leaflet/layer/vector/vector.dart' show Polyline;
+part of leaflet.layer.vector.test;
 
-
-main() {
-  useHtmlEnhancedConfiguration();
-
+polylineGeometryTest() {
   group('PolylineGeometry', () {
 
     final c = document.createElement('div');
@@ -17,7 +9,7 @@ main() {
     final map = new LeafletMap(c);
     map.setView(new LatLng(55.8, 37.6), 6);
 
-    group('#distanceTo', () {
+    group('distanceTo', () {
       test('calculates distances to points', () {
         final p1 = map.latLngToLayerPoint(new LatLng(55.8, 37.6));
         final p2 = map.latLngToLayerPoint(new LatLng(57.123076977278, 44.861962891635));
@@ -25,9 +17,8 @@ main() {
         .map((ll) {
           return new LatLng(ll[0], ll[1]);
         });
-        final polyline = new Polyline([], {
-          'noClip': true
-        });
+        final polyline = new Polyline([], new PolylineOptions()
+          ..noClip = true);
         map.addLayer(polyline);
 
         expect(polyline.closestLayerPoint(p1), isNull);

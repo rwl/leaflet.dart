@@ -14,9 +14,11 @@ part 'lat_lng_bounds_test.dart';
 part 'lat_lng_test.dart';
 part 'projection_test.dart';
 
-main() {
+geoTest() {
   crsTest();
   latLngBoundsTest();
   latLngTest();
   projectionTest();
 }
+
+main() => geoTest();

@@ -1,13 +1,6 @@
-import 'dart:html' show document;
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show LeafletMap;
-import 'package:leaflet/geo/geo.dart' show LatLng;
-import 'package:leaflet/layer/tile/tile.dart' show TileLayer, TileLayerOptions;
+part of leaflet.layer.test;
 
-main() {
-  useHtmlEnhancedConfiguration();
-
+tileLayerTest() {
   group('TileLayer', () {
     String tileUrl = '';
 
