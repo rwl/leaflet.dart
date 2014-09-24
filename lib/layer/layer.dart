@@ -13,6 +13,7 @@ import '../map/map.dart';
 import '../geo/geo.dart';
 import '../geometry/geometry.dart' show Point2D;
 import './marker/marker.dart';
+import './tile/tile.dart' show TileLayer;
 import './vector/vector.dart' show Polygon, PathOptions, Polyline, MultiPolyline, MultiPolygon, Path;
 
 part 'feature_group.dart';

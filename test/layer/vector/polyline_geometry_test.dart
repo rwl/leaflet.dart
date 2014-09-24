@@ -13,8 +13,12 @@ polylineGeometryTest() {
       test('calculates distances to points', () {
         final p1 = map.latLngToLayerPoint(new LatLng(55.8, 37.6));
         final p2 = map.latLngToLayerPoint(new LatLng(57.123076977278, 44.861962891635));
-        final latlngs = [[56.485503424111, 35.545556640339], [55.972522915346, 36.116845702918], [55.502459116923, 34.930322265253], [55.31534617509, 38.973291015816]]
-        .map((ll) {
+        final latlngs = [
+          [56.485503424111, 35.545556640339],
+          [55.972522915346, 36.116845702918],
+          [55.502459116923, 34.930322265253],
+          [55.31534617509, 38.973291015816]
+        ].map((ll) {
           return new LatLng(ll[0], ll[1]);
         });
         final polyline = new Polyline([], new PolylineOptions()

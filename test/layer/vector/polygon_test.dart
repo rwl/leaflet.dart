@@ -90,7 +90,7 @@ polygonTest() {
 
         final polygon = new Polygon(latLngs);
 
-        polygon.spliceLatLngs(1, 1, [7, 8]);
+        polygon.spliceLatLngs(1, 1);//, new LatLng(7, 8));
 
         expect(polygon.latlngs, equals([
           new LatLng(1, 2), new LatLng(7, 8), new LatLng(5, 6)

@@ -83,7 +83,7 @@ tileLayerTest() {
                   ..minZoom = 0
                   ..maxZoom = 25)..addTo(map)
           ];
-          map.whenReady(() {
+          map.whenReady((_) {
             expect(map.getMinZoom(), equals(0));
             expect(map.getMaxZoom(), equals(25));
 

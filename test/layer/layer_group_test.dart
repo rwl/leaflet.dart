@@ -55,7 +55,7 @@ layerGroupTest() {
         lg.eachLayer((layer) {
           expect(layer, equals(marker));
           //expect(this).to.eql(ctx);
-        }, ctx);
+        });//, ctx);
       });
     });
   });

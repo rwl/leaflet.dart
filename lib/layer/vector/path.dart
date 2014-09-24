@@ -241,7 +241,8 @@ abstract class Path extends Layer {
   }
 
   /**
-   * Opens the popup previously bound by the bindPopup method in the given point, or in one of the path's points if not specified.
+   * Opens the popup previously bound by the bindPopup method in the given
+   * point, or in one of the path's points if not specified.
    */
   void openPopup([LatLng latlng = null]) {
 

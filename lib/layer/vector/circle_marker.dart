@@ -12,7 +12,10 @@ class CircleMarker extends Circle {
 
   CircleMarkerOptions get circleMarkerOptions => options as CircleMarkerOptions;
 
-  CircleMarker(LatLng latlng, CircleMarkerOptions options) : super(latlng, null, options) {
+  CircleMarker(LatLng latlng, [CircleMarkerOptions options=null]) : super(latlng, null, options) {
+    if (options == null) {
+      this.options = new CircleMarkerOptions();
+    }
     this._radius = options.radius;
   }
 

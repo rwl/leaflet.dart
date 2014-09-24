@@ -599,13 +599,22 @@ class Marker extends Layer {
   Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
   Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
 
+
+  void fire(EventType eventType) {
+    final event = new MapEvent(eventType);
+    fireEvent(event);
+  }
+
   /**
    * For internal use.
    */
   //StreamController<PopupEvent> get popupOpenController;
   //StreamController<PopupEvent> get popupCloseController;
-  void fire(PopupEvent event) {
+  void fireEvent(MapEvent event) {
     switch (event.type) {
+      case EventType.CLICK:
+        _clickController.add(event);
+        break;
       case EventType.POPUPOPEN:
         _popupOpenController.add(event);
         break;
@@ -613,6 +622,33 @@ class Marker extends Layer {
         _popupCloseController.add(event);
         break;
     }
+
+//    switch (event.type) {
+//    case EventType.CLICK:
+//      _clickController.add(event);
+//      break;
+//    case EventType.DBLCLICK:
+//      _dblClickController.add(event);
+//      break;
+//    case EventType.MOUSEDOWN:
+//      _mouseDownController.add(event);
+//      break;
+//    case EventType.MOUSEOVER:
+//      _mouseOverController.add(event);
+//      break;
+//    case EventType.MOUSEOUT:
+//      _mouseOutController.add(event);
+//      break;
+//    case EventType.CONTEXTMENU:
+//      _contextMenuController.add(event);
+//      break;
+//    case EventType.DRAGSTART:
+//      _dragStartController.add(event);
+//      break;
+//    case EventType.DRAG:
+//      _dragController.add(event);
+//      break;
+//    }
   }
 
   /**

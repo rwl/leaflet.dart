@@ -1734,107 +1734,107 @@ class LeafletMap extends Object {
   }
 
   void fireEvent(MapEvent event) {
-      switch (event.type) {
-      case EventType.CLICK:
-        _clickController.add(event);
-        break;
-      case EventType.DBLCLICK:
-        _dblClickController.add(event);
-        break;
-      case EventType.MOUSEDOWN:
-        _mouseDownController.add(event);
-        break;
-      case EventType.MOUSEUP:
-        _mouseUpController.add(event);
-        break;
-      case EventType.MOUSEOVER:
-        _mouseOverController.add(event);
-        break;
-      case EventType.MOUSEOUT:
-        _mouseOutController.add(event);
-        break;
-      case EventType.MOUSEMOVE:
-        _mouseMoveController.add(event);
-        break;
-      case EventType.PRECLICK:
-        _preClickController.add(event);
-        break;
-      case EventType.DRAGEND:
-        _dragEndController.add(event);
-        break;
-      case EventType.RESIZE:
-        _resizeController.add(event);
-        break;
-      case EventType.LAYERADD:
-        _layerAddController.add(event);
-        break;
-      case EventType.LAYERREMOVE:
-        _layerRemoveController.add(event);
-        break;
-      case EventType.BASELAYERCHANGE:
-        _baseLayerChangeController.add(event);
-        break;
-      case EventType.OVERLAYADD:
-        _overlayAddController.add(event);
-        break;
-      case EventType.OVERLAYREMOVE:
-        _overlayRemoveController.add(event);
-        break;
-      case EventType.LOCATIONFOUND:
-        _locationFoundController.add(event);
-        break;
-      case EventType.LOCATIONERROR:
-        _locationErrorController.add(event);
-        break;
-      case EventType.POPUPOPEN:
-        _popupOpenController.add(event);
-        break;
-      case EventType.POPUPCLOSE:
-        _popupCloseController.add(event);
-        break;
-      case EventType.FOCUS:
-        _focusController.add(event);
-        break;
-      case EventType.BLUR:
-        _blurController.add(event);
-        break;
-      case EventType.LOAD:
-        _loadController.add(event);
-        break;
-      case EventType.UNLOAD:
-        _unloadController.add(event);
-        break;
-      case EventType.VIEWRESET:
-        _viewResetController.add(event);
-        break;
-      case EventType.MOVESTART:
-        _moveStartController.add(event);
-        break;
-      case EventType.MOVE:
-        _moveController.add(event);
-        break;
-      case EventType.MOVEEND:
-        _moveEndController.add(event);
-        break;
-      case EventType.DRAGSTART:
-        _dragStartController.add(event);
-        break;
-      case EventType.DRAG:
-        _dragController.add(event);
-        break;
-      case EventType.ZOOMSTART:
-        _zoomStartController.add(event);
-        break;
-      case EventType.ZOOMEND:
-        _zoomEndController.add(event);
-        break;
-      case EventType.ZOOMLEVELSCHANGE:
-        _zoomLevelsChangeController.add(event);
-        break;
-      case EventType.AUTOPANSTART:
-        _autoPanStartController.add(event);
-        break;
-    }
+    switch (event.type) {
+    case EventType.CLICK:
+      _clickController.add(event);
+      break;
+    case EventType.DBLCLICK:
+      _dblClickController.add(event);
+      break;
+    case EventType.MOUSEDOWN:
+      _mouseDownController.add(event);
+      break;
+    case EventType.MOUSEUP:
+      _mouseUpController.add(event);
+      break;
+    case EventType.MOUSEOVER:
+      _mouseOverController.add(event);
+      break;
+    case EventType.MOUSEOUT:
+      _mouseOutController.add(event);
+      break;
+    case EventType.MOUSEMOVE:
+      _mouseMoveController.add(event);
+      break;
+    case EventType.PRECLICK:
+      _preClickController.add(event);
+      break;
+    case EventType.DRAGEND:
+      _dragEndController.add(event);
+      break;
+    case EventType.RESIZE:
+      _resizeController.add(event);
+      break;
+    case EventType.LAYERADD:
+      _layerAddController.add(event);
+      break;
+    case EventType.LAYERREMOVE:
+      _layerRemoveController.add(event);
+      break;
+    case EventType.BASELAYERCHANGE:
+      _baseLayerChangeController.add(event);
+      break;
+    case EventType.OVERLAYADD:
+      _overlayAddController.add(event);
+      break;
+    case EventType.OVERLAYREMOVE:
+      _overlayRemoveController.add(event);
+      break;
+    case EventType.LOCATIONFOUND:
+      _locationFoundController.add(event);
+      break;
+    case EventType.LOCATIONERROR:
+      _locationErrorController.add(event);
+      break;
+    case EventType.POPUPOPEN:
+      _popupOpenController.add(event);
+      break;
+    case EventType.POPUPCLOSE:
+      _popupCloseController.add(event);
+      break;
+    case EventType.FOCUS:
+      _focusController.add(event);
+      break;
+    case EventType.BLUR:
+      _blurController.add(event);
+      break;
+    case EventType.LOAD:
+      _loadController.add(event);
+      break;
+    case EventType.UNLOAD:
+      _unloadController.add(event);
+      break;
+    case EventType.VIEWRESET:
+      _viewResetController.add(event);
+      break;
+    case EventType.MOVESTART:
+      _moveStartController.add(event);
+      break;
+    case EventType.MOVE:
+      _moveController.add(event);
+      break;
+    case EventType.MOVEEND:
+      _moveEndController.add(event);
+      break;
+    case EventType.DRAGSTART:
+      _dragStartController.add(event);
+      break;
+    case EventType.DRAG:
+      _dragController.add(event);
+      break;
+    case EventType.ZOOMSTART:
+      _zoomStartController.add(event);
+      break;
+    case EventType.ZOOMEND:
+      _zoomEndController.add(event);
+      break;
+    case EventType.ZOOMLEVELSCHANGE:
+      _zoomLevelsChangeController.add(event);
+      break;
+    case EventType.AUTOPANSTART:
+      _autoPanStartController.add(event);
+      break;
+  }
     /*if (event is MouseEvent) {
       switch (event.type) {
         case EventType.CLICK:

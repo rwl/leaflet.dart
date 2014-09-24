@@ -50,7 +50,7 @@ polylineTest() {
 
         final polyline = new Polyline(latLngs);
 
-        polyline.spliceLatLngs(1, 1, new LatLng(7, 8));
+        polyline.spliceLatLngs(1, 1);//, new LatLng(7, 8));
 
         expect(polyline.latlngs, equals([
           new LatLng(1, 2), new LatLng(7, 8), new LatLng(5, 6)

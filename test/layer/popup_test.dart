@@ -14,37 +14,40 @@ popupTest() {
     });
 
     test('closes on map click when map has closePopupOnClick option', () {
-      map.interactionOptions.closePopupOnClick = true;
+      map.options.closePopupOnClick = true;
 
       final popup = new Popup()
         ..setLatLng(new LatLng(55.8, 37.6))
         ..openOn(map);
 
-      happen.click(c);
+      //happen.click(c);
+      c.dispatchEvent(new html.Event('click'));
 
       expect(map.hasLayer(popup), isFalse);
     });
 
     test('closes on map click when popup has closeOnClick option', () {
-      map.interactionOptions.closePopupOnClick = false;
+      map.options.closePopupOnClick = false;
 
-      final popup = new Popup({'closeOnClick': true})
+      final popup = new Popup(new PopupOptions()..closeOnClick = true)
         ..setLatLng(new LatLng(55.8, 37.6))
         ..openOn(map);
 
-      happen.click(c);
+      //happen.click(c);
+      c.dispatchEvent(new html.Event('click'));
 
       expect(map.hasLayer(popup), isFalse);
     });
 
     test('does not close on map click when popup has closeOnClick: false option', () {
-      map.interactionOptions.closePopupOnClick = true;
+      map.options.closePopupOnClick = true;
 
-      final popup = new Popup({'closeOnClick': false})
+      final popup = new Popup(new PopupOptions()..closeOnClick = false)
         ..setLatLng(new LatLng(55.8, 37.6))
         ..openOn(map);
 
-      happen.click(c);
+      //happen.click(c);
+      c.dispatchEvent(new html.Event('click'));
 
       expect(map.hasLayer(popup), isTrue);
     });
@@ -53,21 +56,22 @@ popupTest() {
       final marker = new Marker(new LatLng(55.8, 37.6));
       map.addLayer(marker);
 
-      marker.bindPopup('Popup1').openPopup();
+      marker..bindPopup('Popup1')..openPopup();
 
-      map.interactionOptions.closePopupOnClick = true;
-      happen.click(c);
+      map.options.closePopupOnClick = true;
+      //happen.click(c);
+      c.dispatchEvent(new html.Event('click'));
 
       // toggle open popup
       sinon.spy(marker, 'openPopup');
-      marker.fire('click');
+      marker.fire(EventType.CLICK);
       expect(marker.openPopup.calledOnce, isTrue);
       expect(map.hasLayer(marker._popup), isTrue);
       marker.openPopup.restore();
 
       // toggle close popup
       sinon.spy(marker, 'closePopup');
-      marker.fire('click');
+      marker.fire(EventType.CLICK);
       expect(marker.closePopup.calledOnce, isTrue);
       expect(map.hasLayer(marker._popup), isFalse);
       marker.closePopup.restore();
@@ -85,7 +89,7 @@ popupTest() {
 
       var spy = sinon.spy();
 
-      marker1.on('popupopen', spy);
+      marker1.onPopupOpen.listen(spy);
 
       expect(spy.called, isFalse);
       marker2.openPopup();
@@ -106,7 +110,7 @@ popupTest() {
 
       var spy = sinon.spy();
 
-      marker1.on('popupclose', spy);
+      marker1.onPopupClose.listen(spy);
 
       expect(spy.called, isFalse);
       marker2.openPopup();
