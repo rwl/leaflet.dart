@@ -1,9 +1,8 @@
 part of leaflet.layer;
 
-/**
- * FeatureGroup extends LayerGroup by introducing mouse events and additional methods
- * shared between a group of interactive layers (like vectors or markers).
- */
+/// FeatureGroup extends LayerGroup by introducing mouse events and
+/// additional methods shared between a group of interactive layers
+/// (like vectors or markers).
 class FeatureGroup extends LayerGroup {
 
 //  static final EVENTS = [EventType.CLICK, EventType.DBLCLICK,
@@ -22,9 +21,7 @@ class FeatureGroup extends LayerGroup {
   StreamSubscription<MapEvent> _popupOpenSubscription;
   StreamSubscription<MapEvent> _popupCloseSubscription;
 
-  /**
-   * Create a layer group, optionally given an initial set of layers.
-   */
+  /// Create a layer group, optionally given an initial set of layers.
   FeatureGroup([List<Layer> layers = null]) : super(layers);
 
   void addLayer(Layer layer) {
@@ -99,9 +96,8 @@ class FeatureGroup extends LayerGroup {
     _layerRemoveController.add(new LayerEvent(EventType.LAYERREMOVE, layer));
   }
 
-  /**
-   * Binds a popup with a particular HTML content to a click on any layer from the group that has a bindPopup method.
-   */
+  /// Binds a popup with a particular HTML content to a click on any layer
+  /// from the group that has a bindPopup method.
   bindPopup(String content, [PopupOptions options=null]) {
     if (options == null) {
       options = new PopupOptions();
@@ -129,9 +125,8 @@ class FeatureGroup extends LayerGroup {
     return this;
   }
 
-  /**
-   * Sets the given path options to each layer of the group that has a setStyle method.
-   */
+  /// Sets the given path options to each layer of the group that has a
+  /// setStyle method.
   setStyle(PathOptions style) {
     //return invoke('setStyle', style);
     eachLayer((layer) {
@@ -139,9 +134,7 @@ class FeatureGroup extends LayerGroup {
     });
   }
 
-  /**
-   * Brings the layer group to the top of all other layers.
-   */
+  /// Brings the layer group to the top of all other layers.
   bringToFront() {
     //return invoke('bringToFront');
     eachLayer((layer) {
@@ -149,9 +142,7 @@ class FeatureGroup extends LayerGroup {
     });
   }
 
-  /**
-   * Brings the layer group to the bottom of all other layers.
-   */
+  /// Brings the layer group to the bottom of all other layers.
   bringToBack() {
     //return invoke('bringToBack');
     eachLayer((layer) {
@@ -159,9 +150,8 @@ class FeatureGroup extends LayerGroup {
     });
   }
 
-  /**
-   * Returns the LatLngBounds of the Feature Group (created from bounds and coordinates of its children).
-   */
+  /// Returns the LatLngBounds of the Feature Group (created from bounds and
+  /// coordinates of its children).
   getBounds() {
     var bounds = new LatLngBounds.between();
 

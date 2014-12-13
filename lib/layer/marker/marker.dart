@@ -18,71 +18,50 @@ part 'icon.dart';
 part 'marker_drag.dart';
 
 class MarkerOptions {
-  /**
-   * Icon class to use for rendering the marker. See Icon documentation for
-   * details on how to customize the marker icon. Set to new Icon.Default()
-   * by default.
-   */
+  /// Icon class to use for rendering the marker. See Icon documentation for
+  /// details on how to customize the marker icon. Set to new Icon.Default()
+  /// by default.
   Icon icon = new DefaultIcon();
 
-  /**
-   * If false, the marker will not emit mouse events and will act as a part
-   * of the underlying map.
-   */
+  /// If false, the marker will not emit mouse events and will act as a part
+  /// of the underlying map.
   bool clickable = true;
 
-  /**
-   * Whether the marker is draggable with mouse/touch or not.
-   */
+  /// Whether the marker is draggable with mouse/touch or not.
   bool draggable = false;
 
-  /**
-   * Whether the marker can be tabbed to with a keyboard and clicked by
-   * pressing enter.
-   */
+  /// Whether the marker can be tabbed to with a keyboard and clicked by
+  /// pressing enter.
   bool keyboard = true;
 
-  /**
-   * Text for the browser tooltip that appear on marker hover (no tooltip by
-   * default).
-   */
+  /// Text for the browser tooltip that appear on marker hover (no tooltip by
+  /// default).
   String  title = '';
 
-  /**
-   * Text for the alt attribute of the icon image (useful for accessibility).
-   */
+  /// Text for the alt attribute of the icon image (useful for accessibility).
   String  alt = '';
 
-  /**
-   * By default, marker images zIndex is set automatically based on its
-   * latitude. Use this option if you want to put the marker on top of all
-   * others (or below), specifying a high value like 1000 (or high negative
-   * value, respectively).
-   */
+  /// By default, marker images zIndex is set automatically based on its
+  /// latitude. Use this option if you want to put the marker on top of all
+  /// others (or below), specifying a high value like 1000 (or high negative
+  /// value, respectively).
   num zIndexOffset  = 0;
 
-  /**
-   * The opacity of the marker.
-   */
+  /// The opacity of the marker.
   num opacity = 1.0;
 
-  /**
-   * If true, the marker will get on top of others when you hover the mouse over it.
-   */
+  /// If true, the marker will get on top of others when you hover the mouse
+  /// over it.
   bool riseOnHover  = false;
 
-  /**
-   * The z-index offset used for the riseOnHover feature.
-   */
+  /// The z-index offset used for the riseOnHover feature.
   num riseOffset  = 250;
 
   Point2D offset;
 }
 
 
-/**
- * Marker is used to display clickable/draggable icons on the map.
- */
+/// Marker is used to display clickable/draggable icons on the map.
 class Marker extends Layer {
 
   LatLng _latlng;
@@ -159,12 +138,12 @@ class Marker extends Layer {
     _map = null;
   }
 
-  // Returns the current geographical position of the marker.
+  /// Returns the current geographical position of the marker.
   LatLng getLatLng() {
     return _latlng;
   }
 
-  // Changes the marker position to the given point.
+  /// Changes the marker position to the given point.
   void setLatLng(LatLng latlng) {
     _latlng = new LatLng.latLng(latlng);
 
@@ -174,13 +153,13 @@ class Marker extends Layer {
     _moveController.add(new MouseEvent(EventType.MOVE, _latlng, null, null, null));
   }
 
-  // Changes the zIndex offset of the marker.
+  /// Changes the zIndex offset of the marker.
   void setZIndexOffset(num offset) {
     options.zIndexOffset = offset;
     update();
   }
 
-  // Changes the marker icon.
+  /// Changes the marker icon.
   void setIcon(Icon icon) {
     options.icon = icon;
 
@@ -194,8 +173,8 @@ class Marker extends Layer {
     }
   }
 
-  // Updates the marker position, useful if coordinates of its latLng object
-  // were changed directly.
+  /// Updates the marker position, useful if coordinates of its latLng object
+  /// were changed directly.
   void update([Object obj=null, MapEvent e=null]) {
     if (_icon != null) {
       final pos = _map.latLngToLayerPoint(_latlng).rounded();
@@ -605,9 +584,7 @@ class Marker extends Layer {
     fireEvent(event);
   }
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   //StreamController<PopupEvent> get popupOpenController;
   //StreamController<PopupEvent> get popupCloseController;
   void fireEvent(MapEvent event) {
@@ -651,10 +628,7 @@ class Marker extends Layer {
 //    }
   }
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   ImageElement get icon => _icon;
   ImageElement get shadow => _shadow;
-
 }

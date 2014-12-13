@@ -1,8 +1,7 @@
 part of leaflet.dom;
 
-/**
- * Draggable allows you to add dragging capabilities to any element. Supports mobile devices too.
- */
+/// Draggable allows you to add dragging capabilities to any element. Supports
+/// mobile devices too.
 class Draggable {
 
   static bool disabled = false;// TODO implement global drag disable
@@ -29,16 +28,13 @@ class Draggable {
   bool get moved =>_moved;
   Point2D get newPos => _newPos;
 
-  /**
-   * Creates a Draggable object for moving the given element when you start dragging the dragHandle element (equals the element itself by default).
-   */
+  /// Creates a Draggable object for moving the given element when you start
+  /// dragging the dragHandle element (equals the element itself by default).
   Draggable(this._element, dragStartTarget) {
     _dragStartTarget = firstNonNull(dragStartTarget, _element);
   }
 
-  /**
-   * Enables the dragging ability.
-   */
+  /// Enables the dragging ability.
   enable() {
     if (this._enabled) { return; }
 
@@ -49,9 +45,7 @@ class Draggable {
     this._enabled = true;
   }
 
-  /**
-   * Disables the dragging ability.
-   */
+  /// Disables the dragging ability.
   disable() {
     if (!this._enabled) { return; }
 

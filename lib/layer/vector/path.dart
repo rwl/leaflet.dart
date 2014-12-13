@@ -1,75 +1,52 @@
 part of leaflet.layer.vector;
 
 class PathOptions {
-  /**
-   * Whether to draw stroke along the path. Set it to false to disable borders on polygons or circles.
-   */
+  /// Whether to draw stroke along the path. Set it to false to disable
+  /// borders on polygons or circles.
   bool stroke = true;
 
-  /**
-   * Stroke color.
-   */
+  /// Stroke color.
   String color = '#03f';
 
-  /**
-   * Stroke width in pixels.
-   */
+  /// Stroke width in pixels.
   num weight = 5;
 
-  /**
-   * Stroke opacity.
-   */
+  /// Stroke opacity.
   num opacity = 0.5;
 
-  /**
-   * Whether to fill the path with color. Set it to false to disable filling on polygons or circles.
-   */
+  /// Whether to fill the path with color. Set it to false to disable filling
+  /// on polygons or circles.
   bool fill;
 
-  /**
-   * Same as color Fill color.
-   */
+  /// Same as color Fill color.
   String fillColor;
 
-  /**
-   * Fill opacity.
-   */
+  /// Fill opacity.
   num fillOpacity = 0.2;
 
-  /**
-   * A string that defines the stroke dash pattern. Doesn't work on canvas-powered layers (e.g. Android 2).
-   */
+  /// A string that defines the stroke dash pattern. Doesn't work on
+  /// canvas-powered layers (e.g. Android 2).
   String dashArray;
 
-  /**
-   * A string that defines shape to be used at the end of the stroke.
-   */
+  /// A string that defines shape to be used at the end of the stroke.
   String lineCap;
 
-  /**
-   * A string that defines shape to be used at the corners of the stroke.
-   */
+  /// A string that defines shape to be used at the corners of the stroke.
   String lineJoin;
 
-  /**
-   * If false, the vector will not emit mouse events and will act as a part of the underlying map.
-   */
+  /// If false, the vector will not emit mouse events and will act as a part
+  /// of the underlying map.
   bool clickable = true;
 
-  /**
-   * Sets the pointer-events attribute on the path if SVG backend is used.
-   */
+  /// Sets the pointer-events attribute on the path if SVG backend is used.
   String pointerEvents;
 
-  /**
-   * Custom class name set on an element.
-   */
+  /// Custom class name set on an element.
   String className;// = '';
 }
 
-/**
- * Path is a base class for rendering vector paths on a map. Inherited by Polyline, Circle, etc.
- */
+/// Path is a base class for rendering vector paths on a map. Inherited by
+/// Polyline, Circle, etc.
 abstract class Path extends Layer {
 
   // how much to extend the clip area around the map view
@@ -132,9 +109,7 @@ abstract class Path extends Layer {
     _moveEndSubscription = map.onMoveEnd.listen(_updatePath);
   }
 
-  /**
-   * Adds the layer to the map.
-   */
+  /// Adds the layer to the map.
   void addTo(LeafletMap map) {
     map.addLayer(this);
   }
@@ -160,14 +135,11 @@ abstract class Path extends Layer {
     _moveEndSubscription.cancel();
   }
 
-  /**
-   * Do all projection stuff here.
-   */
+  /// Do all projection stuff here.
   void projectLatlngs();
 
-  /**
-   * Changes the appearance of a Path based on the options in the Path options object.
-   */
+  /// Changes the appearance of a Path based on the options in the Path
+  /// options object.
   void setStyle(PathOptions style) {
     options = style;
 
@@ -176,9 +148,8 @@ abstract class Path extends Layer {
     }
   }
 
-  /**
-   * Redraws the layer. Sometimes useful after you changed the coordinates that the path uses.
-   */
+  /// Redraws the layer. Sometimes useful after you changed the coordinates
+  /// that the path uses.
   void redraw() {
     if (_map != null) {
       projectLatlngs();
@@ -194,9 +165,7 @@ abstract class Path extends Layer {
   Popup _popup;
   bool _popupHandlersAdded = false;
 
-  /**
-   * Binds a popup with a particular HTML content to a click on this path.
-   */
+  /// Binds a popup with a particular HTML content to a click on this path.
   void bindPopupHtml(String html, PopupOptions options) {
     _popup = new Popup(options, this);
     _popup.setContent(html);
@@ -209,9 +178,7 @@ abstract class Path extends Layer {
 
   StreamSubscription<MapEvent> _popupClickSubscription, _popupRemoveSubscription;
 
-  /**
-   * Binds a given popup object to the path.
-   */
+  /// Binds a given popup object to the path.
   void bindPopup(Popup popup, PopupOptions options) {
     _popup = popup;
 
@@ -225,9 +192,7 @@ abstract class Path extends Layer {
     }
   }
 
-  /**
-   * Unbinds the popup previously bound to the path with bindPopup.
-   */
+  /// Unbinds the popup previously bound to the path with bindPopup.
   void unbindPopup() {
     if (_popup != null) {
       _popup = null;
@@ -240,10 +205,8 @@ abstract class Path extends Layer {
     }
   }
 
-  /**
-   * Opens the popup previously bound by the bindPopup method in the given
-   * point, or in one of the path's points if not specified.
-   */
+  /// Opens the popup previously bound by the bindPopup method in the given
+  /// point, or in one of the path's points if not specified.
   void openPopup([LatLng latlng = null]) {
 
     if (_popup != null) {
@@ -256,9 +219,7 @@ abstract class Path extends Layer {
     }
   }
 
-  /**
-   * Closes the path's bound popup if it is opened.
-   */
+  /// Closes the path's bound popup if it is opened.
   void closePopup(_) {
     if (_popup != null) {
       _popup.close();
@@ -270,9 +231,7 @@ abstract class Path extends Layer {
     _map.openPopup(_popup);
   }
 
-  /**
-   * Returns the LatLngBounds of the path.
-   */
+  /// Returns the LatLngBounds of the path.
   LatLngBounds getBounds();
 
 
@@ -284,9 +243,7 @@ abstract class Path extends Layer {
 
   Element _path;
 
-  /**
-   * Brings the layer to the top of all path layers.
-   */
+  /// Brings the layer to the top of all path layers.
   bringToFront() {
     final root = _map.pathRoot,
         path = _container;
@@ -296,9 +253,7 @@ abstract class Path extends Layer {
     }
   }
 
-  /**
-   * Brings the layer to the bottom of all path layers.
-   */
+  /// Brings the layer to the bottom of all path layers.
   bringToBack() {
     final root = _map.pathRoot,
         path = _container,
@@ -562,9 +517,7 @@ abstract class Path extends Layer {
   Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
   Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   //StreamController<PopupEvent> get popupOpenController;
   //StreamController<PopupEvent> get popupCloseController;
   void fire(PopupEvent event) {
@@ -578,8 +531,6 @@ abstract class Path extends Layer {
     }
   }
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   List<LatLng> get latlngs => _latlngs;
 }

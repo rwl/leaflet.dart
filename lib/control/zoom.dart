@@ -1,35 +1,24 @@
 part of leaflet.control;
 
 class ZoomOptions extends ControlOptions {
-  /**
-   * The position of the control (one of the map corners). See control positions.
-   */
+  /// The position of the control (one of the map corners). See control
+  /// positions.
   ControlPosition position  = ControlPosition.TOPLEFT;
 
-  /**
-   * The text set on the zoom in button.
-   */
+  /// The text set on the zoom in button.
   String  zoomInText = '+';
 
-  /**
-   * The text set on the zoom out button.
-   */
+  /// The text set on the zoom out button.
   String  zoomOutText = '-';
 
-  /**
-   * The title set on the zoom in button.
-   */
+  /// The title set on the zoom in button.
   String  zoomInTitle = 'Zoom in';
 
-  /**
-   * The title set on the zoom out button.
-   */
+  /// The title set on the zoom out button.
   String  zoomOutTitle = 'Zoom out';
 }
 
-/**
- * Zoom is used for the default zoom buttons on the map.
- */
+/// Zoom is used for the default zoom buttons on the map.
 class Zoom extends Control {
 
   ZoomOptions get zoomOptions => options as ZoomOptions;

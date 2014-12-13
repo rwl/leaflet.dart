@@ -1,9 +1,7 @@
 part of leaflet.map.handler;
 
-/**
- * BoxZoom is used to add shift-drag zoom interaction to the map
- * (zoom to a selected bounding box), enabled by default.
- */
+/// BoxZoom is used to add shift-drag zoom interaction to the map
+/// (zoom to a selected bounding box), enabled by default.
 class BoxZoom extends Handler {
 
   Element _container, _pane, _box;

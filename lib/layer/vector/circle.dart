@@ -4,7 +4,7 @@ class CircleOptions extends PathOptions {
   bool fill = true;
 }
 
-// Circle is a circle overlay (with a certain radius in meters).
+/// Circle is a circle overlay (with a certain radius in meters).
 class Circle extends Path {
 
   //CircleOptions circleOptions;
@@ -25,17 +25,13 @@ class Circle extends Path {
     _mRadius = radius;
   }
 
-  /**
-   * Sets the position of a circle to a new location.
-   */
+  /// Sets the position of a circle to a new location.
   void setLatLng(latlng) {
     _latlng = new LatLng.latLng(latlng);
     redraw();
   }
 
-  /**
-   * Sets the radius of a circle. Units are in meters.
-   */
+  /// Sets the radius of a circle. Units are in meters.
   void setRadius(radius) {
     _mRadius = radius;
     redraw();
@@ -60,9 +56,7 @@ class Circle extends Path {
             new LatLng(latlng.lat + latRadius, latlng.lng + lngRadius));
   }
 
-  /**
-   * Returns the current geographical position of the circle.
-   */
+  /// Returns the current geographical position of the circle.
   LatLng getLatLng() {
     return _latlng;
   }
@@ -84,9 +78,7 @@ class Circle extends Path {
     }
   }
 
-  /**
-   * Returns the current radius of a circle. Units are in meters.
-   */
+  /// Returns the current radius of a circle. Units are in meters.
   num getRadius() {
     return _mRadius;
   }

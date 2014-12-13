@@ -1,128 +1,87 @@
 part of leaflet.layer.tile;
 
 class TileLayerOptions {
-  /**
-   * Minimum zoom number.
-   */
+  /// Minimum zoom number.
   num minZoom = 0;
 
-  /**
-   * Maximum zoom number.
-   */
+  /// Maximum zoom number.
   num maxZoom = 18;
 
-  /**
-   * Maximum zoom number the tiles source has available. If it is specified,
-   * the tiles on all zoom levels higher than maxNativeZoom will be loaded
-   * from maxZoom level and auto-scaled.
-   */
+  /// Maximum zoom number the tiles source has available. If it is specified,
+  /// the tiles on all zoom levels higher than maxNativeZoom will be loaded
+  /// from maxZoom level and auto-scaled.
   num maxNativeZoom;
 
-  /**
-   * Tile size (width and height in pixels, assuming tiles are square).
-   */
+  /// Tile size (width and height in pixels, assuming tiles are square).
   num tileSize  = 256;
 
-  /**
-   * Subdomains of the tile service. Can be passed in the form of one string
-   * (where each letter is a subdomain name) or an array of strings.
-   */
+  /// Subdomains of the tile service. Can be passed in the form of one string
+  /// (where each letter is a subdomain name) or an array of strings.
   List<String> subdomains = ['abc'];
 
-  /**
-   * URL to the tile image to show in place of the tile that failed to load.
-   */
+  /// URL to the tile image to show in place of the tile that failed to load.
   String errorTileUrl  = '';
 
-  /**
-   * e.g. "© Mapbox" — the string used by the attribution control, describes
-   * the layer data.
-   */
+  /// e.g. "© Mapbox" — the string used by the attribution control, describes
+  /// the layer data.
   String attribution = '';
 
-  /**
-   * If true, inverses Y axis numbering for tiles (turn this on for TMS
-   * services).
-   */
+  /// If true, inverses Y axis numbering for tiles (turn this on for TMS
+  /// services).
   bool tms = false;
 
-  /**
-   * If set to true, the tile coordinates won't be wrapped by world width
-   * (-180 to 180 longitude) or clamped to lie within world height (-90 to 90).
-   * Use this if you use Leaflet for maps that don't reflect the real world
-   * (e.g. game, indoor or photo maps).
-   */
+  /// If set to true, the tile coordinates won't be wrapped by world width
+  /// (-180 to 180 longitude) or clamped to lie within world height (-90 to 90).
+  /// Use this if you use Leaflet for maps that don't reflect the real world
+  /// (e.g. game, indoor or photo maps).
   bool continuousWorld = false;
 
-  /**
-   * If set to true, the tiles just won't load outside the world width
-   * (-180 to 180 longitude) instead of repeating.
-   */
+  /// If set to true, the tiles just won't load outside the world width
+  /// (-180 to 180 longitude) instead of repeating.
   bool noWrap = false;
 
-  /**
-   * The zoom number used in tile URLs will be offset with this value.
-   */
+  /// The zoom number used in tile URLs will be offset with this value.
   num zoomOffset  = 0;
 
-  /**
-   * If set to true, the zoom number used in tile URLs will be reversed
-   * (maxZoom - zoom instead of zoom)
-   */
+  /// If set to true, the zoom number used in tile URLs will be reversed
+  /// (maxZoom - zoom instead of zoom)
   bool zoomReverse = false;
 
-  /**
-   * The opacity of the tile layer.
-   */
+  /// The opacity of the tile layer.
   num opacity = 1.0;
 
-  /**
-   * The explicit zIndex of the tile layer. Not set by default.
-   */
+  /// The explicit zIndex of the tile layer. Not set by default.
   num zIndex;
 
-  /**
-   * If true, all the tiles that are not visible after panning are removed
-   * (for better performance). true by default on mobile WebKit, otherwise
-   * false.
-   */
+  /// If true, all the tiles that are not visible after panning are removed
+  /// (for better performance). true by default on mobile WebKit, otherwise
+  /// false.
   bool unloadInvisibleTiles;
 
-  /**
-   * If false, new tiles are loaded during panning, otherwise only after it
-   * (for better performance). true by default on mobile WebKit, otherwise
-   * false.
-   */
+  /// If false, new tiles are loaded during panning, otherwise only after it
+  /// (for better performance). true by default on mobile WebKit, otherwise
+  /// false.
   bool updateWhenIdle;
 
-  /**
-   * If true and user is on a retina display, it will request four tiles of
-   * half the specified size and a bigger zoom level in place of one to
-   * utilize the high resolution.
-   */
+  /// If true and user is on a retina display, it will request four tiles of
+  /// half the specified size and a bigger zoom level in place of one to
+  /// utilize the high resolution.
   bool detectRetina;
 
-  /**
-   * If true, all the tiles that are not visible after panning are placed in
-   * a reuse queue from which they will be fetched when new tiles become
-   * visible (as opposed to dynamically creating new ones). This will in
-   * theory keep memory usage low and eliminate the need for reserving new
-   * memory whenever a new tile is needed.
-   */
+  /// If true, all the tiles that are not visible after panning are placed in
+  /// a reuse queue from which they will be fetched when new tiles become
+  /// visible (as opposed to dynamically creating new ones). This will in
+  /// theory keep memory usage low and eliminate the need for reserving new
+  /// memory whenever a new tile is needed.
   bool reuseTiles = false;
 
-  /**
-   * When this option is set, the TileLayer only loads tiles that are in the
-   * given geographical bounds.
-   */
+  /// When this option is set, the TileLayer only loads tiles that are in the
+  /// given geographical bounds.
   LatLngBounds bounds;
 }
 
-/**
- * TileLayer is used for standard xyz-numbered tile layers.
- */
+/// TileLayer is used for standard xyz-numbered tile layers.
 class TileLayer implements Layer {
-
   String _url;
   LeafletMap _map;
   bool _animated;
@@ -274,9 +233,7 @@ class TileLayer implements Layer {
     _map = null;
   }
 
-  /**
-   * Brings the tile layer to the top of all tile layers.
-   */
+  /// Brings the tile layer to the top of all tile layers.
   void bringToFront() {
     final pane = _map.panes['tilePane'];
 
@@ -286,9 +243,7 @@ class TileLayer implements Layer {
     }
   }
 
-  /**
-   * Brings the tile layer to the bottom of all tile layers.
-   */
+  /// Brings the tile layer to the bottom of all tile layers.
   void bringToBack() {
     final pane = _map.panes['tilePane'];
 
@@ -302,16 +257,12 @@ class TileLayer implements Layer {
     return options.attribution;
   }
 
-  /**
-   * Returns the HTML element that contains the tiles for this layer.
-   */
+  /// Returns the HTML element that contains the tiles for this layer.
   Element getContainer() {
     return _container;
   }
 
-  /**
-   * Changes the opacity of the tile layer.
-   */
+  /// Changes the opacity of the tile layer.
   void setOpacity(num opacity) {
     options.opacity = opacity;
 
@@ -320,17 +271,13 @@ class TileLayer implements Layer {
     }
   }
 
-  /**
-   * Sets the zIndex of the tile layer.
-   */
+  /// Sets the zIndex of the tile layer.
   void setZIndex(num zIndex) {
     options.zIndex = zIndex;
     _updateZIndex();
   }
 
-  /**
-   * Updates the layer's URL template and redraws it.
-   */
+  /// Updates the layer's URL template and redraws it.
   void setUrl(String url, [bool noRedraw=false]) {
     _url = url;
 
@@ -339,9 +286,7 @@ class TileLayer implements Layer {
     }
   }
 
-  /**
-   * Causes the layer to clear all the tiles and request them again.
-   */
+  /// Causes the layer to clear all the tiles and request them again.
   void redraw() {
     if (_map != null) {
       _reset(true);

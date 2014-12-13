@@ -1,35 +1,25 @@
 part of leaflet.control;
 
 class ScaleOptions extends ControlOptions {
-  /**
-   * The position of the control (one of the map corners). See control positions.
-   */
+  /// The position of the control (one of the map corners). See control positions.
   ControlPosition position  = ControlPosition.BOTTOMLEFT;
 
-  /**
-   * Maximum width of the control in pixels. The width is set dynamically to show round values (e.g. 100, 200, 500).
-   */
+  /// Maximum width of the control in pixels. The width is set dynamically
+  /// to show round values (e.g. 100, 200, 500).
   num maxWidth  = 100;
 
-  /**
-   * Whether to show the metric scale line (m/km).
-   */
+  /// Whether to show the metric scale line (m/km).
   bool metric  = true;
 
-  /**
-   * Whether to show the imperial scale line (mi/ft).
-   */
+  /// Whether to show the imperial scale line (mi/ft).
   bool imperial  = true;
 
-  /**
-   * If true, the control is updated on moveend, otherwise it's always up-to-date (updated on move).
-   */
+  /// If true, the control is updated on moveend, otherwise it's always
+  /// up-to-date (updated on move).
   bool updateWhenIdle  = false;
 }
 
-/**
- * Scale is used for displaying metric/imperial scale on the map.
- */
+/// Scale is used for displaying metric/imperial scale on the map.
 class Scale extends Control {
 
   ScaleOptions get scaleOptions => options as ScaleOptions;

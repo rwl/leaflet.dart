@@ -1,23 +1,14 @@
 part of leaflet.geometry;
 
-/**
- * Bounds represents a rectangular area on the screen in pixel coordinates.
- */
+/// Bounds represents a rectangular area on the screen in pixel coordinates.
 class Bounds {
-
-  /**
-   * The top left corner of the rectangle.
-   */
+  /// The top left corner of the rectangle.
   Point2D min;
 
-  /**
-   * The bottom right corner of the rectangle.
-   */
+  /// The bottom right corner of the rectangle.
   Point2D max;
 
-  /**
-   * Creates a Bounds object defined by the points it contains.
-   */
+  /// Creates a Bounds object defined by the points it contains.
   Bounds([List<Point2D> points=null]) {
     if (points == null) { return; }
 
@@ -26,9 +17,8 @@ class Bounds {
     }
   }
 
-  /**
-   * Creates a Bounds object from two coordinates (usually top-left and bottom-right corners).
-   */
+  /// Creates a Bounds object from two coordinates (usually top-left
+  /// and bottom-right corners).
   factory Bounds.between(Point2D a, Point2D b) {
     return new Bounds([a, b]);
   }
@@ -37,9 +27,7 @@ class Bounds {
     return b;
   }
 
-  /**
-   * Extends the bounds to contain the given point.
-   */
+  /// Extends the bounds to contain the given point.
   void extend(Point2D point) {
     point = new Point2D.point(point);
 
@@ -54,9 +42,7 @@ class Bounds {
     }
   }
 
-  /**
-   * Returns the center point of the bounds.
-   */
+  /// Returns the center point of the bounds.
   Point2D getCenter([bool round = false]) {
     return new Point2D(
             (min.x + max.x) / 2,
@@ -71,16 +57,12 @@ class Bounds {
     return new Point2D(max.x, min.y);
   }
 
-  /**
-   * Returns the size of the given bounds.
-   */
+  /// Returns the size of the given bounds.
   Point2D getSize() {
     return max - min;
   }
 
-  /**
-   * Returns true if the rectangle contains the given point.
-   */
+  /// Returns true if the rectangle contains the given point.
   bool contains(Point2D obj) {
     obj = new Point2D.point(obj);
 
@@ -93,9 +75,7 @@ class Bounds {
            (max.y <= this.max.y);
   }
 
-  /**
-   * Returns true if the rectangle contains the given one.
-   */
+  /// Returns true if the rectangle contains the given one.
   bool containsBounds(Bounds obj) {
     obj = new Bounds.bounds(obj);
 
@@ -108,9 +88,7 @@ class Bounds {
            (max.y <= this.max.y);
   }
 
-  /**
-   * Returns true if the rectangle intersects the given bounds.
-   */
+  /// Returns true if the rectangle intersects the given bounds.
   bool intersects(Bounds bounds) {
     bounds = new Bounds.bounds(bounds);
 
@@ -122,9 +100,7 @@ class Bounds {
     return xIntersects && yIntersects;
   }
 
-  /**
-   * Returns true if the bounds are properly initialized.
-   */
+  /// Returns true if the bounds are properly initialized.
   bool isValid() {
     return min != null && max != null;
   }

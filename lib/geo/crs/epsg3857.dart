@@ -2,10 +2,8 @@ part of leaflet.geo.crs;
 
 final EPSG3857 = new _EPSG3857();
 
-/**
- * EPSG3857 (Spherical Mercator) is the most common CRS for web mapping
- * and is used by Leaflet by default.
- */
+/// EPSG3857 (Spherical Mercator) is the most common CRS for web mapping
+/// and is used by Leaflet by default.
 class _EPSG3857 extends CRS {
 
   static final num earthRadius = 6378137;

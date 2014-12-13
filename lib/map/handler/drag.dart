@@ -1,11 +1,8 @@
 part of leaflet.map.handler;
 
-/**
- * Drag is used to make the map draggable (with panning inertia), enabled
- * by default.
- */
+/// Drag is used to make the map draggable (with panning inertia), enabled
+/// by default.
 class Drag extends Handler {
-
   dom.Draggable _draggable;
   List<DateTime> _times;
   List<Point2D> _positions;

@@ -1,20 +1,14 @@
 part of leaflet.control;
 
 class AttributionOptions extends ControlOptions {
-  /**
-   * The position of the control (one of the map corners). See control positions.
-   */
+  /// The position of the control (one of the map corners). See control positions.
   ControlPosition position = ControlPosition.BOTTOMRIGHT;
 
-  /**
-   * The HTML text shown before the attributions. Set null to disable.
-   */
+  /// The HTML text shown before the attributions. Set null to disable.
   String prefix = '<a href="http://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>';
 }
 
-/**
- * Attribution is used for displaying attribution on the map (added by default).
- */
+/// Attribution is used for displaying attribution on the map (added by default).
 class Attribution extends Control {
 
   AttributionOptions get attributionOptions => options as AttributionOptions;
@@ -55,17 +49,13 @@ class Attribution extends Control {
     //map.off(EventType.LAYERREMOVE, _onLayerRemove);
   }
 
-  /**
-   * Sets the text before the attributions.
-   */
+  /// Sets the text before the attributions.
   setPrefix(String prefix) {
     attributionOptions.prefix = prefix;
     _update();
   }
 
-  /**
-   * Adds an attribution text (e.g. 'Vector data &copy; Mapbox').
-   */
+  /// Adds an attribution text (e.g. 'Vector data &copy; Mapbox').
   void addAttribution(String text) {
     if (text == null) {
       return;
@@ -79,9 +69,7 @@ class Attribution extends Control {
     _update();
   }
 
-  /**
-   * Removes an attribution text.
-   */
+  /// Removes an attribution text.
   void removeAttribution(String text) {
     if (text == null) {
       return;

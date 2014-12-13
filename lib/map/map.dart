@@ -29,7 +29,6 @@ final containerProp = new Expando<bool>('_leaflet');
 typedef LayerFunc(Layer layer);
 
 class LeafletMap extends Object {
-
   /*MapStateOptions options;
   InteractionOptions options;
   KeyboardNavigationOptions options;
@@ -56,49 +55,31 @@ class LeafletMap extends Object {
 
   Element _container;
 
-  /**
-   * Map dragging handler (by both mouse and touch).
-   */
+  /// Map dragging handler (by both mouse and touch).
   Drag dragging;
 
-  /**
-   * Touch zoom handler.
-   */
+  /// Touch zoom handler.
   TouchZoom touchZoom;
 
-  /**
-   * Double click zoom handler.
-   */
+  /// Double click zoom handler.
   DoubleClickZoom doubleClickZoom;
 
-  /**
-   * Scroll wheel zoom handler.
-   */
+  /// Scroll wheel zoom handler.
   ScrollWheelZoom scrollWheelZoom;
 
-  /**
-   * Box (shift-drag with mouse) zoom handler.
-   */
+  /// Box (shift-drag with mouse) zoom handler.
   BoxZoom boxZoom;
 
-  /**
-   * Keyboard navigation handler.
-   */
+  /// Keyboard navigation handler.
   Keyboard keyboard;
 
-  /**
-   * Mobile touch hacks (quick tap and touch hold) handler.
-   */
+  /// Mobile touch hacks (quick tap and touch hold) handler.
   Tap tap;
 
-  /**
-   * Zoom control.
-   */
+  /// Zoom control.
   Zoom zoomControl;
 
-  /**
-   * Attribution control.
-   */
+  /// Attribution control.
   Attribution attributionControl;
 
   LeafletMap(Element container, [this.options=null]/*{MapStateOptions options: null, InteractionOptions options: null,
@@ -176,20 +157,16 @@ class LeafletMap extends Object {
 
   /* Public methods that modify map state */
 
-  /**
-   * Sets the view of the map (geographical center and zoom) with the given
-   * animation options.
-   *
-   * Replaced by animation-powered implementation in Map.PanAnimation
-   */
+  /// Sets the view of the map (geographical center and zoom) with the given
+  /// animation options.
+  ///
+  /// Replaced by animation-powered implementation in Map.PanAnimation
   /*void setView(LatLng center, [num zoom = null, ZoomPanOptions options = null]) {
     zoom = zoom == null ? getZoom() : zoom;
     _resetView(new LatLng.latLng(center), _limitZoom(zoom));
   }*/
 
-  /**
-   * Sets the zoom of the map.
-   */
+  /// Sets the zoom of the map.
   void setZoom(num zoom, [ZoomOptions options=null]) {
     if (!_loaded) {
       _zoom = limitZoom(zoom);
@@ -198,32 +175,24 @@ class LeafletMap extends Object {
     setView(getCenter(), zoom, new ZoomPanOptions()..zoomOptions = options);
   }
 
-  /**
-   * Increases the zoom of the map by delta (1 by default).
-   */
+  /// Increases the zoom of the map by delta (1 by default).
   void zoomIn([num delta = 1, ZoomOptions options = null]) {
     return setZoom(_zoom + delta, options);
   }
 
-  /**
-   * Decreases the zoom of the map by delta (1 by default).
-   */
+  /// Decreases the zoom of the map by delta (1 by default).
   void zoomOut([num delta = 1, ZoomOptions options = null]) {
     return setZoom(_zoom - delta, options);
   }
 
-  /**
-   * Zooms the map while keeping a specified point on the map stationary
-   * (e.g. used internally for scroll zoom and double-click zoom).
-   */
+  /// Zooms the map while keeping a specified point on the map stationary
+  /// (e.g. used internally for scroll zoom and double-click zoom).
   void setZoomAroundLatLng(LatLng latlng, num zoom, [ZoomOptions options = null]) {
     setZoomAround(latLngToContainerPoint(latlng), zoom, options);
   }
 
-  /**
-   * Zooms the map while keeping a specified point on the map stationary
-   * (e.g. used internally for scroll zoom and double-click zoom).
-   */
+  /// Zooms the map while keeping a specified point on the map stationary
+  /// (e.g. used internally for scroll zoom and double-click zoom).
   void setZoomAround(Point2D containerPoint, num zoom, [ZoomOptions options = null]) {
     final scale = getZoomScale(zoom),
         viewHalf = getSize() / 2,
@@ -234,10 +203,8 @@ class LeafletMap extends Object {
     setView(newCenter, zoom, new ZoomPanOptions()..zoomOptions = options);
   }
 
-  /**
-   * Sets a map view that contains the given geographical bounds with the
-   * maximum zoom level possible.
-   */
+  /// Sets a map view that contains the given geographical bounds with the
+  /// maximum zoom level possible.
   void fitBounds(LatLngBounds bounds, [ZoomPanOptions options = null]) {
     if (options == null) {
       options = new ZoomPanOptions();
@@ -275,25 +242,19 @@ class LeafletMap extends Object {
     return setView(center, zoom, options);
   }
 
-  /**
-   * Sets a map view that mostly contains the whole world with the maximum
-   * zoom level possible.
-   */
+  /// Sets a map view that mostly contains the whole world with the maximum
+  /// zoom level possible.
   void fitWorld([ZoomPanOptions options = null]) {
     fitBounds(new LatLngBounds.between(new LatLng(-90, -180), new LatLng(90, 180)), options);
   }
 
-  /**
-   * Pans the map to a given center. Makes an animated pan if new center is
-   * not more than one screen away from the current one.
-   */
+  /// Pans the map to a given center. Makes an animated pan if new center is
+  /// not more than one screen away from the current one.
   void panTo(LatLng center, [PanOptions options = null]) { // (LatLng)
     setView(center, _zoom, new ZoomPanOptions()..panOptions = options);
   }
 
-  /**
-   * Pans the map by a given number of pixels (animated).
-   */
+  /// Pans the map by a given number of pixels (animated).
   /*void panBy(Point2D offset) {
     // replaced with animated panBy in Map.PanAnimation.js
     fire(EventType.MOVESTART);
@@ -306,9 +267,7 @@ class LeafletMap extends Object {
 
   StreamSubscription<MapEvent> _panInsideMaxBoundsSubscription;
 
-  /**
-   * Restricts the map view to the given bounds (see map maxBounds option).
-   */
+  /// Restricts the map view to the given bounds (see map maxBounds option).
   void setMaxBounds(LatLngBounds bounds) {
     bounds = new LatLngBounds.latLngBounds(bounds);
 
@@ -328,11 +287,9 @@ class LeafletMap extends Object {
     _panInsideMaxBoundsSubscription = onMoveEnd.listen(_panInsideMaxBounds);
   }
 
-  /**
-   * Pans the map to the closest view that would lie inside the given bounds
-   * (if it's not already), controlling the animation using the options
-   * specific, if any.
-   */
+  /// Pans the map to the closest view that would lie inside the given bounds
+  /// (if it's not already), controlling the animation using the options
+  /// specific, if any.
   void panInsideBounds(LatLngBounds bounds, [PanOptions options = null]) {
     var center = getCenter(),
       newCenter = _limitCenter(center, _zoom, bounds);
@@ -344,11 +301,9 @@ class LeafletMap extends Object {
 
   StreamSubscription<TileEvent> _onTileLayerLoadSubscription;
 
-  /**
-   * Adds the given layer to the map. If optional insertAtTheBottom is set to
-   * true, the layer is inserted under all others (useful when switching base
-   * tile layers).
-   */
+  /// Adds the given layer to the map. If optional insertAtTheBottom is set to
+  /// true, the layer is inserted under all others (useful when switching base
+  /// tile layers).
   void addLayer(Layer layer) {
     // TODO method is too big, refactor
 
@@ -381,9 +336,7 @@ class LeafletMap extends Object {
     return;
   }
 
-  /**
-   * Removes the given layer from the map.
-   */
+  /// Removes the given layer from the map.
   void removeLayer(Layer layer) {
     final id = stamp(layer);
 
@@ -415,9 +368,7 @@ class LeafletMap extends Object {
     return;
   }
 
-  /**
-   * Returns true if the given layer is currently added to the map.
-   */
+  /// Returns true if the given layer is currently added to the map.
   bool hasLayer(Layer layer) {
     if (layer == null) { return false; }
 
@@ -432,13 +383,11 @@ class LeafletMap extends Object {
 
   Timer _sizeTimer;
 
-  /**
-   * Checks if the map container size changed and updates the map if so — call
-   * it after you've changed the map size dynamically, also animating pan by
-   * default. If options.pan is false, panning will not occur. If
-   * options.debounceMoveend is true, it will delay moveend event so that it
-   * doesn't happen often even if the method is called many times in a row.
-   */
+  /// Checks if the map container size changed and updates the map if so — call
+  /// it after you've changed the map size dynamically, also animating pan by
+  /// default. If options.pan is false, panning will not occur. If
+  /// options.debounceMoveend is true, it will delay moveend event so that it
+  /// doesn't happen often even if the method is called many times in a row.
   void invalidateSize({bool animate: true, bool pan: true, bool debounceMoveend: false}) {
     if (!_loaded) { return; }
 
@@ -491,9 +440,7 @@ class LeafletMap extends Object {
     return this;
   }*/
 
-  /**
-   * Destroys the map and clears all related event listeners.
-   */
+  /// Destroys the map and clears all related event listeners.
   remove() {
     if (_loaded) {
       fire(EventType.UNLOAD);
@@ -522,9 +469,7 @@ class LeafletMap extends Object {
 
   /* public methods for getting map state */
 
-  /**
-   * Returns the geographical center of the map view.
-   */
+  /// Returns the geographical center of the map view.
   LatLng getCenter() {
     _checkIfLoaded();
 
@@ -534,18 +479,14 @@ class LeafletMap extends Object {
     return layerPointToLatLng(_getCenterLayerPoint());
   }
 
-  /**
-   * Returns the current zoom of the map view.
-   */
+  /// Returns the current zoom of the map view.
   num getZoom() {
     return _zoom;
   }
 
   num get zoom => _zoom;
 
-  /**
-   * Returns the LatLngBounds of the current map view.
-   */
+  /// Returns the LatLngBounds of the current map view.
   LatLngBounds getBounds() {
     final bounds = getPixelBounds(),
         sw = unproject(bounds.getBottomLeft()),
@@ -554,30 +495,24 @@ class LeafletMap extends Object {
     return new LatLngBounds.between(sw, ne);
   }
 
-  /**
-   * Returns the minimum zoom level of the map.
-   */
+  /// Returns the minimum zoom level of the map.
   num getMinZoom() {
     return options.minZoom == null ?
       (_layersMinZoom == null ? 0 : _layersMinZoom) :
       options.minZoom;
   }
 
-  /**
-   * Returns the maximum zoom level of the map.
-   */
+  /// Returns the maximum zoom level of the map.
   num getMaxZoom() {
     return options.maxZoom == null ?
       (_layersMaxZoom == null ? double.INFINITY : _layersMaxZoom) :
       options.maxZoom;
   }
 
-  /**
-   * Returns the maximum zoom level on which the given bounds fit to the map
-   * view in its entirety. If inside (optional) is set to true, the method
-   * instead returns the minimum zoom level on which the map view fits into
-   * the given bounds in its entirety.
-   */
+  /// Returns the maximum zoom level on which the given bounds fit to the map
+  /// view in its entirety. If inside (optional) is set to true, the method
+  /// instead returns the minimum zoom level on which the map view fits into
+  /// the given bounds in its entirety.
   num getBoundsZoom(LatLngBounds bounds, [bool inside = false, Point2D padding = null]) {
     if (padding == null) {
       padding = new Point2D(0, 0);
@@ -612,9 +547,7 @@ class LeafletMap extends Object {
 
   Point2D _size;
 
-  /**
-   * Returns the current size of the map container.
-   */
+  /// Returns the current size of the map container.
   Point2D getSize() {
     if (_size == null || _sizeChanged) {
       _size = new Point2D(
@@ -626,10 +559,8 @@ class LeafletMap extends Object {
     return _size.clone();
   }
 
-  /**
-   * Returns the bounds of the current map view in projected pixel coordinates
-   * (sometimes useful in layer and overlay implementations).
-   */
+  /// Returns the bounds of the current map view in projected pixel coordinates
+  /// (sometimes useful in layer and overlay implementations).
   Bounds getPixelBounds() {
     final topLeftPoint = _getTopLeftPoint();
     return new Bounds.between(topLeftPoint, topLeftPoint + getSize());
@@ -637,23 +568,17 @@ class LeafletMap extends Object {
 
   Point2D _initialTopLeftPoint;
 
-  /**
-   * Returns the projected pixel coordinates of the top left point of the map
-   * layer (useful in custom layer and overlay implementations).
-   */
+  /// Returns the projected pixel coordinates of the top left point of the map
+  /// layer (useful in custom layer and overlay implementations).
   Point2D getPixelOrigin() {
     _checkIfLoaded();
     return _initialTopLeftPoint;
   }
 
-  /**
-   * Returns an object with different map panes (to render overlays in).
-   */
+  /// Returns an object with different map panes (to render overlays in).
   Map<String, Element> get panes => new Map.from(_panes);
 
-  /**
-   * Returns the container element of the map.
-   */
+  /// Returns the container element of the map.
   Element getContainer() {
     return _container;
   }
@@ -673,93 +598,71 @@ class LeafletMap extends Object {
 
   /* Conversion methods */
 
-  /**
-   * Projects the given geographical coordinates to absolute pixel coordinates
-   * for the given zoom level (current zoom level by default).
-   */
+  /// Projects the given geographical coordinates to absolute pixel coordinates
+  /// for the given zoom level (current zoom level by default).
   Point2D project(LatLng latlng, [num zoom = null]) {
     zoom = zoom == null ? _zoom : zoom;
     return options.crs.latLngToPoint(new LatLng.latLng(latlng), zoom);
   }
 
-  /**
-   * Projects the given absolute pixel coordinates to geographical coordinates
-   * for the given zoom level (current zoom level by default).
-   */
+  /// Projects the given absolute pixel coordinates to geographical coordinates
+  /// for the given zoom level (current zoom level by default).
   LatLng unproject(Point2D point, [num zoom = null]) {
     zoom = zoom == null ? _zoom : zoom;
     return options.crs.pointToLatLng(new Point2D.point(point), zoom);
   }
 
-  /**
-   * Returns the geographical coordinates of a given map layer point.
-   */
+  /// Returns the geographical coordinates of a given map layer point.
   LatLng layerPointToLatLng(Point2D point) {
     final projectedPoint = new Point2D.point(point) + getPixelOrigin();
     return unproject(projectedPoint);
   }
 
-  /**
-   * Returns the map layer point that corresponds to the given geographical
-   * coordinates (useful for placing overlays on the map).
-   */
+  /// Returns the map layer point that corresponds to the given geographical
+  /// coordinates (useful for placing overlays on the map).
   Point2D latLngToLayerPoint(LatLng latlng) {
     var projectedPoint = project(new LatLng.latLng(latlng))..round();
     return projectedPoint - getPixelOrigin();
   }
 
-  /**
-   * Converts the point relative to the map container to a point relative
-   * to the map layer.
-   */
+  /// Converts the point relative to the map container to a point relative
+  /// to the map layer.
   Point2D containerPointToLayerPoint(Point2D point) {
     return new Point2D.point(point) - _getMapPanePos();
   }
 
-  /**
-   * Converts the point relative to the map layer to a point relative to the
-   * map container.
-   */
+  /// Converts the point relative to the map layer to a point relative to the
+  /// map container.
   Point2D layerPointToContainerPoint(Point2D point) {
     return new Point2D.point(point) + _getMapPanePos();
   }
 
-  /**
-   * Returns the geographical coordinates of a given map container point.
-   */
+  /// Returns the geographical coordinates of a given map container point.
   LatLng containerPointToLatLng(Point2D point) {
     final layerPoint = containerPointToLayerPoint(new Point2D.point(point));
     return layerPointToLatLng(layerPoint);
   }
 
-  /**
-   * Returns the map container point that corresponds to the given
-   * geographical coordinates.
-   */
+  /// Returns the map container point that corresponds to the given
+  /// geographical coordinates.
   Point2D latLngToContainerPoint(LatLng latlng) {
     return layerPointToContainerPoint(latLngToLayerPoint(new LatLng.latLng(latlng)));
   }
 
-  /**
-   * Returns the pixel coordinates of a mouse click (relative to the top left
-   * corner of the map) given its event object.
-   */
+  /// Returns the pixel coordinates of a mouse click (relative to the top left
+  /// corner of the map) given its event object.
   Point2D mouseEventToContainerPoint(html.MouseEvent e) {
     return dom.getMousePosition(e, _container);
   }
 
-  /**
-   * Returns the pixel coordinates of a mouse click relative to the map layer
-   * given its event object.
-   */
+  /// Returns the pixel coordinates of a mouse click relative to the map layer
+  /// given its event object.
   Point2D mouseEventToLayerPoint(html.MouseEvent e) {
     return containerPointToLayerPoint(mouseEventToContainerPoint(e));
   }
 
-  /**
-   * Returns the geographical coordinates of the point the mouse clicked on
-   * given the click's event object.
-   */
+  /// Returns the geographical coordinates of the point the mouse clicked on
+  /// given the click's event object.
   LatLng mouseEventToLatLng(html.MouseEvent e) {
     return layerPointToLatLng(mouseEventToLayerPoint(e));
   }
@@ -1106,23 +1009,17 @@ class LeafletMap extends Object {
     return project(latlng, newZoom) - topLeft;
   }
 
-  /**
-   * Layer point of the current center.
-   */
+  /// Layer point of the current center.
   Point2D _getCenterLayerPoint() {
     return containerPointToLayerPoint(getSize() / 2);
   }
 
-  /**
-   * Offset of the specified place to the current center in pixels.
-   */
+  /// Offset of the specified place to the current center in pixels.
   Point2D _getCenterOffset(LatLng latlng) {
     return latLngToLayerPoint(latlng) - _getCenterLayerPoint();
   }
 
-  /**
-   * Adjust center for view to get inside bounds.
-   */
+  /// Adjust center for view to get inside bounds.
   LatLng _limitCenter(LatLng center, num zoom, [LatLngBounds bounds=null]) {
 
     if (bounds == null) { return center; }
@@ -1135,9 +1032,7 @@ class LeafletMap extends Object {
     return unproject(centerPoint + offset, zoom);
   }
 
-  /**
-   * Adjust offset for view to get inside bounds.
-   */
+  /// Adjust offset for view to get inside bounds.
   Point2D /*_*/limitOffset(Point2D offset, LatLngBounds bounds) {
     if (bounds == null) { return offset; }
 
@@ -1147,10 +1042,8 @@ class LeafletMap extends Object {
     return offset + _getBoundsOffset(newBounds, bounds);
   }
 
-  /**
-   * Returns offset needed for pxBounds to get inside maxBounds at a specified
-   * zoom.
-   */
+  /// Returns offset needed for pxBounds to get inside maxBounds at a specified
+  /// zoom.
   Point2D _getBoundsOffset(Bounds pxBounds, LatLngBounds maxBounds, [num zoom=null]) {
     final nwOffset = project(maxBounds.getNorthWest(), zoom) - pxBounds.min,
         seOffset = project(maxBounds.getSouthEast(), zoom) - pxBounds.max,
@@ -1167,9 +1060,7 @@ class LeafletMap extends Object {
       math.max(0, left.ceil()) - math.max(0, right.floor());
   }
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   num limitZoom(num zoom) {
     var min = getMinZoom(),
         max = getMaxZoom();
@@ -1185,17 +1076,13 @@ class LeafletMap extends Object {
 
   Element _controlContainer;
 
-  /**
-   * Adds the given control to the map.
-   */
+  /// Adds the given control to the map.
   addControl(Control control) {
     control.addTo(this);
     return this;
   }
 
-  /**
-   * Removes the given control from the map.
-   */
+  /// Removes the given control from the map.
   removeControl(control) {
     control.removeFrom(this);
     return this;
@@ -1230,9 +1117,8 @@ class LeafletMap extends Object {
 
   Popup _popup;
 
-  /**
-   * Creates a popup with the specified options and opens it in the given point on a map.
-   */
+  /// Creates a popup with the specified options and opens it in the given
+  /// point on a map.
   openPopupString(String content, LatLng latlng, PopupOptions options) {
     final popup = new Popup(options)
               ..setLatLng(latlng)
@@ -1246,9 +1132,8 @@ class LeafletMap extends Object {
     openPopup(popup);
   }
 
-  /**
-   * Opens the specified popup while closing the previously opened (to make sure only one is opened at one time for usability).
-   */
+  /// Opens the specified popup while closing the previously opened (to make
+  /// sure only one is opened at one time for usability).
   openPopup(Popup popup) { // (Popup) or (String || HTMLElement, LatLng[, Object])
     closePopup();
 
@@ -1258,9 +1143,7 @@ class LeafletMap extends Object {
     addLayer(popup);
   }
 
-  /**
-   * Closes the popup previously opened with openPopup (or the given one).
-   */
+  /// Closes the popup previously opened with openPopup (or the given one).
   closePopup([Popup popup=null]) {
     if (popup == null || popup == _popup) {
       popup = _popup;
@@ -1282,9 +1165,7 @@ class LeafletMap extends Object {
 
   bool get zoomAnimated => _zoomAnimated;
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   bool get animatingZoom => _animatingZoom;
 
   _catchTransitionEnd(e) {
@@ -1323,9 +1204,7 @@ class LeafletMap extends Object {
     return true;
   }
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   void animateZoom(LatLng center, num zoom, Point2D origin, num scale, [Point2D delta=null, bool backwards=false]) {
 
     _animatingZoom = true;
@@ -1366,9 +1245,8 @@ class LeafletMap extends Object {
 
   dom.PosAnimation get panAnim => _panAnim;
 
-  /**
-   * Sets the view of the map (geographical center and zoom) with the given animation options.
-   */
+  /// Sets the view of the map (geographical center and zoom) with the given
+  /// animation options.
   void setView(LatLng center, num zoom, [ZoomPanOptions options=null, LatLngBounds maxBounds=null]) {
     print("setView");
     zoom = zoom == null ? _zoom : limitZoom(zoom);
@@ -1406,9 +1284,7 @@ class LeafletMap extends Object {
     _resetView(center, zoom);
   }
 
-  /**
-   * Pans the map by a given number of pixels (animated).
-   */
+  /// Pans the map by a given number of pixels (animated).
   void panBy(Point2D offset, [PanOptions options=null]) {
     offset = new Point2D.point(offset).rounded();
     //options = options == null ? {} : options;
@@ -1487,12 +1363,10 @@ class LeafletMap extends Object {
 
   StreamSubscription<Geoposition> _locationWatchSubscription;
 
-  /**
-   * Tries to locate the user using the Geolocation API, firing a locationfound
-   * event with location data on success or a locationerror event on failure,
-   * and optionally sets the map view to the user's location with respect to
-   * detection accuracy (or to the world view if geolocation failed).
-   */
+  /// Tries to locate the user using the Geolocation API, firing a locationfound
+  /// event with location data on success or a locationerror event on failure,
+  /// and optionally sets the map view to the user's location with respect to
+  /// detection accuracy (or to the world view if geolocation failed).
   void locate([LocateOptions options=null]) {
     if (options == null) {
       options = new LocateOptions();
@@ -1522,11 +1396,9 @@ class LeafletMap extends Object {
     }
   }
 
-  /**
-   * Stops watching location previously initiated by map.locate(watch: true)
-   * and aborts resetting the map view if map.locate was called with
-   * (setView: true).
-   */
+  /// Stops watching location previously initiated by map.locate(watch: true)
+  /// and aborts resetting the map view if map.locate was called with
+  /// (setView: true).
   void stopLocate() {
     if (window.navigator.geolocation != null) {
       //window.navigator.geolocation.clearWatch(_locationWatchId);
@@ -2033,5 +1905,4 @@ class LeafletMap extends Object {
   Stream<ErrorEvent> get onLocationError => _locationErrorController.stream;
   Stream<PopupEvent> get onPopupOpen => _popupOpenController.stream;
   Stream<PopupEvent> get onPopupClose => _popupCloseController.stream;
-
 }

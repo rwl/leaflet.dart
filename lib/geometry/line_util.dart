@@ -2,17 +2,18 @@ part of leaflet.geometry;
 
 //final LineUtil = new _LineUtil();
 
-/**
- * LineUtil contains different utility functions for line segments
- * and polylines (clipping, simplification, distances, etc.)
- */
+/// LineUtil contains different utility functions for line segments
+/// and polylines (clipping, simplification, distances, etc.)
 //class _LineUtil {
 
-/**
- * Dramatically reduces the number of points in a polyline while retaining its shape and returns a new array of simplified points. Used for a huge performance boost when processing/displaying Leaflet polylines for each zoom level and also reducing visual noise. tolerance affects the amount of simplification (lesser value means higher quality but slower and with more points).
- *
- * Douglas-Peucker simplification
- */
+/// Dramatically reduces the number of points in a polyline while retaining
+/// its shape and returns a new array of simplified points. Used for a huge
+/// performance boost when processing/displaying Leaflet polylines for each
+/// zoom level and also reducing visual noise. tolerance affects the amount
+/// of simplification (lesser value means higher quality but slower and with
+/// more points).
+///
+/// Douglas-Peucker simplification
 List<Point2D> simplify(List<Point2D> points, num tolerance) {
 //    if (!tolerance || !points.length) {
 //      return points.slice();
@@ -29,23 +30,17 @@ List<Point2D> simplify(List<Point2D> points, num tolerance) {
   return points;
 }
 
-/**
- * Returns the distance between point p and segment p1 to p2.
- */
+/// Returns the distance between point p and segment p1 to p2.
 num pointToSegmentDistance(Point2D p, Point2D p1, Point2D p2) {
   return math.sqrt(_sqClosestPointOnSegment(p, p1, p2, true));
 }
 
-/**
- * Returns the closest point from a point p on a segment p1 to p2.
- */
+/// Returns the closest point from a point p on a segment p1 to p2.
 Point2D closestPointOnSegment(Point2D p, Point2D p1, Point2D p2) {
   return _sqClosestPointOnSegment(p, p1, p2);
 }
 
-/**
- * Douglas-Peucker simplification, see http://en.wikipedia.org/wiki/Douglas-Peucker_algorithm
- */
+/// Douglas-Peucker simplification, see http://en.wikipedia.org/wiki/Douglas-Peucker_algorithm
 List<Point2D> _simplifyDP(List<Point2D> points, num sqTolerance) {
 
   final len = points.length,
@@ -88,9 +83,7 @@ void _simplifyDPStep(List<Point2D> points, List<bool >markers, num sqTolerance, 
   }
 }
 
-/**
- * Reduce points that are too close to each other to a single point.
- */
+/// Reduce points that are too close to each other to a single point.
 List<Point2D> _reducePoints(points, sqTolerance) {
   var reducedPoints = [points[0]];
 
@@ -110,13 +103,11 @@ List<Point2D> _reducePoints(points, sqTolerance) {
 
 int _lastCode;
 
-/**
- * Clips the segment a to b by rectangular bounds (modifying the segment
- * points directly!). Used by Leaflet to only show polyline points that
- * are on the screen or near, increasing performance.
- *
- * Cohen-Sutherland line clipping algorithm.
- */
+/// Clips the segment a to b by rectangular bounds (modifying the segment
+/// points directly!). Used by Leaflet to only show polyline points that
+/// are on the screen or near, increasing performance.
+///
+/// Cohen-Sutherland line clipping algorithm.
 clipSegment(Point2D a, Point2D b, Bounds bounds, [bool useLastCode=false]) {
   int codeA = useLastCode ? _lastCode : _getBitCode(a, bounds),
       codeB = _getBitCode(b, bounds);
@@ -186,18 +177,14 @@ int _getBitCode(Point2D p, Bounds bounds) {
   return code;
 }
 
-/**
- * Square distance (to avoid unnecessary Math.sqrt calls).
- */
+/// Square distance (to avoid unnecessary Math.sqrt calls).
 num _sqDist(Point2D p1, Point2D p2) {
   final dx = p2.x - p1.x,
       dy = p2.y - p1.y;
   return dx * dx + dy * dy;
 }
 
-/**
- * Return closest point on segment or distance to that point.
- */
+/// Return closest point on segment or distance to that point.
 _sqClosestPointOnSegment(Point2D p, Point2D p1, Point2D p2, [bool sqDist=false]) {
   var x = p1.x,
       y = p1.y,

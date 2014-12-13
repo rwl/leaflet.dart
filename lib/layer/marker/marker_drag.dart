@@ -1,10 +1,7 @@
 part of leaflet.layer.marker;
 
-/**
- * MarkerDrag is used internally by Marker to make the markers draggable.
- */
+/// MarkerDrag is used internally by Marker to make the markers draggable.
 class MarkerDrag extends Handler {
-
   Marker _marker;
   dom.Draggable _draggable;
 

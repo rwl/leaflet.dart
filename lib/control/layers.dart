@@ -3,29 +3,21 @@ part of leaflet.control;
 final _layerId = new Expando<int>();
 
 class LayersOptions extends ControlOptions {
-  /**
-   * The position of the control (one of the map corners). See control
-   * positions.
-   */
+  /// The position of the control (one of the map corners). See control
+  /// positions.
   ControlPosition position  = ControlPosition.TOPRIGHT;
 
-  /**
-   * If true, the control will be collapsed into an icon and expanded on
-   * mouse hover or touch.
-   */
+  /// If true, the control will be collapsed into an icon and expanded on
+  /// mouse hover or touch.
   bool collapsed = true;
 
-  /**
-   * If true, the control will assign zIndexes in increasing order to all of
-   * its layers so that the order is preserved when switching them on/off.
-   */
+  /// If true, the control will assign zIndexes in increasing order to all of
+  /// its layers so that the order is preserved when switching them on/off.
   bool autoZIndex  = true;
 }
 
-/**
- * Layers is a control to allow users to switch between different layers on
- * the map.
- */
+/// Layers is a control to allow users to switch between different layers on
+/// the map.
 class Layers extends Control {
 
   LayersOptions get layersOptions => options as LayersOptions;
@@ -37,20 +29,16 @@ class Layers extends Control {
   Element _layersLink;
   Element _baseLayersList, _overlaysList, _separator;
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   Element get baseLayersList => _baseLayersList;
   Element get overlaysList => _overlaysList;
 
   StreamSubscription<LayerEvent> _layerAddSubscription, _layerRemoveSubscription;
 
-  /**
-   * Creates an attribution control with the given layers. Base layers will be
-   * switched with radio buttons, while overlays will be switched with
-   * checkboxes. Note that all base layers should be passed in the base layers
-   * object, but only one should be added to the map during map instantiation.
-   */
+  /// Creates an attribution control with the given layers. Base layers will be
+  /// switched with radio buttons, while overlays will be switched with
+  /// checkboxes. Note that all base layers should be passed in the base layers
+  /// object, but only one should be added to the map during map instantiation.
   Layers(LinkedHashMap<String, Layer> baseLayers, [LinkedHashMap<String, Layer> overlays=null, LayersOptions options=null]) : super(options) {
     if (options == null) {
       this.options = new LayersOptions();
@@ -89,25 +77,19 @@ class Layers extends Control {
     //map.off(EventType.LAYERREMOVE, _onLayerChange);
   }
 
-  /**
-   * Adds a base layer (radio button entry) with the given name to the control.
-   */
+  /// Adds a base layer (radio button entry) with the given name to the control.
   void addBaseLayer(Layer layer, String name) {
     _addLayer(layer, name);
     update();
   }
 
-  /**
-   * Adds an overlay (checkbox entry) with the given name to the control.
-   */
+  /// Adds an overlay (checkbox entry) with the given name to the control.
   void addOverlay(layer, String name) {
     _addLayer(layer, name, true);
     update();
   }
 
-  /**
-   * Remove the given layer from the control.
-   */
+  /// Remove the given layer from the control.
   void removeLayer(layer) {
     final id = stamp(layer);
     _layers.remove(id);
@@ -182,9 +164,7 @@ class Layers extends Control {
     }
   }
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   void update() {
     if (_container == null) {
       return;

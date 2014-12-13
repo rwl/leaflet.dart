@@ -1,20 +1,15 @@
 part of leaflet.layer;
 
 class ImageOverlayOptions {
-  /**
-   * The opacity of the image overlay.
-   */
+  /// The opacity of the image overlay.
   num opacity = 1.0;
 
-  /**
-   * The attribution text of the image overlay.
-   */
+  /// The attribution text of the image overlay.
   String attribution = '';
 }
 
-/**
- * ImageOverlay is used to overlay images over the map (to specific geographical bounds).
- */
+/// ImageOverlay is used to overlay images over the map (to specific
+/// geographical bounds).
 class ImageOverlay extends Layer {//with Events {
 
   ImageOverlayOptions options;
@@ -33,9 +28,7 @@ class ImageOverlay extends Layer {//with Events {
     _bounds = new LatLngBounds.latLngBounds(bounds);
   }
 
-  /**
-   * Adds the overlay to the map.
-   */
+  /// Adds the overlay to the map.
   void onAdd(LeafletMap map) {
     _map = map;
 
@@ -73,28 +66,22 @@ class ImageOverlay extends Layer {//with Events {
     map.addLayer(this);
   }
 
-  /**
-   * Sets the opacity of the overlay.
-   */
+  /// Sets the opacity of the overlay.
   void setOpacity(num opacity) {
     options.opacity = opacity;
     _updateOpacity();
   }
 
-  /**
-   * Brings the layer to the top of all overlays.
-   *
-   * TODO remove bringToFront/bringToBack duplication from TileLayer/Path
-   */
+  /// Brings the layer to the top of all overlays.
+  ///
+  /// TODO remove bringToFront/bringToBack duplication from TileLayer/Path
   void bringToFront() {
     if (_image) {
       _map.panes['overlayPane'].append(_image);
     }
   }
 
-  /**
-   * Brings the layer to the bottom of all overlays.
-   */
+  /// Brings the layer to the bottom of all overlays.
   void bringToBack() {
     final pane = _map.panes['overlayPane'];
     if (_image) {
@@ -102,9 +89,7 @@ class ImageOverlay extends Layer {//with Events {
     }
   }
 
-  /**
-   * Changes the URL of the image.
-   */
+  /// Changes the URL of the image.
   void setUrl(String url) {
     _url = url;
     _image.src = _url;

@@ -1,15 +1,13 @@
 part of leaflet.layer.vector;
 
-/**
- * Rectangle extends Polygon and creates a rectangle when passed a LatLngBounds object.
- */
+/// Rectangle extends Polygon and creates a rectangle when passed a
+/// LatLngBounds object.
 class Rectangle extends Polygon {
 
-  Rectangle(LatLngBounds latLngBounds, [PolygonOptions options=null]) : super(_boundsToLatLngs(latLngBounds), options);
+  Rectangle(LatLngBounds latLngBounds, [PolygonOptions options=null]) :
+    super(_boundsToLatLngs(latLngBounds), options);
 
-  /**
-   * Redraws the rectangle with the passed bounds.
-   */
+  /// Redraws the rectangle with the passed bounds.
   setBounds(LatLngBounds latLngBounds) {
     setLatLngs(_boundsToLatLngs(latLngBounds));
   }
@@ -23,5 +21,4 @@ class Rectangle extends Polygon {
       latLngBounds.getSouthEast()
     ];
   }
-
 }

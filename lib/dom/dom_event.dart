@@ -2,23 +2,19 @@ part of leaflet.dom;
 
 //final DomEvent = new _DomEvent();
 
-/**
- * DomEvent contains functions for working with DOM events.
- */
+/// DomEvent contains functions for working with DOM events.
 //class _DomEvent {}
 
-/**
- * Alias for addListener.
- */
+/// Alias for addListener.
 /*void on(Element obj, String type, Function fn, [Object context=null]) {
   addListener(obj, type, fn, context);
 }*/
 
-/**
- * Adds a listener fn to the element's DOM event of the specified type. this keyword inside the listener will point to context, or to the element if not specified.
- *
- * Inspired by John Resig, Dean Edwards and YUI addEvent implementations.
- */
+/// Adds a listener fn to the element's DOM event of the specified type. this
+/// keyword inside the listener will point to context, or to the element if
+/// not specified.
+///
+/// Inspired by John Resig, Dean Edwards and YUI addEvent implementations.
 /*void addListener(Element obj, String type, Function fn, Object context) { // (HTMLElement, String, Function[, Object])
 
   final id = stamp(fn),
@@ -76,16 +72,12 @@ part of leaflet.dom;
   return;
 }*/
 
-/**
- * Alias for removeListener.
- */
+/// Alias for removeListener.
 /*void off(Element obj, String type, Function fn) {
   removeListener(obj, type, fn);
 }*/
 
-/**
- * Removes an event listener from the element.
- */
+/// Removes an event listener from the element.
 /*void removeListener(Element obj, String type, Function fn) {  // (HTMLElement, String, Function)
 
   var id = stamp(fn),
@@ -119,9 +111,7 @@ part of leaflet.dom;
   return;
 }*/
 
-/**
- * Stop the given event from propagation to parent elements.
- */
+/// Stop the given event from propagation to parent elements.
 void stopPropagation(Event e) {
   e.stopPropagation();
 //  _skipped(e);
@@ -133,9 +123,8 @@ void disableScrollPropagation(Element el) {
   el.on['MozMousePixelScroll'].listen(stop);
 }
 
-/**
- * Adds stopPropagation to the element's 'click', 'doubleclick', 'mousedown' and 'touchstart' events.
- */
+/// Adds stopPropagation to the element's 'click', 'doubleclick', 'mousedown'
+/// and 'touchstart' events.
 void disableClickPropagation(Element el) {
   var stop = stopPropagation;
 
@@ -147,16 +136,14 @@ void disableClickPropagation(Element el) {
   el.onDoubleClick.listen(stop);
 }
 
-/**
- * Prevents the default action of the event from happening (such as following a link in the href of the a element, or doing a POST request with page reload when form is submitted).
- */
+/// Prevents the default action of the event from happening (such as following
+/// a link in the href of the a element, or doing a POST request with page
+/// reload when form is submitted).
 void preventDefault(e) {
   e.preventDefault();
 }
 
-/**
- * Does stopPropagation and preventDefault at the same time.
- */
+/// Does stopPropagation and preventDefault at the same time.
 void stop(Event e) {
   //preventDefault(e);
   e.preventDefault();
@@ -164,9 +151,8 @@ void stop(Event e) {
   e.stopPropagation();
 }
 
-/**
- * Gets normalized mouse position from a DOM event relative to the container or to the whole page if not specified.
- */
+/// Gets normalized mouse position from a DOM event relative to the container
+/// or to the whole page if not specified.
 Point2D getMousePosition(html.MouseEvent e, [Element container=null]) {
   if (container == null) {
     return new Point2D(e.client.x, e.client.y);
@@ -179,9 +165,7 @@ Point2D getMousePosition(html.MouseEvent e, [Element container=null]) {
     e.client.y - rect.top - container.clientTop);
 }
 
-/**
- * Gets normalized wheel delta from a mousewheel DOM event.
- */
+/// Gets normalized wheel delta from a mousewheel DOM event.
 num getWheelDelta(html.WheelEvent e) {
 
   num delta = e.deltaY / 120;
@@ -205,9 +189,8 @@ bool skipped(html.MouseEvent e) {
   return skipped;
 }
 
-/**
- * Check if element really left/entered the event target (for mouseenter/mouseleave)
- */
+/// Check if element really left/entered the event target (for
+/// mouseenter/mouseleave)
 bool _checkMouse(Element el, e) {
 
   var related = e.relatedTarget;

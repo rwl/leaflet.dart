@@ -4,11 +4,11 @@ class PolygonOptions extends PolylineOptions {
   bool fill = true;
 }
 
-/**
- * Polygon is used to display polygons on a map.
- *
- * Note that points you pass when creating a polygon shouldn't have an additional last point equal to the first one - it's better to filter out such points.
- */
+/// Polygon is used to display polygons on a map.
+///
+/// Note that points you pass when creating a polygon shouldn't have an
+/// additional last point equal to the first one - it's better to filter
+/// out such points.
 class Polygon extends Polyline {
 
   /*Map<String, Object> options = {

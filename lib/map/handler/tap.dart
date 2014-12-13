@@ -1,10 +1,7 @@
 part of leaflet.map.handler;
 
-/**
- * Tap is used to enable mobile hacks like quick taps and long hold.
- */
+/// Tap is used to enable mobile hacks like quick taps and long hold.
 class Tap extends Handler {
-
   bool _fireClick;
   Timer _holdTimeout;
   Point2D _startPos, _newPos;

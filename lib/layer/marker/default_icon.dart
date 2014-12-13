@@ -1,8 +1,6 @@
 part of leaflet.layer.marker;
 
-/**
- * Default is the blue marker icon used by default in Leaflet.
- */
+/// Default is the blue marker icon used by default in Leaflet.
 class DefaultIcon extends Icon {
 
   static String imagePath;
@@ -44,5 +42,4 @@ class DefaultIcon extends Icon {
 
     return '$path/marker-$name.png';
   }
-
 }

@@ -1,10 +1,8 @@
 part of leaflet.map.handler;
 
-/**
- * ScrollWheelZoom is used by L.Map to enable mouse scroll wheel zoom on the map.
- */
+/// ScrollWheelZoom is used by L.Map to enable mouse scroll wheel zoom on
+/// the map.
 class ScrollWheelZoom extends Handler {
-
   num _delta;
   Point2D _lastMousePos;
   DateTime _startTime;

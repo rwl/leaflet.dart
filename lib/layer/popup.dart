@@ -1,75 +1,57 @@
 part of leaflet.layer;
 
 class PopupOptions {
-  /**
-   * Max width of the popup.
-   */
+  /// Max width of the popup.
   num maxWidth  = 300;
 
-  /**
-   * Min width of the popup.
-   */
+  /// Min width of the popup.
   num minWidth  = 50;
 
-  /**
-   * If set, creates a scrollable container of the given height inside a popup if its content exceeds it.
-   */
+  /// If set, creates a scrollable container of the given height inside a
+  /// popup if its content exceeds it.
   num maxHeight;
 
-  /**
-   * Set it to false if you don't want the map to do panning animation to fit the opened popup.
-   */
+  /// Set it to false if you don't want the map to do panning animation to
+  /// fit the opened popup.
   bool autoPan = true;
 
-  /**
-   * Set it to true if you want to prevent users from panning the popup off of the screen while it is open.
-   */
+  /// Set it to true if you want to prevent users from panning the popup off
+  /// of the screen while it is open.
   bool keepInView  = false;
 
-  /**
-   * Controls the presense of a close button in the popup.
-   */
+  /// Controls the presense of a close button in the popup.
   bool closeButton = true;
 
-  /**
-   * The offset of the popup position. Useful to control the anchor of the popup when opening it on some overlays.
-   */
+  /// The offset of the popup position. Useful to control the anchor of the
+  /// popup when opening it on some overlays.
   Point2D offset  = new Point2D(0, 6);
 
-  /**
-   * The margin between the popup and the top left corner of the map view after autopanning was performed.
-   */
+  /// The margin between the popup and the top left corner of the map view
+  /// after autopanning was performed.
   Point2D autoPanPaddingTopLeft;
 
-  /**
-   * The margin between the popup and the bottom right corner of the map view after autopanning was performed.
-   */
+  /// The margin between the popup and the bottom right corner of the map
+  /// view after autopanning was performed.
   Point2D autoPanPaddingBottomRight;
 
-  /**
-   * Equivalent of setting both top left and bottom right autopan padding to the same value.
-   */
+  /// Equivalent of setting both top left and bottom right autopan padding to
+  /// the same value.
   Point2D autoPanPadding = new Point2D(5, 5);
 
-  /**
-   * Whether to animate the popup on zoom. Disable it if you have problems with Flash content inside popups.
-   */
+  /// Whether to animate the popup on zoom. Disable it if you have problems
+  /// with Flash content inside popups.
   bool zoomAnimation = true;
 
-  /**
-   * Set it to false if you want to override the default behavior of the popup closing when user clicks the map (set globally by the Map closePopupOnClick option).
-   */
+  /// Set it to false if you want to override the default behavior of the
+  /// popup closing when user clicks the map (set globally by the Map
+  /// closePopupOnClick option).
   bool closeOnClick;
 
-  /**
-   * A custom class name to assign to the popup.
-   */
+  /// A custom class name to assign to the popup.
   String className = '';
 }
 
-/**
- * Popup is used for displaying popups on the map.
- */
+/// Popup is used for displaying popups on the map.
 class Popup extends Layer {//with Events {
 
   /*Map<String, Object> options = {
@@ -192,12 +174,12 @@ class Popup extends Layer {//with Events {
     }
   }
 
-  // Returns the geographical point of popup.
+  /// Returns the geographical point of popup.
   LatLng getLatLng() {
     return _latlng;
   }
 
-  // Sets the geographical point where the popup will open.
+  /// Sets the geographical point where the popup will open.
   void setLatLng(LatLng latlng) {
     _latlng = new LatLng.latLng(latlng);
     if (_map != null) {
@@ -206,19 +188,19 @@ class Popup extends Layer {//with Events {
     }
   }
 
-  // Returns the content of the popup.
+  /// Returns the content of the popup.
   Object getContent() {
     return _content;
   }
 
-  // Sets the HTML content of the popup.
+  /// Sets the HTML content of the popup.
   void setContent(var content) {
     _content = content;
     update();
   }
 
-  // Updates the popup content, layout and position. Useful for updating the
-  // popup after something inside changed, e.g. image loaded.
+  /// Updates the popup content, layout and position. Useful for updating the
+  /// popup after something inside changed, e.g. image loaded.
   update() {
     if (_map == null) { return; }
 
@@ -281,9 +263,7 @@ class Popup extends Layer {//with Events {
     return events;
   }*/
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   void close() {
     _close();
   }
@@ -441,14 +421,10 @@ class Popup extends Layer {//with Events {
     dom.stop(e);
   }
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   bool get open => _isOpen;
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   void set open(bool isOpen) {
     _isOpen = isOpen;
   }

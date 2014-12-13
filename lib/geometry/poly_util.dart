@@ -2,20 +2,16 @@ part of leaflet.geometry;
 
 //final PolyUtil = new _PolyUtil();
 
-/**
- * PolyUtil contains utility functions for polygons (clipping, etc.).
- */
+/// PolyUtil contains utility functions for polygons (clipping, etc.).
 //class _PolyUtil {
 
-/**
- * Clips the polygon geometry defined by the given points by rectangular
- * bounds. Used by Leaflet to only show polygon points that are on the
- * screen or near, increasing performance. Note that polygon points needs
- * different algorithm for clipping than polyline, so there's a seperate
- * method for it.
- *
- * Sutherland-Hodgeman polygon clipping algorithm.
- */
+/// Clips the polygon geometry defined by the given points by rectangular
+/// bounds. Used by Leaflet to only show polygon points that are on the
+/// screen or near, increasing performance. Note that polygon points needs
+/// different algorithm for clipping than polyline, so there's a seperate
+/// method for it.
+///
+/// Sutherland-Hodgeman polygon clipping algorithm.
 List<Point2D> clipPolygon(List<Point2D> points, Bounds bounds) {
   final edges = [1, 4, 2, 8];
 

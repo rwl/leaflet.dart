@@ -1,11 +1,8 @@
 part of leaflet.map.handler;
 
-/**
- * DoubleClickZoom is used to handle double-click zoom on the map, enabled
- * by default.
- */
+/// DoubleClickZoom is used to handle double-click zoom on the map, enabled
+/// by default.
 class DoubleClickZoom extends Handler {
-
   StreamSubscription<MouseEvent> _doubleClickSubscription;
 
   DoubleClickZoom(LeafletMap map) : super(map);

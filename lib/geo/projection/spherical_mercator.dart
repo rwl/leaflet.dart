@@ -2,9 +2,8 @@ part of leaflet.geo.projection;
 
 final SphericalMercator = new _SphericalMercator();
 
-/**
- * Spherical Mercator is the most popular map projection, used by EPSG:3857 CRS used by default.
- */
+/// Spherical Mercator is the most popular map projection, used by EPSG:3857
+/// CRS used by default.
 class _SphericalMercator implements Projection {
   static final double MAX_LATITUDE = 85.0511287798;
 

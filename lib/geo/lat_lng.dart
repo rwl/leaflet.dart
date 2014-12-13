@@ -1,18 +1,13 @@
 part of leaflet.geo;
 
-/**
- * LatLng represents a geographical point with latitude and longitude coordinates.
- */
+/// LatLng represents a geographical point with latitude and longitude
+/// coordinates.
 class LatLng {
 
-  /**
-   * Latitude in degrees.
-   */
+  /// Latitude in degrees.
   num lat;
 
-  /**
-   * Longitude in degrees.
-   */
+  /// Longitude in degrees.
   num lng;
 
   num alt;
@@ -34,33 +29,25 @@ class LatLng {
     return ll;
   }
 
-  /**
-   * Creates an object representing a geographical point with the given latitude and longitude (and optionally altitude).
-   */
+  /// Creates an object representing a geographical point with the given
+  /// latitude and longitude (and optionally altitude).
   LatLng(this.lat, this.lng, [this.alt = null]) {
     if (lat.isNaN || lng.isNaN) {
       throw new Exception('Invalid LatLng object: ($lat, $lng)');
     }
   }
 
-  /**
-   * A multiplier for converting degrees into radians.
-   */
+  /// A multiplier for converting degrees into radians.
   static final DEG_TO_RAD = math.PI / 180;
 
-  /**
-   * A multiplier for converting radians into degrees.
-   */
+  /// A multiplier for converting radians into degrees.
   static final RAD_TO_DEG = 180 / math.PI;
 
-  /**
-   * Max margin of error for the equality check.
-   */
+  /// Max margin of error for the equality check.
   static final MAX_MARGIN = 1.0E-9;
 
-  /**
-   * Returns true if the given LatLng point is at the same position (within a small margin of error).
-   */
+  /// Returns true if the given LatLng point is at the same position (within
+  /// a small margin of error).
   bool operator ==(LatLng obj) { // (LatLng) -> Boolean
     if (obj == null) {
       return false;
@@ -73,20 +60,17 @@ class LatLng {
     return margin <= LatLng.MAX_MARGIN;
   }
 
-  /**
-   * Returns a string representation of the point (for debugging purposes).
-   */
+  /// Returns a string representation of the point (for debugging purposes).
   String toString([num precision = 5]) {
 //    return 'LatLng(${formatNum(lat, precision)}, ${formatNum(lng, precision)})';
     return 'LatLng($lat, $lng)';
   }
 
-  /**
-   * Returns the distance (in meters) to the given LatLng calculated using the Haversine formula
-   * see http://en.wikipedia.org/wiki/Haversine_formula
-   *
-   * TODO move to projection code, LatLng shouldn't know about Earth
-   */
+  /// Returns the distance (in meters) to the given LatLng calculated using
+  /// the Haversine formula
+  /// see http://en.wikipedia.org/wiki/Haversine_formula
+  ///
+  /// TODO move to projection code, LatLng shouldn't know about Earth
   num distanceTo(LatLng other) {
     other = new LatLng.latLng(other);
 
@@ -104,10 +88,8 @@ class LatLng {
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
   }
 
-  /**
-   * Returns a new LatLng object with the longitude wrapped around left and
-   * right boundaries (-180 to 180 by default).
-   */
+  /// Returns a new LatLng object with the longitude wrapped around left and
+  /// right boundaries (-180 to 180 by default).
   LatLng wrap([num a = -180, num b = 180]) {
     final l = (lng + b).remainder(b - a) + (lng < a || lng == b ? b : a);
 

@@ -1,8 +1,7 @@
 part of leaflet.geo;
 
-/**
- * LatLngBounds represents a rectangular area on the map in geographical coordinates.
- */
+/// LatLngBounds represents a rectangular area on the map in geographical
+/// coordinates.
 class LatLngBounds {
 
   LatLng _southWest, _northEast;
@@ -11,25 +10,22 @@ class LatLngBounds {
     return llb;
   }
 
-  /**
-   * Creates a LatLngBounds object defined by the geographical points it contains. Very useful for zooming the map to fit a particular set of locations with fitBounds.
-   */
+  /// Creates a LatLngBounds object defined by the geographical points it
+  /// contains. Very useful for zooming the map to fit a particular set of
+  /// locations with fitBounds.
   LatLngBounds(List<LatLng> latlngs) {
     for (LatLng latlng in latlngs) {
       extend(latlng);
     }
   }
 
-  /**
-   * Creates a latLngBounds object by defining south-west and north-east corners of the rectangle.
-   */
+  /// Creates a latLngBounds object by defining south-west and north-east
+  /// corners of the rectangle.
   factory LatLngBounds.between([LatLng southWest=null, LatLng northEast=null]) {
     return new LatLngBounds([southWest, northEast]);
   }
 
-  /**
-   * Extend the bounds to contain the given point.
-   */
+  /// Extend the bounds to contain the given point.
   void extend(LatLng obj) {
     if (obj == null) { return; }
 
@@ -47,9 +43,7 @@ class LatLngBounds {
     }
   }
 
-  /**
-   * Extend the bounds to contain the given bounds.
-   */
+  /// Extend the bounds to contain the given bounds.
   void extendBounds([LatLngBounds obj=null]) {
     if (obj == null) { return; }
 
@@ -59,9 +53,8 @@ class LatLngBounds {
     extend(obj._northEast);
   }
 
-  /**
-   * Returns bigger bounds created by extending the current bounds by a given percentage in each direction.
-   */
+  /// Returns bigger bounds created by extending the current bounds by a
+  /// given percentage in each direction.
   LatLngBounds pad(num bufferRatio) {
     final sw = _southWest;
     final ne = _northEast;
@@ -73,74 +66,54 @@ class LatLngBounds {
             new LatLng(ne.lat + heightBuffer, ne.lng + widthBuffer));
   }
 
-  /**
-   * Returns the center point of the bounds.
-   */
+  /// Returns the center point of the bounds.
   LatLng getCenter() {
     return new LatLng(
             (_southWest.lat + _northEast.lat) / 2,
             (_southWest.lng + _northEast.lng) / 2);
   }
 
-  /**
-   * Returns the south-west point of the bounds.
-   */
+  /// Returns the south-west point of the bounds.
   LatLng getSouthWest() {
     return _southWest;
   }
 
-  /**
-   * Returns the north-east point of the bounds.
-   */
+  /// Returns the north-east point of the bounds.
   LatLng getNorthEast() {
     return _northEast;
   }
 
-  /**
-   * Returns the north-west point of the bounds.
-   */
+  /// Returns the north-west point of the bounds.
   LatLng getNorthWest() {
     return new LatLng(getNorth(), getWest());
   }
 
-  /**
-   * Returns the south-east point of the bounds.
-   */
+  /// Returns the south-east point of the bounds.
   LatLng getSouthEast() {
     return new LatLng(getSouth(), getEast());
   }
 
-  /**
-   * Returns the west longitude of the bounds.
-   */
+  /// Returns the west longitude of the bounds.
   num getWest() {
     return _southWest.lng;
   }
 
-  /**
-   * Returns the south latitude of the bounds.
-   */
+  /// Returns the south latitude of the bounds.
   num getSouth() {
     return _southWest.lat;
   }
 
-  /**
-   * Returns the east longitude of the bounds.
-   */
+  /// Returns the east longitude of the bounds.
   num getEast() {
     return _northEast.lng;
   }
 
-  /**
-   * Returns the north latitude of the bounds.
-   */
+  /// Returns the north latitude of the bounds.
   num getNorth() {
     return _northEast.lat;
   }
 
-  /**
-   * Returns true if the rectangle contains the given point.
-   */
+  /// Returns true if the rectangle contains the given point.
   bool contains(LatLng obj) {
     obj = new LatLng.latLng(obj);
 
@@ -154,9 +127,7 @@ class LatLngBounds {
            (sw2.lng >= sw.lng) && (ne2.lng <= ne.lng);
   }
 
-  /**
-   * Returns true if the rectangle contains the given one.
-   */
+  /// Returns true if the rectangle contains the given one.
   bool containsBounds(LatLngBounds obj) {
     obj = new LatLngBounds.latLngBounds(obj);
 
@@ -170,9 +141,7 @@ class LatLngBounds {
            (sw2.lng >= sw.lng) && (ne2.lng <= ne.lng);
   }
 
-  /**
-   * Returns true if the rectangle intersects the given bounds.
-   */
+  /// Returns true if the rectangle intersects the given bounds.
   bool intersects(LatLngBounds bounds) {
     bounds = new LatLngBounds.latLngBounds(bounds);
 
@@ -187,16 +156,15 @@ class LatLngBounds {
     return latIntersects && lngIntersects;
   }
 
-  /**
-   * Returns a string with bounding box coordinates in a 'southwest_lng,southwest_lat,northeast_lng,northeast_lat' format. Useful for sending requests to web services that return geo data.
-   */
+  /// Returns a string with bounding box coordinates in a
+  /// 'southwest_lng,southwest_lat,northeast_lng,northeast_lat' format.
+  /// Useful for sending requests to web services that return geo data.
   String toBBoxString() {
     return [getWest(), getSouth(), getEast(), getNorth()].join(',');
   }
 
-  /**
-   * Returns true if the rectangle is equivalent (within a small margin of error) to the given bounds.
-   */
+  /// Returns true if the rectangle is equivalent (within a small margin
+  /// of error) to the given bounds.
   bool operator ==(LatLngBounds bounds) {
     if (bounds == null) { return false; }
 
@@ -206,9 +174,7 @@ class LatLngBounds {
            _northEast == bounds.getNorthEast();
   }
 
-  /**
-   * Returns true if the bounds are properly initialized.
-   */
+  /// Returns true if the bounds are properly initialized.
   bool isValid() {
     return _southWest != null && _northEast != null;
   }

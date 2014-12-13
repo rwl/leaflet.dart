@@ -1,20 +1,16 @@
 part of leaflet.layer.vector;
 
 class PolylineOptions extends PathOptions {
-  /**
-   * How much to simplify the polyline on each zoom level. More means better performance and smoother look, and less means more accurate representation.
-   */
+  /// How much to simplify the polyline on each zoom level. More means
+  /// better performance and smoother look, and less means more accurate
+  /// representation.
   num smoothFactor  = 1.0;
 
-  /**
-   * Disabled polyline clipping.
-   */
+  /// Disabled polyline clipping.
   bool noClip  = false;
 }
 
-/**
- * Polyline is used to display polylines on a map.
- */
+/// Polyline is used to display polylines on a map.
 class Polyline extends Path {
 
   List<Point2D> _originalPoints;
@@ -54,32 +50,27 @@ class Polyline extends Path {
     return str;
   }
 
-  /**
-   * Returns an array of the points in the path.
-   */
+  /// Returns an array of the points in the path.
   getLatLngs() {
     return _latlngs;
   }
 
-  /**
-   * Replaces all the points in the polyline with the given array of geographical points.
-   */
+  /// Replaces all the points in the polyline with the given array of
+  /// geographical points.
   setLatLngs(List<LatLng> latlngs) {
     _latlngs = latlngs;//_convertLatLngs(latlngs);
     return redraw();
   }
 
-  /**
-   * Adds a given point to the polyline.
-   */
+  /// Adds a given point to the polyline.
   addLatLng(LatLng latlng) {
     _latlngs.add(new LatLng.latLng(latlng));
     return redraw();
   }
 
-  /**
-   * Allows adding, removing or replacing points in the polyline. Syntax is the same as in Array#splice. Returns the array of removed points (if any).
-   */
+  /// Allows adding, removing or replacing points in the polyline. Syntax
+  /// is the same as in Array#splice. Returns the array of removed points
+  /// (if any).
   spliceLatLngs(int index, int howMany) { // (Number index, Number howMany)
     final sub = _latlngs.sublist(index, index+howMany);
     _latlngs.removeRange(index, index+howMany);
@@ -113,9 +104,7 @@ class Polyline extends Path {
     return minPoint;
   }
 
-  /**
-   * Returns the LatLngBounds of the polyline.
-   */
+  /// Returns the LatLngBounds of the polyline.
   getBounds() {
     return new LatLngBounds(getLatLngs());
   }

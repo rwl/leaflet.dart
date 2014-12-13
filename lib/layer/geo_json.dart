@@ -7,49 +7,35 @@ typedef bool FilterFunc(sfs.Feature featureData, [Layer layer]);
 typedef LatLng CoordsToLatLngFunc(List coords);
 
 class GeoJSONOptions extends PathOptions {
-  /**
-   * Function that will be used for creating layers for GeoJSON points
-   * (if not specified, simple markers will be created).
-   */
+  /// Function that will be used for creating layers for GeoJSON points
+  /// (if not specified, simple markers will be created).
   PointToLayerFunc pointToLayer;
 
-  /**
-   * Function that will be used to get style options for vector layers
-   * created for GeoJSON features.
-   */
+  /// Function that will be used to get style options for vector layers
+  /// created for GeoJSON features.
   StyleFunc style;
 
-  /**
-   * Function that will be called on each created feature layer. Useful
-   * for attaching events and popups to features.
-   */
+  /// Function that will be called on each created feature layer. Useful
+  /// for attaching events and popups to features.
   FeatureFunc onEachFeature;
 
-  /**
-   * Function that will be used to decide whether to show a feature or not.
-   */
+  /// Function that will be used to decide whether to show a feature or not.
   FilterFunc filter;
 
-  /**
-   * Function that will be used for converting GeoJSON coordinates to LatLng
-   * points (if not specified, coords will be assumed to be WGS84 — standard
-   * [longitude, latitude] values in degrees).
-   */
+  /// Function that will be used for converting GeoJSON coordinates to LatLng
+  /// points (if not specified, coords will be assumed to be WGS84 — standard
+  /// [longitude, latitude] values in degrees).
   CoordsToLatLngFunc coordsToLatLng;
 }
 
-/**
- * GeoJSON turns any GeoJSON data into a Leaflet layer.
- */
+/// GeoJSON turns any GeoJSON data into a Leaflet layer.
 class GeoJSON extends FeatureGroup {
 
   GeoJSONOptions options;
 
-  /**
-   * Creates a GeoJSON layer. Optionally accepts an object in GeoJSON format
-   * to display on the map (you can alternatively add it later with addFeature
-   * method) and an options object.
-   */
+  /// Creates a GeoJSON layer. Optionally accepts an object in GeoJSON format
+  /// to display on the map (you can alternatively add it later with addFeature
+  /// method) and an options object.
   GeoJSON([sfs.Feature geojson = null, this.options = null]) : super([]) {
     //_layers = {};
 
@@ -58,9 +44,7 @@ class GeoJSON extends FeatureGroup {
     }
   }
 
-  /**
-   * Adds a GeoJSON feature to the layer.
-   */
+  /// Adds a GeoJSON feature to the layer.
   void addFeatures(sfs.FeatureCollection features) {
     //final features = geojson is List ? geojson : geojson.features;
 
@@ -96,9 +80,8 @@ class GeoJSON extends FeatureGroup {
     addLayer(layer);
   }
 
-  /**
-   * Resets the given vector layer's style to the original GeoJSON style, useful for resetting style after hover events.
-   */
+  /// Resets the given vector layer's style to the original GeoJSON style,
+  /// useful for resetting style after hover events.
   void resetStyle(Path layer) {
     final style = options.style;
     if (style != null) {
@@ -109,9 +92,7 @@ class GeoJSON extends FeatureGroup {
     }
   }
 
-  /**
-   * Changes styles of GeoJSON vector layers with the given style function.
-   */
+  /// Changes styles of GeoJSON vector layers with the given style function.
   void setStyle(StyleFunc style) {
     eachLayer((layer) {
       _setLayerStyle(layer, style);
@@ -128,9 +109,7 @@ class GeoJSON extends FeatureGroup {
   }
 
 
-  /**
-   * Creates a layer from a given GeoJSON feature.
-   */
+  /// Creates a layer from a given GeoJSON feature.
   static Layer geometryToLayer(sfs.Feature geojson, Function pointToLayer, Function coordsToLatLng, var vectorOptions) {
     final geometry = geojson.geometry;//geojson.type == 'Feature' ? geojson.geometry : geojson,
         //coords = geometry.coordinates;
@@ -182,22 +161,18 @@ class GeoJSON extends FeatureGroup {
     }
   }
 
-  /**
-   * Creates a LatLng object from an array of 2 numbers (latitude, longitude)
-   * used in GeoJSON for points. If reverse is set to true, the numbers will
-   * be interpreted as (longitude, latitude).
-   */
+  /// Creates a LatLng object from an array of 2 numbers (latitude, longitude)
+  /// used in GeoJSON for points. If reverse is set to true, the numbers will
+  /// be interpreted as (longitude, latitude).
   static LatLng coordsToLatLng(List coords) {
     return new LatLng(coords[1], coords[0], coords[2]);
   }
 
-  /**
-   * Creates a multidimensional array of LatLng objects from a GeoJSON
-   * coordinates array. levelsDeep specifies the nesting level (0 is for
-   * an array of points, 1 for an array of arrays of points, etc., 0 by
-   * default). If reverse is set to true, the numbers will be interpreted
-   * as (longitude, latitude).
-   */
+  /// Creates a multidimensional array of LatLng objects from a GeoJSON
+  /// coordinates array. levelsDeep specifies the nesting level (0 is for
+  /// an array of points, 1 for an array of arrays of points, etc., 0 by
+  /// default). If reverse is set to true, the numbers will be interpreted
+  /// as (longitude, latitude).
   static List<LatLng> coordsToLatLngs(List<sfs.Point> coords, [num levelsDeep = null, CoordsToLatLngFunc coordsToLatLng = null]) {
     List<LatLng> latlngs = [];
 

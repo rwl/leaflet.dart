@@ -5,9 +5,7 @@ class CircleMarkerOptions extends CircleOptions {
   num weight = 2;
 }
 
-/**
- * CircleMarker is a circle overlay with a permanent pixel radius.
- */
+/// CircleMarker is a circle overlay with a permanent pixel radius.
 class CircleMarker extends Circle {
 
   CircleMarkerOptions get circleMarkerOptions => options as CircleMarkerOptions;
@@ -28,9 +26,7 @@ class CircleMarker extends Circle {
     this.setRadius(circleMarkerOptions.radius);
   }
 
-  /**
-   * Sets the position of a circle marker to a new location.
-   */
+  /// Sets the position of a circle marker to a new location.
   void setLatLng(LatLng latlng) {
     super.setLatLng(latlng);
     if (this._popup != null && this._popup.open) {
@@ -38,9 +34,7 @@ class CircleMarker extends Circle {
     }
   }
 
-  /**
-   * Sets the radius of a circle marker. Units are in pixels.
-   */
+  /// Sets the radius of a circle marker. Units are in pixels.
   void setRadius(num radius) {
     circleMarkerOptions.radius = this._radius = radius;
     this.redraw();

@@ -1,27 +1,19 @@
 part of leaflet.layer.marker;
 
 class DivIconOptions extends IconOptions {
-  /**
-   * Size of the icon in pixels. Can be also set through CSS.
-   */
+  /// Size of the icon in pixels. Can be also set through CSS.
   Point2D iconSize = new Point2D(12, 12);
 
-  /**
-   * The coordinates of the "tip" of the icon (relative to its top left
-   * corner). The icon will be aligned so that this point is at the
-   * marker's geographical location. Centered by default if size is
-   * specified, also can be set in CSS with negative margins.
-   */
+  /// The coordinates of the "tip" of the icon (relative to its top left
+  /// corner). The icon will be aligned so that this point is at the
+  /// marker's geographical location. Centered by default if size is
+  /// specified, also can be set in CSS with negative margins.
   Point2D iconAnchor;
 
-  /**
-   * A custom class name to assign to the icon. 'leaflet-div-icon' by default.
-   */
+  /// A custom class name to assign to the icon. 'leaflet-div-icon' by default.
   String  className = 'leaflet-div-icon';
 
-  /**
-   * A custom HTML code to put inside the div element, empty by default.
-   */
+  /// A custom HTML code to put inside the div element, empty by default.
   String  html;
 
   Point2D bgPos;
@@ -29,10 +21,8 @@ class DivIconOptions extends IconOptions {
   DivIconOptions(String iconUrl) : super(iconUrl);
 }
 
-/**
- * DivIcon is a lightweight HTML-based icon class (as opposed to the image-based Icon)
- * to use with Marker.
- */
+/// DivIcon is a lightweight HTML-based icon class (as opposed to the
+/// image-based Icon) to use with Marker.
 class DivIcon extends Icon {
 
   DivIconOptions get divIconOptions => options as DivIconOptions;

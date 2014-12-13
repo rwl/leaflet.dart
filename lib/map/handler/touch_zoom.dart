@@ -1,17 +1,12 @@
 part of leaflet.map.handler;
 
-/**
- * TouchZoom is used by Map to add pinch zoom on supported mobile browsers.
- */
+/// TouchZoom is used by Map to add pinch zoom on supported mobile browsers.
 class TouchZoom extends Handler {
-
   Point2D _startCenter, _centerOffset, _delta;
   bool _moved, _zooming;
   num _scale, _startDist;
 
-  /**
-   * For internal use.
-   */
+  /// For internal use.
   bool get zooming => _zooming;
 
   StreamSubscription<Event> _touchStartSubscription, _touchMoveSubscription, _touchEndSubscription;
