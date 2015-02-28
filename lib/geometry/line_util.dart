@@ -126,8 +126,7 @@ clipSegment(Point2D a, Point2D b, Bounds bounds, [bool useLastCode=false]) {
       return false;
     // other cases
     } else {
-      //final codeOut = codeA || codeB;
-      final codeOut = codeA | codeB;
+      final codeOut = codeA != 0 ? codeA : codeB;
       final p = _getEdgeIntersection(a, b, codeOut, bounds);
       final newCode = _getBitCode(p, bounds);
 
