@@ -756,7 +756,6 @@ class LeafletMap extends Object {
   // private methods that modify map state
 
   void _resetView(LatLng center, num zoom, [bool preserveMapOffset=false, bool afterZoomAnim=false]) {
-    print("_resetView");
     var zoomChanged = (_zoom != zoom);
 
     if (!afterZoomAnim) {
@@ -1248,7 +1247,6 @@ class LeafletMap extends Object {
   /// Sets the view of the map (geographical center and zoom) with the given
   /// animation options.
   void setView(LatLng center, num zoom, [ZoomPanOptions options=null, LatLngBounds maxBounds=null]) {
-    print("setView");
     zoom = zoom == null ? _zoom : limitZoom(zoom);
     center = _limitCenter(new LatLng.latLng(center), zoom, /*options.*/maxBounds);
     //options = options || {};

@@ -1,11 +1,13 @@
 part of leaflet.layer.marker;
 
+const defaultImagePath = '/packages/leaflet/images';
+
 /// Default is the blue marker icon used by default in Leaflet.
 class DefaultIcon extends Icon {
 
-  static String imagePath;
+  static String imagePath = defaultImagePath;
 
-  static final _defaultOptions = new IconOptions("")
+  static final _defaultOptions = new IconOptions(null)
     ..iconSize = new Point2D(25, 41)
     ..iconAnchor = new Point2D(12, 41)
     ..popupAnchor = new Point2D(1, -34)
@@ -13,7 +15,7 @@ class DefaultIcon extends Icon {
 
   DefaultIcon() : super(_defaultOptions);
 
-  String _getIconUrl(IconType iconType) {
+  String getIconUrl(IconType iconType) {
 
     switch (iconType) {
       case IconType.SHADOW:

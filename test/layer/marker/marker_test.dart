@@ -7,19 +7,19 @@ import 'package:unittest/html_enhanced_config.dart';
 import 'package:leaflet/map/map.dart' show LeafletMap;
 import 'package:leaflet/geo/geo.dart' show LatLng;
 import 'package:leaflet/layer/marker/marker.dart' show Marker, MarkerOptions,
-  Icon, DefaultIcon, DivIcon, DivIconOptions;
+  Icon, DefaultIcon, DivIcon, DivIconOptions, IconType;
 
 markerTest() {
   group('Marker', () {
     LeafletMap map;
-    Icon icon1, icon2;
+    DefaultIcon icon1, icon2;
 
     setUp(() {
       map = new LeafletMap(document.createElement('div'))..setView(new LatLng(0, 0), 0);
       icon1 = new DefaultIcon();
       icon2 = new DefaultIcon()
-        ..options.iconUrl = icon1._getIconUrl('icon') + '?2'
-        ..options.shadowUrl = icon1._getIconUrl('shadow') + '?2';
+        ..options.iconUrl = icon1.getIconUrl(IconType.ICON) + '?2'
+        ..options.shadowUrl = icon1.getIconUrl(IconType.SHADOW) + '?2';
     });
 
     group('setIcon', () {
@@ -32,16 +32,16 @@ markerTest() {
         final afterIcon = marker.icon;
 
         expect(beforeIcon, equals(afterIcon));
-        expect(afterIcon.src, contains(icon2._getIconUrl('icon')));
+        expect(afterIcon.src, contains(icon2.getIconUrl(IconType.ICON)));
       });
 
       test('changes the icon to another DivIcon', () {
         final marker = new Marker(new LatLng(0, 0), new MarkerOptions()
-          ..icon = new DivIcon(new DivIconOptions()..html = 'Inner1Text'));
+          ..icon = new DivIcon(new DivIconOptions(null)..html = 'Inner1Text'));
         map.addLayer(marker);
 
         final beforeIcon = marker.icon;
-        marker.setIcon(new DivIcon(new DivIconOptions()..html = 'Inner2Text'));
+        marker.setIcon(new DivIcon(new DivIconOptions(null)..html = 'Inner2Text'));
         final afterIcon = marker.icon;
 
         expect(beforeIcon, equals(afterIcon));
@@ -50,7 +50,7 @@ markerTest() {
 
       test('removes text when changing to a blank DivIcon', () {
         final marker = new Marker(new LatLng(0, 0), new MarkerOptions()
-          ..icon = new DivIcon(new DivIconOptions()..html = 'Inner1Text'));
+          ..icon = new DivIcon(new DivIconOptions(null)..html = 'Inner1Text'));
         map.addLayer(marker);
 
         marker.setIcon(new DivIcon());
@@ -61,7 +61,7 @@ markerTest() {
 
       test('changes a DivIcon to an image', () {
         final marker = new Marker(new LatLng(0, 0), new MarkerOptions()
-          ..icon = new DivIcon(new DivIconOptions()..html = 'Inner1Text'));
+          ..icon = new DivIcon(new DivIconOptions(null)..html = 'Inner1Text'));
         map.addLayer(marker);
         final oldIcon = marker.icon;
 
@@ -80,7 +80,7 @@ markerTest() {
         map.addLayer(marker);
         final oldIcon = marker.icon;
 
-        marker.setIcon(new DivIcon(new DivIconOptions()..html = 'Inner1Text'));
+        marker.setIcon(new DivIcon(new DivIconOptions(null)..html = 'Inner1Text'));
 
         expect(oldIcon, isNot(equals(marker.icon)));
         expect(oldIcon.parentNode, isNull);

@@ -69,9 +69,9 @@ class Icon {
   }
 
   ImageElement _createIcon(IconType iconType, Element oldIcon) {
-    final src = _getIconUrl(iconType);
+    final src = getIconUrl(iconType);
 
-    if (src == null) {
+    if (src == null || src.isEmpty) {
       if (iconType == IconType.ICON) {
         throw new Exception('iconUrl not set in Icon options (see the docs).');
       }
@@ -139,7 +139,8 @@ class Icon {
     return el;
   }
 
-  String _getIconUrl(IconType iconType) {
+  /// For internal use.
+  String getIconUrl(IconType iconType) {
     String iconUrl = null;
     if (Browser.retina) {
       switch (iconType) {

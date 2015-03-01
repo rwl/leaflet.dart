@@ -29,7 +29,7 @@ class DivIcon extends Icon {
 
   DivIcon([DivIconOptions options=null]) : super(options) {
     if (options == null) {
-      options = new DivIconOptions("");
+      this.options = new DivIconOptions("");
     }
   }
 

@@ -179,7 +179,7 @@ class TileLayer implements Layer {
 
     if (options.updateWhenIdle != true) {
       //_limitedUpdate = limitExecByInterval(_update, 150, this);
-      _limitedUpdate = () {
+      _limitedUpdate = (_) {
         //new Future.delayed(const Duration(milliseconds: 150), _update);
         new Timer(const Duration(milliseconds: 150), _update);
       };

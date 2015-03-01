@@ -67,7 +67,7 @@ class Marker extends Layer {
   LatLng _latlng;
   LeafletMap _map;
   MarkerDrag dragging;
-  ImageElement _icon, _shadow;
+  Element _icon, _shadow;
   int _zIndex;
 
   /*final Map<String, Object> options = {
@@ -203,7 +203,7 @@ class Marker extends Layer {
         icon.title = options.title;
       }
 
-      if (options.alt != null) {
+      if (options.alt != null && icon is ImageElement) {
         icon.alt = options.alt;
       }
     }
@@ -629,6 +629,6 @@ class Marker extends Layer {
   }
 
   /// For internal use.
-  ImageElement get icon => _icon;
-  ImageElement get shadow => _shadow;
+  Element get icon => _icon;
+  Element get shadow => _shadow;
 }
