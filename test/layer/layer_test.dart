@@ -1,5 +1,6 @@
 library leaflet.layer.test;
 
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:html' show document, Element;
 

@@ -85,7 +85,7 @@ class FeatureGroup extends LayerGroup {
 
     super.removeLayer(layer);
 
-    if (_popupContent) {
+    if (_popupContent != null) {
       //      invoke('unbindPopup');
       eachLayer((layer) {
         layer.unbindPopup();

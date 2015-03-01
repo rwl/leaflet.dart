@@ -7,12 +7,12 @@ featureGroupTest() {
       map = new LeafletMap(document.createElement('div'));
       map.setView(new LatLng(0, 0), 1);
     });
-    group('#_propagateEvent', () {
+    group('propagateEvent', () {
       Marker marker;
       setUp(() {
         marker = new Marker(new LatLng(0, 0));
       });
-      group('when a Marker is added to multiple FeatureGroups ', () {
+      group('when a Marker is added to multiple FeatureGroups', () {
         test('e.layer should be the Marker', () {
           final fg1 = new FeatureGroup(),
               fg2 = new FeatureGroup();
@@ -20,25 +20,24 @@ featureGroupTest() {
           fg1.addLayer(marker);
           fg2.addLayer(marker);
 
-          bool wasClicked1 = false,
-            wasClicked2 = false;
+          marker.fire(EventType.CLICK);//, { 'type': 'click' });
+
+          final comp1 = new Completer();
+          final comp2 = new Completer();
 
           fg2.onClick.listen((LayerEvent e) {
             expect(e.layer, equals(marker));
             //expect(e.target, equals(fg2));
-            wasClicked2 = true;
+            comp2.complete();
           });
 
           fg1.onClick.listen((LayerEvent e) {
             expect(e.layer, equals(marker));
             //expect(e.target, equals(fg1));
-            wasClicked1 = true;
+            comp1.complete();
           });
 
-          marker.fire(EventType.CLICK);//, { 'type': 'click' });
-
-          expect(wasClicked1, isTrue);
-          expect(wasClicked2, isTrue);
+          expect(Future.wait([comp1.future, comp2.future]), completes);
         });
       });
     });
