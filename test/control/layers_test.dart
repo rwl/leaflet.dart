@@ -18,8 +18,6 @@ layersTest() {
       called = false;
       //objs = new List<Object>();
       events = new List<LayersControlEvent>();
-
-      DefaultIcon.imagePath = '../lib/images';
     });
 
     group('baselayerchange event', () {
@@ -57,17 +55,18 @@ layersTest() {
         map.setView(new LatLng(0, 0), 14);
       });
 
-      test('when an included layer is addded or removed', () {
+      test('when an included layer is added or removed', () {
         final baseLayer = new TileLayer(),
           overlay = new Marker(new LatLng(0, 0)),
           layers = new TestLayers({'Base': baseLayer}, {'Overlay': overlay})..addTo(map);
 
         //var spy = sinon.spy(layers, '_update');
+        layers.resetTest();
 
         map.addLayer(overlay);
         map.removeLayer(overlay);
 
-        expect(new Future.delayed(const Duration(seconds: 1), () {
+        expect(new Future.delayed(const Duration(milliseconds: 500), () {
           expect(layers.called, isTrue);
           expect(layers.callCount, equals(2));
         }), completes);
@@ -79,11 +78,12 @@ layersTest() {
           layers = new TestLayers({'Base': baseLayer})..addTo(map);
 
         //var spy = sinon.spy(layers, '_update');
+        layers.resetTest();
 
         map.addLayer(overlay);
         map.removeLayer(overlay);
 
-        expect(new Future.delayed(const Duration(seconds: 1), () {
+        expect(new Future.delayed(const Duration(milliseconds: 500), () {
           expect(layers.called, isFalse);
         }), completes);
       });
@@ -102,5 +102,10 @@ class TestLayers extends Layers {
     called = true;
     callCount++;
     super.update();
+  }
+
+  void resetTest() {
+    called = false;
+    callCount = 0;
   }
 }
