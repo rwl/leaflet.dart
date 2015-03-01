@@ -99,6 +99,24 @@ class PosAnimation {
     fire(EventType.END);
   }
 
+  fire(EventType eventType) {
+    fireEvent(new MapEvent(eventType));
+  }
+
+  void fireEvent(MapEvent event) {
+    switch (event.type) {
+    case EventType.START:
+      _startController.add(event);
+      break;
+    case EventType.STEP:
+      _stepController.add(event);
+      break;
+    case EventType.END:
+      _endController.add(event);
+      break;
+    }
+  }
+
   StreamController<MapEvent> _startController = new StreamController.broadcast();
   StreamController<MapEvent> _stepController = new StreamController.broadcast();
   StreamController<MapEvent> _endController = new StreamController.broadcast();

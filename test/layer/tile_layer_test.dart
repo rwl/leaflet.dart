@@ -4,7 +4,7 @@ tileLayerTest() {
   group('TileLayer', () {
     String tileUrl = '';
 
-    group('#getMaxZoom, #getMinZoom', () {
+    group('getMaxZoom, getMinZoom', () {
       LeafletMap map;
 
       setUp(() {

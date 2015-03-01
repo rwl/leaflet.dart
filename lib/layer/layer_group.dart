@@ -85,7 +85,7 @@ class LayerGroup extends Layer {
 
   /// Iterates over the layers of the group.
   void eachLayer(LayerFunc fn) {
-    _layers.forEach((i, layer) {
+    _layers.values.toList().forEach((layer) {
       fn(layer);
     });
   }
@@ -97,7 +97,7 @@ class LayerGroup extends Layer {
 
   /// Returns an array of all the layers added to the group.
   List<Layer> getLayers() {
-    return _layers.values;
+    return _layers.values.toList();
   }
 
   void setZIndex(zIndex) {

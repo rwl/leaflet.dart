@@ -148,7 +148,6 @@ class TileLayer implements Layer {
   }
 
   void onAdd(LeafletMap map) {
-    print("TileLayer.onAdd");
     _map = map;
     _animated = map.zoomAnimated;
 
@@ -655,7 +654,6 @@ class TileLayer implements Layer {
   }
 
   void _tileLoaded() {
-    print("_tileLoaded");
     _tilesToLoad--;
 
     if (_animated == true) {
@@ -699,18 +697,21 @@ class TileLayer implements Layer {
     _tileLoaded();
   }
 
-  void _tileOnError(e) {
-    print("tile load error: $e");
-    /*final layer = _layer;
+  void _tileOnError(Event e) {
+    final target = e.target;
 
-    layer.fireEvent(new TileEvent(EventType.TILEERROR, this, this.src));
+    if (target is ImageElement) {
+      _tileErrorController.add(new TileEvent(EventType.TILEERROR, target, target.src));
 
-    var newUrl = layer.options.errorTileUrl;
-    if (newUrl) {
-      this.src = newUrl;
+      var newUrl = options.errorTileUrl;
+      if (newUrl != null && newUrl.isNotEmpty) {
+        target.src = newUrl;
+      }
+    } else {
+      throw new StateError('tile element: $target');
     }
 
-    layer._tileLoaded();*/
+    _tileLoaded();
   }
 
 
@@ -831,10 +832,12 @@ class TileLayer implements Layer {
   StreamController<TileEvent> _tileLoadStartController = new StreamController.broadcast();
   StreamController<TileEvent> _tileLoadController = new StreamController.broadcast();
   StreamController<TileEvent> _tileUnloadController = new StreamController.broadcast();
+  StreamController<TileEvent> _tileErrorController = new StreamController.broadcast();
 
   Stream<MapEvent> get onLoading => _loadingController.stream;
   Stream<MapEvent> get onLoad => _loadController.stream;
   Stream<TileEvent> get onTileLoadStart => _tileLoadStartController.stream;
   Stream<TileEvent> get onTileLoad => _tileLoadController.stream;
   Stream<TileEvent> get onUnload => _tileUnloadController.stream;
+  Stream<TileEvent> get onTileError => _tileErrorController.stream;
 }

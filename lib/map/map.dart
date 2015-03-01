@@ -927,14 +927,52 @@ class LeafletMap extends Object {
     _fireMouseEvent(e);
   }
 
-  void _fireMouseEvent(Event e) {
+  void _fireMouseEvent(html.MouseEvent e) {
     if (_loaded != true || dom.skipped(e) == true) {
       return;
     }
 
     final type = (e.type == 'mouseenter' ? EventType.MOUSEOVER : (e.type == 'mouseleave' ? EventType.MOUSEOUT : new EventType.from(e.type)));
 
-    if (!hasEventListeners(type)) { return; }
+    switch (type) {
+      case EventType.CLICK:
+        if (!_clickController.hasListener) {
+          return;
+        }
+        break;
+      case EventType.DBLCLICK:
+        if (!_dblClickController.hasListener) {
+          return;
+        }
+        break;
+      case EventType.MOUSEDOWN:
+        if (!_mouseDownController.hasListener) {
+          return;
+        }
+        break;
+      case EventType.MOUSEOVER:
+        if (!_mouseOverController.hasListener) {
+          return;
+        }
+        break;
+      case EventType.MOUSEUP:
+        if (!_mouseUpController.hasListener) {
+          return;
+        }
+        break;
+      case EventType.MOUSEOUT:
+        if (!_mouseOutController.hasListener) {
+          return;
+        }
+        break;
+      case EventType.MOUSEMOVE:
+        if (!_mouseMoveController.hasListener) {
+          return;
+        }
+        break;
+    }
+
+//    if (!_container.hasEventListeners(type)) { return; }
 
     if (type == EventType.CONTEXTMENU) {
       e.preventDefault();

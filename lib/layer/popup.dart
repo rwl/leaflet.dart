@@ -82,8 +82,9 @@ class Popup extends Layer {//with Events {
   var _tip, _tipContainer;
   var _containerWidth, _containerBottom, _containerLeft;
 
-  Popup(this.options, [this._source=null]) {
-    _animated = Browser.any3d && options.zoomAnimation;
+  Popup([options=null, this._source=null]) :
+    this.options = options == null ? new PopupOptions() : options {
+    _animated = /*Browser.any3d &&*/ this.options.zoomAnimation;
     _isOpen = false;
   }
 
@@ -222,7 +223,7 @@ class Popup extends Layer {//with Events {
     _viewResetSubscription = _map.onViewReset.listen(_updatePosition);
 
     if (_animated) {
-      _zoomAnimSubscription = _map.onZoomStart.listen(_zoomAnimation);
+      _zoomAnimSubscription = _map.onZoomStart.listen((_) => _zoomAnimation());
     }
     if (options.closeOnClick != null ? options.closeOnClick : _map.options.closePopupOnClick) {
       _preClickSubscription = _map.onPreClick.listen(_close);
@@ -306,7 +307,7 @@ class Popup extends Layer {//with Events {
   }
 
   void _updateContent() {
-    if (!_content) { return; }
+    if (_content == null) { return; }
 
     if (_content is String) {
       _contentNode.setInnerHtml(_content);
@@ -341,7 +342,7 @@ class Popup extends Layer {//with Events {
         maxHeight = options.maxHeight,
         scrolledClass = 'leaflet-popup-scrolled';
 
-    if (maxHeight && height > maxHeight) {
+    if (maxHeight != null && height > maxHeight) {
       style.height = '${maxHeight}px';
       container.classes.add(scrolledClass);
     } else {
@@ -366,8 +367,8 @@ class Popup extends Layer {//with Events {
     _containerLeft = -(_containerWidth / 2).round() + offset.x + (animated ? 0 : pos.x);
 
     // bottom position the popup in case the height of the popup changes (images loading etc)
-    _container.style.bottom = _containerBottom + 'px';
-    _container.style.left = _containerLeft + 'px';
+    _container.style.bottom = '${_containerBottom}px';
+    _container.style.left = '${_containerLeft}px';
   }
 
   void _zoomAnimation(num zoom, LatLng center) {
@@ -412,7 +413,7 @@ class Popup extends Layer {//with Events {
 
     if (dx != 0 || dy != 0) {
       map.fire(EventType.AUTOPANSTART);
-      map.panBy([dx, dy]);
+      map.panBy(new Point2D(dx, dy));
     }
   }
 

@@ -21,7 +21,7 @@ popupTest() {
         ..openOn(map);
 
       //happen.click(c);
-      c.dispatchEvent(new html.Event('click'));
+      c.dispatchEvent(new html.MouseEvent('click'));
 
       expect(map.hasLayer(popup), isFalse);
     });
@@ -34,7 +34,7 @@ popupTest() {
         ..openOn(map);
 
       //happen.click(c);
-      c.dispatchEvent(new html.Event('click'));
+      c.dispatchEvent(new html.MouseEvent('click'));
 
       expect(map.hasLayer(popup), isFalse);
     });
@@ -47,7 +47,7 @@ popupTest() {
         ..openOn(map);
 
       //happen.click(c);
-      c.dispatchEvent(new html.Event('click'));
+      c.dispatchEvent(new html.MouseEvent('click'));
 
       expect(map.hasLayer(popup), isTrue);
     });
@@ -60,7 +60,7 @@ popupTest() {
 
       map.options.closePopupOnClick = true;
       //happen.click(c);
-      c.dispatchEvent(new html.Event('click'));
+      c.dispatchEvent(new html.MouseEvent('click'));
 
       // toggle open popup
       sinon.spy(marker, 'openPopup');
