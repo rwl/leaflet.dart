@@ -13,14 +13,16 @@ polylineTest() {
       test('doesn\'t overwrite the given latlng array', () {
         final originalLatLngs = [
           new LatLng(1, 2),
-          new LatLng(3, 4)
+          new LatLng(3, 4),
         ];
         final sourceLatLngs = new List.from(originalLatLngs);
 
         final polyline = new Polyline(sourceLatLngs);
 
-        expect(sourceLatLngs, equals(originalLatLngs));
-        expect(polyline.latlngs, isNot(equals(sourceLatLngs)));
+        sourceLatLngs.removeLast();
+
+        expect(polyline.latlngs, equals(originalLatLngs));
+        expect(originalLatLngs, isNot(equals(sourceLatLngs)));
       });
     });
 
@@ -50,7 +52,7 @@ polylineTest() {
 
         final polyline = new Polyline(latLngs);
 
-        polyline.spliceLatLngs(1, 1);//, new LatLng(7, 8));
+        polyline.spliceLatLngs(1, 1, [new LatLng(7, 8)]);
 
         expect(polyline.latlngs, equals([
           new LatLng(1, 2), new LatLng(7, 8), new LatLng(5, 6)

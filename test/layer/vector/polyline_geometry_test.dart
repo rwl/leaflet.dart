@@ -20,7 +20,7 @@ polylineGeometryTest() {
           [55.31534617509, 38.973291015816]
         ].map((ll) {
           return new LatLng(ll[0], ll[1]);
-        });
+        }).toList();
         final polyline = new Polyline([], new PolylineOptions()
           ..noClip = true);
         map.addLayer(polyline);
@@ -28,14 +28,16 @@ polylineGeometryTest() {
         expect(polyline.closestLayerPoint(p1), isNull);
 
         polyline.setLatLngs(latlngs);
-        final point = polyline.closestLayerPoint(p1);
+        var distance = [0];
+        final point = polyline.closestLayerPoint(p1, distance);
         expect(point, isNotNull);
-        expect(point.distance, isNot(equals(double.INFINITY)));
-        expect(point.distance, isNot(equals(double.NAN)));
+        expect(distance[0], isNot(equals(double.INFINITY)));
+        expect(distance[0], isNotNaN);
 
-        final point2 = polyline.closestLayerPoint(p2);
+        var distance2 = [0];
+        final point2 = polyline.closestLayerPoint(p2, distance2);
 
-        expect(point.distance, lessThan(point2.distance));
+        expect(distance[0], lessThan(distance2[0]));
       });
     });
   });

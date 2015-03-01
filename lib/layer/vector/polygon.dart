@@ -22,23 +22,21 @@ class Polygon extends Polyline {
 
   Polygon(List<LatLng> latlngs, [PolygonOptions options=null, this._holes=null]) : super(latlngs, options) {
     if (options == null) {
-      options = PolygonOptions();
+      this.options = new PolygonOptions();
     }
 
     if (_holes != null) {
       for (int i = 0; i < _holes.length; i++) {
-        final hole = _holes[i];// = this._convertLatLngs(_holes[i]);
-        if (hole[0] == hole[hole.length - 1]) {
-          hole.removeLast();
+//        final hole = _holes[i];// = this._convertLatLngs(_holes[i]);
+        if (_holes[0] == _holes[_holes.length - 1]) {
+          _holes.removeLast();
         }
       }
     }
 
     // Filter out last point if its equal to the first one.
-    latlngs = _latlngs;
-
-    if (latlngs.length >= 2 && latlngs[0] == latlngs[latlngs.length - 1]) {
-      latlngs.removeLast();
+    if (_latlngs.length >= 2 && _latlngs[0] == _latlngs[_latlngs.length - 1]) {
+      _latlngs.removeLast();
     }
   }
 

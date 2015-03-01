@@ -16,7 +16,7 @@ class PathOptions {
 
   /// Whether to fill the path with color. Set it to false to disable filling
   /// on polygons or circles.
-  bool fill;
+  bool fill = true;
 
   /// Same as color Fill color.
   String fillColor;
@@ -53,8 +53,8 @@ abstract class Path extends Layer {
   // (relative to its size, e.g. 0.5 is half the screen in each direction)
   // set it so that SVG element doesn't exceed 1280px (vectors flicker on dragend if it is)
   static var CLIP_PADDING = (() {
-    var max = Browser.mobile ? 1280 : 2000,
-        target = (max / math.max(window.outerWidth, window.outerHeight) - 1) / 2;
+    var max = false/*Browser.mobile*/ ? 1280 : 2000;
+    var target = (max / math.max(window.outerWidth, window.outerHeight) - 1) / 2;
     return math.max(0, math.min(0.5, target));
   })();
 
@@ -105,7 +105,7 @@ abstract class Path extends Layer {
 
     //map.on(EventType.VIEWRESET, projectLatlngs, this);
     //map.on(EventType.MOVEEND, this._updatePath, this);
-    _viewResetSubscription = map.onViewReset.listen(projectLatlngs);
+    _viewResetSubscription = map.onViewReset.listen((_) => projectLatlngs());
     _moveEndSubscription = map.onMoveEnd.listen(_updatePath);
   }
 
@@ -265,22 +265,22 @@ abstract class Path extends Layer {
   }
 
   // Form path string here.
-  getPathString();
+  String getPathString();
 
   /*_createElement(String name) {
     return document.createElementNS(SVG_NS, name);
   }*/
 
   _initElements() {
-    _map._initPathRoot();
+    _map.initSvgPathRoot();
     _initPath();
     _initStyle();
   }
 
   _initPath() {
-    _container = _createElement('g');
+    _container = new Element.tag('g');
 
-    _path = _createElement('path');
+    _path = new Element.tag('path');
 
     if (options.className != null) {
       _path.classes.add(options.className);
@@ -335,7 +335,7 @@ abstract class Path extends Layer {
 
   _updatePath([Object obj, MapEvent e]) {
     var str = getPathString();
-    if (!str) {
+    if (str == null || str.isEmpty) {
       // fix webkit empty string parsing bug
       str = 'M0 0';
     }
@@ -345,9 +345,9 @@ abstract class Path extends Layer {
   // TODO remove duplication with Map
   _initEvents() {
     if (options.clickable) {
-      if (Browser.svg || !Browser.vml) {
+      //if (Browser.svg || !Browser.vml) {
         _path.classes.add('leaflet-clickable');
-      }
+      //}
 
       //dom.on(_container, 'click', _onMouseClick, this);
       _container.onClick.listen(_onMouseClick);

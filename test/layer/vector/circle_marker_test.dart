@@ -2,13 +2,13 @@ part of leaflet.layer.vector.test;
 
 circleMarkerTest() {
   group('CircleMarker', () {
-    group('#_radius', () {
+    group('radius', () {
       LeafletMap map;
       setUp(() {
         map = new LeafletMap(document.createElement('div'));
         map.setView(new LatLng(0, 0), 1);
       });
-      group('when a CircleMarker is added to the map ', () {
+      group('when a CircleMarker is added to the map', () {
         group('with a radius set as an option', () {
           test('takes that radius', () {
             final marker = new CircleMarker(new LatLng(0, 0), new CircleMarkerOptions()

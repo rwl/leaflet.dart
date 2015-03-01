@@ -69,13 +69,13 @@ class Circle extends Path {
       return '';
     }
 
-    if (Browser.svg) {
+//    if (Browser.svg) {
       return 'M${p.x},${p.y - r}A$r,$r,0,1,1,${p.x - 0.1},${p.y - r} z';
-    } else {
-      p.round();
-      r = r.round();
-      return 'AL ${p.x},${p.y} $r,$r 0,${65535 * 360}';
-    }
+//    } else {
+//      p.round();
+//      r = r.round();
+//      return 'AL ${p.x},${p.y} $r,$r 0,${65535 * 360}';
+//    }
   }
 
   /// Returns the current radius of a circle. Units are in meters.

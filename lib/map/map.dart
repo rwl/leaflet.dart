@@ -1527,9 +1527,10 @@ class LeafletMap extends Object {
 
   /* SVG path extensions */
 
-  bool _pathZooming;
+  bool _pathZooming = false;
 
-  void _initSvgPathRoot() {
+  /// For internal use.
+  void initSvgPathRoot() {
     if (_pathRoot == null) {
       _pathRoot = new SvgSvgElement();//Path.prototype._createElement('svg');
       _panes['overlayPane'].append(_pathRoot);

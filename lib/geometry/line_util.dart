@@ -32,12 +32,12 @@ List<Point2D> simplify(List<Point2D> points, num tolerance) {
 
 /// Returns the distance between point p and segment p1 to p2.
 num pointToSegmentDistance(Point2D p, Point2D p1, Point2D p2) {
-  return math.sqrt(_sqClosestPointOnSegment(p, p1, p2, true));
+  return math.sqrt(sqClosestPointOnSegment(p, p1, p2, true));
 }
 
 /// Returns the closest point from a point p on a segment p1 to p2.
 Point2D closestPointOnSegment(Point2D p, Point2D p1, Point2D p2) {
-  return _sqClosestPointOnSegment(p, p1, p2);
+  return sqClosestPointOnSegment(p, p1, p2);
 }
 
 /// Douglas-Peucker simplification, see http://en.wikipedia.org/wiki/Douglas-Peucker_algorithm
@@ -47,7 +47,10 @@ List<Point2D> _simplifyDP(List<Point2D> points, num sqTolerance) {
       //ArrayConstructor = typeof Uint8Array !== undefined + '' ? Uint8Array : Array,
       markers = new List<bool>(len);
 
-  markers[0] = markers[len - 1] = true;
+  if (len > 0) {
+    markers[0] = true;
+    markers[len - 1] = true;
+  }
 
   _simplifyDPStep(points, markers, sqTolerance, 0, len - 1);
 
@@ -67,7 +70,7 @@ void _simplifyDPStep(List<Point2D> points, List<bool >markers, num sqTolerance, 
   int index;
 
   for (int i = first + 1; i <= last - 1; i++) {
-    final sqDist = _sqClosestPointOnSegment(points[i], points[first], points[last], true);
+    final sqDist = sqClosestPointOnSegment(points[i], points[first], points[last], true);
 
     if (sqDist > maxSqDist) {
       index = i;
@@ -85,7 +88,10 @@ void _simplifyDPStep(List<Point2D> points, List<bool >markers, num sqTolerance, 
 
 /// Reduce points that are too close to each other to a single point.
 List<Point2D> _reducePoints(points, sqTolerance) {
-  var reducedPoints = [points[0]];
+  var reducedPoints = [];
+  if (points.isNotEmpty) {
+    reducedPoints.add(points[0]);
+  }
 
   int prev = 0;
   final len = points.length;
@@ -184,7 +190,9 @@ num _sqDist(Point2D p1, Point2D p2) {
 }
 
 /// Return closest point on segment or distance to that point.
-_sqClosestPointOnSegment(Point2D p, Point2D p1, Point2D p2, [bool sqDist=false]) {
+///
+/// For internal use.
+sqClosestPointOnSegment(Point2D p, Point2D p1, Point2D p2, [bool sqDist=false]) {
   var x = p1.x,
       y = p1.y,
       dx = p2.x - x,

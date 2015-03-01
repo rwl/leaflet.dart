@@ -9,11 +9,12 @@ polygonTest() {
     var map = new LeafletMap(c);
     map.setView(new LatLng(55.8, 37.6), 6);
 
-    group('#initialize', () {
+    group('initialize', () {
       test('doesn\'t overwrite the given latlng array', () {
         final originalLatLngs = [
           new LatLng(1, 2),
-          new LatLng(3, 4)
+          new LatLng(3, 4),
+          new LatLng(1, 2)
         ];
         final sourceLatLngs = new List.from(originalLatLngs);
 
@@ -29,15 +30,23 @@ polygonTest() {
       });
 
       test('can be initialized with holes', () {
-        final originalLatLngs = [
-          [ //external rink
+//        final originalLatLngs = [
+//          [ //external rink
+//            new LatLng(0, 10), new LatLng(10, 10), new LatLng(10, 0)
+//          ], [ //hole
+//            new LatLng(2, 3), new LatLng(2, 4), new LatLng(3, 4)
+//          ]
+//        ];
+        final originalLatLngs = [ //external rink
             new LatLng(0, 10), new LatLng(10, 10), new LatLng(10, 0)
-          ], [ //hole
+          ];
+        final holes = [
+          [ //hole
             new LatLng(2, 3), new LatLng(2, 4), new LatLng(3, 4)
           ]
         ];
 
-        final polygon = new Polygon(originalLatLngs);
+        final polygon = new Polygon(originalLatLngs, null, holes);
 
         //getLatLngs() returns only external ring
         expect(polygon.getLatLngs(), equals([
@@ -46,7 +55,7 @@ polygonTest() {
       });
     });
 
-    group('#setLatLngs', () {
+    group('setLatLngs', () {
       test('doesn\'t overwrite the given latlng array', () {
         final originalLatLngs = [
           new LatLng(1, 2),
@@ -62,16 +71,18 @@ polygonTest() {
       });
 
       test('can be set external ring and holes', () {
-        final latLngs = [
-          [ //external rink
+        final latLngs = [ //external rink
             new LatLng(0, 10), new LatLng(10, 10), new LatLng(10, 0)
-          ], [ //hole
+          ];
+        final holes = [
+          [ //hole
             new LatLng(2, 3), new LatLng(2, 4), new LatLng(3, 4)
           ]
         ];
 
         final polygon = new Polygon([]);
         polygon.setLatLngs(latLngs);
+        polygon.setHoles(holes);
 
         //getLatLngs() returns only external ring
         expect(polygon.getLatLngs(), equals([
@@ -80,7 +91,7 @@ polygonTest() {
       });
     });
 
-    group('#spliceLatLngs', () {
+    group('spliceLatLngs', () {
       test('splices the internal latLngs', () {
         final latLngs = [
           new LatLng(1, 2),
@@ -90,11 +101,11 @@ polygonTest() {
 
         final polygon = new Polygon(latLngs);
 
-        polygon.spliceLatLngs(1, 1);//, new LatLng(7, 8));
+        polygon.spliceLatLngs(1, 1, [new LatLng(7, 8)]);
 
-        expect(polygon.latlngs, equals([
-          new LatLng(1, 2), new LatLng(7, 8), new LatLng(5, 6)
-        ]));
+        final ll = polygon.latlngs;
+        final expected = [new LatLng(1, 2), new LatLng(7, 8), new LatLng(5, 6)];
+        expect(ll, equals(expected));
       });
     });
   });
