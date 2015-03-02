@@ -413,7 +413,9 @@ class LeafletMap extends Object {
       fire(EventType.MOVE);
 
       if (debounceMoveend) {
-        _sizeTimer.cancel();
+        if (_sizeTimer != null) {
+          _sizeTimer.cancel();
+        }
         _sizeTimer = new Timer(const Duration(milliseconds: 200), () {
           fire(EventType.MOVEEND);
         });

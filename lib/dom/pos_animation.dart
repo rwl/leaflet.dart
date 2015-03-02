@@ -36,7 +36,9 @@ class PosAnimation {
   }
 
   stop() {
-    if (this._inProgress != true) { return; }
+    if (this._inProgress != true) {
+      return;
+    }
 
     // if we just removed the transition property, the element would jump to its final position,
     // so we need to make it stay at the current position
@@ -62,19 +64,33 @@ class PosAnimation {
   // you can't easily get intermediate values of properties animated with CSS3 Transitions,
   // we need to parse computed style (in case of transform it returns matrix string)
 
-  var _transformRe = r'([-+]?(?:\d*\.)?\d+)\D*, ([-+]?(?:\d*\.)?\d+)\D*\)';
+  final _transformRe = new RegExp(r'([-+]?(?:\d*\.)?\d+)\D*, ([-+]?(?:\d*\.)?\d+)\D*\)');
 
   _getPos() {
     var style = _el.getComputedStyle();
-    List<Match> matches = style.transform.allMatches(_transformRe).toList();
-    print("getPos: \n"
-        "  ${style.transform}\n"
-        "  ${_transformRe}\n"
-        "  $matches");
+    var transform = style.transform;
+    List<Match> matches = _transformRe.allMatches(transform).toList();
+//    print("getPos: \n"
+//        "  ${style.transform}\n"
+//        "  ${_transformRe}\n"
+//        "  $matches");
 
-    if (matches.isEmpty) { return null; }
-    var left = double.parse(matches[1].toString());
-    var top  = double.parse(matches[2].toString());
+//    for (Match m in matches) {
+//      print(m.group(0));
+//      print(m.group(1));
+//      print(m.group(2));
+//    }
+
+    if (matches.isEmpty) {
+      return null;
+    }
+//    else {
+//      print(matches[0].toString());
+//      print(matches[1].toString());
+//      print(matches[2].toString());
+//    }
+    var left = double.parse(matches[0].group(1));
+    var top  = double.parse(matches[0].group(2));
 
     return new Point2D(left, top, true);
   }

@@ -573,7 +573,7 @@ mapTest() {
         expect(args, hasLength(2));
         expect(args[0], equals(t1));
         expect(args[1], equals(t2));
-      });/*
+      });
 
       /*test('calls the provided function with the provided context', () {
         final t1 = new TileLayer('{z}{x}{y}')..addTo(map);
@@ -644,52 +644,60 @@ mapTest() {
 
       test('emits no move event if the size has not changed', () {
         map.onMove.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
 
         map.invalidateSize();
 
-        expect(called, isFalse);
+//        expect(called, isFalse);
+        expect(comp1.future, completion(isFalse));
+        new Future.delayed(new Duration(milliseconds: 33), c1);
       });
 
       test('emits a move event if the size has changed', () {
         map.onMove.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
 
         container.style.width = '${origWidth + 5}px';
         map.invalidateSize();
 
-        expect(called, isTrue);
+//        expect(called, isTrue);
+        expect(comp1.future, completion(isTrue));
       });
 
       test('emits a moveend event if the size has changed', () {
         map.onMoveEnd.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
 
         container.style.width = '${origWidth + 5}px';
-        map.invalidateSize();
+        map.invalidateSize(animate: false);
 
-        expect(called, isTrue);
+//        expect(called, isTrue);
+        expect(comp1.future, completion(isTrue));
       });
 
       test('debounces the moveend event if the debounceMoveend option is given', () {
         map.onMoveEnd.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
 
         container.style.width = '${origWidth + 5}px';
-        map.invalidateSize(debounceMoveend: true);
+        map.invalidateSize(animate: false, debounceMoveend: true);
 
-        expect(called, isFalse);
+        //expect(called, isFalse);
 
 //        clock.tick(200);
 
         expect(new Future.delayed(new Duration(milliseconds: 200)).then((_) {
-          expect(called, isTrue);
+          expect(comp1.future, completion(isTrue));
         }), completes);
-      });*/
+      });
     });
   });
 }
