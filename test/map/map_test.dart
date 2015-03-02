@@ -1,14 +1,15 @@
 library leaflet.map.test;
 
+import 'dart:async' show Future;
 import 'dart:html' show document;
-import 'dart:html' as html show Event;
+import 'dart:html' as html show Event, MouseEvent, Element;
 
 import 'package:unittest/unittest.dart';
 import 'package:unittest/html_enhanced_config.dart';
 import 'package:leaflet/map/map.dart' show LeafletMap, MapOptions,
     ZoomPanOptions, containerProp;
 import 'package:leaflet/geo/geo.dart' show LatLng, LatLngBounds;
-import 'package:leaflet/core/core.dart' show Event, EventType;
+import 'package:leaflet/core/core.dart' show Event, EventType, MapEvent, LayerEvent;
 import 'package:leaflet/layer/layer.dart' show Layer;
 import 'package:leaflet/layer/tile/tile.dart' show TileLayer, TileLayerOptions;
 
@@ -26,7 +27,7 @@ mapTest() {
       test('fires an unload event if loaded', () {
         final container = document.createElement('div'),
           map = new LeafletMap(container)..setView(new LatLng(0, 0), 0);
-        map.on(EventType.UNLOAD, (Object obj, Event e) {
+        map.onUnload.listen((_) {
           called = true;
         });
         map.remove();
@@ -36,7 +37,7 @@ mapTest() {
       test('fires no unload event if not loaded', () {
         final container = document.createElement('div'),
             map = new LeafletMap(container);
-        map.on(EventType.UNLOAD, (Object obj, Event e) {
+        map.onUnload.listen((_) {
           called = true;
         });
         map.remove();
@@ -77,21 +78,21 @@ mapTest() {
         final container = document.createElement('div'),
             map = new LeafletMap(container)..setView(new LatLng(0, 0), 1);
 
-        final fn = (Object obj, Event e) {
+        final fn = (_) {
           called = true;
         };
-        map.on(EventType.CLICK, fn);
-        map.on(EventType.DBLCLICK, fn);
-        map.on(EventType.MOUSEDOWN, fn);
-        map.on(EventType.MOUSEUP, fn);
-        map.on(EventType.MOUSEMOVE, fn);
+        map.onClick.listen(fn);
+        map.onDblClick.listen(fn);
+        map.onMouseDown.listen(fn);
+        map.onMouseUp.listen(fn);
+        map.onMouseMove.listen(fn);
         map.remove();
 
-        container.dispatchEvent(new html.Event('click'));
-        container.dispatchEvent(new html.Event('dblclick'));
-        container.dispatchEvent(new html.Event('mousedown'));
-        container.dispatchEvent(new html.Event('mouseup'));
-        container.dispatchEvent(new html.Event('mousemove'));
+        container.dispatchEvent(new html.MouseEvent('click'));
+        container.dispatchEvent(new html.MouseEvent('dblclick'));
+        container.dispatchEvent(new html.MouseEvent('mousedown'));
+        container.dispatchEvent(new html.MouseEvent('mouseup'));
+        container.dispatchEvent(new html.MouseEvent('mousemove'));
 
         expect(called, isFalse);
       });
@@ -121,7 +122,7 @@ mapTest() {
     group('#whenReady', () {
       group('when the map has not yet been loaded', () {
         test('calls the callback when the map is loaded', () {
-          map.whenReady(() {
+          map.whenReady((_) {
             called = true;
           });
           expect(called, isFalse);
@@ -134,7 +135,7 @@ mapTest() {
       group('when the map has already been loaded', () {
         test('calls the callback immediately', () {
           map.setView(new LatLng(0, 0), 1);
-          map.whenReady(() {
+          map.whenReady((_) {
             called = true;
           });
 
@@ -162,7 +163,7 @@ mapTest() {
     group('#getBounds', () {
       test('is safe to call from within a moveend callback during initial '
           'load (#1027)', () {
-        map.on(EventType.MOVEEND, (Object obj, Event e) {
+        map.onMoveEnd.listen((MapEvent e) {
           map.getBounds();
         });
 
@@ -214,7 +215,7 @@ mapTest() {
       });
     });
 
-    group('#getMinZoom and #getMaxZoom', () {
+    group('getMinZoom and getMaxZoom', () {
       group('#getMinZoom', () {
         test('returns 0 if not set by Map options or TileLayer options', () {
           final map = new LeafletMap(document.createElement('div'));
@@ -240,64 +241,67 @@ mapTest() {
       });
     });
 
-    group('#addLayer', () {
+    group('addLayer', () {
       test('calls layer.onAdd immediately if the map is ready', () {
-        var layer = { onAdd: sinon.spy() };
+        var layer = new TestLayer();
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
-        expect(layer.onAdd.called).to.be.ok();
+        expect(layer.addCalled, isTrue);
       });
 
       test('calls layer.onAdd when the map becomes ready', () {
-        var layer = { onAdd: sinon.spy() };
+        var layer = new TestLayer();
         map.addLayer(layer);
-        expect(layer.onAdd.called).not.to.be.ok();
+        expect(layer.addCalled, isFalse);
         map.setView(new LatLng(0, 0), 0);
-        expect(layer.onAdd.called).to.be.ok();
+        expect(layer.addCalled, isTrue);
       });
 
       test('does not call layer.onAdd if the layer is removed before the map becomes ready', () {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() };
+        var layer = new TestLayer();
         map.addLayer(layer);
         map.removeLayer(layer);
         map.setView(new LatLng(0, 0), 0);
-        expect(layer.onAdd.called).not.to.be.ok();
+        expect(layer.addCalled, isFalse);
       });
 
       test('fires a layeradd event immediately if the map is ready', () {
-        var layer = { onAdd: sinon.spy() },
-            spy = sinon.spy();
-        map.on(EventType.LAYERADD, spy);
+        var layer = new TestLayer();
+        map.onLayerAdd.listen((_) {
+          called = true;
+        });
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
-        expect(spy.called).to.be.ok();
+        expect(called, isTrue);
       });
 
       test('fires a layeradd event when the map becomes ready', () {
-        var layer = { onAdd: sinon.spy() },
-            spy = sinon.spy();
-        map.on(EventType.LAYERADD, spy);
+        var layer = new TestLayer();
+        map.onLayerAdd.listen((_) {
+          called = true;
+        });
         map.addLayer(layer);
-        expect(spy.called).not.to.be.ok();
+        expect(called, isFalse);
         map.setView(new LatLng(0, 0), 0);
-        expect(spy.called).to.be.ok();
+        expect(called, isTrue);
       });
 
       test('does not fire a layeradd event if the layer is removed before the map becomes ready', () {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() },
-            spy = sinon.spy();
-        map.on(EventType.LAYERADD, spy);
+        var layer = new TestLayer();
+        map.onLayerAdd.listen((_) {
+          called = true;
+        });
         map.addLayer(layer);
         map.removeLayer(layer);
         map.setView(new LatLng(0, 0), 0);
-        expect(spy.called).not.to.be.ok();
+        expect(called, isFalse);
       });
 
       test('adds the layer before firing layeradd', (/*done*/) {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() };
-        map.on(EventType.LAYERADD, (Object obj, Event e) {
+        var layer = new TestLayer();
+        map.onLayerAdd.listen((LayerEvent e) {
           expect(map.hasLayer(layer), isTrue);
-          done();
+//          done();
         });
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
@@ -305,95 +309,113 @@ mapTest() {
 
       group('When the first layer is added to a map', () {
         test('fires a zoomlevelschange event', () {
-          var spy = sinon.spy();
-          map.on(EventType.ZOOMLEVELSCHANGE, spy);
-          expect(spy.called).not.to.be.ok();
-          new TileLayer('{z}{x}{y}', {'minZoom': 0, 'maxZoom': 10}).addTo(map);
-          expect(spy.called).to.be.ok();
+          map.onZoomLevelsChange.listen((_) {
+            called = true;
+          });
+          expect(called, isFalse);
+          new TileLayer('{z}{x}{y}', new TileLayerOptions()
+            ..minZoom = 0
+            ..maxZoom = 10).addTo(map);
+          expect(called, isTrue);
         });
       });
 
       group('when a new layer with greater zoomlevel coverage than the current layer is added to a map', () {
         test('fires a zoomlevelschange event', () {
-          var spy = sinon.spy();
-          new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 10}).addTo(map);
-          map.on(EventType.ZOOMLEVELSCHANGE, spy);
-          expect(spy.called).not.to.be.ok();
-          new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 15}).addTo(map);
-          expect(spy.called).to.be.ok();
+          new TileLayer('{z}{x}{y}', new TileLayerOptions()
+            ..minZoom = 0
+            ..maxZoom = 10).addTo(map);
+          map.onZoomLevelsChange.listen((_) {
+            called = true;
+          });
+          expect(called, isFalse);
+          new TileLayer('{z}{x}{y}', new TileLayerOptions()
+            ..minZoom = 0
+            ..maxZoom = 15).addTo(map);
+          expect(called, isTrue);
         });
       });
 
       group('when a new layer with the same or lower zoomlevel coverage as the current layer is added to a map', () {
         test('fires no zoomlevelschange event', () {
-          var spy = sinon.spy();
-          new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 10}).addTo(map);
-          map.on(EventType.ZOOMLEVELSCHANGE, spy);
-          expect(spy.called).not.to.be.ok();
-          new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 10}).addTo(map);
-          expect(spy.called).not.to.be.ok();
-          new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 5}).addTo(map);
-          expect(spy.called).not.to.be.ok();
+          new TileLayer('{z}{x}{y}', new TileLayerOptions()
+            ..minZoom = 0
+            ..maxZoom = 10).addTo(map);
+          map.onZoomLevelsChange.listen((_) {
+            called = true;
+          });
+          expect(called, isFalse);
+          new TileLayer('{z}{x}{y}', new TileLayerOptions()
+            ..minZoom = 0
+            ..maxZoom = 10).addTo(map);
+          expect(called, isFalse);
+          new TileLayer('{z}{x}{y}', new TileLayerOptions()
+            ..minZoom = 0
+            ..maxZoom = 5).addTo(map);
+          expect(called, isFalse);
         });
       });
     });
 
-    group('#removeLayer', () {
+    group('removeLayer', () {
       test('calls layer.onRemove if the map is ready', () {
-        final layer = { onAdd: sinon.spy(), onRemove: sinon.spy() };
+        final layer = new TestLayer();
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
         map.removeLayer(layer);
-        expect(layer.onRemove.called).to.be.ok();
+        expect(layer.removeCalled, isTrue);
       });
 
       test('does not call layer.onRemove if the layer was not added', () {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() };
+        var layer = new TestLayer();
         map.setView(new LatLng(0, 0), 0);
         map.removeLayer(layer);
-        expect(layer.onRemove.called).not.to.be.ok();
+        expect(layer.removeCalled, isFalse);
       });
 
       test('does not call layer.onRemove if the map is not ready', () {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() };
+        var layer = new TestLayer();
         map.addLayer(layer);
         map.removeLayer(layer);
-        expect(layer.onRemove.called).not.to.be.ok();
+        expect(layer.removeCalled, isFalse);
       });
 
       test('fires a layerremove event if the map is ready', () {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() },
-            spy = sinon.spy();
-        map.on(EventType.LAYERREMOVE, spy);
+        var layer = new TestLayer();
+        map.onLayerRemove.listen((_) {
+          called = true;
+        });
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
         map.removeLayer(layer);
-        expect(spy.called).to.be.ok();
+        expect(called, isTrue);
       });
 
       test('does not fire a layerremove if the layer was not added', () {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() },
-            spy = sinon.spy();
-        map.on(EventType.LAYERREMOVE, spy);
+        var layer = new TestLayer();
+        map.onLayerRemove.listen((_) {
+          called = true;
+        });
         map.setView(new LatLng(0, 0), 0);
         map.removeLayer(layer);
-        expect(spy.called).not.to.be.ok();
+        expect(called, isFalse);
       });
 
       test('does not fire a layerremove if the map is not ready', () {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() },
-            spy = sinon.spy();
-        map.on(EventType.LAYERREMOVE, spy);
+        var layer = new TestLayer();
+        map.onLayerRemove.listen((_) {
+          called = true;
+        });
         map.addLayer(layer);
         map.removeLayer(layer);
-        expect(spy.called).not.to.be.ok();
+        expect(called, isFalse);
       });
 
       test('removes the layer before firing layerremove', (/*done*/) {
-        var layer = { onAdd: sinon.spy(), onRemove: sinon.spy() };
-        map.on(EventType.LAYERREMOVE, (Object obj, Event e) {
+        var layer = new TestLayer();
+        map.onLayerRemove.listen((_) {
           expect(map.hasLayer(layer), isFalse);
-          done();
+//          done();
         });
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
@@ -402,124 +424,141 @@ mapTest() {
 
       group('when the last tile layer on a map is removed', () {
         test('fires a zoomlevelschange event', () {
-          map.whenReady(() {
-            var spy = sinon.spy();
-            final tl = new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 10}).addTo(map);
+          map.whenReady((_) {
+            final tl = new TileLayer('{z}{x}{y}', new TileLayerOptions()
+              ..minZoom = 0
+              ..maxZoom = 10)..addTo(map);
 
-            map.on(EventType.ZOOMLEVELSCHANGE, spy);
-            expect(spy.called).not.to.be.ok();
+            map.onZoomLevelsChange.listen((_) {
+              called = true;
+            });
+            expect(called, isFalse);
             map.removeLayer(tl);
-            expect(spy.called).to.be.ok();
+            expect(called, isTrue);
           });
         });
       });
 
       group('when a tile layer is removed from a map and it had greater zoom level coverage than the remainding layer', () {
         test('fires a zoomlevelschange event', () {
-          map.whenReady(() {
-            final spy = sinon.spy(),
-              tl = new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 10}).addTo(map),
-                t2 = new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 15}).addTo(map);
+          map.whenReady((_) {
+            final tl = new TileLayer('{z}{x}{y}', new TileLayerOptions()
+              ..minZoom = 0
+              ..maxZoom = 10)..addTo(map);
+            final t2 = new TileLayer('{z}{x}{y}', new TileLayerOptions()
+              ..minZoom = 0
+              ..maxZoom = 15)..addTo(map);
 
-            map.on(EventType.ZOOMLEVELSCHANGE, spy);
-            expect(spy.called).to.not.be.ok();
+            map.onZoomLevelsChange.listen((_) {
+              called = true;
+            });
+            expect(called, isFalse);
             map.removeLayer(t2);
-            expect(spy.called).to.be.ok();
+            expect(called, isTrue);
           });
         });
       });
 
       group('when a tile layer is removed from a map it and it had lesser or the sa,e zoom level coverage as the remainding layer(s)', () {
         test('fires no zoomlevelschange event', () {
-          map.whenReady(() {
-            final tl = new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 10}).addTo(map),
-                t2 = new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 10}).addTo(map),
-                t3 = new TileLayer('{z}{x}{y}', {minZoom: 0, maxZoom: 5}).addTo(map);
+          map.whenReady((_) {
+            final tl = new TileLayer('{z}{x}{y}', new TileLayerOptions()
+              ..minZoom = 0
+              ..maxZoom = 10)..addTo(map);
+            final t2 = new TileLayer('{z}{x}{y}', new TileLayerOptions()
+              ..minZoom = 0
+              ..maxZoom = 10)..addTo(map);
+            final t3 = new TileLayer('{z}{x}{y}', new TileLayerOptions()
+              ..minZoom = 0
+              ..maxZoom = 5)..addTo(map);
 
-            map.on(EventType.ZOOMLEVELSCHANGE, spy);
-            expect(spy).not.toHaveBeenCalled();
+            map.onZoomLevelsChange.listen((_) {
+              called = true;
+            });
+            expect(called, isFalse);
             map.removeLayer(t2);
-            expect(spy).not.toHaveBeenCalled();
+            expect(called, isFalse);
             map.removeLayer(t3);
-            expect(spy).not.toHaveBeenCalled();
+            expect(called, isFalse);
           });
         });
       });
     });
 
-    group('#eachLayer', () {
+    group('eachLayer', () {
       test('returns self', () {
-        expect(map.eachLayer((Layer l) {}), equals(map));
+        expect(map..eachLayer((Layer l) {}), equals(map));
       });
 
       test('calls the provided function for each layer', () {
-        final t1 = new TileLayer('{z}{x}{y}').addTo(map),
-            t2 = new TileLayer('{z}{x}{y}').addTo(map),
-          spy = sinon.spy();
+        final t1 = new TileLayer('{z}{x}{y}')..addTo(map);
+        final t2 = new TileLayer('{z}{x}{y}')..addTo(map);
 
-        map.eachLayer(spy);
+        final args = [];
+        map.eachLayer((Layer l) {
+          args.add(l);
+        });
 
-        expect(spy.callCount, equals(2));
-        expect(spy.firstCall.args, equals([t1]));
-        expect(spy.secondCall.args, equals([t2]));
+        expect(args, hasLength(2));
+        expect(args[0], equals(t1));
+        expect(args[1], equals(t2));
       });
 
-      test('calls the provided function with the provided context', () {
-        final t1 = new TileLayer('{z}{x}{y}').addTo(map),
-          spy = sinon.spy();
+      /*test('calls the provided function with the provided context', () {
+        final t1 = new TileLayer('{z}{x}{y}')..addTo(map);
 
         map.eachLayer(spy, map);
 
         expect(spy.thisValues[0], equals(map));
-      });
+      });*/
     });
 
-    group('#invalidateSize', () {
-      var container,
-          origWidth = 100,
-        clock;
+    group('invalidateSize', () {
+      html.Element container;
+      int origWidth = 100;
+//        clock;
 
       setUp(() {
         container = map.getContainer();
-        container.style.width = '$origWidthpx';
+        container.style.width = '${origWidth}px';
         document.body.append(container);
         map.setView(new LatLng(0, 0), 0);
-        map.invalidateSize({pan: false});
-        clock = sinon.useFakeTimers();
+        map.invalidateSize(pan: false);
+//        clock = sinon.useFakeTimers();
       });
 
       tearDown(() {
         //document.body.removeChild(container);
         container.remove();
-        clock.restore();
+//        clock.restore();
       });
 
       test('pans by the right amount when growing in 1px increments', () {
         container.style.width = '${origWidth + 1}px';
         map.invalidateSize();
-        expect(map._getMapPanePos().x, equals(1));
+        expect(map.getMapPanePos().x, equals(1));
 
         container.style.width = '${origWidth + 2}px';
         map.invalidateSize();
-        expect(map._getMapPanePos().x, equals(1));
+        expect(map.getMapPanePos().x, equals(1));
 
         container.style.width = '${origWidth + 3}px';
         map.invalidateSize();
-        expect(map._getMapPanePos().x, equals(2));
+        expect(map.getMapPanePos().x, equals(2));
       });
 
       test('pans by the right amount when shrinking in 1px increments', () {
         container.style.width = '${origWidth - 1}px';
         map.invalidateSize();
-        expect(map._getMapPanePos().x, equals(0));
+        expect(map.getMapPanePos().x, equals(0));
 
         container.style.width = '${origWidth - 2}px';
         map.invalidateSize();
-        expect(map._getMapPanePos().x, equals(-1));
+        expect(map.getMapPanePos().x, equals(-1));
 
         container.style.width = '${origWidth - 3}px';
         map.invalidateSize();
-        expect(map._getMapPanePos().x, equals(-1));
+        expect(map.getMapPanePos().x, equals(-1));
       });
 
       test('pans back to the original position after growing by an odd size and back', () {
@@ -529,53 +568,72 @@ mapTest() {
         container.style.width = '${origWidth}px';
         map.invalidateSize();
 
-        expect(map._getMapPanePos().x, equals(0));
+        expect(map.getMapPanePos().x, equals(0));
       });
 
       test('emits no move event if the size has not changed', () {
-        var spy = sinon.spy();
-        map.on(EventType.MOVE, spy);
+        map.onMove.listen((_) {
+          called = true;
+        });
 
         map.invalidateSize();
 
-        expect(spy.called).not.to.be.ok();
+        expect(called, isFalse);
       });
 
       test('emits a move event if the size has changed', () {
-        var spy = sinon.spy();
-        map.on(EventType.MOVE, spy);
+        map.onMove.listen((_) {
+          called = true;
+        });
 
         container.style.width = '${origWidth + 5}px';
         map.invalidateSize();
 
-        expect(spy.called).to.be.ok();
+        expect(called, isTrue);
       });
 
       test('emits a moveend event if the size has changed', () {
-        var spy = sinon.spy();
-        map.on(EventType.MOVEEND, spy);
+        map.onMoveEnd.listen((_) {
+          called = true;
+        });
 
         container.style.width = '${origWidth + 5}px';
         map.invalidateSize();
 
-        expect(spy.called).to.be.ok();
+        expect(called, isTrue);
       });
 
       test('debounces the moveend event if the debounceMoveend option is given', () {
-        var spy = sinon.spy();
-        map.on(EventType.MOVEEND, spy);
+        map.onMoveEnd.listen((_) {
+          called = true;
+        });
 
-        container.style.width = (origWidth + 5) + 'px';
+        container.style.width = '${origWidth + 5}px';
         map.invalidateSize(debounceMoveend: true);
 
-        expect(spy.called).not.to.be.ok();
+        expect(called, isFalse);
 
-        clock.tick(200);
+//        clock.tick(200);
 
-        expect(spy.called).to.be.ok();
+        expect(new Future.delayed(new Duration(milliseconds: 200)).then((_) {
+          expect(called, isTrue);
+        }), completes);
       });
     });
   });
+}
+
+class TestLayer extends Layer {
+  bool removeCalled = false;
+  bool addCalled = false;
+
+  onAdd(LeafletMap map) {
+    addCalled = true;
+  }
+
+  onRemove(LeafletMap map) {
+    removeCalled = true;
+  }
 }
 
 main() {

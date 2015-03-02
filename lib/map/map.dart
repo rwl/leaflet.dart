@@ -628,13 +628,13 @@ class LeafletMap extends Object {
   /// Converts the point relative to the map container to a point relative
   /// to the map layer.
   Point2D containerPointToLayerPoint(Point2D point) {
-    return new Point2D.point(point) - _getMapPanePos();
+    return new Point2D.point(point) - getMapPanePos();
   }
 
   /// Converts the point relative to the map layer to a point relative to the
   /// map container.
   Point2D layerPointToContainerPoint(Point2D point) {
-    return new Point2D.point(point) + _getMapPanePos();
+    return new Point2D.point(point) + getMapPanePos();
   }
 
   /// Returns the geographical coordinates of a given map container point.
@@ -774,7 +774,7 @@ class LeafletMap extends Object {
     if (!preserveMapOffset) {
       dom.setPosition(_mapPane, new Point2D(0, 0));
     } else {
-      _initialTopLeftPoint.add(_getMapPanePos());
+      _initialTopLeftPoint.add(getMapPanePos());
     }
 
     _tileLayersToLoad = _tileLayersNum;
@@ -799,7 +799,7 @@ class LeafletMap extends Object {
   }
 
   void _rawPanBy(Point2D offset) {
-    dom.setPosition(_mapPane, _getMapPanePos() - offset);
+    dom.setPosition(_mapPane, getMapPanePos() - offset);
   }
 
   _getZoomSpan() {
@@ -1021,17 +1021,18 @@ class LeafletMap extends Object {
 
   /* Private methods for getting map state */
 
-  Point2D _getMapPanePos() {
+  /// For internal use.
+  Point2D getMapPanePos() {
     return dom.getPosition(_mapPane);
   }
 
   bool _moved() {
-    final pos = _getMapPanePos();
+    final pos = getMapPanePos();
     return pos != null && pos != new Point2D(0, 0);
   }
 
   Point2D _getTopLeftPoint() {
-    return getPixelOrigin() - _getMapPanePos();
+    return getPixelOrigin() - getMapPanePos();
   }
 
   Point2D _getNewTopLeftPoint(LatLng center, [num zoom = null]) {
@@ -1042,7 +1043,7 @@ class LeafletMap extends Object {
 
   //internal use only
   Point2D latLngToNewLayerPoint(LatLng latlng, num newZoom, LatLng newCenter) {
-    final topLeft = _getNewTopLeftPoint(newCenter, newZoom) + _getMapPanePos();
+    final topLeft = _getNewTopLeftPoint(newCenter, newZoom) + getMapPanePos();
     return project(latlng, newZoom) - topLeft;
   }
 
@@ -1350,7 +1351,7 @@ class LeafletMap extends Object {
     if (options.animate != false) {
       _mapPane.classes.add('leaflet-pan-anim');
 
-      final newPos = _getMapPanePos() - offset;
+      final newPos = getMapPanePos() - offset;
       _panAnim.run(_mapPane, newPos, firstNonNull(options.duration, 0.25), options.easeLinearity);
     } else {
       _rawPanBy(offset);
