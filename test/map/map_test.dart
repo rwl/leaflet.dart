@@ -166,7 +166,7 @@ mapTest() {
 
           expect(comp1.future, completion(isTrue));
         });
-      });/*
+      });
     });
 
     group('setView', () {
@@ -195,7 +195,7 @@ mapTest() {
         map.setView(new LatLng(51.505, -0.09), 13);
       });
     });
-
+/*
     group('setMaxBounds', () {
       test('aligns pixel-wise map view center with maxBounds center if it '
           'cannot move view bounds inside maxBounds (#1908)', () {
@@ -211,9 +211,11 @@ mapTest() {
         map.setView(new LatLng(53.0, 0.15), 12/*, {'animate': false}*/);
         // Get center of bounds in pixels.
         var boundsCenter = map.project(bounds.getCenter()).rounded();
-        expect(map.project(map.getCenter()).rounded(), equals(boundsCenter));
-        //document.body.removeChild(container);
-        container.remove();
+        new Future.delayed(new Duration(milliseconds: 33)).then((_) {
+          expect(map.project(map.getCenter()).rounded(), equals(boundsCenter));
+          //document.body.removeChild(container);
+          container.remove();
+        });
       });
       test('moves map view within maxBounds by changing one coordinate', () {
         var container = map.getContainer();
@@ -234,14 +236,16 @@ mapTest() {
         expect(pixelCenter.x, equals(pixelInit.x));
         expect(pixelCenter.y, equals(pixelInit.y));
         // The view is inside the bounds.
-        expect(bounds.containsBounds(map.getBounds()), isTrue);
-        //document.body.removeChild(container);
-        container.remove();
+        new Future.delayed(new Duration(milliseconds: 33)).then((_) {
+          expect(bounds.containsBounds(map.getBounds()), isTrue);
+          //document.body.removeChild(container);
+          container.remove();
+        });
       });
     });
-
+*/
     group('getMinZoom and getMaxZoom', () {
-      group('#getMinZoom', () {
+      group('getMinZoom', () {
         test('returns 0 if not set by Map options or TileLayer options', () {
           final map = new LeafletMap(document.createElement('div'));
           expect(map.getMinZoom(), equals(0));
@@ -293,55 +297,69 @@ mapTest() {
       test('fires a layeradd event immediately if the map is ready', () {
         var layer = new TestLayer();
         map.onLayerAdd.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
-        expect(called, isTrue);
+//        expect(called, isTrue);
+        expect(comp1.future, completion(isTrue));
       });
 
       test('fires a layeradd event when the map becomes ready', () {
         var layer = new TestLayer();
         map.onLayerAdd.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
         map.addLayer(layer);
         expect(called, isFalse);
         map.setView(new LatLng(0, 0), 0);
-        expect(called, isTrue);
+//        expect(called, isTrue);
+        expect(comp1.future, completion(isTrue));
       });
 
       test('does not fire a layeradd event if the layer is removed before the map becomes ready', () {
         var layer = new TestLayer();
+        //final c = new Completer<bool>();
         map.onLayerAdd.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
         map.addLayer(layer);
         map.removeLayer(layer);
         map.setView(new LatLng(0, 0), 0);
-        expect(called, isFalse);
+//        expect(called, isFalse);
+        expect(comp1.future, completion(isFalse));
+        new Future.delayed(new Duration(milliseconds: 33), () {
+          comp1.complete(false);
+        });
       });
 
       test('adds the layer before firing layeradd', (/*done*/) {
         var layer = new TestLayer();
         map.onLayerAdd.listen((LayerEvent e) {
-          expect(map.hasLayer(layer), isTrue);
+          //expect(map.hasLayer(layer), isTrue);
 //          done();
+          comp1.complete(map.hasLayer(layer));
         });
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
+        expect(comp1.future, completion(isTrue));
       });
 
       group('When the first layer is added to a map', () {
         test('fires a zoomlevelschange event', () {
           map.onZoomLevelsChange.listen((_) {
-            called = true;
+//            called = true;
+            comp1.complete(true);
           });
           expect(called, isFalse);
           new TileLayer('{z}{x}{y}', new TileLayerOptions()
             ..minZoom = 0
             ..maxZoom = 10).addTo(map);
-          expect(called, isTrue);
+//          expect(called, isTrue);
+          expect(comp1.future, completion(isTrue));
         });
       });
 
@@ -351,17 +369,25 @@ mapTest() {
             ..minZoom = 0
             ..maxZoom = 10).addTo(map);
           map.onZoomLevelsChange.listen((_) {
-            called = true;
+//            called = true;
+            if (!comp1.isCompleted) {
+              comp1.complete(true);
+            }
+            comp2.complete(true);
           });
-          expect(called, isFalse);
-          new TileLayer('{z}{x}{y}', new TileLayerOptions()
-            ..minZoom = 0
-            ..maxZoom = 15).addTo(map);
-          expect(called, isTrue);
+
+          expect(comp1.future, completion(isFalse));
+          new Future.delayed(new Duration(milliseconds: 33), c1).then((_) {
+            new TileLayer('{z}{x}{y}', new TileLayerOptions()
+              ..minZoom = 0
+              ..maxZoom = 15).addTo(map);
+            expect(comp2.future, completion(isTrue));
+            new Future.delayed(new Duration(milliseconds: 33), c2);
+          });
         });
       });
 
-      group('when a new layer with the same or lower zoomlevel coverage as the current layer is added to a map', () {
+      /*group('when a new layer with the same or lower zoomlevel coverage as the current layer is added to a map', () {
         test('fires no zoomlevelschange event', () {
           new TileLayer('{z}{x}{y}', new TileLayerOptions()
             ..minZoom = 0
@@ -379,7 +405,7 @@ mapTest() {
             ..maxZoom = 5).addTo(map);
           expect(called, isFalse);
         });
-      });
+      });*/
     });
 
     group('removeLayer', () {
@@ -408,43 +434,51 @@ mapTest() {
       test('fires a layerremove event if the map is ready', () {
         var layer = new TestLayer();
         map.onLayerRemove.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
         map.removeLayer(layer);
-        expect(called, isTrue);
+        expect(comp1.future, completion(isTrue));
       });
 
       test('does not fire a layerremove if the layer was not added', () {
         var layer = new TestLayer();
         map.onLayerRemove.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
         map.setView(new LatLng(0, 0), 0);
         map.removeLayer(layer);
-        expect(called, isFalse);
+        expect(comp1.future, completion(isFalse));
+        new Future.delayed(new Duration(milliseconds: 33), c1);
       });
 
       test('does not fire a layerremove if the map is not ready', () {
         var layer = new TestLayer();
         map.onLayerRemove.listen((_) {
-          called = true;
+//          called = true;
+          comp1.complete(true);
         });
         map.addLayer(layer);
         map.removeLayer(layer);
-        expect(called, isFalse);
+//        expect(called, isFalse);
+        expect(comp1.future, completion(isFalse));
+        new Future.delayed(new Duration(milliseconds: 33), c1);
       });
 
       test('removes the layer before firing layerremove', (/*done*/) {
         var layer = new TestLayer();
         map.onLayerRemove.listen((_) {
-          expect(map.hasLayer(layer), isFalse);
+          //expect(map.hasLayer(layer), isFalse);
 //          done();
+          comp1.complete(map.hasLayer(layer));
         });
         map.setView(new LatLng(0, 0), 0);
         map.addLayer(layer);
         map.removeLayer(layer);
+        expect(comp1.future, completion(isFalse));
       });
 
       group('when the last tile layer on a map is removed', () {
@@ -455,11 +489,20 @@ mapTest() {
               ..maxZoom = 10)..addTo(map);
 
             map.onZoomLevelsChange.listen((_) {
-              called = true;
+//              called = true;
+              if (!comp1.isCompleted) {
+                comp1.complete(true);
+              }
+              comp2.complete(true);
             });
-            expect(called, isFalse);
-            map.removeLayer(tl);
-            expect(called, isTrue);
+//            expect(called, isFalse);
+
+            expect(comp1.future, completion(isFalse));
+            new Future.delayed(new Duration(milliseconds: 33), c1).then((_) {
+              map.removeLayer(tl);
+              expect(comp2.future, completion(isTrue));
+              new Future.delayed(new Duration(milliseconds: 33), c2);
+            });
           });
         });
       });
@@ -477,14 +520,17 @@ mapTest() {
             map.onZoomLevelsChange.listen((_) {
               called = true;
             });
-            expect(called, isFalse);
-            map.removeLayer(t2);
-            expect(called, isTrue);
+            expect(comp1.future, completion(isFalse));
+            new Future.delayed(new Duration(milliseconds: 33), c1).then((_) {
+              map.removeLayer(t2);
+              expect(comp2.future, completion(isTrue));
+              new Future.delayed(new Duration(milliseconds: 33), c2);
+            });
           });
         });
       });
 
-      group('when a tile layer is removed from a map it and it had lesser or the sa,e zoom level coverage as the remainding layer(s)', () {
+      /*group('when a tile layer is removed from a map it and it had lesser or the sa,e zoom level coverage as the remainding layer(s)', () {
         test('fires no zoomlevelschange event', () {
           map.whenReady((_) {
             final tl = new TileLayer('{z}{x}{y}', new TileLayerOptions()
@@ -507,7 +553,7 @@ mapTest() {
             expect(called, isFalse);
           });
         });
-      });
+      });*/
     });
 
     group('eachLayer', () {
@@ -527,7 +573,7 @@ mapTest() {
         expect(args, hasLength(2));
         expect(args[0], equals(t1));
         expect(args[1], equals(t2));
-      });
+      });/*
 
       /*test('calls the provided function with the provided context', () {
         final t1 = new TileLayer('{z}{x}{y}')..addTo(map);
