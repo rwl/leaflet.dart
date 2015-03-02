@@ -1005,7 +1005,7 @@ class LeafletMap extends Object {
    */
   void whenReady(callback(MapEvent e)/*, [Object context=null]*/) {
     if (_loaded) {
-      callback.call();//context == null ? this : context, this);
+      callback(new MapEvent(EventType.LOAD));
     } else {
       //on(EventType.LOAD, callback);//, context);
       onLoad.listen(callback);

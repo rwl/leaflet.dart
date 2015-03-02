@@ -1,6 +1,6 @@
 library leaflet.map.test;
 
-import 'dart:async' show Future;
+import 'dart:async' show Future, Completer;
 import 'dart:html' show document;
 import 'dart:html' as html show Event, MouseEvent, Element;
 
@@ -17,59 +17,79 @@ mapTest() {
   group('Map', () {
     LeafletMap map;
     bool called;
+    Completer<bool> comp1, comp2;
+    Function c1, c2;
 
     setUp(() {
       map = new LeafletMap(document.createElement('div'));
       called = false;
+      comp1 = new Completer();
+      comp2 = new Completer();
+      c1 = () {
+        if (!comp1.isCompleted) {
+          comp1.complete(false);
+        }
+      };
+      c2 = () {
+        if (!comp2.isCompleted) {
+          comp2.complete(false);
+        }
+      };
     });
 
-    group('#remove', () {
+//    tearDown(() {
+//      if (!comp1.isCompleted) {
+//        comp1.complete(false);
+//      }
+//      if (!comp2.isCompleted) {
+//        comp2.complete(false);
+//      }
+//    });
+
+    group('remove', () {
       test('fires an unload event if loaded', () {
         final container = document.createElement('div'),
           map = new LeafletMap(container)..setView(new LatLng(0, 0), 0);
         map.onUnload.listen((_) {
-          called = true;
+          comp1.complete(true);
         });
         map.remove();
-        expect(called, isTrue);
+        expect(comp1.future, completion(isTrue));
       });
 
       test('fires no unload event if not loaded', () {
         final container = document.createElement('div'),
             map = new LeafletMap(container);
         map.onUnload.listen((_) {
-          called = true;
+          comp1.complete(true);
         });
         map.remove();
-        expect(called, isFalse);
+        expect(comp1.future, completion(isFalse));
+        new Future.delayed(new Duration(milliseconds: 33), c1);
       });
 
       group('corner case checking', () {
         test('throws an exception upon reinitialization', () {
           final container = document.createElement('div'),
             map = new LeafletMap(container);
-          try {
+          expect(() {
             new LeafletMap(container);
-            fail('Exception expected');
-          } catch (e) {
-            expect(e.message, equals('Map container is already initialized.'));
-          }
+          }, throws);
           map.remove();
         });
 
-        /*test('throws an exception if a container is not found', () {
+        test('throws an exception if a container is not found', () {
           expect(() {
-            L.map('nonexistentdivelement');
-          }).to.throwException((e) {
-            expect(e.message).to.eql('Map container not found.');
-          });
+            new LeafletMap.query('#nonexistentdivelement');
+          }, throws);
           map.remove();
-        });*/
+        });
       });
 
       test('undefines container._leaflet', () {
         final container = document.createElement('div'),
             map = new LeafletMap(container);
+        expect(containerProp[container], isNotNull);
         map.remove();
         expect(containerProp[container], isNull);
       });
@@ -79,7 +99,7 @@ mapTest() {
             map = new LeafletMap(container)..setView(new LatLng(0, 0), 1);
 
         final fn = (_) {
-          called = true;
+          comp1.complete(true);
         };
         map.onClick.listen(fn);
         map.onDblClick.listen(fn);
@@ -94,18 +114,18 @@ mapTest() {
         container.dispatchEvent(new html.MouseEvent('mouseup'));
         container.dispatchEvent(new html.MouseEvent('mousemove'));
 
-        expect(called, isFalse);
+        expect(comp1.future, completion(isFalse));
+        new Future.delayed(new Duration(milliseconds: 33), c1);
       });
     });
 
 
-    group('#getCenter', () {
+    group('getCenter', () {
       test('throws if not set before', () {
         expect(() => map.getCenter(), throwsException);
       });
 
-      test('returns a precise center when zoomed in after being set '
-          '(#426)', () {
+      test('returns a precise center when zoomed in after being set', () {
         final center = new LatLng(10, 10);
         map.setView(center, 1);
         map.setZoom(19);
@@ -119,16 +139,21 @@ mapTest() {
       });
     });
 
-    group('#whenReady', () {
+    group('whenReady', () {
       group('when the map has not yet been loaded', () {
         test('calls the callback when the map is loaded', () {
           map.whenReady((_) {
-            called = true;
+            if (!comp1.isCompleted) {
+              comp1.complete(true);
+            }
+            comp2.complete(true);
           });
-          expect(called, isFalse);
-
-          map.setView(new LatLng(0, 0), 1);
-          expect(called, isTrue);
+          expect(comp1.future, completion(isFalse));
+          new Future.delayed(new Duration(milliseconds: 33), c1).then((_) {
+            map.setView(new LatLng(0, 0), 1);
+            expect(comp2.future, completion(isTrue));
+            new Future.delayed(new Duration(milliseconds: 33), c2);
+          });
         });
       });
 
@@ -136,15 +161,15 @@ mapTest() {
         test('calls the callback immediately', () {
           map.setView(new LatLng(0, 0), 1);
           map.whenReady((_) {
-            called = true;
+            comp1.complete(true);
           });
 
-          expect(called, isTrue);
+          expect(comp1.future, completion(isTrue));
         });
-      });
+      });/*
     });
 
-    group('#setView', () {
+    group('setView', () {
       test('sets the view of the map', () {
         expect(map..setView(new LatLng(51.505, -0.09), 13), equals(map));
         expect(map.getZoom(), equals(13));
@@ -160,7 +185,7 @@ mapTest() {
       });
     });
 
-    group('#getBounds', () {
+    group('getBounds', () {
       test('is safe to call from within a moveend callback during initial '
           'load (#1027)', () {
         map.onMoveEnd.listen((MapEvent e) {
@@ -171,7 +196,7 @@ mapTest() {
       });
     });
 
-    group('#setMaxBounds', () {
+    group('setMaxBounds', () {
       test('aligns pixel-wise map view center with maxBounds center if it '
           'cannot move view bounds inside maxBounds (#1908)', () {
         final container = map.getContainer();
@@ -618,7 +643,7 @@ mapTest() {
         expect(new Future.delayed(new Duration(milliseconds: 200)).then((_) {
           expect(called, isTrue);
         }), completes);
-      });
+      });*/
     });
   });
 }
@@ -637,6 +662,6 @@ class TestLayer extends Layer {
 }
 
 main() {
-  useHtmlEnhancedConfiguration();
+  //useHtmlEnhancedConfiguration();
   mapTest();
 }
