@@ -15,7 +15,7 @@
     import 'package:leaflet/leaflet.dart';
 
     main() {
-      final map = new LeafletMap.query('map', new MapOptions()
+      final map = new LeafletMap.query('#map', new MapOptions()
         ..crs = EPSG4326);
 
       final bluemarble = new WMS("http://maps.opengeo.org/geowebcache/service/wms", new WMSOptions()

@@ -125,7 +125,7 @@ class Popup extends Layer {//with Events {
     if (source is Path) {
       source.fire(new PopupEvent(EventType.POPUPOPEN, this));
     } else if (source is Marker) {
-      source.fire(new PopupEvent(EventType.POPUPOPEN, this));
+      source.fireEvent(new PopupEvent(EventType.POPUPOPEN, this));
     }
   }
 
@@ -171,7 +171,7 @@ class Popup extends Layer {//with Events {
     if (source is Path) {
       source.fire(new PopupEvent(EventType.POPUPCLOSE, this));
     } else if (source is Marker) {
-      source.fire(new PopupEvent(EventType.POPUPCLOSE, this));
+      source.fireEvent(new PopupEvent(EventType.POPUPCLOSE, this));
     }
   }
 

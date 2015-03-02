@@ -178,6 +178,12 @@ abstract class Path extends Layer {
 
   StreamSubscription<MapEvent> _popupClickSubscription, _popupRemoveSubscription;
 
+  void bindPopupContent(String content, [PopupOptions options=null]) {
+    final popup = new Popup(options, this)
+      ..setContent(content);
+    bindPopup(popup, options);
+  }
+
   /// Binds a given popup object to the path.
   void bindPopup(Popup popup, PopupOptions options) {
     _popup = popup;

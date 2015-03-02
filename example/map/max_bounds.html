@@ -24,7 +24,7 @@
          ..attribution = cloudmadeAttribution),
   			bounds = new LatLngBounds.between(new LatLng(49.5, -11.3), new LatLng(61.2, 2.5));
 
-  		final map = new LeafletMap.query('map', new MapOptions()
+  		final map = new LeafletMap.query('#map', new MapOptions()
   			..center = bounds.getCenter()
   			..zoom = 7
   			..layers = [cloudmade]

@@ -163,16 +163,19 @@ class Polyline extends Path {
     int k = 0;
     for (int i = 0; i < len - 1; i++) {
       segment = clipSegment(points[i], points[i + 1], vp, i != 0);
-      if (!segment) {
+      if (segment == null || segment == false) {
         continue;
       }
 
-      parts[k] = parts[k] || [];
-      parts[k].push(segment[0]);
+      if (parts.length - 1 < k) {
+//        parts[k] = parts[k] || [];
+        parts.add([]);
+      }
+      parts[k].add(segment[0]);
 
       // if segment goes out of screen, or it's the last one, it's the end of the line part
       if ((segment[1] != points[i + 1]) || (i == len - 2)) {
-        parts[k].push(segment[1]);
+        parts[k].add(segment[1]);
         k++;
       }
     }

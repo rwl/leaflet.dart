@@ -5,7 +5,7 @@ abstract class Handler {
 
   LeafletMap _map;
 
-  bool _enabled;
+  bool _enabled = false;
 
   Handler(this._map);
 

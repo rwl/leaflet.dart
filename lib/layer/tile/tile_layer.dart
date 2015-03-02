@@ -440,7 +440,7 @@ class TileLayer implements Layer {
 
     // load tiles in order of their distance to center
     queue.sort((Point2D a, Point2D b) {
-      return a.distanceTo(center) - b.distanceTo(center);
+      return (a.distanceTo(center) - b.distanceTo(center)).toInt();
     });
 
     var fragment = document.createDocumentFragment();

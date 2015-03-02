@@ -135,13 +135,14 @@ class LeafletMap extends Object {
       setMaxBounds(options.maxBounds);
     }
 
+    _layers = {};
+
     if (options.center != null && options.zoom != null) {
       setView(new LatLng.latLng(options.center), options.zoom, new ZoomPanOptions()..reset = true);
     }
 
     _handlers = [];
 
-    _layers = {};
     _zoomBoundLayers = {};
     _tileLayersNum = 0;
 
@@ -152,6 +153,9 @@ class LeafletMap extends Object {
 
   factory LeafletMap.query(String selectors, [MapOptions options=null]) {
     final container = document.querySelector(selectors);
+    if (container == null) {
+      throw new ArgumentError.value(selectors, 'selector', 'element not found');
+    }
     return new LeafletMap(container, options);
   }
 

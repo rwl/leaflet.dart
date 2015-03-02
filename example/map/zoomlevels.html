@@ -23,7 +23,7 @@
   			return 'http://{s}.tile.cloudmade.com/d4fc77ea4a63471cab2423e66626cbb6/$styleId/256/{z}/{x}/{y}.png';
   		}
 
-  		final map = new LeafletMap.query('map')..setView(new LatLng(50.5, 30.51), 0);
+  		final map = new LeafletMap.query('#map')..setView(new LatLng(50.5, 30.51), 0);
 
   		final cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
   			cloudmade = new TileLayer(getCloudMadeUrl(997), new TileLayerOptions()

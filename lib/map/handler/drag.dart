@@ -40,7 +40,7 @@ class Drag extends Handler {
     _draggable.disable();
   }
 
-  moved() {
+  bool moved() {
     return _draggable != null && _draggable.moved;
   }
 

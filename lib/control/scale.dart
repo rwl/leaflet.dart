@@ -77,18 +77,18 @@ class Scale extends Control {
     int maxMeters = 0;
 
     if (size.x > 0) {
-      maxMeters = (dist * (scaleOptions.maxWidth / size.x)) as int;
+      maxMeters = (dist * (scaleOptions.maxWidth / size.x)).toInt();
     }
 
     _updateScales(options, maxMeters);
   }
 
   _updateScales(options, maxMeters) {
-    if (options.metric && maxMeters) {
+    if (options.metric && maxMeters != 0) {
       _updateMetric(maxMeters);
     }
 
-    if (options.imperial && maxMeters) {
+    if (options.imperial && maxMeters != 0) {
       _updateImperial(maxMeters);
     }
   }
@@ -96,7 +96,7 @@ class Scale extends Control {
   _updateMetric(maxMeters) {
     final meters = _getRoundNum(maxMeters);
 
-    _mScale.style.width = _getScaleWidth(meters / maxMeters) + 'px';
+    _mScale.style.width = '${_getScaleWidth(meters / maxMeters)}px';
     _mScale.setInnerHtml(meters < 1000 ? '$meters m' : '${meters / 1000} km');
   }
 
@@ -109,13 +109,13 @@ class Scale extends Control {
       maxMiles = maxFeet / 5280;
       miles = _getRoundNum(maxMiles);
 
-      scale.style.width = _getScaleWidth(miles / maxMiles) + 'px';
+      scale.style.width = '${_getScaleWidth(miles / maxMiles)}px';
       scale.setInnerHtml('$miles mi');
 
     } else {
       feet = _getRoundNum(maxFeet);
 
-      scale.style.width = _getScaleWidth(feet / maxFeet) + 'px';
+      scale.style.width = '${_getScaleWidth(feet / maxFeet)}px';
       scale.setInnerHtml('$feet ft');
     }
   }
@@ -125,7 +125,7 @@ class Scale extends Control {
   }
 
   _getRoundNum(n) {
-    final pow10 = math.pow(10, (n.floor() + '').length - 1);
+    final pow10 = math.pow(10, n.floor().toString().length - 1);
     num d = n / pow10;
 
     d = d >= 10 ? 10 : d >= 5 ? 5 : d >= 3 ? 3 : d >= 2 ? 2 : 1;

@@ -10,7 +10,7 @@ import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geometry/geometry.dart' show Point2D;
 import '../../dom/dom.dart' as dom;
-import '../layer.dart' show Layer, GeoJSON, Popup;
+import '../layer.dart' show Layer, GeoJSON, Popup, PopupOptions;
 
 part 'default_icon.dart';
 part 'div_icon.dart';
@@ -441,7 +441,7 @@ class Marker extends Layer {
   /* Popup extensions to Marker */
 
   Popup _popup;
-  bool _popupHandlersAdded;
+  bool _popupHandlersAdded = false;
 
   openPopup() {
     if (_popup != null && _map != null && !_map.hasLayer(_popup)) {
@@ -471,12 +471,13 @@ class Marker extends Layer {
   StreamSubscription<MouseEvent> _popupClickSubscription;
   StreamSubscription<MapEvent> _popupRemoveSubscription, _popupMoveSubscription;
 
-  void bindPopupContent(String content, [MarkerOptions options=null]) {
-    final popup = new Popup(options, this);
-    bindPopup(popup, options);
+  void bindPopupContent(String content, [PopupOptions options=null]) {
+    final popup = new Popup(options, this)
+      ..setContent(content);
+    bindPopup(popup);//, options);
   }
 
-  void bindPopup(Popup popup, [MarkerOptions options=null]) {
+  void bindPopup(Popup popup, [MarkerOptions optionsArg=null]) {
     /*if (options == null) {
       options = new MarkerOptions();
     }*/
@@ -485,14 +486,18 @@ class Marker extends Layer {
       anchor = new Point2D.point(options.icon.options.popupAnchor);
     }
 
-    anchor = anchor + this.options.offset;
-
-    if (options != null && options.offset != null) {
+    if (options.offset != null) {
       anchor = anchor + options.offset;
     }
 
-    options = new MarkerOptions.from(options);
-    options.offset = anchor;
+    if (optionsArg != null && optionsArg.offset != null) {
+      anchor = anchor + optionsArg.offset;
+    }
+
+    if (optionsArg == null) {
+      optionsArg = new MarkerOptions();
+    }
+    optionsArg.offset = anchor;
 
     if (!_popupHandlersAdded) {
       //on(EventType.CLICK, togglePopup);
@@ -505,7 +510,8 @@ class Marker extends Layer {
     }
 
     //if (content is Popup) {
-      popup.options.addAll(options);
+//      popup.options.addAll(options);
+      popup.options.offset = optionsArg.offset;
       _popup = popup;
     //} else {
     //  _popup = new Popup(options, this)

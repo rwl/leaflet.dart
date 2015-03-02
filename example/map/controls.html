@@ -23,7 +23,7 @@
   			cloudmade = new TileLayer(getCloudMadeUrl(997), new TileLayerOptions()..attribution = cloudmadeAttribution),
   			cloudmade2 = new TileLayer(getCloudMadeUrl(998), new TileLayerOptions()..attribution = 'Hello world');
 
-  		final map = new LeafletMap.query('map')
+  		final map = new LeafletMap.query('#map')
   		  ..addLayer(cloudmade)
   		  ..setView(new LatLng(50.5, 30.512), 15);
 

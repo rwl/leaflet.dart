@@ -9,7 +9,8 @@ class FeatureGroup extends LayerGroup {
 //    EventType.MOUSEOVER, EventType.MOUSEOUT, EventType.MOUSEMOVE,
 //    EventType.CONTEXTMENU, EventType.POPUPOPEN, EventType.POPUPCLOSE];
 
-  var _popupContent, _popupOptions;
+  String _popupContent;
+  var _popupOptions;
 
 //  List<StreamSubscription<LayerEvent>> _subscriptions;
   StreamSubscription<MapEvent> _clickSubscription;
@@ -55,9 +56,9 @@ class FeatureGroup extends LayerGroup {
 
     if (_popupContent != null) {// && layer.bindPopup != null) {
       if (layer is Marker) {
-        layer.bindPopup(_popupContent, _popupOptions);
+        layer.bindPopupContent(_popupContent, _popupOptions);
       } else if (layer is Path) {
-        layer.bindPopup(_popupContent, _popupOptions);
+        layer.bindPopupContent(_popupContent, _popupOptions);
       }
     }
 

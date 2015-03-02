@@ -23,16 +23,16 @@
   		final cloudmade = new TileLayer('http://{s}.tile.cloudmade.com/{key}/997/256/{z}/{x}/{y}.png', new TileLayerOptions()
   			..maxZoom = 18
   			..attribution = 'Map data &copy; 2011 <a href="#">OpenStreetMap</a> contributors, Imagery &copy; 2011 <a href="#">CloudMade</a>'
-  			..key = 'd4fc77ea4a63471cab2423e66626cbb6'
+//  			..key = 'd4fc77ea4a63471cab2423e66626cbb6'
   		);
 
-  		final map = new LeafletMap.query('map')
-  				..setView([50.5, 30.51], 15)
+  		final map = new LeafletMap.query('#map')
+  				..setView(new LatLng(50.5, 30.51), 15)
   				..addLayer(cloudmade);
 
   		final markers = new FeatureGroup();
 
-  		populate() {
+  		populate([_]) {
   			for (var i = 0; i < 10; i++) {
   				markers.addLayer(new Marker(getRandomLatLng(map)));
   			}
@@ -44,7 +44,7 @@
   		map.addLayer(markers);
 
   		populate();
-  		document.querySelector('populate').onClick.listen(populate);
+  		document.querySelector('#populate').onClick.listen(populate);
 
   		/*logEvent(Event e) { print(e.type); }
 
