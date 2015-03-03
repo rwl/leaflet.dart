@@ -128,9 +128,10 @@ void disableScrollPropagation(Element el) {
 void disableClickPropagation(Element el) {
   var stop = stopPropagation;
 
-  for (var event in  Draggable.START.reversed) {
-    el.addEventListener(event, stop);
-  }
+//  for (var event in  Draggable.START.reversed) {
+//    el.addEventListener(event, stop);
+//  }
+  el.onMouseDown.listen(stop);
 
   el.onClick.listen(fakeStop);
   el.onDoubleClick.listen(stop);
@@ -170,9 +171,13 @@ num getWheelDelta(html.WheelEvent e) {
 
   num delta = e.deltaY / 120;
 
-  delta = -e.detail / 3;
+  if (e.detail != 0) {
+    delta = -e.detail / 3;
+  }
 
-  return delta;
+  return -delta;
+
+//  return e.deltaY / (e.wheelDeltaY/3).abs();
 }
 
 Map<String, bool> _skipEvents = {};

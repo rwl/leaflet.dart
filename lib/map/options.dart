@@ -45,7 +45,7 @@ class InteractionOptions {
   /// Whether the map can be zoomed by using the mouse wheel. If passed
   /// 'center', it will zoom to the center of the view regardless of where
   /// the mouse was.
-  bool scrollWheelZoom = true;
+  var scrollWheelZoom = true;
 
   /// Whether the map can be zoomed in by double clicking on it and zoomed out
   /// by double clicking while holding shift. If passed 'center', double-click

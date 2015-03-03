@@ -6,19 +6,19 @@ class Draggable {
 
   static bool disabled = false;// TODO implement global drag disable
 
-  static var START = browser.touch ? ['touchstart', 'mousedown'] : ['mousedown'];
-  static var END = {
-      'mousedown': 'mouseup',
-      'touchstart': 'touchend',
-      'pointerdown': 'touchend',
-      'MSPointerDown': 'touchend'
-    };
-  static var MOVE = {
-      'mousedown': 'mousemove',
-      'touchstart': 'touchmove',
-      'pointerdown': 'touchmove',
-      'MSPointerDown': 'touchmove'
-    };
+  //static var START = browser.touch ? ['touchstart', 'mousedown'] : ['mousedown'];
+//  static var END = {
+//      'mousedown': 'mouseup',
+//      'touchstart': 'touchend',
+//      'pointerdown': 'touchend',
+//      'MSPointerDown': 'touchend'
+//    };
+//  static var MOVE = {
+//      'mousedown': 'mousemove',
+//      'touchstart': 'touchmove',
+//      'pointerdown': 'touchmove',
+//      'MSPointerDown': 'touchmove'
+//    };
 
   Element _element, _dragStartTarget;
   bool _enabled = false, _moved, _moving = false;
@@ -35,31 +35,48 @@ class Draggable {
     _dragStartTarget = firstNonNull(dragStartTarget, _element);
   }
 
+  StreamSubscription<html.MouseEvent> _mouseDownSubscription;
+
   /// Enables the dragging ability.
   enable() {
-    if (this._enabled) { return; }
-
-    for (var i = Draggable.START.length - 1; i >= 0; i--) {
-      this._dragStartTarget.addEventListener(Draggable.START[i],_onDown);
+    if (_enabled) {
+      return;
     }
 
-    this._enabled = true;
+//    for (var i = Draggable.START.length - 1; i >= 0; i--) {
+//      _dragStartTarget.addEventListener(Draggable.START[i],_onDown);
+//    }
+    if (_mouseDownSubscription != null) {
+      _mouseDownSubscription.cancel();
+    }
+    _mouseDownSubscription = _dragStartTarget.onMouseDown.listen(_onDown);
+
+    _enabled = true;
   }
 
   /// Disables the dragging ability.
   disable() {
-    if (!this._enabled) { return; }
-
-    for (var i = Draggable.START.length - 1; i >= 0; i--) {
-      this._dragStartTarget.removeEventListener(Draggable.START[i],_onDown);
+    if (!_enabled) {
+      return;
     }
 
-    this._enabled = false;
-    this._moved = false;
+//    for (var i = Draggable.START.length - 1; i >= 0; i--) {
+//      _dragStartTarget.removeEventListener(Draggable.START[i],_onDown);
+//    }
+    if (_mouseDownSubscription != null) {
+      _mouseDownSubscription.cancel();
+      _mouseDownSubscription = null;
+    }
+
+    _enabled = false;
+    _moved = false;
   }
 
+  StreamSubscription<html.MouseEvent> _mouseMoveSubscription;
+  StreamSubscription<html.MouseEvent> _mouseUpSubscription;
+
   _onDown(html.MouseEvent e) {
-    this._moved = false;
+    _moved = false;
 
     if (e.shiftKey || ((e.which != 1) && (e.button != 1) /*&& !e.touches*/)) {
       return;
@@ -67,36 +84,47 @@ class Draggable {
 
     stopPropagation(e);
 
-    if (Draggable.disabled) { return; }
+    if (Draggable.disabled) {
+      return;
+    }
 
     disableImageDrag();
     disableTextSelection();
 
-    if (this._moving) {
+    if (_moving) {
       return;
     }
 
     var first = e;//.touches ? e.touches[0] : e;
 
-    this._startPoint = new Point2D(first.client.x, first.client.y);
-    this._startPos = this._newPos = getPosition(this._element);
+    _startPoint = new Point2D(first.client.x, first.client.y);
+    _startPos = _newPos = getPosition(_element);
 
-    document
-        ..addEventListener(Draggable.MOVE[e.type], _onMove)
-        ..addEventListener(Draggable.END[e.type], _onUp);
+//    document
+//        ..addEventListener(Draggable.MOVE[e.type], _onMove)
+//        ..addEventListener(Draggable.END[e.type], _onUp);
+    if (_mouseMoveSubscription != null) {
+      _mouseMoveSubscription.cancel();
+    }
+    _mouseMoveSubscription = document.onMouseMove.listen(_onMove);
+
+    if (_mouseUpSubscription != null) {
+      _mouseUpSubscription.cancel();
+    }
+    _mouseUpSubscription = document.onMouseUp.listen(_onUp);
   }
 
   _onMove(Event e) {
     Element target = e.target;
 
     if (e is TouchEvent && e.touches.length > 1) {
-      this._moved = true;
+      _moved = true;
       return;
     }
 
-    var first = (e is TouchEvent && e.touches.length == 1 ? e.touches.first : e),
-        newPoint = new Point2D(first.clientX, first.clientY),
-        offset = newPoint..subtract(this._startPoint);
+    var first = (e is TouchEvent && e.touches.length == 1 ? e.touches.first : e);
+    var newPoint = new Point2D(first.clientX, first.clientY);
+    var offset = newPoint - _startPoint;
 
     if (offset.x == 0 && offset.y == 0) {
       return;
@@ -104,53 +132,61 @@ class Draggable {
 
     preventDefault(e);
 
-    if (!this._moved) {
-      this.fire(EventType.DRAGSTART);
+    if (!_moved) {
+      fire(EventType.DRAGSTART);
 
-      this._moved = true;
-      this._startPos = getPosition(this._element)..subtract(offset);
+      _moved = true;
+      _startPos = getPosition(_element) - offset;
 
       document.body.classes.add('leaflet-dragging');
       target.classes.add('leaflet-drag-target');
     }
 
-    this._newPos = this._startPos + offset;
-    this._moving = true;
+    _newPos = _startPos + offset;
+    _moving = true;
 
     if (_animRequest != null) {
-      window.cancelAnimationFrame(this._animRequest);
+      window.cancelAnimationFrame(_animRequest);
     }
-    this._animRequest = window.requestAnimationFrame(_updatePosition);
-//    this._animRequest = Util.requestAnimFrame(this._updatePosition, this, true, this._dragStartTarget);
+    _animRequest = window.requestAnimationFrame(_updatePosition);
+//    _animRequest = Util.requestAnimFrame(_updatePosition, this, true, _dragStartTarget);
   }
 
   _updatePosition(_) {
-    this.fire(EventType.PREDRAG);
-    setPosition(this._element, this._newPos);
-    this.fire(EventType.DRAG);
+    fire(EventType.PREDRAG);
+    setPosition(_element, _newPos);
+    fire(EventType.DRAG);
   }
 
   _onUp(e) {
     document.body.classes.remove('leaflet-dragging');
     e.target.classes.remove('leaflet-drag-target');
 
-    for (var i in Draggable.MOVE.keys) {
-      document
-        ..removeEventListener(Draggable.MOVE[i], _onMove)
-        ..removeEventListener(Draggable.END[i], _onUp);
+//    for (var i in Draggable.MOVE.keys) {
+//      document
+//        ..removeEventListener(Draggable.MOVE[i], _onMove)
+//        ..removeEventListener(Draggable.END[i], _onUp);
+//    }
+    if (_mouseMoveSubscription != null) {
+      _mouseMoveSubscription.cancel();
+    }
+    if (_mouseUpSubscription != null) {
+      _mouseUpSubscription.cancel();
     }
 
     enableImageDrag();
     enableTextSelection();
 
-    if (this._moved && this._moving) {
+    if (_moved && _moving) {
       // ensure drag is not fired after dragend
-      window.cancelAnimationFrame(this._animRequest);
+      if (_animRequest != null) {
+        window.cancelAnimationFrame(_animRequest);
+      }
 
-      this.fireEvent(new DragEndEvent(_newPos.distanceTo(this._startPos)));
+      fireEvent(new DragEndEvent(_newPos.distanceTo(_startPos)));
     }
 
-    this._moving = false;
+    _moving = false;
   }
 
   void fire(EventType eventType) {

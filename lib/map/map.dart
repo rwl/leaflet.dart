@@ -205,21 +205,21 @@ class LeafletMap extends Object {
 
     var scrollWheelZoom = new ScrollWheelZoom(this);
     _handlers.add(scrollWheelZoom);
-    if (options.scrollWheelZoom) {
+    if (options.scrollWheelZoom != false) {
       scrollWheelZoom.enable();
     }
 
-    var tap = new Tap(this);
-    _handlers.add(tap);
-    if (options.tap) {
-      tap.enable();
-    }
-
-    var touchZoom = new TouchZoom(this);
-    _handlers.add(touchZoom);
-    if (options.touchZoom) {
-      touchZoom.enable();
-    }
+//    var tap = new Tap(this);
+//    _handlers.add(tap);
+//    if (options.tap) {
+//      tap.enable();
+//    }
+//
+//    var touchZoom = new TouchZoom(this);
+//    _handlers.add(touchZoom);
+//    if (options.touchZoom) {
+//      touchZoom.enable();
+//    }
   }
 
   /* Public methods that modify map state */
@@ -1004,7 +1004,14 @@ class LeafletMap extends Object {
       return;
     }
 
-    final type = (e.type == 'mouseenter' ? EventType.MOUSEOVER : (e.type == 'mouseleave' ? EventType.MOUSEOUT : new EventType.from(e.type)));
+    EventType type;
+    if (e.type == 'mouseenter') {
+      type = EventType.MOUSEOVER;
+    } else if (e.type == 'mouseleave') {
+      type = EventType.MOUSEOUT;
+    } else {
+      type = new EventType.from(e.type);
+    }
 
     switch (type) {
       case EventType.CLICK:
@@ -1720,6 +1727,8 @@ class LeafletMap extends Object {
   }
 
   void fireEvent(MapEvent event) {
+//    if (event.type != null)
+//      print('EVENT: ${event.type}');
     switch (event.type) {
     case EventType.CLICK:
       _clickController.add(event);

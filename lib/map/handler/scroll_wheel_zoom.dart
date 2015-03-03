@@ -33,7 +33,7 @@ class ScrollWheelZoom extends Handler {
     _delta += delta;
     _lastMousePos = map.mouseEventToContainerPoint(e);
 
-    if (_startTime = null) {
+    if (_startTime == null) {
       _startTime = /*+*/new DateTime.now();
     }
 
@@ -41,7 +41,9 @@ class ScrollWheelZoom extends Handler {
 
     //clearTimeout(_timer);
     //_timer = setTimeout(L.bind(_performZoom, this), left);
-    _timer.cancel();
+    if (_timer != null) {
+      _timer.cancel();
+    }
     _timer = new Timer(new Duration(milliseconds: left), () {
       _performZoom();
     });

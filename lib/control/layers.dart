@@ -277,6 +277,6 @@ class Layers extends Control {
   }
 
   _collapse(_) {
-    _container.className = _container.className.replaceAll(' leaflet-control-layers-expanded', '');
+    _container.classes.remove('leaflet-control-layers-expanded');
   }
 }
