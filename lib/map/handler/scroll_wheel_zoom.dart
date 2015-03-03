@@ -27,7 +27,7 @@ class ScrollWheelZoom extends Handler {
     //dom.off(map.getContainer(), 'MozMousePixelScroll', dom.preventDefault);
   }
 
-  void _onWheelScroll(html.MouseEvent e) {
+  void _onWheelScroll(html.WheelEvent e) {
     final delta = dom.getWheelDelta(e);
 
     _delta += delta;

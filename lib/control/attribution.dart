@@ -17,7 +17,10 @@ class Attribution extends Control {
 
   StreamSubscription<LayerEvent> _layerAddSubscription, _layerRemoveSubscription;
 
-  Attribution(AttributionOptions options) : super(options) {
+  Attribution([AttributionOptions options]) : super(options) {
+    if (options == null) {
+      this.options = new AttributionOptions();
+    }
     _attributions = <String, int>{};
   }
 

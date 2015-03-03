@@ -23,7 +23,11 @@ class Zoom extends Control {
 
   ZoomOptions get zoomOptions => options as ZoomOptions;
 
-  Zoom(ZoomOptions options) : super(options);
+  Zoom([ZoomOptions options]) : super(options) {
+    if (options == null) {
+      this.options = new ZoomOptions();
+    }
+  }
 
   Element _zoomInButton, _zoomOutButton;
 
@@ -66,14 +70,14 @@ class Zoom extends Control {
     _map.zoomOut(e.shiftKey ? 3 : 1);
   }
 
-  _createButton(String html, String title, String className, Element container, Function fn/*, var context*/) {
+  _createButton(String htmlStr, String title, String className, Element container, Function fn/*, var context*/) {
     final link = dom.create('a', className, container);
-    link.innerHtml = html;
+    link.innerHtml = htmlStr;
     link.href = '#';
     link.title = title;
 
     //final stop = dom.stopPropagation;
-    final stop = (html.MouseEvent e) {
+    stop(html.MouseEvent e) {
       e.stopPropagation();
     };
 

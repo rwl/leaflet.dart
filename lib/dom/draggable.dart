@@ -21,7 +21,7 @@ class Draggable {
     };
 
   Element _element, _dragStartTarget;
-  bool _enabled, _moved, _moving;
+  bool _enabled = false, _moved, _moving = false;
   Point2D _startPoint;
   var _startPos, _newPos, _animRequest;
 

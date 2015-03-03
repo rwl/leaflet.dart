@@ -22,7 +22,7 @@ class Keyboard extends Handler {
     _setZoomOffset(map.options.keyboardZoomOffset);
   }
 
-  StreamSubscription<Event> _focusSubscription, _blurSubscription, _mouseDownSubscription;
+  StreamSubscription<html.Event> _focusSubscription, _blurSubscription, _mouseDownSubscription;
   StreamSubscription<MapEvent> _mapFocusSubscription, _mapBlurSubscription;
 
   addHooks() {
@@ -30,7 +30,7 @@ class Keyboard extends Handler {
 
     // make the container focusable by tabbing
     if (container.tabIndex == -1) {
-      container.tabIndex = '0';
+      container.tabIndex = 0;
     }
 
     //dom.on(container, 'focus', _onFocus, this);
@@ -83,12 +83,12 @@ class Keyboard extends Handler {
     window.scrollTo(left, top);
   }
 
-  _onFocus([Event e]) {
+  _onFocus([html.Event e]) {
     _focused = true;
     map.fire(EventType.FOCUS);
   }
 
-  _onBlur([Event e]) {
+  _onBlur([html.Event e]) {
     _focused = false;
     map.fire(EventType.BLUR);
   }

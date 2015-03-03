@@ -734,7 +734,7 @@ class TileLayer implements Layer {
         '$initialTransform $scaleStr';
   }
 
-  void _endZoomAnim(ZoomEvent e) {
+  void _endZoomAnim(MapEvent e) {
     final front = _tileContainer,
         bg = _bgBuffer;
 
@@ -751,7 +751,7 @@ class TileLayer implements Layer {
   void _clearBgBuffer() {
     final map = _map;
 
-    if (map != null && map.animatingZoom == false && map.touchZoom.zooming == false) {
+    if (map != null && map.animatingZoom == false && map.touchZoom != null && map.touchZoom.zooming == false) {
       _bgBuffer.setInnerHtml('');
       _bgBuffer.style.transform/*[dom.TRANSFORM]*/ = '';
     }

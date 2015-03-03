@@ -146,7 +146,7 @@ class LeafletMap extends Object {
     _zoomBoundLayers = {};
     _tileLayersNum = 0;
 
-    //callInitHooks();
+    _callInitHooks();
 
     _addLayers(options.layers);
   }
@@ -157,6 +157,69 @@ class LeafletMap extends Object {
       throw new ArgumentError.value(selectors, 'selector', 'element not found');
     }
     return new LeafletMap(container, options);
+  }
+
+  void _callInitHooks() {
+    if (options.zoomControl) {
+      zoomControl = new Zoom();
+      addControl(zoomControl);
+
+    }
+    if (options.attributionControl) {
+      attributionControl = new Attribution()..addTo(this);
+    }
+
+    _zoomAnimated = options.zoomAnimation;
+    // Zoom transitions run with the same duration for all layers, so if
+    // one of transitionend events happens after starting zoom animation
+    // (propagating to the map pane), we know that it ended globally.
+    if (_zoomAnimated) {
+      _mapPane.onTransitionEnd.listen(_catchTransitionEnd);
+    }
+
+    /* Handlers */
+
+    var boxZoom = new BoxZoom(this);
+    _handlers.add(boxZoom);
+    if (options.boxZoom) {
+      boxZoom.enable();
+    }
+
+    var doubleClickZoom = new DoubleClickZoom(this);
+    _handlers.add(doubleClickZoom);
+    if (options.doubleClickZoom) {
+      doubleClickZoom.enable();
+    }
+
+    var dragging = new Drag(this);
+    _handlers.add(dragging);
+    if (options.dragging) {
+      dragging.enable();
+    }
+
+    var keyboard = new Keyboard(this);
+    _handlers.add(keyboard);
+    if (options.keyboard) {
+      keyboard.enable();
+    }
+
+    var scrollWheelZoom = new ScrollWheelZoom(this);
+    _handlers.add(scrollWheelZoom);
+    if (options.scrollWheelZoom) {
+      scrollWheelZoom.enable();
+    }
+
+    var tap = new Tap(this);
+    _handlers.add(tap);
+    if (options.tap) {
+      tap.enable();
+    }
+
+    var touchZoom = new TouchZoom(this);
+    _handlers.add(touchZoom);
+    if (options.touchZoom) {
+      touchZoom.enable();
+    }
   }
 
   /* Public methods that modify map state */
@@ -432,18 +495,18 @@ class LeafletMap extends Object {
   }
 
   // TODO handler.addTo
-  /*addHandler(name, HandlerClass) {
-    if (!HandlerClass) { return this; }
+  /*void addHandler(String name, HandlerFactory) {
+    if (HandlerFactory == null) {
+      return;
+    }
 
-    var handler = this[name] = new HandlerClass(this);
+    var handler = /*this[name] =*/ HandlerFactory(this);
 
-    _handlers.push(handler);
+    _handlers.add(handler);
 
     if (options[name]) {
       handler.enable();
     }
-
-    return this;
   }*/
 
   /// Destroys the map and clears all related event listeners.
@@ -731,7 +794,7 @@ class LeafletMap extends Object {
     _panes['markerPane'] = _createPane('leaflet-marker-pane');
     _panes['popupPane'] = _createPane('leaflet-popup-pane');
 
-    var zoomHide = ' leaflet-zoom-hide';
+    var zoomHide = 'leaflet-zoom-hide';
 
     if (!options.markerZoomAnimation) {
       _panes['markerPane'].classes.add(zoomHide);
