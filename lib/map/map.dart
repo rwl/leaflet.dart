@@ -318,6 +318,9 @@ class LeafletMap extends Object {
   /// Pans the map to a given center. Makes an animated pan if new center is
   /// not more than one screen away from the current one.
   void panTo(LatLng center, [PanOptions options = null]) { // (LatLng)
+    if (options == null) {
+      options = new PanOptions();
+    }
     setView(center, _zoom, new ZoomPanOptions()..panOptions = options);
   }
 
@@ -1285,15 +1288,17 @@ class LeafletMap extends Object {
     return _container.querySelectorAll('.leaflet-zoom-animated').length == 0;
   }
 
-  bool _tryAnimatedZoom(LatLng center, num zoom, [options=null]) {
+  bool _tryAnimatedZoom(LatLng center, num zoom, [ZoomOptions options=null]) {
 
     if (_animatingZoom) { return true; }
 
-    options = options == null ? {} : options;
+    options = options == null ? new ZoomOptions() : options;
 
     // don't animate if disabled, not supported or zoom difference is too large
     if (!_zoomAnimated || options.animate == false || _nothingToAnimate() ||
-            (zoom - _zoom).abs() > options.zoomAnimationThreshold) { return false; }
+            (zoom - _zoom).abs() > this.options.zoomAnimationThreshold) {
+      return false;
+    }
 
     // offset is the pixel coords of the zoom origin relative to the current center
     final scale = getZoomScale(zoom),
@@ -1328,7 +1333,7 @@ class LeafletMap extends Object {
     dom.Draggable.disabled = true;
     //}
 
-    fireEvent(new ZoomEvent(center, zoom, origin, scale, delta, backwards));
+    fireEvent(new ZoomAnimEvent(center, zoom, origin, scale, delta, backwards));
   }
 
   void _onZoomTransitionEnd() {
@@ -1381,7 +1386,9 @@ class LeafletMap extends Object {
       if (animated) {
         // prevent resize handler call, the view will refresh after animation anyway
         //clearTimeout(_sizeTimer);
-        _sizeTimer.cancel();
+        if (_sizeTimer != null) {
+          _sizeTimer.cancel();
+        }
         return;
       }
     }
@@ -1656,7 +1663,7 @@ class LeafletMap extends Object {
     }
   }
 
-  void _animatePathZoom(ZoomEvent e) {
+  void _animatePathZoom(ZoomAnimEvent e) {
     final scale = getZoomScale(e.zoom),
         offset = _getCenterOffset(e.center) * (-scale) + _pathViewport.min;
 
@@ -1803,6 +1810,9 @@ class LeafletMap extends Object {
       break;
     case EventType.ZOOMSTART:
       _zoomStartController.add(event);
+      break;
+    case EventType.ZOOMANIM:
+      _zoomAnimController.add(event);
       break;
     case EventType.ZOOMEND:
       _zoomEndController.add(event);
@@ -1964,6 +1974,7 @@ class LeafletMap extends Object {
   StreamController<MapEvent> _dragController = new StreamController.broadcast();
   StreamController<DragEndEvent> _dragEndController = new StreamController.broadcast();
   StreamController<MapEvent> _zoomStartController = new StreamController.broadcast();
+  StreamController<ZoomAnimEvent> _zoomAnimController = new StreamController.broadcast();
   StreamController<MapEvent> _zoomEndController = new StreamController.broadcast();
   StreamController<MapEvent> _zoomLevelsChangeController = new StreamController.broadcast();
   StreamController<ResizeEvent> _resizeController = new StreamController.broadcast();
@@ -1999,6 +2010,7 @@ class LeafletMap extends Object {
   Stream<MapEvent> get onDrag => _dragController.stream;
   Stream<DragEndEvent> get onDragEnd => _dragEndController.stream;
   Stream<MapEvent> get onZoomStart => _zoomStartController.stream;
+  Stream<ZoomAnimEvent> get onZoomAnim => _zoomAnimController.stream;
   Stream<MapEvent> get onZoomEnd => _zoomEndController.stream;
   Stream<MapEvent> get onZoomLevelsChange => _zoomLevelsChangeController.stream;
   Stream<ResizeEvent> get onResize => _resizeController.stream;

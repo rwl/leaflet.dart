@@ -6,7 +6,7 @@ class Drag extends Handler {
   dom.Draggable _draggable;
   List<DateTime> _times;
   List<Point2D> _positions;
-  DateTime _lastTime;
+  DateTime _lastTime = new DateTime.now();
   Point2D _lastPos;
   num _initialWorldOffset, _worldWidth;
 
@@ -66,7 +66,7 @@ class Drag extends Handler {
       _positions.add(pos);
       _times.add(time);
 
-      if (time.difference(_times[0]) > 200) {
+      if (time.difference(_times[0]).inMilliseconds > 200) {
         _positions.removeAt(0);
         _times.removeAt(0);
       }
@@ -99,12 +99,13 @@ class Drag extends Handler {
   }
 
   _onDragEnd(MapEvent e) {
-    final options = map.options,
-        delay = /*+*/new DateTime.now().difference(_lastTime),
+    final options = map.options;
+    final delay = /*+*/new DateTime.now().difference(_lastTime);
 
-        noInertia = !options.inertia || delay > options.inertiaThreshold || _positions.length == 0;
+    final noInertia = !options.inertia || (delay.inMilliseconds > options.inertiaThreshold) || (_positions.length == 0);
 
-    map.fireEvent(/*EventType.DRAGEND, */e);
+    map.fireEvent(e);
+//    map.fire(EventType.DRAGEND);
 
     if (noInertia) {
       map.fire(EventType.MOVEEND);
@@ -112,8 +113,8 @@ class Drag extends Handler {
     } else {
 
       final direction = _lastPos - _positions[0],
-          duration = (_lastTime.add(delay).difference(_times[0])),// / 1000,
-          ease = map.options.panOptions.easeLinearity,
+          duration = (_lastTime.add(delay).difference(_times[0]).inMilliseconds),// / 1000,
+          ease = map.options.panOptions != null ? map.options.panOptions.easeLinearity : 0.25,
 
           speedVector = direction * (ease / duration),
           speed = speedVector.distanceTo(new Point2D(0, 0)),

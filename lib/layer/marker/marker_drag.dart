@@ -73,6 +73,6 @@ class MarkerDrag extends Handler {
     //_marker.fire(EventType.MOVEEND);
     //_marker.fire(EventType.DRAGEND, e);
     _marker._moveController.add(new MapEvent(EventType.MOVEEND));
-    _marker._dragEndController.add(new DragEndEvent(EventType.DRAGEND));
+    _marker._dragEndController.add(new DragEndEvent(e.distance));
   }
 }

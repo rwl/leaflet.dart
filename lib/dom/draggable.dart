@@ -23,7 +23,8 @@ class Draggable {
   Element _element, _dragStartTarget;
   bool _enabled = false, _moved, _moving = false;
   Point2D _startPoint;
-  var _startPos, _newPos, _animRequest;
+  Point2D _startPos, _newPos;
+  int _animRequest;
 
   bool get moved =>_moved;
   Point2D get newPos => _newPos;
@@ -57,10 +58,12 @@ class Draggable {
     this._moved = false;
   }
 
-  _onDown(e) {
+  _onDown(html.MouseEvent e) {
     this._moved = false;
 
-    if (e.shiftKey || ((e.which != 1) && (e.button != 1) && !e.touches)) { return; }
+    if (e.shiftKey || ((e.which != 1) && (e.button != 1) /*&& !e.touches*/)) {
+      return;
+    }
 
     stopPropagation(e);
 
@@ -69,11 +72,13 @@ class Draggable {
     disableImageDrag();
     disableTextSelection();
 
-    if (this._moving) { return; }
+    if (this._moving) {
+      return;
+    }
 
-    var first = e.touches ? e.touches[0] : e;
+    var first = e;//.touches ? e.touches[0] : e;
 
-    this._startPoint = new Point2D(first.clientX, first.clientY);
+    this._startPoint = new Point2D(first.client.x, first.client.y);
     this._startPos = this._newPos = getPosition(this._element);
 
     document
@@ -93,7 +98,9 @@ class Draggable {
         newPoint = new Point2D(first.clientX, first.clientY),
         offset = newPoint..subtract(this._startPoint);
 
-    if (!offset.x && !offset.y) { return; }
+    if (offset.x == 0 && offset.y == 0) {
+      return;
+    }
 
     preventDefault(e);
 
@@ -107,10 +114,12 @@ class Draggable {
       target.classes.add('leaflet-drag-target');
     }
 
-    this._newPos = this._startPos.add(offset);
+    this._newPos = this._startPos + offset;
     this._moving = true;
 
-    window.cancelAnimationFrame(this._animRequest);
+    if (_animRequest != null) {
+      window.cancelAnimationFrame(this._animRequest);
+    }
     this._animRequest = window.requestAnimationFrame(_updatePosition);
 //    this._animRequest = Util.requestAnimFrame(this._updatePosition, this, true, this._dragStartTarget);
   }
@@ -125,7 +134,7 @@ class Draggable {
     document.body.classes.remove('leaflet-dragging');
     e.target.classes.remove('leaflet-drag-target');
 
-    for (var i in Draggable.MOVE) {
+    for (var i in Draggable.MOVE.keys) {
       document
         ..removeEventListener(Draggable.MOVE[i], _onMove)
         ..removeEventListener(Draggable.END[i], _onUp);
@@ -142,6 +151,28 @@ class Draggable {
     }
 
     this._moving = false;
+  }
+
+  void fire(EventType eventType) {
+    final event = new MapEvent(eventType);
+    fireEvent(event);
+  }
+
+  void fireEvent(MapEvent event) {
+    switch (event.type) {
+      case EventType.DRAGSTART:
+        _dragStartController.add(event);
+        break;
+      case EventType.PREDRAG:
+        _preDragController.add(event);
+        break;
+      case EventType.DRAG:
+        _dragController.add(event);
+        break;
+      case EventType.DRAGEND:
+        _dragEndController.add(event);
+        break;
+    }
   }
 
   StreamController<MapEvent> _dragStartController = new StreamController.broadcast();

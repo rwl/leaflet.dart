@@ -11,9 +11,9 @@ class Keyboard extends Handler {
     'zoomOut': [189, 109, 173]
   };
 
-  bool _focused;
-  Map _panKeys;
-  Map _zoomKeys;
+  bool _focused = false;
+  Map _panKeys = {};
+  Map _zoomKeys = {};
 
   Keyboard(LeafletMap map) : super(map);
 
@@ -71,9 +71,11 @@ class Keyboard extends Handler {
   }
 
   _onMouseDown([html.MouseEvent e]) {
-    if (_focused) { return; }
+    if (_focused == true) {
+      return;
+    }
 
-    final  body = document.body,
+    final body = document.body,
         docEl = document.documentElement,
         top = body.scrollTop /*|*/| docEl.scrollTop,
         left = body.scrollLeft /*|*/| docEl.scrollLeft;

@@ -110,7 +110,7 @@ class PanningInertiaOptions {
   /// Number of milliseconds that should pass between stopping the movement and
   /// releasing the mouse or touch to prevent inertial movement. 32 for touch
   /// devices and 14 for the rest by default.
-  num inertiaThreshold;
+  num inertiaThreshold = 14;
 }
 
 class ControlOptions {

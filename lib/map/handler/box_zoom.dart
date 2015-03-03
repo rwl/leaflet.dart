@@ -8,7 +8,7 @@ class BoxZoom extends Handler {
   bool _moved;
   Point2D _startLayerPoint;
 
-  StreamSubscription<html.MouseEvent> _mouseDownSubscription, _mouseMoveSubscription,
+  StreamSubscription _mouseDownSubscription, _mouseMoveSubscription,
     _mouseUpSubscription;
   StreamSubscription<html.KeyboardEvent> _keyDownSubscription;
 
@@ -55,7 +55,7 @@ class BoxZoom extends Handler {
     _keyDownSubscription = document.onKeyDown.listen(_onKeyDown);
   }
 
-  void _onMouseMove(html.MouseEvent e) {
+  void _onMouseMove(e) {
     if (!_moved) {
       _box = dom.create('div', 'leaflet-zoom-box', _pane);
       dom.setPosition(_box, _startLayerPoint);
@@ -69,7 +69,7 @@ class BoxZoom extends Handler {
         box = _box,
 
         layerPoint = map.mouseEventToLayerPoint(e),
-        offset = layerPoint.subtract(startPoint),
+        offset = layerPoint - startPoint,
 
         newPos = new Point2D(math.min(layerPoint.x, startPoint.x), math.min(layerPoint.y, startPoint.y));
 
@@ -106,7 +106,7 @@ class BoxZoom extends Handler {
     }
   }
 
-  void _onMouseUp(html.MouseEvent e) {
+  void _onMouseUp(e) {
 
     _finish();
 

@@ -159,7 +159,7 @@ class DragEndEvent extends MapEvent {
   DragEndEvent(this.distance) : super(EventType.DRAGEND);
 }
 
-class ZoomEvent extends MapEvent {
+class ZoomAnimEvent extends MapEvent {
   LatLng center;
   num zoom;
   Point2D origin;
@@ -168,7 +168,7 @@ class ZoomEvent extends MapEvent {
   bool backwards;
 
   //ZoomAnimEvent(EventType eventType, Object target, Action action) : super(eventType, target, action);
-  ZoomEvent(this.center, this.zoom, this.origin, this.scale, this.delta, this.backwards) : super(EventType.ZOOMANIM);
+  ZoomAnimEvent(this.center, this.zoom, this.origin, this.scale, this.delta, this.backwards) : super(EventType.ZOOMANIM);
 }
 
 class ViewEvent extends MapEvent {

@@ -168,7 +168,7 @@ class TileLayer implements Layer {
     if (_animated == true) {
       //map.on(EventType.ZOOMANIM, _animateZoom);
       //map.on(EventType.ZOOMEND, _endZoomAnim);
-      _zoomAnimSubscription = map.onZoomStart.listen(_animateZoom);
+      _zoomAnimSubscription = map.onZoomAnim.listen(_animateZoom);
       _zoomEndSubscription = map.onZoomEnd.listen(_endZoomAnim);
 //      map.on({
 //        'zoomanim': _animateZoom,
@@ -719,15 +719,15 @@ class TileLayer implements Layer {
 
   bool _animating;
 
-  void _animateZoom(ZoomEvent e) {
+  void _animateZoom(ZoomAnimEvent e) {
     if (!_animating) {
       _animating = true;
       _prepareBgBuffer();
     }
 
-    final bg = _bgBuffer,
-        initialTransform = e.delta != null ? dom.getTranslateString(e.delta) : bg.style.transform,
-        scaleStr = dom.getScaleString(e.scale, e.origin);
+    final bg = _bgBuffer;
+    final initialTransform = e.delta != null ? dom.getTranslateString(e.delta) : bg.style.transform;
+    final scaleStr = dom.getScaleString(e.scale, e.origin);
 
     bg.style.transform = e.backwards ?
         '$scaleStr $initialTransform' :

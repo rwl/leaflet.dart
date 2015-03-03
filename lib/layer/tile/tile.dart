@@ -7,7 +7,7 @@ import 'dart:async' show Timer, Future, Stream, StreamController, StreamSubscrip
 import 'package:leaflet/src/core/browser.dart' as browser;
 
 import '../../core/core.dart' as core;
-import '../../core/core.dart' show MapEvent, EventType, Browser, Util, TileEvent, ZoomEvent;
+import '../../core/core.dart' show MapEvent, EventType, Browser, Util, TileEvent, ZoomAnimEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geo/crs/crs.dart' show CRS, EPSG4326;

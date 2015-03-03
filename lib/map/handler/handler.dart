@@ -7,7 +7,7 @@ import 'dart:async' show Timer, StreamSubscription;
 
 import '../map.dart' show LeafletMap, PanOptions;
 
-import '../../core/core.dart' show Handler, EventType, MouseEvent, DateTime, MapEvent, BoxZoomEvent;
+import '../../core/core.dart' show Handler, EventType, MouseEvent, DateTime, MapEvent, BoxZoomEvent, ZoomEvent;
 import '../../dom/dom.dart' as dom;
 import '../../geo/geo.dart' show LatLng, LatLngBounds;
 import '../../geometry/geometry.dart' show Point2D;
