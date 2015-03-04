@@ -1,0 +1,13 @@
+<link rel="import" href="../../../packages/polymer/polymer.html">
+
+<polymer-element name="leaflet-map">
+  <template>
+    <link rel="stylesheet" href="packages/leaflet/leaflet.css">
+    <style>
+    </style>
+    <div id="map"></div>
+    <content id="tile-layers" select="tile-layer"></content>
+    <content id="markers" select="leaflet-marker"></content>
+  </template>
+  <script type="application/dart" src="leaflet_map.dart"></script>
+</polymer-element>
