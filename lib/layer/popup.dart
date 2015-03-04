@@ -223,7 +223,7 @@ class Popup extends Layer {//with Events {
     _viewResetSubscription = _map.onViewReset.listen(_updatePosition);
 
     if (_animated) {
-      _zoomAnimSubscription = _map.onZoomStart.listen((_) => _zoomAnimation());
+      _zoomAnimSubscription = _map.onZoomAnim.listen((ZoomAnimEvent e) => _zoomAnimation(e.zoom, e.center));
     }
     if (options.closeOnClick != null ? options.closeOnClick : _map.options.closePopupOnClick) {
       _preClickSubscription = _map.onPreClick.listen(_close);

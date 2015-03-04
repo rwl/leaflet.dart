@@ -129,6 +129,7 @@ class Layers extends Control {
       else {
         //dom.on(link, 'focus', _expand, this);
         link.onFocus.listen(_expand);
+        link.onMouseOver.listen(_expand);
       }
       //Work around for Firefox android issue https://github.com/Leaflet/Leaflet/issues/2033
       //dom.on(form, 'click', () {
@@ -224,7 +225,7 @@ class Layers extends Control {
     InputElement input;
     final checked = _map.hasLayer(obj.layer);
 
-    if (obj.overlay != null) {
+    if (obj.overlay == true) {
       input = document.createElement('input');
       input.type = 'checkbox';
       input.className = 'leaflet-control-layers-selector';

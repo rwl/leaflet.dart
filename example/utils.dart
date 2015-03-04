@@ -13,3 +13,10 @@ LatLng getRandomLatLng(LeafletMap map) {
       southWest.lat + latSpan * r.nextDouble(),
       southWest.lng + lngSpan * r.nextDouble());
 }
+
+final osmTileLayer = new TileLayer(osmTileUrl, new TileLayerOptions()
+  ..attribution = '© <a href="http://openstreetmap.org">OpenStreetMap</a> contributors');
+
+final osmMapQuestLayer = new TileLayer(mapQuestUrl, new TileLayerOptions()
+  ..subdomains = ['1', '2', '3', '4']
+  ..attribution = '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>. Tiles courtesy of <a href="http://www.mapquest.com/">MapQuest</a>');

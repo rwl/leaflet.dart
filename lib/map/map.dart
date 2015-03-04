@@ -1620,7 +1620,7 @@ class LeafletMap extends Object {
         _pathRoot.className = 'leaflet-zoom-animated';
         //on(EventType.ZOOMANIM, _animatePathZoom);
         //on(EventType.ZOOMEND, _endPathZoom);
-        onZoomStart.listen(_animatePathZoom);
+        onZoomAnim.listen(_animatePathZoom);
         onZoomEnd.listen(_endPathZoom);
       }
       //on(EventType.MOVEEND, _updateCanvasViewport);
@@ -1661,7 +1661,7 @@ class LeafletMap extends Object {
 
       //on(EventType.ZOOMANIM, _animatePathZoom);
       //on(EventType.ZOOMEND, _endPathZoom);
-      onZoomStart.listen(_animatePathZoom);
+      onZoomAnim.listen(_animatePathZoom);
       onZoomEnd.listen(_endPathZoom);
 
       //on(EventType.MOVEEND, _updateSvgViewport);

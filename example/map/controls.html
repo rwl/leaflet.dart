@@ -13,39 +13,32 @@
   <script async type="application/dart">
     import 'dart:html';
     import 'package:leaflet/leaflet.dart';
+    import '../utils.dart';
 
     main() {
-  		getCloudMadeUrl(int styleId) {
-  			return 'http://{s}.tile.cloudmade.com/d4fc77ea4a63471cab2423e66626cbb6/${styleId}/256/{z}/{x}/{y}.png';
-  		}
+      var map = new LeafletMap.query('#map')
+        ..addLayer(osmTileLayer)
+        ..setView(new LatLng(52.520, 13.404), 15);
 
-  		final cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
-  			cloudmade = new TileLayer(getCloudMadeUrl(997), new TileLayerOptions()..attribution = cloudmadeAttribution),
-  			cloudmade2 = new TileLayer(getCloudMadeUrl(998), new TileLayerOptions()..attribution = 'Hello world');
+      var marker = new Marker(new LatLng(52.522, 13.405));
+      map.addLayer(marker);
+      marker
+        ..bindPopupContent("Leaflet is designed with simplicity, performance and usability in mind. It works efficiently across all major desktop and mobile platforms out of the box, taking advantage of HTML5 and CSS3 on modern browsers while still being accessible on older ones.")
+        ..openPopup();
 
-  		final map = new LeafletMap.query('#map')
-  		  ..addLayer(cloudmade)
-  		  ..setView(new LatLng(50.5, 30.512), 15);
+      var marker2 = new Marker(new LatLng(52.525, 13.409));
+      map.addLayer(marker2);
 
-  		final marker = new Marker(new LatLng(50.5, 30.505));
-  		map.addLayer(marker);
-  		marker
-  		  ..bindPopupContent("Leaflet is designed with simplicity, performance and usability in mind. It works efficiently across all major desktop and mobile platforms out of the box, taking advantage of HTML5 and CSS3 on modern browsers while still being accessible on older ones.")
-  		  ..openPopup();
+      var layersControl = new Layers({
+          'OpenStreetMap': osmTileLayer,
+          'OSM MapQuest': osmMapQuestLayer
+        }, {
+          'Marker 1': marker,
+          'Marker 2': marker2
+        }, new LayersOptions()..collapsed = true);
 
-  		final marker2 = new Marker(new LatLng(50.502, 30.515));
-  		map.addLayer(marker2);
-
-  		final layersControl = new Layers({
-  			'CloudMade Fresh': cloudmade,
-  			'CloudMade Pale Dawn': cloudmade2
-  		}, {
-  			'Some marker': marker,
-  			'Another marker': marker2
-  		});
-
-  		map.addControl(layersControl);
-  		map.addControl(new Scale());
+      map.addControl(layersControl);
+      map.addControl(new Scale());
     }
   </script>
 

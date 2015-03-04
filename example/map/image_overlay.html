@@ -3,40 +3,31 @@
 <head>
   <title>Leaflet Image Overlay</title>
 
-  <link rel="stylesheet" href="packages/leaflet/leaflet.css">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <link rel="stylesheet" href="packages/leaflet/leaflet.css">
   <link rel="stylesheet" href="../css/screen.css" />
 </head>
 <body>
-
   <div id="map"></div>
   <button id="populate">Populate with 10 markers</button>
 
   <script async type="application/dart">
     import 'package:leaflet/leaflet.dart';
+    import '../utils.dart';
 
     main() {
-  		final cloudmadeUrl = 'http://{s}.tile.cloudmade.com/d4fc77ea4a63471cab2423e66626cbb6/997/256/{z}/{x}/{y}.png',
-  			cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
-  			cloudmade = new TileLayer(cloudmadeUrl, new TileLayerOptions()
-  			  ..maxZoom = 18
-          ..attribution = cloudmadeAttribution),
-  			latlng = new LatLng(50.5, 30.51);
+      final map = new LeafletMap.query('map')
+        ..addLayer(osmTileLayer);
 
-  		final map = new LeafletMap.query('map');
-  		map.addLayer(cloudmade);
+      final bounds = new LatLngBounds.between(
+            new LatLng(40.71222, -74.22655),
+            new LatLng(40.77394, -74.12544));
 
-  		final	bounds = new LatLngBounds.between(
-        		new LatLng(40.71222,-74.22655),
-        		new LatLng(40.77394,-74.12544));
+      map.fitBounds(bounds);
 
-  		map.fitBounds(bounds);
-
-  		final overlay = new ImageOverlay("https://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg", bounds, new ImageOverlayOptions()
-  			..opacity = 0.5);
-  		map.addLayer(overlay);
+      final overlay = new ImageOverlay("https://www.lib.utexas.edu/maps/historical/newark_nj_1922.jpg",
+          bounds, new ImageOverlayOptions()..opacity = 0.5);
+      map.addLayer(overlay);
     }
   </script>
 </body>

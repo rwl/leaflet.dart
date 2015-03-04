@@ -1,5 +1,8 @@
 part of leaflet.layer.tile;
 
+const osmTileUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const mapQuestUrl = 'http://otile{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png';
+
 class TileLayerOptions {
   /// Minimum zoom number.
   num minZoom = 0;
@@ -15,9 +18,8 @@ class TileLayerOptions {
   /// Tile size (width and height in pixels, assuming tiles are square).
   num tileSize  = 256;
 
-  /// Subdomains of the tile service. Can be passed in the form of one string
-  /// (where each letter is a subdomain name) or an array of strings.
-  List<String> subdomains = ['abc'];
+  /// Subdomains of the tile service.
+  List<String> subdomains = ['a', 'b', 'c'];
 
   /// URL to the tile image to show in place of the tile that failed to load.
   String errorTileUrl  = '';
@@ -56,17 +58,17 @@ class TileLayerOptions {
   /// If true, all the tiles that are not visible after panning are removed
   /// (for better performance). true by default on mobile WebKit, otherwise
   /// false.
-  bool unloadInvisibleTiles;
+  bool unloadInvisibleTiles = false;
 
   /// If false, new tiles are loaded during panning, otherwise only after it
   /// (for better performance). true by default on mobile WebKit, otherwise
   /// false.
-  bool updateWhenIdle;
+  bool updateWhenIdle = false;
 
   /// If true and user is on a retina display, it will request four tiles of
   /// half the specified size and a bigger zoom level in place of one to
   /// utilize the high resolution.
-  bool detectRetina;
+  bool detectRetina = true;
 
   /// If true, all the tiles that are not visible after panning are placed in
   /// a reuse queue from which they will be fetched when new tiles become
@@ -118,7 +120,7 @@ class TileLayer implements Layer {
   Element _container;
   Map _tiles;
 
-  TileLayer([this._url="", this.options=null]) {
+  TileLayer([this._url='', this.options=null]) {
     if (options == null) {
       options = new TileLayerOptions();
     }

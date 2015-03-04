@@ -7,7 +7,7 @@ import 'dart:async' show Stream, StreamController, StreamSubscription;
 
 import 'package:simple_features/simple_features.dart' as sfs;
 
-import '../core/core.dart' show EventType, Browser, Action, stamp, Events, MapEvent, LayerEvent, ZoomEvent, PopupEvent, MouseEvent;
+import '../core/core.dart' show EventType, Browser, Action, stamp, Events, MapEvent, LayerEvent, ZoomAnimEvent, PopupEvent, MouseEvent;
 import '../dom/dom.dart' as dom;
 import '../map/map.dart';
 import '../geo/geo.dart';

@@ -5,7 +5,7 @@ import 'dart:html' as html;
 import 'dart:async' show Stream, StreamController, StreamSubscription;
 
 import '../../core/core.dart' show Browser, EventType, MapEvent, Events,
-  Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent, ZoomEvent;
+  Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent, ZoomAnimEvent;
 import '../../map/map.dart';
 import '../../geo/geo.dart';
 import '../../geometry/geometry.dart' show Point2D;
@@ -106,7 +106,7 @@ class Marker extends Layer {
 
     if (map.options.zoomAnimation && map.options.markerZoomAnimation) {
       //map.on(EventType.ZOOMANIM, _animateZoom);
-      _zoomAnimSubscription = map.onZoomStart.listen(_animateZoom);
+      _zoomAnimSubscription = map.onZoomAnim.listen(_animateZoom);
     }
   }
 
@@ -297,7 +297,7 @@ class Marker extends Layer {
 //    final pos = _map.latLngToNewLayerPoint(_latlng, zoom, center).rounded();
 
   _animateZoom(MapEvent e) {
-    final zoomEvent = e as ZoomEvent;
+    final zoomEvent = e as ZoomAnimEvent;
     final pos = _map.latLngToNewLayerPoint(_latlng, zoomEvent.zoom, zoomEvent.center).rounded();
 
     _setPos(pos);

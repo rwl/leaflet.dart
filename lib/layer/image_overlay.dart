@@ -43,7 +43,7 @@ class ImageOverlay extends Layer {//with Events {
 
     if (map.options.zoomAnimation && Browser.any3d) {
       //map.on(EventType.ZOOMANIM, _animateZoom);
-      _zoomAnimSubscription = map.onZoomStart.listen(_animateZoom);
+      _zoomAnimSubscription = map.onZoomAnim.listen(_animateZoom);
     }
 
     _reset();
@@ -120,7 +120,7 @@ class ImageOverlay extends Layer {//with Events {
 //    });
   }
 
-  void _animateZoom(ZoomEvent e) {
+  void _animateZoom(ZoomAnimEvent e) {
     final map = _map,
         image = _image,
         scale = map.getZoomScale(e.zoom),

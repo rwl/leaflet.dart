@@ -16,7 +16,7 @@
 
     class ExampleCanvas extends Canvas {
       drawTile([CanvasElement canvas, Point2D tile, num zoom]) {
-        final ctx = canvas.context2D;
+        var ctx = canvas.context2D;
 
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, 255, 255);
@@ -38,12 +38,12 @@
     }
 
     main() {
-  		final tiles = new ExampleCanvas();
+      var tiles = new ExampleCanvas();
 
-		  new LeafletMap.query('map', new MapOptions()
-		    ..center = new LatLng(50.5, 30.51)
-		    ..zoom = 15
-		    ..layers = [tiles]);
+      new LeafletMap.query('map', new MapOptions()
+        ..center = new LatLng(52.520, 13.404)
+        ..zoom = 15
+        ..layers = [tiles]);
     }
   </script>
 
