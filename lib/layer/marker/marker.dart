@@ -4,6 +4,8 @@ import 'dart:html' show document, Element, ImageElement, DivElement, Event;
 import 'dart:html' as html;
 import 'dart:async' show Stream, StreamController, StreamSubscription;
 
+import 'package:simple_features/simple_features.dart' as sfs;
+
 import '../../src/core/browser.dart' as browser;
 import '../../core/core.dart' show Browser, EventType, MapEvent, Events,
   Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent, ZoomAnimEvent;
@@ -444,13 +446,14 @@ class Marker extends Layer {
   Popup _popup;
   bool _popupHandlersAdded = false;
 
+  /// For internal use.
+  Popup get markerPopup => _popup;
+
   openPopup() {
     if (_popup != null && _map != null && !_map.hasLayer(_popup)) {
       _popup.setLatLng(_latlng);
       _map.openPopup(_popup);
     }
-
-    return this;
   }
 
   void closePopup([_]) {
@@ -549,10 +552,7 @@ class Marker extends Layer {
 
 
   toGeoJSON() {
-    return GeoJSON.getFeature(this, {
-      'type': 'Point',
-      'coordinates': GeoJSON.latLngToCoords(getLatLng())
-    });
+    return GeoJSON.getFeature(this, GeoJSON.latLngToCoords(getLatLng()));
   }
 
   StreamController<MouseEvent> _clickController = new StreamController.broadcast();

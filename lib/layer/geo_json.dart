@@ -68,13 +68,13 @@ class GeoJSON extends FeatureGroup {
     }
 
     final layer = GeoJSON.geometryToLayer(feature, options.pointToLayer, options.coordsToLatLng, options);
-    layer.feature = GeoJSON.asFeature(feature);
+    layer.feature = feature;//GeoJSON.asFeature(feature);
 
-    layer.defaultOptions = layer.options;
-    resetStyle(layer);
+//    layer.defaultOptions = layer.options;
+//    resetStyle(layer);
 
     if (options.onEachFeature != null) {
-      options.onEachFeature(geojson, layer);
+      options.onEachFeature(feature, layer);
     }
 
     addLayer(layer);
@@ -82,7 +82,7 @@ class GeoJSON extends FeatureGroup {
 
   /// Resets the given vector layer's style to the original GeoJSON style,
   /// useful for resetting style after hover events.
-  void resetStyle(Path layer) {
+  /*void resetStyle(Path layer) {
     final style = options.style;
     if (style != null) {
       // reset any custom styles
@@ -99,14 +99,14 @@ class GeoJSON extends FeatureGroup {
     });
   }
 
-  void _setLayerStyle(layer, style) {
+  void _setLayerStyle(Layer layer, StyleFunc style) {
     if (style is Function) {
       style = style(layer.feature);
     }
     if (layer.setStyle) {
       layer.setStyle(style);
     }
-  }
+  }*/
 
 
   /// Creates a layer from a given GeoJSON feature.
@@ -132,22 +132,23 @@ class GeoJSON extends FeatureGroup {
       return new FeatureGroup(layers);
 
     } else if (geometry is sfs.LineString) {
-      final latlngs = coordsToLatLngs(geometry.toList(), 0, coordsToLatLng);
+      final latlngs = coordsToLatLngs(geometry, 0, coordsToLatLng);
       return new Polyline(latlngs, vectorOptions);
 
     } else if (geometry is sfs.Polygon) {
+      var coords = geometry.exteriorRing;
       if (coords.length == 2 && coords[1].length == 0) {
         throw new Exception('Invalid GeoJSON object.');
       }
-      final latlngs = coordsToLatLngs(coords, 1, coordsToLatLng);
+      final latlngs = coordsToLatLngs(geometry, 1, coordsToLatLng);
       return new Polygon(latlngs, vectorOptions);
 
     } else if (geometry is sfs.MultiLineString) {
-      final latlngs = coordsToLatLngs(coords, 1, coordsToLatLng);
+      var latlngs = coordsToLatLngs(geometry, 1, coordsToLatLng);
       return new MultiPolyline(latlngs, vectorOptions);
 
     } else if (geometry is sfs.MultiPolygon) {
-      final latlngs = coordsToLatLngs(coords, 2, coordsToLatLng);
+      final latlngs = coordsToLatLngs(geometry, 2, coordsToLatLng);
       return new MultiPolygon(latlngs, vectorOptions);
 
     } else if (geometry is sfs.GeometryCollection) {
@@ -164,7 +165,7 @@ class GeoJSON extends FeatureGroup {
   /// Creates a LatLng object from an array of 2 numbers (latitude, longitude)
   /// used in GeoJSON for points. If reverse is set to true, the numbers will
   /// be interpreted as (longitude, latitude).
-  static LatLng coordsToLatLng(List coords) {
+  static LatLng coordsToLatLng(List<num> coords) {
     return new LatLng(coords[1], coords[0], coords[2]);
   }
 
@@ -173,21 +174,21 @@ class GeoJSON extends FeatureGroup {
   /// an array of points, 1 for an array of arrays of points, etc., 0 by
   /// default). If reverse is set to true, the numbers will be interpreted
   /// as (longitude, latitude).
-  static List<LatLng> coordsToLatLngs(List<sfs.Point> coords, [num levelsDeep = null, CoordsToLatLngFunc coordsToLatLng = null]) {
+  static List<LatLng> coordsToLatLngs(var coords, [num levelsDeep = 0, CoordsToLatLngFunc coordsToLatLng = null]) {
     List<LatLng> latlngs = [];
 
     for (int i = 0; i < coords.length; i++) {
-      final latlng = levelsDeep != null ?
-              coordsToLatLngs([coords[i]], levelsDeep - 1, coordsToLatLng) :
-              (coordsToLatLng != null ? coordsToLatLng : GeoJSON.coordsToLatLng)(coords[i]);
-
-      latlngs.add(latlng);
+      if (levelsDeep != 0) {
+        latlngs.addAll(coordsToLatLngs(coords[i], levelsDeep - 1, coordsToLatLng));
+      } else {
+        latlngs.add((coordsToLatLng != null ? coordsToLatLng : GeoJSON.coordsToLatLng)(coords[i]));
+      }
     }
 
     return latlngs;
   }
 
-  static List<sfs.Point> latLngToCoords(LatLng latlng) {
+  static sfs.Point latLngToCoords(LatLng latlng) {
     final coords = [latlng.lng, latlng.lat];
 
     if (latlng.alt != null) {
@@ -196,8 +197,8 @@ class GeoJSON extends FeatureGroup {
     return coords;
   }
 
-  static List latLngsToCoords(List<LatLng> latLngs) {
-    List coords = [];
+  static List<sfs.Point> latLngsToCoords(List<LatLng> latLngs) {
+    List<sfs.Point> coords = [];
 
     for (int i = 0, len = latLngs.length; i < len; i++) {
       coords.add(GeoJSON.latLngToCoords(latLngs[i]));

@@ -53,28 +53,24 @@ popupTest() {
     });
 
     test('toggles its visibility when marker is clicked', () {
-      final marker = new Marker(new LatLng(55.8, 37.6));
+      final marker = new TestMarker(new LatLng(55.8, 37.6));
       map.addLayer(marker);
 
-      marker..bindPopup('Popup1')..openPopup();
+      marker..bindPopupContent('Popup1')..openPopup();
 
       map.options.closePopupOnClick = true;
       //happen.click(c);
       c.dispatchEvent(new html.MouseEvent('click'));
 
       // toggle open popup
-      sinon.spy(marker, 'openPopup');
       marker.fire(EventType.CLICK);
-      expect(marker.openPopup.calledOnce, isTrue);
-      expect(map.hasLayer(marker._popup), isTrue);
-      marker.openPopup.restore();
+      expect(marker.openCallCount, equals(1));
+      expect(map.hasLayer(marker.markerPopup), isTrue);
 
       // toggle close popup
-      sinon.spy(marker, 'closePopup');
       marker.fire(EventType.CLICK);
-      expect(marker.closePopup.calledOnce, isTrue);
-      expect(map.hasLayer(marker._popup), isFalse);
-      marker.closePopup.restore();
+      expect(marker.closeCallCount, equals(1));
+      expect(map.hasLayer(marker.markerPopup), isFalse);
     });
 
     test('should trigger popupopen on marker when popup opens', () {
@@ -84,18 +80,17 @@ popupTest() {
       map.addLayer(marker1);
       map.addLayer(marker2);
 
-      marker1.bindPopup('Popup1');
-      marker2.bindPopup('Popup2');
+      marker1.bindPopupContent('Popup1');
+      marker2.bindPopupContent('Popup2');
 
-      var spy = sinon.spy();
+      var called = false;
+      marker1.onPopupOpen.listen((_) => called = true);
 
-      marker1.onPopupOpen.listen(spy);
-
-      expect(spy.called, isFalse);
+      expect(called, isFalse);
       marker2.openPopup();
-      expect(spy.called, isFalse);
+      expect(called, isFalse);
       marker1.openPopup();
-      expect(spy.called, isTrue);
+      expect(called, isTrue);
     });
 
     test('should trigger popupclose on marker when popup closes', () {
@@ -105,23 +100,43 @@ popupTest() {
       map.addLayer(marker1);
       map.addLayer(marker2);
 
-      marker1.bindPopup('Popup1');
-      marker2.bindPopup('Popup2');
+      marker1.bindPopupContent('Popup1');
+      marker2.bindPopupContent('Popup2');
 
-      var spy = sinon.spy();
+      var called = false;
+      var callCount = 0;
+      marker1.onPopupClose.listen((_) {
+        called = true;
+        callCount++;
+      });
 
-      marker1.onPopupClose.listen(spy);
-
-      expect(spy.called, isFalse);
+      expect(called, isFalse);
       marker2.openPopup();
-      expect(spy.called, isFalse);
+      expect(called, isFalse);
       marker1.openPopup();
-      expect(spy.called, isFalse);
+      expect(called, isFalse);
       marker2.openPopup();
-      expect(spy.called, isTrue);
+      expect(called, isTrue);
       marker1.openPopup();
       marker1.closePopup();
-      expect(spy.callCount, equals(2));
+      expect(callCount, equals(2));
     });
   });
+}
+
+class TestMarker extends Marker {
+  int openCallCount = 0;
+  int closeCallCount = 0;
+
+  TestMarker(LatLng latlng, [options]) : super(latlng, options);
+
+  openPopup() {
+    openCallCount++;
+    super.openPopup();
+  }
+
+  void closePopup([_]) {
+    closeCallCount++;
+    super.closePopup();
+  }
 }

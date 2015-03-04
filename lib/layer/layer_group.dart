@@ -110,37 +110,31 @@ class LayerGroup extends Layer {
     return stamp(layer);
   }
 
-  var feature;
+  sfs.Feature feature;
 
   toGeoJSON() {
 
-    var geometry = feature != null ? feature.geometry : null;
-    List jsons = [];
-    var json;
+    sfs.Geometry geometry = feature != null ? feature.geometry : null;
+    var jsons = [];
 
-    if (geometry != null && geometry.type == 'MultiPoint') {
-      return multiToGeoJSON('MultiPoint').call(this);
+    if (geometry != null && geometry is sfs.MultiPoint) {
+      throw new Exception('TODO: MultiPoint');
+      //return multiToGeoJSON('MultiPoint').call(this);
     }
 
-    var isGeometryCollection = geometry && geometry.type == 'GeometryCollection';
+    var isGeometryCollection = geometry != null && geometry is sfs.GeometryCollection;
 
     eachLayer((layer) {
       if (layer.toGeoJSON) {
-        json = layer.toGeoJSON();
-        jsons.add(isGeometryCollection ? json.geometry : GeoJSON.asFeature(json));
+        var json = layer.toGeoJSON();
+        jsons.add(isGeometryCollection ? json.geometry : new sfs.Feature(json));
       }
     });
 
     if (isGeometryCollection) {
-      return GeoJSON.getFeature(this, {
-        'geometries': jsons,
-        'type': 'GeometryCollection'
-      });
+      return GeoJSON.getFeature(this, new sfs.GeometryCollection(jsons));
     }
 
-    return {
-      'type': 'FeatureCollection',
-      'features': jsons
-    };
+    return new sfs.FeatureCollection(jsons);
   }
 }

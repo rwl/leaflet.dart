@@ -1,5 +1,5 @@
 part of leaflet.map.handler;
-
+/*
 /// Tap is used to enable mobile hacks like quick taps and long hold.
 class Tap extends Handler {
   bool _fireClick;
@@ -118,3 +118,4 @@ class Tap extends Handler {
     e.target.dispatchEvent(simulatedEvent);
   }
 }
+*/

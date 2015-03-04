@@ -22,8 +22,42 @@ class WMSOptions extends TileLayerOptions {
 
   num width, height;
 
-  void merge(WMSOptions other) {
-    // TODO
+//  void merge(WMSOptions other) {
+//  }
+
+  getParamString([String existingUrl=null, bool uppercase=false]) {
+    var params = [];
+
+    encode(String s) => Uri.encodeComponent(uppercase ? s.toUpperCase() : s);
+
+    if (layers != null) {
+      params.add('${encode('layers')}=${Uri.encodeComponent(layers)}');
+    }
+    if (styles != null) {
+      params.add('${encode('styles')}=${Uri.encodeComponent(styles)}');
+    }
+    if (format != null) {
+      params.add('${encode('format')}=${Uri.encodeComponent(format)}');
+    }
+    if (layers != null) {
+      params.add('${encode('transparent')}=${Uri.encodeComponent(transparent.toString())}');
+    }
+    if (version != null) {
+      params.add('${encode('version')}=${Uri.encodeComponent(version)}');
+    }
+    if (crs != null) {
+      params.add('${encode('crs')}=${Uri.encodeComponent(crs.code)}');
+    } else if (srs != null) {
+      params.add('${encode('srs')}=${Uri.encodeComponent(srs.code)}');
+    }
+    if (width != null) {
+      params.add('${encode('width')}=${Uri.encodeComponent(width.toString())}');
+    }
+    if (height != null) {
+      params.add('${encode('height')}=${Uri.encodeComponent(height.toString())}');
+    }
+
+    return ((existingUrl == null || existingUrl.indexOf('?') == -1) ? '?' : '&') + params.join('&');
   }
 }
 
@@ -84,28 +118,26 @@ class WMS extends TileLayer {
     super.onAdd(map);
   }
 
-  getTileUrl(tilePoint) { // (Point, Number) -> String
+  getTileUrl(Point2D tilePoint) { // (Point, Number) -> String
+    var tileSize = options.tileSize;
 
-    final map = _map,
-        tileSize = options.tileSize,
+    var nwPoint = tilePoint * tileSize;
+    var sePoint = nwPoint + new Point2D(tileSize, tileSize);
 
-        nwPoint = tilePoint.multiplyBy(tileSize),
-        sePoint = nwPoint.add([tileSize, tileSize]),
-
-        nw = _crs.project(map.unproject(nwPoint, tilePoint.z)),
-        se = _crs.project(map.unproject(sePoint, tilePoint.z)),
-        bbox = _wmsVersion >= _wms13 && _crs == EPSG4326 ?
+    var nw = _crs.project(_map.unproject(nwPoint, tilePoint.z));
+    var se = _crs.project(_map.unproject(sePoint, tilePoint.z));
+    var bbox = _wmsVersion >= _wms13 && _crs == EPSG4326 ?
             [se.y, nw.x, nw.y, se.x].join(',') :
-            [nw.x, se.y, se.x, nw.y].join(','),
+            [nw.x, se.y, se.x, nw.y].join(',');
 
-        url = core.template(_url, {'s': _getSubdomain(tilePoint)});
+    var url = core.template(_url, {'s': _getSubdomain(tilePoint)});
 
-    return url + core.getParamString(wmsOptions, url, true) + '&BBOX=' + bbox;
+    return url + wmsOptions.getParamString(url, true) + '&BBOX=$bbox';
   }
 
   /// Merges an object with the new parameters and re-requests tiles on the
   /// current screen (unless noRedraw was set to true).
-  setParams(WMSOptions params, bool noRedraw) {
+  /*setParams(WMSOptions params, bool noRedraw) {
 
     //L.extend(wmsParams, params);
     wmsOptions.merge(params);
@@ -113,5 +145,5 @@ class WMS extends TileLayer {
     if (!noRedraw) {
       redraw();
     }
-  }
+  }*/
 }

@@ -200,9 +200,6 @@ class Polyline extends Path {
   }
 
   toGeoJSON() {
-    return GeoJSON.getFeature(this, {
-      'type': 'LineString',
-      'coordinates': GeoJSON.latLngsToCoords(getLatLngs())
-    });
+    return GeoJSON.getFeature(this, new sfs.LineString(GeoJSON.latLngsToCoords(getLatLngs())));
   }
 }

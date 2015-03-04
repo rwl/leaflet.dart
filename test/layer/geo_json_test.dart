@@ -1,5 +1,5 @@
 part of leaflet.layer.test;
-
+/*
 geoJsonTest() {
   group('GeoJSON', () {
     group('addData', () {
@@ -295,4 +295,4 @@ geoJsonTest() {
       }));
     });
   });
-}
+}*/

@@ -41,7 +41,7 @@ class ImageOverlay extends Layer {//with Events {
     //map.on(EventType.VIEWRESET, _reset);
     _viewResetSubscription = map.onViewReset.listen(_reset);
 
-    if (map.options.zoomAnimation && Browser.any3d) {
+    if (map.options.zoomAnimation) {// && Browser.any3d) {
       //map.on(EventType.ZOOMANIM, _animateZoom);
       _zoomAnimSubscription = map.onZoomAnim.listen(_animateZoom);
     }
@@ -76,7 +76,7 @@ class ImageOverlay extends Layer {//with Events {
   ///
   /// TODO remove bringToFront/bringToBack duplication from TileLayer/Path
   void bringToFront() {
-    if (_image) {
+    if (_image != null) {
       _map.panes['overlayPane'].append(_image);
     }
   }
@@ -84,7 +84,7 @@ class ImageOverlay extends Layer {//with Events {
   /// Brings the layer to the bottom of all overlays.
   void bringToBack() {
     final pane = _map.panes['overlayPane'];
-    if (_image) {
+    if (_image != null) {
       pane.insertBefore(_image, pane.firstChild);
     }
   }
@@ -102,7 +102,7 @@ class ImageOverlay extends Layer {//with Events {
   void _initImage() {
     _image = dom.create('img', 'leaflet-image-layer');
 
-    if (_map.options.zoomAnimation && Browser.any3d) {
+    if (_map.options.zoomAnimation) {// && browser.any3d) {
       _image.classes.add('leaflet-zoom-animated');
     } else {
       _image.classes.add('leaflet-zoom-hide');
@@ -131,7 +131,7 @@ class ImageOverlay extends Layer {//with Events {
         size = map.latLngToNewLayerPoint(se, e.zoom, e.center) - topLeft,
         origin = topLeft + (size * ((1 / 2) * (1 - 1 / scale)));
 
-    image.style[dom.TRANSFORM] = dom.getTranslateString(origin) + ' scale($scale) ';
+    image.style.transform/*[dom.TRANSFORM]*/ = dom.getTranslateString(origin) + ' scale($scale) ';
   }
 
   void _reset([_]) {

@@ -99,25 +99,23 @@ class Polygon extends Polyline {
 
   _getPathPartStr(points) {
     var str = super._getPathPartStr(points);
-    return str + (browser.svg ? 'z' : 'x');
+    return str + 'z';//(browser.svg ? 'z' : 'x');
   }
 
   toGeoJSON() {
-    final coords = [GeoJSON.latLngsToCoords(getLatLngs())];
+    final coords = GeoJSON.latLngsToCoords(getLatLngs());
 
-    coords[0].add(coords[0][0]);
+    coords.add(coords[0]);
 
+    List<sfs.LineString> holes = [];
     if (_holes != null) {
       for (int i = 0; i < _holes.length; i++) {
         final hole = GeoJSON.latLngsToCoords(_holes[i]);
         hole.add(hole[0]);
-        coords.add(hole);
+        holes.add(new sfs.LineString(hole));
       }
     }
 
-    return GeoJSON.getFeature(this, {
-      'type': 'Polygon',
-      'coordinates': coords
-    });
+    return GeoJSON.getFeature(this, new sfs.Polygon(new sfs.LineString(coords), holes));
   }
 }

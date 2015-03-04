@@ -58,9 +58,6 @@ class LeafletMap extends Object {
   /// Map dragging handler (by both mouse and touch).
   Drag dragging;
 
-  /// Touch zoom handler.
-  TouchZoom touchZoom;
-
   /// Double click zoom handler.
   DoubleClickZoom doubleClickZoom;
 
@@ -74,7 +71,10 @@ class LeafletMap extends Object {
   Keyboard keyboard;
 
   /// Mobile touch hacks (quick tap and touch hold) handler.
-  Tap tap;
+//  Tap tap;
+
+  /// Touch zoom handler.
+//  TouchZoom touchZoom;
 
   /// Zoom control.
   Zoom zoomControl;
