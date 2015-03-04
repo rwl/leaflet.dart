@@ -123,11 +123,11 @@ abstract class Path extends Layer {
     _removeController.add(new MapEvent(EventType.REMOVE));
     _map = null;
 
-    if (Browser.vml) {
-      _container = null;
-      _stroke = null;
-      _fill = null;
-    }
+//    if (browser.vml) {
+//      _container = null;
+//      _stroke = null;
+//      _fill = null;
+//    }
 
     //map.off(EventType.VIEWRESET, projectLatlngs, this);
     //map.off(EventType.MOVEEND, this._updatePath, this);
@@ -191,7 +191,7 @@ abstract class Path extends Layer {
     if (!_popupHandlersAdded) {
       //on(EventType.CLICK, _openPopup, this);
       //on(EventType.REMOVE, closePopup, this);
-      _popupClickSubscription = onClick.listen(_openPopup);
+      _popupClickSubscription = onClick.listen((_) => openPopup() /*FIXME*/);
       _popupRemoveSubscription = onRemoveMarker.listen(closePopup);
 
       _popupHandlersAdded = true;
@@ -221,7 +221,7 @@ abstract class Path extends Layer {
         latlng = _latlngs[(_latlngs.length / 2).floor()];
       }
 
-      _openPopup(new LocationEvent()..latlng = latlng);
+      _openPopup(latlng);
     }
   }
 
@@ -232,8 +232,8 @@ abstract class Path extends Layer {
     }
   }
 
-  void _openPopup(LocationEvent e) {
-    _popup.setLatLng(e.latlng);
+  void _openPopup(LatLng latlng) {
+    _popup.setLatLng(latlng);
     _map.openPopup(_popup);
   }
 

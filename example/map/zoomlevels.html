@@ -24,14 +24,14 @@
         ..minZoom = 0
         ..maxZoom = 10).addTo(map);
 
-      var osmMapQuestLayer = new TileLayer(mapQuestUrl, new TileLayerOptions()
+      var layer2 = new TileLayer(mapQuestUrl, new TileLayerOptions()
         ..minZoom = 5
         ..maxZoom = 18
         ..subdomains = ['1', '2', '3', '4']).addTo(map);
 
       new Layers({
-        'OSM MapQuest (5-18)': osmMapQuestLayer,
-        'OpenStreetMap (0-10)': osmTileLayer
+        'OSM MapQuest (5-18)': layer2,
+        'OpenStreetMap (0-10)': layer1
       }).addTo(map);
 
       new Scale().addTo(map);

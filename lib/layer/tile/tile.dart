@@ -4,6 +4,8 @@ import 'dart:html' show Element, ImageElement, Node, ParentNode, document, Canva
 import 'dart:math' as math;
 import 'dart:async' show Timer, Future, Stream, StreamController, StreamSubscription;
 
+import 'package:pub_semver/pub_semver.dart' as semver;
+
 import 'package:leaflet/src/core/browser.dart' as browser;
 
 import '../../core/core.dart' as core;

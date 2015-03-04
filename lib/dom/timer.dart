@@ -1,5 +1,5 @@
 part of leaflet.dom;
-
+/*
 // PosAnimation fallback implementation that powers Leaflet pan animations
 // in browsers that don't support CSS3 Transitions.
 class PosAnimationTimer {
@@ -7,21 +7,21 @@ class PosAnimationTimer {
   Element _el;
   bool _inProgress;
   num _duration, _easeOutPower;
-  Point _startPos, _offset;
-  Date _startTime;
+  Point2D _startPos, _offset;
+  DateTime _startTime;
   var _animId;
 
-  run(Element el, Point newPos, [num duration, num easeLinearity]) { // (HTMLElement, Point[, Number, Number])
+  run(Element el, Point2D newPos, [num duration=0.25, num easeLinearity=0.5]) { // (HTMLElement, Point[, Number, Number])
     this.stop();
 
     this._el = el;
     this._inProgress = true;
-    this._duration = duration || 0.25;
-    this._easeOutPower = 1 / math.max(easeLinearity || 0.5, 0.2);
+    this._duration = duration;
+    this._easeOutPower = 1 / math.max(easeLinearity, 0.2);
 
-    this._startPos = L.DomUtil.getPosition(el);
-    this._offset = newPos.subtract(this._startPos);
-    this._startTime = /*+*/new Date();
+    this._startPos = getPosition(el);
+    this._offset = newPos - _startPos;
+    this._startTime = new DateTime.now();
 
     this.fire('start');
 
@@ -70,4 +70,4 @@ class PosAnimationTimer {
   _easeOut(t) {
     return 1 - math.pow(1 - t, this._easeOutPower);
   }
-}
+}*/

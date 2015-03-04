@@ -142,7 +142,7 @@ class Icon {
   /// For internal use.
   String getIconUrl(IconType iconType) {
     String iconUrl = null;
-    if (Browser.retina) {
+    if (browser.retina) {
       switch (iconType) {
         case IconType.ICON:
           iconUrl = options.iconRetinaUrl;

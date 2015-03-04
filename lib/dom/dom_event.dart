@@ -212,8 +212,7 @@ bool _checkMouse(Element el, e) {
   return (related != el);
 }
 
-_getEvent() { // evil magic for IE
-  /*jshint noarg:false */
+/*_getEvent() { // evil magic for IE
   var e = window.event;
   if (!e) {
     var caller = arguments.callee.caller;
@@ -226,12 +225,14 @@ _getEvent() { // evil magic for IE
     }
   }
   return e;
-}
+}*/
+
+var _lastClick;
 
 // this is a horrible workaround for a bug in Android where a single touch triggers two click events
 _filterClick(e, handler) {
   var timeStamp = (e.timeStamp || e.originalEvent.timeStamp),
-    elapsed = _lastClick && (timeStamp - L.DomEvent._lastClick);
+    elapsed = _lastClick != null && (timeStamp - _lastClick);
 
   // are they closer together than 1000ms yet more than 100ms?
   // Android typically triggers them ~300ms apart while multiple listeners

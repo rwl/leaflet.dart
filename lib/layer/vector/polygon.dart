@@ -99,7 +99,7 @@ class Polygon extends Polyline {
 
   _getPathPartStr(points) {
     var str = super._getPathPartStr(points);
-    return str + (Browser.svg ? 'z' : 'x');
+    return str + (browser.svg ? 'z' : 'x');
   }
 
   toGeoJSON() {

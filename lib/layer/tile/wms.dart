@@ -18,9 +18,13 @@ class WMSOptions extends TileLayerOptions {
 
   /// Coordinate Reference System to use for the WMS requests, defaults to
   /// map CRS. Don't change this if you're not sure what it means.
-  CRS crs;
+  CRS crs, srs;
 
   num width, height;
+
+  void merge(WMSOptions other) {
+    // TODO
+  }
 }
 
 /// WMS is used for putting WMS tile layers on the map.
@@ -41,7 +45,7 @@ class WMS extends TileLayer {
 //    var wmsParams = L.extend({}, defaultWmsParams),
     final tileSize = options.tileSize;// || options.tileSize;
 
-    if (options.detectRetina && Browser.retina) {
+    if (options.detectRetina && browser.retina) {
       wmsOptions.width = wmsOptions.height = tileSize * 2;
     } else {
       wmsOptions.width = wmsOptions.height = tileSize;
@@ -60,19 +64,20 @@ class WMS extends TileLayer {
   }
 
   CRS _crs;
-  double _wmsVersion;
+  semver.Version _wmsVersion;
+  static final _wms13 = new semver.Version(1, 3, 0);
 
   onAdd(LeafletMap map) {
 
     _crs = wmsOptions.crs != null ? wmsOptions.crs : map.options.crs;
 
-    _wmsVersion = double.parse(wmsOptions.version);
+    _wmsVersion = new semver.Version.parse(wmsOptions.version);
 
     //var projectionKey = _wmsVersion >= 1.3 ? 'crs' : 'srs';
-    if (_wmsVersion >= 1.3) {
-      wmsOptions.crs = _crs.code;
+    if (_wmsVersion >= _wms13) {
+      wmsOptions.crs = _crs;//.code;
     } else {
-      wmsOptions.srs = _crs.code;
+      wmsOptions.srs = _crs;//.code;
     }
 
     //L.TileLayer.prototype.onAdd.call(this, map);
@@ -89,7 +94,7 @@ class WMS extends TileLayer {
 
         nw = _crs.project(map.unproject(nwPoint, tilePoint.z)),
         se = _crs.project(map.unproject(sePoint, tilePoint.z)),
-        bbox = _wmsVersion >= 1.3 && _crs == EPSG4326 ?
+        bbox = _wmsVersion >= _wms13 && _crs == EPSG4326 ?
             [se.y, nw.x, nw.y, se.x].join(',') :
             [nw.x, se.y, se.x, nw.y].join(','),
 

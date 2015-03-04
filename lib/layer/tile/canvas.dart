@@ -1,5 +1,7 @@
 part of leaflet.layer.tile;
 
+final _tilePointProp = new Expando<Point2D>('tilePoint');
+
 class CanvasOptions extends TileLayerOptions {
   /// Indicates that tiles will be drawn asynchronously. tileDrawn method
   /// should be called for each tile after drawing completion.
@@ -34,19 +36,21 @@ abstract class Canvas extends TileLayer {
   }
 
   _redrawTile(Element tile) {
-    drawTile(tile, tile._tilePoint, _map.getZoom());
+    drawTile(tile, _tilePointProp[tile], _map.getZoom());
   }
 
   _createTile() {
     var tile = dom.create('canvas', 'leaflet-tile');
     tile.width = tile.height = options.tileSize;
-    tile.onselectstart = tile.onmousemove = core.falseFn;
+    //tile.onselectstart = tile.onmousemove = core.falseFn; TODO
+    tile.onSelectStart;
+    tile.onMouseMove;
     return tile;
   }
 
   _loadTile(tile, tilePoint) {
     tile._layer = this;
-    tile._tilePoint = tilePoint;
+    _tilePointProp[tile] = tilePoint;
 
     _redrawTile(tile);
 

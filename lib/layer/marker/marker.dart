@@ -4,6 +4,7 @@ import 'dart:html' show document, Element, ImageElement, DivElement, Event;
 import 'dart:html' as html;
 import 'dart:async' show Stream, StreamController, StreamSubscription;
 
+import '../../src/core/browser.dart' as browser;
 import '../../core/core.dart' show Browser, EventType, MapEvent, Events,
   Handler, LocationEvent, MouseEvent, DragEndEvent, PopupEvent, ZoomAnimEvent;
 import '../../map/map.dart';
