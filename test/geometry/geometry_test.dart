@@ -2,11 +2,8 @@ library leaflet.geometry.test;
 
 import 'dart:math' as Math;
 
-import 'package:unittest/unittest.dart';
-
-import 'package:leaflet/geometry/geometry.dart' show Transformation,
-  Bounds, Point2D, simplify, clipSegment, pointToSegmentDistance,
-  closestPointOnSegment, clipPolygon;
+import 'package:test/test.dart';
+import 'package:leaflet/leaflet.dart';
 
 part 'bounds_test.dart';
 part 'line_util_test.dart';

@@ -9,11 +9,12 @@
   <h1>Leaflet Example</h1>
   <div id="map" style="height: 500px"></div>
 
+  <script src="packages/leaflet/leaflet-src.js"></script>
   <script async type="application/dart">
     import 'package:leaflet/leaflet.dart';
 
     void main() {
-      var map = new LeafletMap.query('#map',
+      var map = new LeafletMap.selector('map',
         new MapOptions()
           ..layers = [new TileLayer(osmTileUrl)]
           ..minZoom = 5

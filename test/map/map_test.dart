@@ -4,14 +4,8 @@ import 'dart:async' show Future, Completer;
 import 'dart:html' show document;
 import 'dart:html' as html show Event, MouseEvent, Element;
 
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
-import 'package:leaflet/map/map.dart' show LeafletMap, MapOptions,
-    ZoomPanOptions, containerProp;
-import 'package:leaflet/geo/geo.dart' show LatLng, LatLngBounds;
-import 'package:leaflet/core/core.dart' show Event, EventType, MapEvent, LayerEvent;
-import 'package:leaflet/layer/layer.dart' show Layer;
-import 'package:leaflet/layer/tile/tile.dart' show TileLayer, TileLayerOptions;
+import 'package:test/test.dart';
+import 'package:leaflet/leaflet.dart';
 
 mapTest() {
   group('Map', () {
@@ -49,7 +43,7 @@ mapTest() {
     group('remove', () {
       test('fires an unload event if loaded', () {
         final container = document.createElement('div'),
-          map = new LeafletMap(container)..setView(new LatLng(0, 0), 0);
+            map = new LeafletMap(container)..setView(new LatLng(0, 0), 0);
         map.onUnload.listen((_) {
           comp1.complete(true);
         });
@@ -71,7 +65,7 @@ mapTest() {
       group('corner case checking', () {
         test('throws an exception upon reinitialization', () {
           final container = document.createElement('div'),
-            map = new LeafletMap(container);
+              map = new LeafletMap(container);
           expect(() {
             new LeafletMap(container);
           }, throws);
@@ -118,7 +112,6 @@ mapTest() {
         new Future.delayed(new Duration(milliseconds: 33), c1);
       });
     });
-
 
     group('getCenter', () {
       test('throws if not set before', () {
@@ -173,20 +166,21 @@ mapTest() {
       test('sets the view of the map', () {
         expect(map..setView(new LatLng(51.505, -0.09), 13), equals(map));
         expect(map.getZoom(), equals(13));
-        expect(map.getCenter().distanceTo(new LatLng(51.505, -0.09)),
-            lessThan(5));
+        expect(
+            map.getCenter().distanceTo(new LatLng(51.505, -0.09)), lessThan(5));
       });
       test('can be passed without a zoom specified', () {
         map.setZoom(13);
         expect(map..setView(new LatLng(51.605, -0.11), null), equals(map));
         expect(map.getZoom(), equals(13));
-        expect(map.getCenter().distanceTo(new LatLng(51.605, -0.11)),
-            lessThan(5));
+        expect(
+            map.getCenter().distanceTo(new LatLng(51.605, -0.11)), lessThan(5));
       });
     });
 
     group('getBounds', () {
-      test('is safe to call from within a moveend callback during initial '
+      test(
+          'is safe to call from within a moveend callback during initial '
           'load (#1027)', () {
         map.onMoveEnd.listen((MapEvent e) {
           map.getBounds();
@@ -252,18 +246,23 @@ mapTest() {
         });
       });
 
-      test('minZoom and maxZoom options overrides any minZoom and maxZoom set '
+      test(
+          'minZoom and maxZoom options overrides any minZoom and maxZoom set '
           'on layers', () {
+        final map =
+            new LeafletMap(document.createElement('div'), new MapOptions()
+              ..minZoom = 2
+              ..maxZoom = 20);
 
-        final map = new LeafletMap(document.createElement('div'),
-            new MapOptions()..minZoom=2..maxZoom=20);
-
-        new TileLayer('{z}{x}{y}',
-            new TileLayerOptions()..minZoom = 4..maxZoom = 10).addTo(map);
-        new TileLayer('{z}{x}{y}',
-            new TileLayerOptions()..minZoom = 6..maxZoom = 17).addTo(map);
-        new TileLayer('{z}{x}{y}',
-            new TileLayerOptions()..minZoom = 0..maxZoom = 22).addTo(map);
+        new TileLayer('{z}{x}{y}', new TileLayerOptions()
+          ..minZoom = 4
+          ..maxZoom = 10).addTo(map);
+        new TileLayer('{z}{x}{y}', new TileLayerOptions()
+          ..minZoom = 6
+          ..maxZoom = 17).addTo(map);
+        new TileLayer('{z}{x}{y}', new TileLayerOptions()
+          ..minZoom = 0
+          ..maxZoom = 22).addTo(map);
 
         expect(map.getMinZoom(), equals(2));
         expect(map.getMaxZoom(), equals(20));
@@ -286,7 +285,9 @@ mapTest() {
         expect(layer.addCalled, isTrue);
       });
 
-      test('does not call layer.onAdd if the layer is removed before the map becomes ready', () {
+      test(
+          'does not call layer.onAdd if the layer is removed before the map becomes ready',
+          () {
         var layer = new TestLayer();
         map.addLayer(layer);
         map.removeLayer(layer);
@@ -319,7 +320,9 @@ mapTest() {
         expect(comp1.future, completion(isTrue));
       });
 
-      test('does not fire a layeradd event if the layer is removed before the map becomes ready', () {
+      test(
+          'does not fire a layeradd event if the layer is removed before the map becomes ready',
+          () {
         var layer = new TestLayer();
         //final c = new Completer<bool>();
         map.onLayerAdd.listen((_) {
@@ -363,7 +366,9 @@ mapTest() {
         });
       });
 
-      group('when a new layer with greater zoomlevel coverage than the current layer is added to a map', () {
+      group(
+          'when a new layer with greater zoomlevel coverage than the current layer is added to a map',
+          () {
         test('fires a zoomlevelschange event', () {
           new TileLayer('{z}{x}{y}', new TileLayerOptions()
             ..minZoom = 0
@@ -507,7 +512,9 @@ mapTest() {
         });
       });
 
-      group('when a tile layer is removed from a map and it had greater zoom level coverage than the remainding layer', () {
+      group(
+          'when a tile layer is removed from a map and it had greater zoom level coverage than the remainding layer',
+          () {
         test('fires a zoomlevelschange event', () {
           map.whenReady((_) {
             final tl = new TileLayer('{z}{x}{y}', new TileLayerOptions()
@@ -632,7 +639,9 @@ mapTest() {
         expect(map.getMapPanePos().x, equals(-1));
       });
 
-      test('pans back to the original position after growing by an odd size and back', () {
+      test(
+          'pans back to the original position after growing by an odd size and back',
+          () {
         container.style.width = '${origWidth + 5}px';
         map.invalidateSize();
 
@@ -681,7 +690,8 @@ mapTest() {
         expect(comp1.future, completion(isTrue));
       });
 
-      test('debounces the moveend event if the debounceMoveend option is given', () {
+      test('debounces the moveend event if the debounceMoveend option is given',
+          () {
         map.onMoveEnd.listen((_) {
 //          called = true;
           comp1.complete(true);
@@ -694,9 +704,11 @@ mapTest() {
 
 //        clock.tick(200);
 
-        expect(new Future.delayed(new Duration(milliseconds: 200)).then((_) {
-          expect(comp1.future, completion(isTrue));
-        }), completes);
+        expect(
+            new Future.delayed(new Duration(milliseconds: 200)).then((_) {
+              expect(comp1.future, completion(isTrue));
+            }),
+            completes);
       });
     });
   });

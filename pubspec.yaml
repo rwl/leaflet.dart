@@ -5,17 +5,9 @@ description: Mobile-friendly interactive maps
 homepage: https://github.com/rwl/leaflet.dart
 dependencies:
   intl: '>=0.12.0+3 <0.13.0'
-  polymer: '>=0.15.5+4 <0.16.0'
-  pub_semver: '>=1.1.0 <1.2.0'
   quiver: '>=0.18.0 <0.19.0'
   simple_features: '>=0.0.5 <0.1.0'
   uri: '>=0.9.2 <1.0.0'
-dev_dependencies:
   browser: any
-  unittest: any
-transformers:
-- $dart2js:
-    commandLineOptions:
-    - --enable-enum
-- polymer:
-    entry_points: example/components/index.html
+dev_dependencies:
+  test: any

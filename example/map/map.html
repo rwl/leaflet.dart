@@ -11,13 +11,14 @@
   <div id="map"></div>
   <button id="populate">Populate with 10 markers</button>
 
+  <script src="packages/leaflet/leaflet-src.js"></script>
   <script async type="application/dart">
     import 'dart:html' show document;
     import 'package:leaflet/leaflet.dart';
     import '../utils.dart';
 
     main() {
-      var map = new LeafletMap.query('#map')
+      var map = new LeafletMap.selector('map')
         ..setView(new LatLng(52.520, 13.404), 15)
         ..addLayer(osmTileLayer);
 
