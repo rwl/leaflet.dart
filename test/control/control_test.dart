@@ -5,8 +5,7 @@ import 'dart:html' as html;
 import 'dart:html' show document, Element;
 import 'dart:collection' show LinkedHashMap;
 
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
+import 'package:test/test.dart';
 
 import 'package:leaflet/leaflet.dart';
 
@@ -21,6 +20,5 @@ controlTest() {
 }
 
 main() {
-  useHtmlEnhancedConfiguration();
   controlTest();
 }

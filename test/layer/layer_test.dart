@@ -4,8 +4,7 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:html' show document, Element;
 
-import 'package:unittest/unittest.dart';
-import 'package:unittest/html_enhanced_config.dart';
+import 'package:test/test.dart';
 import 'package:leaflet/leaflet.dart';
 
 part 'feature_group_test.dart';
@@ -23,6 +22,5 @@ layerTest() {
 }
 
 main() {
-  useHtmlEnhancedConfiguration();
   layerTest();
 }
