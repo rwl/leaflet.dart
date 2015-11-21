@@ -63,7 +63,7 @@ class MarkerOptions {
 
 /// Marker is used to display clickable/draggable icons on the map.
 class Marker implements Layer {
-  JsObject _L, _layer;
+  JsObject _L, layer;
 
   Marker(LatLng latlng,
       {
@@ -123,6 +123,6 @@ class Marker implements Layer {
     if (offset != null) m['offset'] = offset;
 
     var args = [latlng._latlng, new JsObject.jsify(m)];
-    _layer = _L.callMethod('marker', args);
+    layer = _L.callMethod('marker', args);
   }
 }

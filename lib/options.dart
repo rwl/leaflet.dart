@@ -15,7 +15,7 @@ class MapOptions extends Object
 
     if (center != null) m['center'] = center._latlng;
     if (zoom != null) m['zoom'] = zoom;
-    if (layers != null) m['layers'] = layers.map((l) => l._layer).toList();
+    if (layers != null) m['layers'] = layers.map((l) => l.layer).toList();
     if (minZoom != null) m['minZoom'] = minZoom;
     if (maxZoom != null) m['maxZoom'] = maxZoom;
     if (maxBounds != null) m['maxBounds'] = maxBounds._llb;

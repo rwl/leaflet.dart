@@ -44,7 +44,7 @@ class LeafletMap {
   /// true, the layer is inserted under all others (useful when switching base
   /// tile layers).
   void addLayer(Layer layer) {
-    _map.callMethod('addLayer', [layer._layer]);
+    _map.callMethod('addLayer', [layer.layer]);
   }
 
   /// Returns the LatLngBounds of the current map view.

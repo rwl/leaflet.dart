@@ -112,7 +112,7 @@ class TileLayerOptions {
 
 /// TileLayer is used for standard xyz-numbered tile layers.
 class TileLayer implements Layer {
-  JsObject _L, _layer;
+  JsObject _L, layer;
   TileLayer(
       {String url: '',
 
@@ -217,6 +217,6 @@ class TileLayer implements Layer {
 
     var args = [url, new JsObject.jsify(m)];
 
-    _layer = _L.callMethod('tileLayer', args);
+    layer = _L.callMethod('tileLayer', args);
   }
 }

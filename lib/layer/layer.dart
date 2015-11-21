@@ -3,7 +3,8 @@ part of leaflet;
 /// Represents an object attached to a particular location (or a set of
 /// locations) on a map.
 abstract class Layer {
-  JsObject get _layer;
+  /// For internal use.
+  JsObject get layer;
 
   /// Should contain code that creates DOM elements for the overlay, adds them
   /// to map panes where they should belong and puts listeners on relevant map
@@ -21,7 +22,7 @@ abstract class Layer {
 /// LayerGroup is a class to combine several layers into one so that
 /// you can manipulate the group (e.g. add/remove it) as one layer.
 class LayerGroup implements Layer {
-  JsObject _L, _layer;
+  JsObject _L, layer;
 }
 
 /// FeatureGroup extends LayerGroup by introducing mouse events and
@@ -33,13 +34,13 @@ class FeatureGroup extends LayerGroup {
     _L = context['L'];
     var args = [];
     if (layers != null) {
-      args.add(layers.map((l) => l._layer).toList());
+      args.add(layers.map((l) => l.layer).toList());
     }
-    _layer = _L.callMethod('featureGroup', args);
+    layer = _L.callMethod('featureGroup', args);
   }
 
-  void addLayer(Layer layer) {
-    _layer.callMethod('addLayer', [layer._layer]);
+  void addLayer(Layer l) {
+    layer.callMethod('addLayer', [l.layer]);
   }
 
   void bindPopup(String content, [PopupOptions options]) {
@@ -47,7 +48,7 @@ class FeatureGroup extends LayerGroup {
     if (options != null) {
       args.add(options.jsify());
     }
-    _layer.callMethod('bindPopup', args);
+    layer.callMethod('bindPopup', args);
   }
 }
 
