@@ -3,7 +3,6 @@ version: 0.0.1
 author: Richard Lincoln <r.w.lincoln@gmail.com>
 description: Mobile-friendly interactive maps
 homepage: https://github.com/rwl/leaflet.dart
-dependencies:
-  browser: any
 dev_dependencies:
+  browser: any
   test: any
