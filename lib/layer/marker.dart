@@ -71,7 +71,7 @@ class Marker implements Layer {
       /// Icon class to use for rendering the marker. See Icon documentation for
       /// details on how to customize the marker icon. Set to new Icon.Default()
       /// by default.
-      Icon icon,
+      /*Icon*/ icon,
 
       /// If false, the marker will not emit mouse events and will act as a part
       /// of the underlying map.
@@ -106,7 +106,7 @@ class Marker implements Layer {
 
       /// The z-index offset used for the riseOnHover feature. Default: 250
       num riseOffset,
-      Point2D offset}) {
+      Point offset}) {
     var L = context['L'];
     if (L == null) {
       throw new ArgumentError.notNull(L);

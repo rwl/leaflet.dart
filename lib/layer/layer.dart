@@ -96,19 +96,19 @@ class PopupOptions {
 
   /// The offset of the popup position. Useful to control the anchor of the
   /// popup when opening it on some overlays.
-  Point2D offset;
+  Point offset;
 
   /// The margin between the popup and the top left corner of the map view
   /// after autopanning was performed.
-  Point2D autoPanPaddingTopLeft;
+  Point autoPanPaddingTopLeft;
 
   /// The margin between the popup and the bottom right corner of the map
   /// view after autopanning was performed.
-  Point2D autoPanPaddingBottomRight;
+  Point autoPanPaddingBottomRight;
 
   /// Equivalent of setting both top left and bottom right autopan padding to
   /// the same value.
-  Point2D autoPanPadding;
+  Point autoPanPadding;
 
   /// Whether to animate the popup on zoom. Disable it if you have problems
   /// with Flash content inside popups.

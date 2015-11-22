@@ -68,11 +68,10 @@ class MapOptions extends Object
     if (panOptions != null) m['panOptions'] = panOptions._toJsonMap();
     if (zoomOptions != null) m['zoomOptions'] = zoomOptions._toJsonMap();
     if (animate != null) m['animate'] = animate;
-    if (paddingTopLeft != null) m['paddingTopLeft'] =
-        paddingTopLeft._toJsonMap();
+    if (paddingTopLeft != null) m['paddingTopLeft'] = _pointMap(paddingTopLeft);
     if (paddingBottomRight != null) m['paddingBottomRight'] =
-        paddingBottomRight._toJsonMap();
-    if (padding != null) m['padding'] = padding._toJsonMap();
+        _pointMap(paddingBottomRight);
+    if (padding != null) m['padding'] = _pointMap(padding);
     if (maxZoom != null) m['maxZoom'] = maxZoom;
 
     return m;
@@ -106,18 +105,17 @@ class MapStateOptions {
 
   /// Coordinate Reference System to use. Don't change this if you're not sure
   /// what it means. Default: EPSG3857
-  CRS crs;
+  /*CRS*/ var crs;
 
   Map<String, dynamic> _toJsonMap() {
     var m = {};
-    if (center != null) m['center'] = center._toJsonMap();
+    if (center != null) m['center'] = center._latlng;
     if (zoom != null) m['zoom'] = zoom;
-    if (layers != null) m['layers'] =
-        layers.map((l) => l._toJsonMap()).toList();
+    if (layers != null) m['layers'] = layers.map((l) => l.layer).toList();
     if (minZoom != null) m['minZoom'] = minZoom;
     if (maxZoom != null) m['maxZoom'] = maxZoom;
-    if (maxBounds != null) m['maxBounds'] = maxBounds._toJsonMap();
-    if (crs != null) m['crs'] = crs._toJsonMap();
+    if (maxBounds != null) m['maxBounds'] = maxBounds._llb;
+    if (crs != null) m['crs'] = crs._crs;
     return m;
   }
 
@@ -365,14 +363,14 @@ class ZoomPanOptions {
   /// shouldn't be accounted for when setting the view to fit bounds. Useful if
   /// you have some control overlays on the map like a sidebar and you don't want
   /// them to obscure objects you're zooming to.
-  Point2D paddingTopLeft;
+  Point paddingTopLeft;
 
   /// The same for bottom right corner of the map.
-  Point2D paddingBottomRight;
+  Point paddingBottomRight;
 
   /// Equivalent of setting both top left and bottom right padding to the same
   /// value.
-  Point2D padding;
+  Point padding;
   /*void set padding(Point2D point) {
     if (point == null) {
       point = new Point2D([0, 0]);
@@ -401,11 +399,10 @@ class ZoomPanOptions {
     if (panOptions != null) m['panOptions'] = panOptions._toJsonMap();
     if (zoomOptions != null) m['zoomOptions'] = zoomOptions._toJsonMap();
     if (animate != null) m['animate'] = animate;
-    if (paddingTopLeft != null) m['paddingTopLeft'] =
-        paddingTopLeft._toJsonMap();
+    if (paddingTopLeft != null) m['paddingTopLeft'] = _pointMap(paddingTopLeft);
     if (paddingBottomRight != null) m['paddingBottomRight'] =
-        paddingBottomRight._toJsonMap();
-    if (padding != null) m['padding'] = padding._toJsonMap();
+        _pointMap(paddingBottomRight);
+    if (padding != null) m['padding'] = _pointMap(padding);
     if (maxZoom != null) m['maxZoom'] = maxZoom;
     return m;
   }
@@ -462,3 +459,5 @@ class ZoomOptions {
 
 //class FitBoundsOptions extends ZoomPanOptions {
 //}
+
+Map _pointMap(Point point) => {'x': point.x, 'y': point.y};

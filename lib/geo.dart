@@ -69,14 +69,14 @@ class LatLngBounds {
   LatLng getSouthEast() => new LatLng._(_L, _llb.callMethod('getSouthEast'));
 
   /// Returns the west longitude of the bounds.
-  num getWest() => new LatLng._(_L, _llb.callMethod('getWest'));
+  num getWest() => _llb.callMethod('getWest');
 
   /// Returns the south latitude of the bounds.
-  num getSouth() => new LatLng._(_L, _llb.callMethod('getSouth'));
+  num getSouth() => _llb.callMethod('getSouth');
 
   /// Returns the east longitude of the bounds.
-  num getEast() => new LatLng._(_L, _llb.callMethod('getEast'));
+  num getEast() => _llb.callMethod('getEast');
 
   /// Returns the north latitude of the bounds.
-  num getNorth() => new LatLng._(_L, _llb.callMethod('getNorth'));
+  num getNorth() => _llb.callMethod('getNorth');
 }
