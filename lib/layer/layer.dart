@@ -19,10 +19,27 @@ abstract class Layer {
 //  String getAttribution();
 }
 
+class _AbstractLayer implements Layer {
+  final JsObject layer;
+  _AbstractLayer._(this.layer);
+}
+
 /// LayerGroup is a class to combine several layers into one so that
 /// you can manipulate the group (e.g. add/remove it) as one layer.
 class LayerGroup implements Layer {
-  JsObject _L, layer;
+  final JsObject layer;
+
+  /// For internal use.
+  LayerGroup.wrap(this.layer);
+
+  /// Iterates over the layers of the group.
+  void eachLayer(fn(Layer layer)) {
+    _fn(JsObject l) {
+      var ll = new _AbstractLayer._(l);
+      fn(ll);
+    }
+    layer.callMethod('eachLayer', [_fn]);
+  }
 }
 
 /// FeatureGroup extends LayerGroup by introducing mouse events and
@@ -30,14 +47,17 @@ class LayerGroup implements Layer {
 /// (like vectors or markers).
 class FeatureGroup extends LayerGroup {
   /// Create a layer group, optionally given an initial set of layers.
-  FeatureGroup([List<Layer> layers]) {
-    _L = context['L'];
+  factory FeatureGroup([List<Layer> layers]) {
+    var L = context['L'];
     var args = [];
     if (layers != null) {
       args.add(layers.map((l) => l.layer).toList());
     }
-    layer = _L.callMethod('featureGroup', args);
+    var layer = L.callMethod('featureGroup', args);
+    return new FeatureGroup._(layer);
   }
+
+  FeatureGroup._(JsObject layer) : super.wrap(layer);
 
   void addLayer(Layer l) {
     layer.callMethod('addLayer', [l.layer]);

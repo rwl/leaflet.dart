@@ -63,9 +63,9 @@ class MarkerOptions {
 
 /// Marker is used to display clickable/draggable icons on the map.
 class Marker implements Layer {
-  JsObject _L, layer;
+  final JsObject layer;
 
-  Marker(LatLng latlng,
+  factory Marker(LatLng latlng,
       {
 
       /// Icon class to use for rendering the marker. See Icon documentation for
@@ -107,7 +107,10 @@ class Marker implements Layer {
       /// The z-index offset used for the riseOnHover feature. Default: 250
       num riseOffset,
       Point2D offset}) {
-    _L = context['L'];
+    var L = context['L'];
+    if (L == null) {
+      throw new ArgumentError.notNull(L);
+    }
 
     var m = {};
     if (icon != null) m['icon'] = icon._icon;
@@ -123,6 +126,17 @@ class Marker implements Layer {
     if (offset != null) m['offset'] = offset;
 
     var args = [latlng._latlng, new JsObject.jsify(m)];
-    layer = _L.callMethod('marker', args);
+    var layer = L.callMethod('marker', args);
+    if (layer == null) {
+      throw new ArgumentError.notNull(layer);
+    }
+    return new Marker.wrap(layer);
+  }
+
+  /// For internal use.
+  Marker.wrap(this.layer);
+
+  void bindPopup(popup) {
+    layer.callMethod('bindPopup', [popup]);
   }
 }

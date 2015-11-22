@@ -2,13 +2,17 @@ library leaflet;
 
 import 'dart:html';
 import 'dart:js';
+import 'dart:async';
+import 'dart:convert' show JSON;
 
 part 'options.dart';
 part 'geo.dart';
+part 'control.dart';
 
 part 'layer/layer.dart';
 part 'layer/tile.dart';
 part 'layer/marker.dart';
+part 'layer/vector.dart';
 
 class LeafletMap {
   JsObject _L;
@@ -51,5 +55,27 @@ class LeafletMap {
   LatLngBounds getBounds() {
     var llb = _map.callMethod('getBounds');
     return new LatLngBounds._(_L, llb);
+  }
+
+  /// Adds the given control to the map.
+  void addControl(Control control) {
+    _map.callMethod('addControl', [control.control]);
+  }
+
+  /// Removes the given control from the map.
+  void removeControl(Control control) {
+    _map.callMethod('removeControl', [control.control]);
+  }
+
+  Stream on(String type) {
+    Function fn;
+    var ctrl = new StreamController(onCancel: () {
+      _map.callMethod('off', [type, fn]);
+    });
+    fn = (event) {
+      ctrl.add(event);
+    };
+    _map.callMethod('on', [type, fn]);
+    return ctrl.stream;
   }
 }
