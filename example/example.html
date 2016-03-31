@@ -16,7 +16,7 @@
     void main() {
       var map = new LeafletMap.selector('map',
         new MapOptions()
-          ..layers = [new TileLayer(osmTileUrl)]
+          ..layers = [osmLayer]
           ..minZoom = 5
           ..maxZoom = 15
           ..zoomAnimation = false)
